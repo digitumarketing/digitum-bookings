@@ -9,6 +9,7 @@ namespace Digitum\Bookings\Admin;
 
 use Digitum\Bookings\Admin\Screens\DashboardScreen;
 use Digitum\Bookings\Admin\Screens\SettingsScreen;
+use Digitum\Bookings\Admin\Screens\ZonesScreen;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Roles\Capabilities;
 use Digitum\Bookings\Settings\Settings;
@@ -76,16 +77,17 @@ final class Menus {
 
 		add_submenu_page( self::SLUG, $label, __( 'Dashboard', 'digitum-bookings' ), Capabilities::VIEW_MANIFEST, self::SLUG, array( $dashboard, 'render' ) );
 		add_submenu_page( self::SLUG, __( 'Tours', 'digitum-bookings' ), __( 'Tours', 'digitum-bookings' ), Capabilities::MANAGE_BOOKINGS, 'edit.php?post_type=' . $this->product_type->key() );
+		add_submenu_page( self::SLUG, __( 'Pickup zones', 'digitum-bookings' ), __( 'Pickup zones', 'digitum-bookings' ), Capabilities::MANAGE_BOOKINGS, ZonesScreen::SLUG, array( new ZonesScreen(), 'render' ) );
 		add_submenu_page( self::SLUG, __( 'Settings', 'digitum-bookings' ), __( 'Settings', 'digitum-bookings' ), Capabilities::MANAGE_SETTINGS, SettingsScreen::SLUG, array( $settings, 'render' ) );
 	}
 
 	/**
-	 * Admin styles on our own pages.
-	 *
-	 * @param string $hook_suffix Admin page.
+	 * Admin styles on our own pages (matched by page slug, so a renamed menu still works).
 	 */
-	public function enqueue( string $hook_suffix ): void {
-		if ( false === strpos( $hook_suffix, self::SLUG ) && false === strpos( $hook_suffix, SettingsScreen::SLUG ) ) {
+	public function enqueue(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only decides whether to load a stylesheet.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		if ( ! in_array( $page, array( self::SLUG, SettingsScreen::SLUG, ZonesScreen::SLUG ), true ) ) {
 			return;
 		}
 		wp_enqueue_style( 'dgb-admin', DGB_PLUGIN_URL . 'assets/build/admin.css', array(), DGB_VERSION );

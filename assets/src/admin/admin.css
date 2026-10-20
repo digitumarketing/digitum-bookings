@@ -215,3 +215,48 @@
 	border-left: 4px solid #d63638;
 	background: #fcf0f1;
 }
+
+.dgb-display-price {
+	padding: 10px 12px;
+	border: 1px solid #72aee6;
+	border-radius: 4px;
+	background: #f0f6fc;
+	font-weight: 600;
+}
+
+.dgb-display-price .description {
+	display: block;
+	margin-top: 2px;
+	font-weight: 400;
+}
+
+.dgb-subhead {
+	margin: 20px 0 4px;
+	font-size: 14px;
+}
+
+/* Pickup zones page */
+.dgb-list {
+	max-width: 960px;
+	margin-top: 8px;
+}
+
+.dgb-actions {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+}
+
+.dgb-inline-form {
+	display: inline;
+	margin: 0;
+}
+
+.dgb-form {
+	max-width: 960px;
+	margin: 16px 0 32px;
+	padding: 4px 20px 16px;
+	background: #fff;
+	border: 1px solid var(--dgb-border);
+	border-radius: 8px;
+}
