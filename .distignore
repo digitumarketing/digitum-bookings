@@ -19,3 +19,6 @@
 ./phpcs.xml.dist
 ./phpunit.xml.dist
 *.zip
+./playwright.config.ts
+./test-results
+./playwright-report
