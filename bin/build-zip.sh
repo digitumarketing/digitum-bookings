@@ -27,7 +27,7 @@ cp composer.json "$STAGE/"
 composer install --working-dir="$STAGE" --no-dev --optimize-autoloader --no-interaction --no-progress --quiet
 rm -f "$STAGE/composer.json" "$STAGE/composer.lock"
 
-for required in digitum-bookings.php uninstall.php readme.txt vendor/autoload.php assets/build/admin.css assets/build/meta-box.js; do
+for required in digitum-bookings.php uninstall.php readme.txt vendor/autoload.php assets/build/admin/admin.css assets/build/admin/meta-box.js assets/build/front/booking.js assets/build/front/booking.css assets/build/blocks/booking-block.js blocks/booking/block.json templates/front/booking-widget.php; do
 	if [ ! -e "$STAGE/$required" ]; then
 		echo "Build is missing $required" >&2
 		exit 1

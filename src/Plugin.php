@@ -11,9 +11,17 @@ use Digitum\Bookings\Admin\Menus;
 use Digitum\Bookings\Admin\MetaBoxes\BookingSettingsBox;
 use Digitum\Bookings\Admin\Screens\SettingsScreen;
 use Digitum\Bookings\Admin\Screens\ZonesScreen;
+use Digitum\Bookings\Database\Migrator;
+use Digitum\Bookings\Database\Repositories\BookingRepository;
+use Digitum\Bookings\Frontend\Assets;
+use Digitum\Bookings\Frontend\Placement;
+use Digitum\Bookings\Frontend\Widget;
+use Digitum\Bookings\Integrations\Elementor\ElementorIntegration;
+use Digitum\Bookings\Integrations\Gutenberg\BookingBlock;
+use Digitum\Bookings\Rest\PublicController;
+use Digitum\Bookings\Services\BookingService;
 use Digitum\Bookings\Services\Holds;
 use Digitum\Bookings\Services\QuoteService;
-use Digitum\Bookings\Database\Migrator;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Roles\Capabilities;
 use Digitum\Bookings\Settings\Settings;
@@ -107,6 +115,20 @@ final class Plugin {
 
 		$this->product_type->register_hooks();
 		( new Holds( $this->settings ) )->register_hooks();
+
+		$quotes = $this->quotes();
+		$assets = new Assets( $this->settings, $this->product_type );
+		$widget = new Widget( $this->settings, $this->product_type, $quotes, $assets );
+		$assets->register_hooks();
+		( new Placement( $this->settings, $this->product_type, $widget ) )->register_hooks();
+		( new BookingBlock( $widget ) )->register_hooks();
+		( new ElementorIntegration( $widget ) )->register_hooks();
+		( new PublicController(
+			$this->settings,
+			$this->product_type,
+			$quotes,
+			new BookingService( $this->settings, $this->product_type, $quotes, new BookingRepository() )
+		) )->register_hooks();
 
 		if ( is_admin() ) {
 			( new Menus( $this->settings, $this->product_type ) )->register_hooks();

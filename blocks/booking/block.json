@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "digitum-bookings/booking",
+  "title": "Booking widget",
+  "category": "widgets",
+  "icon": "calendar-alt",
+  "description": "Booking form for a tour. Leave the tour empty to use the tour being viewed.",
+  "keywords": [ "booking", "tour", "reservation" ],
+  "textdomain": "digitum-bookings",
+  "attributes": {
+    "productId": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "supports": {
+    "html": false,
+    "multiple": false
+  }
+}
