@@ -45,6 +45,10 @@
     "lint:fix": "phpcbf",
     "test": "phpunit",
     "test:integration": "php tests/Integration/run.php",
-    "build": "bash bin/build-zip.sh"
+    "build": "bash bin/build-zip.sh",
+    "test:coverage": [
+      "phpunit --coverage-clover build/coverage.xml",
+      "php bin/check-coverage.php build/coverage.xml src/Services/Pricing"
+    ]
   }
 }
