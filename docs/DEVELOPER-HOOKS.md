@@ -26,7 +26,48 @@ add_filter( 'dgb_available_sessions', function ( array $sessions, int $product_i
 }, 10, 3 );
 ```
 
+### `dgb_payment_methods` (0.3.0)
+
+Filters the payment methods offered at checkout. Each method has `id`, `label`, `description` and `status` (the booking status it creates: `confirmed`, `awaiting_transfer` or `pending_payment`). Payment gateways add themselves here.
+
+```php
+add_filter( 'dgb_payment_methods', function ( array $methods, \Digitum\Bookings\Settings\Settings $settings ) {
+	unset( $methods['arrival'] ); // no pay on arrival on this site
+	return $methods;
+}, 10, 2 );
+```
+
+### `dgb_template_file` (0.3.0)
+
+Filters the file used for a template (`front/booking-widget`, `front/confirmation`). Themes can also override a template by copying it to `your-theme/digitum-bookings/<name>.php`.
+
+```php
+add_filter( 'dgb_template_file', function ( string $file, string $name ) {
+	return $file;
+}, 10, 2 );
+```
+
+### `dgb_client_ip` (0.3.0)
+
+Filters the visitor IP used for rate limiting. Behind Cloudflare or a proxy, return the real client IP.
+
+```php
+add_filter( 'dgb_client_ip', function ( string $ip ) {
+	return isset( $_SERVER['HTTP_CF_CONNECTING_IP'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_CF_CONNECTING_IP'] ) ) : $ip;
+} );
+```
+
 ## Actions
+
+### `dgb_booking_created` (0.3.0)
+
+Fires after a booking or quote request was created from the booking widget.
+
+```php
+add_action( 'dgb_booking_created', function ( int $booking_id, array $booking ) {
+	// $booking is the dgb_bookings row: reference, status, customer fields, totals, attribution.
+}, 10, 2 );
+```
 
 ### `dgb_booking_status_changed` (0.2.0)
 
@@ -44,14 +85,14 @@ The scheduled job that releases unpaid bookings (every five minutes). Run it by 
 
 ## Planned
 
-The remaining hooks from section 17 of `CLAUDE.md` (`dgb_booking_created`, `dgb_payment_completed`, `dgb_email_template` and others) arrive with the milestones that introduce bookings, payments and emails.
+The remaining hooks from section 17 of `CLAUDE.md` (`dgb_payment_completed`, `dgb_bank_details`, `dgb_email_template`, `dgb_email_recipients` and others) arrive with the milestones that introduce payments and emails.
 
 ## Options and meta (for reference)
 
 | Name | Type | Contents |
 |---|---|---|
-| `dgb_settings` | option | All settings, grouped by tab: `general`, `currency`, `payments`, `privacy`, `branding` |
-| `dgb_db_version` | option | Schema version applied by the migrations runner (1.1.0 in this release) |
+| `dgb_settings` | option | All settings, grouped by tab: `general`, `currency`, `payments`, `analytics`, `privacy`, `branding` |
+| `dgb_db_version` | option | Schema version applied by the migrations runner (1.2.0 in this release) |
 | `dgb_version` | option | Plugin version that last ran its upgrade routine |
 | `_dgb_*` | post meta | Booking settings of a tour (see `src/Domain/Product.php`) |
 | `{prefix}dgb_*` | tables | See `src/Database/Schema.php` |

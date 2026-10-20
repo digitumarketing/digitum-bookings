@@ -328,3 +328,10 @@ Document every filter and action in `docs/DEVELOPER-HOOKS.md`. At minimum: `dgb_
 5. Fleet sizes / resource capacity removed; admins close dates or sessions instead.
 6. No automatic deletion of guest data; admins erase manually.
 7. Releases and updates through GitHub instead of a Digitum update server.
+
+## 20. Decisions made during development
+
+1. M3 ships pay on arrival and bank transfer at checkout; Stripe and PayPal plug in through the `dgb_payment_methods` filter in M4.
+2. Confirmation and "booking received" pages are private links on the tour URL (`?dgb_booking=REF&dgb_key=KEY`); the key is a 32-character secret stored on the booking (schema 1.2.0).
+3. The widget stylesheet (under 3 KB gzipped) is printed inline, not linked, so the widget adds no render-blocking request.
+4. Lighthouse is measured on the e2e test site (Twenty Twenty-Four, PHP built-in server with gzip). That theme's 470 KB of web fonts set the mobile LCP; with system fonts the tour page with the widget scores 99.

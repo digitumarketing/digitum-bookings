@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Digitum Bookings 0.2.0\n"
-"Report-Msgid-Bugs-To: https://github.com/digitumarketing/digitum-bookings/issues\n"
+"Project-Id-Version: Digitum Bookings 0.3.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/digitum-bookings\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-20T13:51:52+00:00\n"
+"POT-Creation-Date: 2026-10-20T16:53:47+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: digitum-bookings\n"
@@ -135,6 +135,7 @@ msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:164
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:459
+#: src/Frontend/Widget.php:291
 msgid "On request"
 msgstr ""
 
@@ -172,6 +173,7 @@ msgid "Prices exclude VAT"
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:203
+#: templates/front/confirmation.php:123
 msgid "Deposit"
 msgstr ""
 
@@ -450,6 +452,8 @@ msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:489
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:510
+#: templates/front/booking-widget.php:166
+#: templates/front/confirmation.php:46
 msgid "Hotel pickup"
 msgstr ""
 
@@ -476,6 +480,7 @@ msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:518
 #: src/Admin/Screens/ZonesScreen.php:101
+#: templates/front/booking-widget.php:153
 msgid "Meeting point"
 msgstr ""
 
@@ -496,7 +501,7 @@ msgid "Minimum notice"
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:538
-#: src/Settings/Settings.php:259
+#: src/Settings/Settings.php:289
 msgid "hours"
 msgstr ""
 
@@ -545,6 +550,9 @@ msgid "Close a date range (for example a holiday or when you are fully booked), 
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:584
+#: templates/front/booking-widget.php:43
+#: templates/front/booking-widget.php:56
+#: templates/front/booking-widget.php:347
 msgid "From"
 msgstr ""
 
@@ -554,6 +562,8 @@ msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:586
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:606
+#: templates/front/booking-widget.php:108
+#: templates/front/confirmation.php:29
 msgid "Session"
 msgstr ""
 
@@ -761,7 +771,7 @@ msgstr ""
 
 #: src/Admin/Screens/ZonesScreen.php:102
 #: src/Admin/Screens/ZonesScreen.php:187
-#: src/Settings/Settings.php:69
+#: src/Settings/Settings.php:70
 msgid "Address"
 msgstr ""
 
@@ -853,8 +863,296 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
+#: src/Frontend/Confirmation.php:125
+msgid "Booking confirmed"
+msgstr ""
+
+#: src/Frontend/Confirmation.php:126
+#: src/Frontend/Confirmation.php:128
+msgid "Booking received, waiting for payment"
+msgstr ""
+
+#: src/Frontend/Confirmation.php:127
+msgid "Quote request received"
+msgstr ""
+
+#: src/Frontend/Confirmation.php:129
+msgid "This booking was cancelled"
+msgstr ""
+
+#: src/Frontend/Confirmation.php:132
+msgid "Thank you! Your place is booked. Keep your reference; you may be asked for it on the day."
+msgstr ""
+
+#: src/Frontend/Confirmation.php:133
+msgid "Your place is held. Complete the bank transfer to confirm it."
+msgstr ""
+
+#: src/Frontend/Confirmation.php:134
+msgid "Thank you! We will send you a price and a payment link shortly."
+msgstr ""
+
+#: src/Frontend/Confirmation.php:135
+msgid "Your place is held while the payment is completed."
+msgstr ""
+
+#: src/Frontend/Confirmation.php:136
+msgid "Please contact us if you would like to book again."
+msgstr ""
+
+#: src/Frontend/Confirmation.php:212
+msgid "child"
+msgid_plural "children"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Frontend/Confirmation.php:214
+msgid "infant"
+msgid_plural "infants"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Frontend/Confirmation.php:216
+msgid "adult"
+msgid_plural "adults"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Frontend/Widget.php:65
+msgid "Booking widget: switch on “Take bookings for this tour” in the tour’s Booking settings to show it here."
+msgstr ""
+
+#: src/Frontend/Widget.php:236
+#: templates/front/booking-widget.php:227
+msgid "per vehicle"
+msgstr ""
+
+#: src/Frontend/Widget.php:238
+msgid "per car"
+msgstr ""
+
+#: src/Frontend/Widget.php:240
+#: templates/front/booking-widget.php:226
+msgid "per person"
+msgstr ""
+
+#: src/Frontend/Widget.php:259
+#: templates/front/booking-widget.php:98
+msgid "Previous month"
+msgstr ""
+
+#: src/Frontend/Widget.php:260
+#: templates/front/booking-widget.php:100
+msgid "Next month"
+msgstr ""
+
+#: src/Frontend/Widget.php:262
+msgid "available"
+msgstr ""
+
+#: src/Frontend/Widget.php:263
+msgid "closed"
+msgstr ""
+
+#: src/Frontend/Widget.php:264
+msgid "past"
+msgstr ""
+
+#: src/Frontend/Widget.php:265
+msgid "not open yet"
+msgstr ""
+
+#: src/Frontend/Widget.php:266
+msgid "no tours"
+msgstr ""
+
+#: src/Frontend/Widget.php:267
+msgid "closed for today"
+msgstr ""
+
+#: src/Frontend/Widget.php:269
+#: templates/front/booking-widget.php:110
+msgid "Choose a date to see the times."
+msgstr ""
+
+#: src/Frontend/Widget.php:270
+msgid "No tours on this day. Please choose another date."
+msgstr ""
+
+#: src/Frontend/Widget.php:271
+msgid "Loading…"
+msgstr ""
+
+#. translators: %s: time.
+#: src/Frontend/Widget.php:273
+#, php-format
+msgid "Starts %s"
+msgstr ""
+
+#. translators: %s: time range.
+#: src/Frontend/Widget.php:275
+#, php-format
+msgid "Pickup %s"
+msgstr ""
+
+#: src/Frontend/Widget.php:276
+msgid "Not available"
+msgstr ""
+
+#: src/Frontend/Widget.php:277
+#: templates/front/confirmation.php:118
+msgid "Total"
+msgstr ""
+
+#. translators: %s: VAT amount.
+#: src/Frontend/Widget.php:279
+#, php-format
+msgid "Includes VAT %s"
+msgstr ""
+
+#. translators: %s: VAT amount.
+#: src/Frontend/Widget.php:281
+#, php-format
+msgid "VAT %s"
+msgstr ""
+
+#: src/Frontend/Widget.php:282
+msgid "Discount"
+msgstr ""
+
+#: src/Frontend/Widget.php:283
+msgid "Pay now"
+msgstr ""
+
+#: src/Frontend/Widget.php:284
+msgid "Due on arrival"
+msgstr ""
+
+#: src/Frontend/Widget.php:285
+#: templates/front/booking-widget.php:317
+msgid "Full amount"
+msgstr ""
+
+#. translators: %s: deposit percentage.
+#: src/Frontend/Widget.php:287
+#, php-format
+msgid "%s%% deposit"
+msgstr ""
+
+#. translators: 1: amount now, 2: amount on arrival.
+#: src/Frontend/Widget.php:289
+#, php-format
+msgid "%1$s now, %2$s on arrival"
+msgstr ""
+
+#. translators: %s: meeting point.
+#: src/Frontend/Widget.php:290
+#: templates/front/booking-widget.php:19
+#: templates/front/booking-widget.php:160
+msgid "Free"
+msgstr ""
+
+#. translators: 1: current step, 2: number of steps.
+#: src/Frontend/Widget.php:293
+#, php-format
+msgid "Step %1$s of %2$s"
+msgstr ""
+
+#: src/Frontend/Widget.php:294
+msgid "Sending…"
+msgstr ""
+
+#: src/Frontend/Widget.php:295
+msgid "Something went wrong. Please check your connection and try again."
+msgstr ""
+
+#: src/Frontend/Widget.php:296
+#: src/Services/BookingService.php:131
+msgid "Please check the highlighted fields."
+msgstr ""
+
+#: src/Frontend/Widget.php:297
+#: src/Services/BookingService.php:125
+#: src/Services/Pricing/ErrorMessages.php:26
+msgid "Please choose an option."
+msgstr ""
+
+#: src/Frontend/Widget.php:298
+msgid "Please choose a date and a session."
+msgstr ""
+
+#: src/Frontend/Widget.php:299
+#: src/Services/Pricing/ErrorMessages.php:28
+msgid "Please add at least one guest."
+msgstr ""
+
+#: src/Frontend/Widget.php:300
+#: src/Services/BookingService.php:97
+#: src/Services/Pricing/ErrorMessages.php:39
+msgid "Please choose your pickup area."
+msgstr ""
+
+#: src/Frontend/Widget.php:301
+#: src/Services/BookingValidator.php:49
+msgid "Please tell us your hotel or pickup address."
+msgstr ""
+
+#: src/Frontend/Widget.php:302
+msgid "This field is required."
+msgstr ""
+
+#: src/Frontend/Widget.php:303
+#: src/Services/BookingService.php:111
+msgid "Please choose how you want to pay."
+msgstr ""
+
+#: src/Frontend/Widget.php:304
+#: src/Services/BookingValidator.php:53
+msgid "Please accept the booking terms."
+msgstr ""
+
+#. translators: %s: amount.
+#: src/Frontend/Widget.php:306
+#, php-format
+msgid "Book now · pay %s"
+msgstr ""
+
+#: src/Frontend/Widget.php:307
+msgid "Confirm booking · pay on arrival"
+msgstr ""
+
+#: src/Frontend/Widget.php:308
+#: templates/front/booking-widget.php:48
+#: templates/front/booking-widget.php:332
+msgid "Book now"
+msgstr ""
+
+#. translators: %s: amount.
+#: src/Frontend/Widget.php:310
+#, php-format
+msgid "Book now · %s by bank transfer"
+msgstr ""
+
+#: src/Integrations/Elementor/BookingWidget.php:28
+#: src/Settings/Settings.php:109
+msgid "Booking widget"
+msgstr ""
+
+#: src/Integrations/Elementor/BookingWidget.php:56
 #: src/PostTypes/ProductType.php:99
+#: templates/front/confirmation.php:22
+#: assets/src/blocks/booking-block.js:24
 msgid "Tour"
+msgstr ""
+
+#: src/Integrations/Elementor/BookingWidget.php:60
+#: assets/src/blocks/booking-block.js:26
+msgid "Tour ID"
+msgstr ""
+
+#: src/Integrations/Elementor/BookingWidget.php:63
+#: assets/src/blocks/booking-block.js:27
+msgid "Leave empty to use the tour being viewed."
 msgstr ""
 
 #: src/PostTypes/ProductType.php:100
@@ -893,12 +1191,85 @@ msgstr ""
 msgid "All Tours"
 msgstr ""
 
+#: src/Rest/PublicController.php:217
+msgid "Invalid month."
+msgstr ""
+
+#: src/Rest/PublicController.php:299
+msgid "Your session expired. Please try again."
+msgstr ""
+
+#: src/Rest/PublicController.php:303
+msgid "Your request could not be sent."
+msgstr ""
+
+#: src/Rest/PublicController.php:309
+msgid "Please complete the security check."
+msgstr ""
+
+#: src/Rest/PublicController.php:345
+msgid "Booking not found."
+msgstr ""
+
+#: src/Rest/PublicController.php:367
+#: templates/front/confirmation.php:17
+msgid "Booking reference"
+msgstr ""
+
+#: src/Rest/PublicController.php:402
+#: src/Services/BookingService.php:55
+msgid "This tour could not be found."
+msgstr ""
+
+#: src/Rest/PublicController.php:426
+msgid "Too many requests. Please wait a moment and try again."
+msgstr ""
+
 #: src/Roles/Capabilities.php:73
 msgid "Booking manager"
 msgstr ""
 
 #: src/Roles/Capabilities.php:77
 msgid "Tour guide"
+msgstr ""
+
+#: src/Services/BookingService.php:59
+msgid "This tour is not taking bookings online."
+msgstr ""
+
+#: src/Services/BookingService.php:64
+msgid "This tour can be booked directly."
+msgstr ""
+
+#: src/Services/BookingService.php:64
+msgid "This tour is priced on request. Please send a quote request."
+msgstr ""
+
+#: src/Services/BookingService.php:76
+msgid "Please choose a date."
+msgstr ""
+
+#: src/Services/BookingService.php:85
+msgid "This session is not available any more. Please choose another date or session."
+msgstr ""
+
+#. translators: %s: pickup area, e.g. Abu Dhabi.
+#: src/Services/BookingService.php:96
+#: src/Services/Pricing/ErrorMessages.php:43
+#, php-format
+msgid "Pickup is not available from %s. Please meet us at the meeting point."
+msgstr ""
+
+#: src/Services/BookingValidator.php:31
+msgid "Please enter your full name."
+msgstr ""
+
+#: src/Services/BookingValidator.php:36
+msgid "Please enter a valid email address."
+msgstr ""
+
+#: src/Services/BookingValidator.php:43
+msgid "Please enter a phone number we can reach you on."
 msgstr ""
 
 #: src/Services/Holds.php:69
@@ -913,12 +1284,23 @@ msgstr ""
 msgid "Payment not completed in time; booking released."
 msgstr ""
 
-#: src/Services/Pricing/ErrorMessages.php:26
-msgid "Please choose an option."
+#: src/Services/PaymentMethods.php:50
+#: src/Settings/Settings.php:214
+#: src/Settings/Settings.php:240
+msgid "Bank transfer"
 msgstr ""
 
-#: src/Services/Pricing/ErrorMessages.php:28
-msgid "Please add at least one guest."
+#: src/Services/PaymentMethods.php:51
+msgid "Bank details are shown after you book. Upload the transfer screenshot there."
+msgstr ""
+
+#: src/Services/PaymentMethods.php:58
+#: src/Settings/Settings.php:208
+msgid "Pay on arrival"
+msgstr ""
+
+#: src/Services/PaymentMethods.php:59
+msgid "Cash or card at the meeting point."
 msgstr ""
 
 #. translators: 1: number of seats, 2: vehicles needed.
@@ -929,16 +1311,6 @@ msgstr ""
 
 #: src/Services/Pricing/ErrorMessages.php:37
 msgid "Hotel pickup is not offered for this tour. Please meet us at the meeting point."
-msgstr ""
-
-#: src/Services/Pricing/ErrorMessages.php:39
-msgid "Please choose your pickup area."
-msgstr ""
-
-#. translators: %s: pickup area, e.g. Abu Dhabi.
-#: src/Services/Pricing/ErrorMessages.php:43
-#, php-format
-msgid "Pickup is not available from %s. Please meet us at the meeting point."
 msgstr ""
 
 #: src/Services/Pricing/ErrorMessages.php:47
@@ -962,273 +1334,672 @@ msgid "Payments"
 msgstr ""
 
 #: src/Settings/Settings.php:36
-msgid "Privacy"
+msgid "Analytics"
 msgstr ""
 
 #: src/Settings/Settings.php:37
+msgid "Privacy"
+msgstr ""
+
+#: src/Settings/Settings.php:38
 msgid "Branding"
 msgstr ""
 
-#: src/Settings/Settings.php:54
+#: src/Settings/Settings.php:55
 msgid "Business name"
 msgstr ""
 
-#: src/Settings/Settings.php:59
+#: src/Settings/Settings.php:60
+#: templates/front/booking-widget.php:256
 msgid "Phone"
 msgstr ""
 
-#: src/Settings/Settings.php:64
+#: src/Settings/Settings.php:65
+#: templates/front/booking-widget.php:250
 msgid "Email"
 msgstr ""
 
-#: src/Settings/Settings.php:70
+#: src/Settings/Settings.php:71
 msgid "Used in emails, schema and llms.txt."
 msgstr ""
 
-#: src/Settings/Settings.php:75
+#: src/Settings/Settings.php:76
 msgid "Tours come from"
 msgstr ""
 
-#: src/Settings/Settings.php:77
+#: src/Settings/Settings.php:78
 msgid "Digitum Bookings “Tours” post type"
 msgstr ""
 
-#: src/Settings/Settings.php:78
+#: src/Settings/Settings.php:79
 msgid "An existing post type on this site"
 msgstr ""
 
-#: src/Settings/Settings.php:81
+#: src/Settings/Settings.php:82
 msgid "Attach to an existing post type to keep its URLs. Changing this refreshes permalinks once."
 msgstr ""
 
-#: src/Settings/Settings.php:85
+#: src/Settings/Settings.php:86
 msgid "Existing post type"
 msgstr ""
 
-#: src/Settings/Settings.php:88
+#: src/Settings/Settings.php:89
 msgid "Used when “Tours come from” is set to an existing post type. If that post type later disappears (for example the theme is removed), Digitum Bookings registers it with the same name and URL slug."
 msgstr ""
 
-#: src/Settings/Settings.php:96
+#: src/Settings/Settings.php:97
 msgid "Post type name"
 msgstr ""
 
-#: src/Settings/Settings.php:98
+#: src/Settings/Settings.php:99
 msgid "Internal name, 20 characters at most. Only change this on a new site."
 msgstr ""
 
-#: src/Settings/Settings.php:102
+#: src/Settings/Settings.php:103
 msgid "URL slug"
 msgstr ""
 
-#: src/Settings/Settings.php:104
+#: src/Settings/Settings.php:105
 msgid "Tours appear at /slug/tour-name/."
 msgstr ""
 
-#: src/Settings/Settings.php:108
-msgid "Booking widget"
-msgstr ""
-
-#: src/Settings/Settings.php:109
+#: src/Settings/Settings.php:110
 msgid "Add the booking widget to single tour pages automatically"
 msgstr ""
 
-#: src/Settings/Settings.php:114
+#: src/Settings/Settings.php:115
 msgid "Mobile sticky bar"
 msgstr ""
 
-#: src/Settings/Settings.php:115
+#: src/Settings/Settings.php:116
 msgid "Show price and Book button at the bottom of the screen on phones"
 msgstr ""
 
-#: src/Settings/Settings.php:120
+#: src/Settings/Settings.php:121
 msgid "Unpaid hold (card, PayPal)"
 msgstr ""
 
-#: src/Settings/Settings.php:121
+#: src/Settings/Settings.php:122
 msgid "minutes"
 msgstr ""
 
+#: src/Settings/Settings.php:130
+msgid "Booking terms page"
+msgstr ""
+
 #: src/Settings/Settings.php:131
-msgid "Currency"
+msgid "Link shown next to “I accept the booking terms”."
+msgstr ""
+
+#: src/Settings/Settings.php:136
+msgid "Cancellation policy (short)"
+msgstr ""
+
+#: src/Settings/Settings.php:137
+msgid "One or two sentences shown at payment and on the confirmation."
+msgstr ""
+
+#: src/Settings/Settings.php:142
+msgid "Default phone country code"
 msgstr ""
 
 #: src/Settings/Settings.php:149
-msgid "Prices are entered"
-msgstr ""
-
-#: src/Settings/Settings.php:151
-msgid "Including VAT"
-msgstr ""
-
-#: src/Settings/Settings.php:152
-msgid "Excluding VAT"
-msgstr ""
-
-#: src/Settings/Settings.php:158
-msgid "VAT rate"
+msgid "Currency"
 msgstr ""
 
 #: src/Settings/Settings.php:167
-msgid "Tax registration number (TRN)"
+msgid "Prices are entered"
 msgstr ""
 
-#: src/Settings/Settings.php:168
-msgid "Shown on receipts."
+#: src/Settings/Settings.php:169
+msgid "Including VAT"
 msgstr ""
 
-#: src/Settings/Settings.php:173
-msgid "Weekend days"
-msgstr ""
-
-#: src/Settings/Settings.php:174
-msgid "A tour’s weekend uplift applies on these days."
+#: src/Settings/Settings.php:170
+msgid "Excluding VAT"
 msgstr ""
 
 #: src/Settings/Settings.php:176
-msgid "Monday"
+msgid "VAT rate"
 msgstr ""
 
-#: src/Settings/Settings.php:177
-msgid "Tuesday"
+#: src/Settings/Settings.php:185
+msgid "Tax registration number (TRN)"
 msgstr ""
 
-#: src/Settings/Settings.php:178
-msgid "Wednesday"
-msgstr ""
-
-#: src/Settings/Settings.php:179
-msgid "Thursday"
-msgstr ""
-
-#: src/Settings/Settings.php:180
-msgid "Friday"
-msgstr ""
-
-#: src/Settings/Settings.php:181
-msgid "Saturday"
-msgstr ""
-
-#: src/Settings/Settings.php:182
-msgid "Sunday"
-msgstr ""
-
-#: src/Settings/Settings.php:190
-msgid "Deposits"
+#: src/Settings/Settings.php:186
+msgid "Shown on receipts."
 msgstr ""
 
 #: src/Settings/Settings.php:191
-msgid "Let guests pay part now and the rest on arrival"
+msgid "Weekend days"
 msgstr ""
 
 #: src/Settings/Settings.php:192
-msgid "When this is off, guests always pay the full amount or choose pay on arrival. Each tour can turn deposits off or use its own percentage."
+msgid "A tour’s weekend uplift applies on these days."
+msgstr ""
+
+#: src/Settings/Settings.php:194
+msgid "Monday"
+msgstr ""
+
+#: src/Settings/Settings.php:195
+msgid "Tuesday"
+msgstr ""
+
+#: src/Settings/Settings.php:196
+msgid "Wednesday"
 msgstr ""
 
 #: src/Settings/Settings.php:197
-msgid "Deposit percentage"
+msgid "Thursday"
 msgstr ""
 
-#: src/Settings/Settings.php:206
-msgid "Deposit allowed with"
+#: src/Settings/Settings.php:198
+msgid "Friday"
 msgstr ""
 
-#: src/Settings/Settings.php:208
-msgid "Stripe"
+#: src/Settings/Settings.php:199
+msgid "Saturday"
+msgstr ""
+
+#: src/Settings/Settings.php:200
+msgid "Sunday"
 msgstr ""
 
 #: src/Settings/Settings.php:209
-msgid "PayPal"
+msgid "Guests can book now and pay cash or card at the meeting point"
 msgstr ""
 
-#: src/Settings/Settings.php:210
-msgid "Bank transfer"
+#: src/Settings/Settings.php:215
+msgid "Offer bank transfer (fill in the bank details below)"
 msgstr ""
 
-#: src/Settings/Settings.php:216
-msgid "Bank transfer: account name"
+#: src/Settings/Settings.php:220
+msgid "Deposits"
 msgstr ""
 
 #: src/Settings/Settings.php:221
-msgid "Bank name"
+msgid "Let guests pay part now and the rest on arrival"
 msgstr ""
 
-#: src/Settings/Settings.php:226
-msgid "IBAN"
+#: src/Settings/Settings.php:222
+msgid "When this is off, guests always pay the full amount or choose pay on arrival. Each tour can turn deposits off or use its own percentage."
 msgstr ""
 
-#: src/Settings/Settings.php:231
-msgid "Account number"
+#: src/Settings/Settings.php:227
+msgid "Deposit percentage"
 msgstr ""
 
 #: src/Settings/Settings.php:236
-msgid "SWIFT / BIC"
+msgid "Deposit allowed with"
 msgstr ""
 
-#: src/Settings/Settings.php:241
-msgid "Instructions for the guest"
+#: src/Settings/Settings.php:238
+msgid "Stripe"
 msgstr ""
 
-#: src/Settings/Settings.php:242
-msgid "Use your booking reference as the payment reference. After paying, upload a screenshot of the transfer on the booking page. We confirm your booking by email once the payment is checked."
+#: src/Settings/Settings.php:239
+msgid "PayPal"
 msgstr ""
 
 #: src/Settings/Settings.php:246
-msgid "Screenshot upload"
+msgid "Bank transfer: account name"
 msgstr ""
 
-#: src/Settings/Settings.php:247
-msgid "Let guests upload the transfer screenshot on the booking page or from the email link"
+#: src/Settings/Settings.php:251
+msgid "Bank name"
 msgstr ""
 
-#: src/Settings/Settings.php:252
-msgid "WhatsApp number (other way to send it)"
+#: src/Settings/Settings.php:256
+#: templates/front/confirmation.php:84
+msgid "IBAN"
 msgstr ""
 
-#: src/Settings/Settings.php:253
-msgid "Shown as a small link under the upload box. Leave empty to hide."
+#: src/Settings/Settings.php:261
+#: templates/front/confirmation.php:85
+msgid "Account number"
 msgstr ""
 
-#: src/Settings/Settings.php:258
-msgid "Hold bank transfer bookings for"
-msgstr ""
-
-#: src/Settings/Settings.php:260
-msgid "If the booking is not marked as paid by then, it is cancelled and both sides get an email."
-msgstr ""
-
-#: src/Settings/Settings.php:270
-msgid "On uninstall"
+#: src/Settings/Settings.php:266
+#: templates/front/confirmation.php:86
+msgid "SWIFT / BIC"
 msgstr ""
 
 #: src/Settings/Settings.php:271
-msgid "Delete all booking tables and settings when the plugin is deleted"
+msgid "Instructions for the guest"
 msgstr ""
 
 #: src/Settings/Settings.php:272
+msgid "Use your booking reference as the payment reference. After paying, upload a screenshot of the transfer on the booking page. We confirm your booking by email once the payment is checked."
+msgstr ""
+
+#: src/Settings/Settings.php:276
+msgid "Screenshot upload"
+msgstr ""
+
+#: src/Settings/Settings.php:277
+msgid "Let guests upload the transfer screenshot on the booking page or from the email link"
+msgstr ""
+
+#: src/Settings/Settings.php:282
+msgid "WhatsApp number (other way to send it)"
+msgstr ""
+
+#: src/Settings/Settings.php:283
+msgid "Shown as a small link under the upload box. Leave empty to hide."
+msgstr ""
+
+#: src/Settings/Settings.php:288
+msgid "Hold bank transfer bookings for"
+msgstr ""
+
+#: src/Settings/Settings.php:290
+msgid "If the booking is not marked as paid by then, it is cancelled and both sides get an email."
+msgstr ""
+
+#: src/Settings/Settings.php:300
+msgid "dataLayer events"
+msgstr ""
+
+#: src/Settings/Settings.php:301
+msgid "Push GA4 ecommerce events (view_item … purchase, generate_lead) to dataLayer for Google Tag Manager"
+msgstr ""
+
+#: src/Settings/Settings.php:302
+msgid "No tags are fired directly; Google Tag Manager owns all tags."
+msgstr ""
+
+#: src/Settings/Settings.php:307
+msgid "Enhanced conversions"
+msgstr ""
+
+#: src/Settings/Settings.php:308
+msgid "Add the guest’s hashed (SHA-256) email and phone to the purchase event"
+msgstr ""
+
+#: src/Settings/Settings.php:313
+msgid "Attribution cookie"
+msgstr ""
+
+#: src/Settings/Settings.php:314
+msgid "days (UTM and gclid, first-party)"
+msgstr ""
+
+#: src/Settings/Settings.php:322
+msgid "Cloudflare Turnstile site key"
+msgstr ""
+
+#: src/Settings/Settings.php:323
+msgid "Optional bot check on booking and enquiry forms. A hidden honeypot field is always on."
+msgstr ""
+
+#: src/Settings/Settings.php:328
+msgid "Cloudflare Turnstile secret key"
+msgstr ""
+
+#: src/Settings/Settings.php:335
+msgid "On uninstall"
+msgstr ""
+
+#: src/Settings/Settings.php:336
+msgid "Delete all booking tables and settings when the plugin is deleted"
+msgstr ""
+
+#: src/Settings/Settings.php:337
 msgid "Off keeps your data. Guest data is never deleted automatically; erase it from a booking when needed."
 msgstr ""
 
-#: src/Settings/Settings.php:279
+#: src/Settings/Settings.php:344
 msgid "Admin menu name"
 msgstr ""
 
-#: src/Settings/Settings.php:280
+#: src/Settings/Settings.php:345
 msgid "Rename the menu for a client (white label)."
 msgstr ""
 
-#: src/Settings/Settings.php:285
+#: src/Settings/Settings.php:350
 msgid "Front-end credit"
 msgstr ""
 
-#: src/Settings/Settings.php:286
+#: src/Settings/Settings.php:351
 msgid "Show “Booking by Digitum” under the booking widget"
 msgstr ""
 
-#: src/Settings/Settings.php:291
+#: src/Settings/Settings.php:356
 msgid "Widget accent colour"
 msgstr ""
 
-#: src/Settings/Settings.php:319
+#: src/Settings/Settings.php:384
 msgid "— Choose —"
+msgstr ""
+
+#: templates/front/booking-widget.php:17
+msgid "Adults"
+msgstr ""
+
+#: templates/front/booking-widget.php:18
+msgid "Children"
+msgstr ""
+
+#: templates/front/booking-widget.php:19
+msgid "Infants"
+msgstr ""
+
+#. translators: %d: seats per vehicle.
+#: templates/front/booking-widget.php:25
+msgid "Vehicles"
+msgstr ""
+
+#. translators: %d: seats per vehicle.
+#: templates/front/booking-widget.php:25
+#, php-format
+msgid "%d seat each"
+msgid_plural "%d seats each"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/front/booking-widget.php:45
+#: templates/front/booking-widget.php:58
+#: templates/front/booking-widget.php:223
+#: templates/front/booking-widget.php:349
+msgid "Price on request"
+msgstr ""
+
+#: templates/front/booking-widget.php:48
+#: templates/front/booking-widget.php:53
+#: templates/front/booking-widget.php:332
+#: templates/front/booking-widget.php:352
+msgid "Request a quote"
+msgstr ""
+
+#: templates/front/booking-widget.php:53
+msgid "Book this tour"
+msgstr ""
+
+#: templates/front/booking-widget.php:62
+msgid "Close booking"
+msgstr ""
+
+#: templates/front/booking-widget.php:67
+msgid "Choose"
+msgstr ""
+
+#: templates/front/booking-widget.php:71
+msgid "Option"
+msgstr ""
+
+#: templates/front/booking-widget.php:95
+#: templates/front/confirmation.php:25
+msgid "Date"
+msgstr ""
+
+#: templates/front/booking-widget.php:117
+msgid "Vehicles and guests"
+msgstr ""
+
+#: templates/front/booking-widget.php:117
+#: templates/front/confirmation.php:32
+msgid "Guests"
+msgstr ""
+
+#. translators: %s: Adults, Children…
+#: templates/front/booking-widget.php:127
+#, php-format
+msgid "Fewer: %s"
+msgstr ""
+
+#. translators: %s: Adults, Children…
+#: templates/front/booking-widget.php:129
+#, php-format
+msgid "More: %s"
+msgstr ""
+
+#. translators: %d: minimum age.
+#: templates/front/booking-widget.php:139
+#, php-format
+msgid "Minimum age %d."
+msgstr ""
+
+#: templates/front/booking-widget.php:142
+msgid "The driver must show a driving licence."
+msgstr ""
+
+#: templates/front/booking-widget.php:153
+msgid "Pickup or meeting point"
+msgstr ""
+
+#. translators: %s: meeting point.
+#: templates/front/booking-widget.php:159
+#, php-format
+msgid "Meet us at %s"
+msgstr ""
+
+#. translators: %s: meeting point.
+#: templates/front/booking-widget.php:159
+msgid "Meet us at the meeting point"
+msgstr ""
+
+#: templates/front/booking-widget.php:167
+msgid "Included"
+msgstr ""
+
+#: templates/front/booking-widget.php:173
+msgid "Pickup area"
+msgstr ""
+
+#: templates/front/booking-widget.php:175
+msgid "Choose…"
+msgstr ""
+
+#: templates/front/booking-widget.php:184
+msgid "Hotel or address"
+msgstr ""
+
+#: templates/front/booking-widget.php:189
+msgid "Room number (optional)"
+msgstr ""
+
+#: templates/front/booking-widget.php:205
+#: templates/front/confirmation.php:66
+msgid "Open in maps"
+msgstr ""
+
+#: templates/front/booking-widget.php:214
+msgid "Extras"
+msgstr ""
+
+#: templates/front/booking-widget.php:232
+msgid "included in every booking"
+msgstr ""
+
+#: templates/front/booking-widget.php:243
+msgid "Your details"
+msgstr ""
+
+#: templates/front/booking-widget.php:245
+msgid "Full name"
+msgstr ""
+
+#: templates/front/booking-widget.php:252
+msgid "We send the quote here."
+msgstr ""
+
+#: templates/front/booking-widget.php:252
+msgid "Your confirmation and receipt are sent here."
+msgstr ""
+
+#: templates/front/booking-widget.php:258
+msgid "Country code"
+msgstr ""
+
+#: templates/front/booking-widget.php:264
+msgid "Nationality (optional)"
+msgstr ""
+
+#: templates/front/booking-widget.php:268
+msgid "What are you planning?"
+msgstr ""
+
+#: templates/front/booking-widget.php:268
+msgid "Special requests (optional)"
+msgstr ""
+
+#: templates/front/booking-widget.php:271
+msgid "Send me offers and news (optional)"
+msgstr ""
+
+#. translators: %s: link to the booking terms.
+#: templates/front/booking-widget.php:279
+#, php-format
+msgid "I accept the %s"
+msgstr ""
+
+#: templates/front/booking-widget.php:280
+msgid "booking terms"
+msgstr ""
+
+#: templates/front/booking-widget.php:284
+msgid "I accept the booking terms"
+msgstr ""
+
+#: templates/front/booking-widget.php:290
+msgid "Leave this empty"
+msgstr ""
+
+#: templates/front/booking-widget.php:299
+msgid "Payment"
+msgstr ""
+
+#: templates/front/booking-widget.php:301
+msgid "Payment method"
+msgstr ""
+
+#: templates/front/booking-widget.php:313
+msgid "Online booking is not available right now. Please contact us."
+msgstr ""
+
+#: templates/front/booking-widget.php:316
+msgid "How much to pay now"
+msgstr ""
+
+#: templates/front/booking-widget.php:330
+msgid "Back"
+msgstr ""
+
+#: templates/front/booking-widget.php:331
+msgid "Continue"
+msgstr ""
+
+#: templates/front/booking-widget.php:336
+msgid "Booking by Digitum"
+msgstr ""
+
+#: templates/front/booking-widget.php:341
+msgid "Online booking needs JavaScript. Please enable it or contact us to book."
+msgstr ""
+
+#: templates/front/booking-widget.php:352
+msgid "Book"
+msgstr ""
+
+#: templates/front/confirmation.php:17
+msgid "Request reference"
+msgstr ""
+
+#. translators: %d: number of vehicles.
+#: templates/front/confirmation.php:38
+#, php-format
+msgid "%d vehicle"
+msgid_plural "%d vehicles"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: pickup window, e.g. 2:15 pm – 2:45 pm.
+#: templates/front/confirmation.php:52
+#, php-format
+msgid "Please be ready in the lobby between %s."
+msgstr ""
+
+#: templates/front/confirmation.php:57
+msgid "Where to meet"
+msgstr ""
+
+#. translators: %s: start time.
+#: templates/front/confirmation.php:58
+#, php-format
+msgid "session starts %s"
+msgstr ""
+
+#. translators: %s: amount to transfer.
+#: templates/front/confirmation.php:76
+#, php-format
+msgid "Transfer %s"
+msgstr ""
+
+#: templates/front/confirmation.php:82
+msgid "Account name"
+msgstr ""
+
+#: templates/front/confirmation.php:83
+msgid "Bank"
+msgstr ""
+
+#: templates/front/confirmation.php:96
+msgid "Payment reference"
+msgstr ""
+
+#. translators: %s: date and time the booking is held until.
+#: templates/front/confirmation.php:106
+#, php-format
+msgid "Your place is held until %s."
+msgstr ""
+
+#: templates/front/confirmation.php:111
+msgid "Send the transfer screenshot on WhatsApp"
+msgstr ""
+
+#: templates/front/confirmation.php:120
+msgid "Includes VAT"
+msgstr ""
+
+#: templates/front/confirmation.php:126
+msgid "To pay on arrival"
+msgstr ""
+
+#: templates/front/confirmation.php:126
+msgid "Still to pay"
+msgstr ""
+
+#: templates/front/confirmation.php:137
+msgid "Add to calendar"
+msgstr ""
+
+#: templates/front/confirmation.php:140
+msgid "Email us"
+msgstr ""
+
+#: blocks/booking/block.json
+msgctxt "block title"
+msgid "Booking widget"
+msgstr ""
+
+#: blocks/booking/block.json
+msgctxt "block description"
+msgid "Booking form for a tour. Leave the tour empty to use the tour being viewed."
+msgstr ""
+
+#: blocks/booking/block.json
+msgctxt "block keyword"
+msgid "booking"
+msgstr ""
+
+#: blocks/booking/block.json
+msgctxt "block keyword"
+msgid "tour"
+msgstr ""
+
+#: blocks/booking/block.json
+msgctxt "block keyword"
+msgid "reservation"
 msgstr ""

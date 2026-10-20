@@ -18,8 +18,8 @@ If the site already serves tours under `/tour/` (for example the Traveler theme'
 |---|---|---|
 | M1 Foundation | settings, attach / own tour post type, booking settings box, tables, roles, release workflow | done (v0.1.0) |
 | M2 Pricing and availability | price calculator, deposits, closures, holds, pickup zones | done (v0.2.0) |
-| M3 Front-end flow | booking widget, block, shortcode, Elementor widget | next |
-| M4 Payments | Stripe, PayPal, bank transfer with screenshot upload, pay on arrival | |
+| M3 Front-end flow | booking widget, block, shortcode, Elementor widget | done (v0.3.0) |
+| M4 Payments | Stripe, PayPal, bank transfer with screenshot upload, pay on arrival | next |
 | M5 Admin operations | dashboard, calendar, bookings, manifest, check-in, emails | |
 | M6 Integrations | schema, llms.txt, REST API, Traveler importer, CSV | |
 | M7 Release | update checker, Arabic RTL, docs, demo data | |
@@ -32,8 +32,8 @@ The full specification is in [CLAUDE.md](CLAUDE.md). The approved layout is at h
 2. Add the changes to `docs/CHANGELOG.md` and the changelog in `readme.txt`.
 3. Commit, then tag and push:
    ```bash
-   git tag v0.2.0
-   git push origin v0.2.0
+   git tag v0.3.0
+   git push origin v0.3.0
    ```
 4. The **Release** GitHub Action checks that the tag matches the version, builds `digitum-bookings.zip` and attaches it to a new GitHub release.
 
@@ -59,7 +59,16 @@ git clone --depth 1 --branch v2.1.16 https://github.com/WordPress/sqlite-databas
 DGB_WP_DIR=.wp-test/wordpress DGB_SQLITE_DIR=.wp-test/sqlite composer test:integration
 ```
 
-Set `DGB_PLUGIN_DIR` to an unzipped `digitum-bookings` folder to test a release build instead of the checkout, and `DGB_PREVIOUS_DIR` to a checkout of the previous release (`git worktree add ../previous v0.1.0`) to test upgrading from it.
+Set `DGB_PLUGIN_DIR` to an unzipped `digitum-bookings` folder to test a release build instead of the checkout, and `DGB_PREVIOUS_DIR` to a checkout of the previous release (`git worktree add ../previous v0.2.0`) to test upgrading from it.
+
+Browser tests (Playwright, desktop and phone, with axe accessibility checks) build a test site from the same checkouts and serve it with PHP's built-in server:
+
+```bash
+npx playwright install chromium   # once
+DGB_WP_DIR=.wp-test/wordpress DGB_SQLITE_DIR=.wp-test/sqlite npm run test:e2e
+```
+
+Lighthouse can be run against that site while it is up: `npx lighthouse http://127.0.0.1:8889/tour/rzr/`.
 
 Regenerate the translation template with WP-CLI: `wp i18n make-pot . languages/digitum-bookings.pot --exclude=vendor,node_modules,tests,build,.wp-test,assets/build`.
 
