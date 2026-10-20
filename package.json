@@ -1,6 +1,6 @@
 {
   "name": "digitum-bookings",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Front-end and admin assets for the Digitum Bookings WordPress plugin.",
   "license": "GPL-2.0-or-later",

@@ -17,8 +17,8 @@ If the site already serves tours under `/tour/` (for example the Traveler theme'
 | Milestone | Scope | State |
 |---|---|---|
 | M1 Foundation | settings, attach / own tour post type, booking settings box, tables, roles, release workflow | done (v0.1.0) |
-| M2 Pricing and availability | price calculator, deposits, closures, holds | next |
-| M3 Front-end flow | booking widget, block, shortcode, Elementor widget | |
+| M2 Pricing and availability | price calculator, deposits, closures, holds, pickup zones | done (v0.2.0) |
+| M3 Front-end flow | booking widget, block, shortcode, Elementor widget | next |
 | M4 Payments | Stripe, PayPal, bank transfer with screenshot upload, pay on arrival | |
 | M5 Admin operations | dashboard, calendar, bookings, manifest, check-in, emails | |
 | M6 Integrations | schema, llms.txt, REST API, Traveler importer, CSV | |
@@ -47,6 +47,7 @@ npm install
 npm run build             # assets/src → assets/build
 composer lint             # coding standards
 composer test             # unit tests
+composer test:coverage    # unit tests + 100% coverage gate for the pricing engine (needs pcov or Xdebug)
 composer build            # build/digitum-bookings.zip
 ```
 
@@ -58,7 +59,7 @@ git clone --depth 1 --branch v2.1.16 https://github.com/WordPress/sqlite-databas
 DGB_WP_DIR=.wp-test/wordpress DGB_SQLITE_DIR=.wp-test/sqlite composer test:integration
 ```
 
-Set `DGB_PLUGIN_DIR` to an unzipped `digitum-bookings` folder to test a release build instead of the checkout.
+Set `DGB_PLUGIN_DIR` to an unzipped `digitum-bookings` folder to test a release build instead of the checkout, and `DGB_PREVIOUS_DIR` to a checkout of the previous release (`git worktree add ../previous v0.1.0`) to test upgrading from it.
 
 Regenerate the translation template with WP-CLI: `wp i18n make-pot . languages/digitum-bookings.pot --exclude=vendor,node_modules,tests,build,.wp-test,assets/build`.
 

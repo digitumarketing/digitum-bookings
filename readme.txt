@@ -4,7 +4,7 @@ Tags: bookings, tours, activities, reservations, deposits
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.1.0
+Stable tag: 0.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,7 +21,7 @@ Digitum Bookings adds online booking to tour and activity sites.
 * Optional deposits with a percentage you choose.
 * Booking manager and tour guide roles.
 
-This is an early release (milestone 1: foundation). The booking widget, payments and booking screens arrive in the next releases.
+This is an early release (milestones 1–2: foundation, pricing and availability). The booking widget, payments and booking screens arrive in the next releases.
 
 == Installation ==
 
@@ -31,6 +31,13 @@ This is an early release (milestone 1: foundation). The booking widget, payments
 4. Open Digitum Bookings › Settings and fill in your business details.
 
 == Changelog ==
+
+= 0.2.0 =
+* Pricing engine for per person, per vehicle, per group and price-on-request tours, with child prices, free infants, add-ons, pickup zones, coupons, VAT and optional deposits.
+* Closed dates and date price changes per tour; weekend uplift.
+* Session availability with same-day cut-off, minimum notice and booking window.
+* Pickup zones and meeting points screen.
+* Unpaid bookings are released automatically when their hold expires.
 
 = 0.1.0 =
 * Foundation: settings, tour post type (attach or own), booking settings box, database tables, roles.

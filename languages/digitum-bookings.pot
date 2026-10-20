@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Digitum Bookings 0.1.0\n"
+"Project-Id-Version: Digitum Bookings 0.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/digitumarketing/digitum-bookings/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-20T12:42:02+00:00\n"
+"POT-Creation-Date: 2026-10-20T13:51:52+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: digitum-bookings\n"
@@ -45,491 +45,580 @@ msgstr ""
 msgid "Digitum Bookings needs PHP %1$s or newer. This site runs PHP %2$s."
 msgstr ""
 
-#: src/Admin/Menus.php:77
+#: src/Admin/Menus.php:78
 #: src/Admin/Screens/DashboardScreen.php:84
 msgid "Dashboard"
 msgstr ""
 
-#: src/Admin/Menus.php:78
+#: src/Admin/Menus.php:79
 #: src/PostTypes/ProductType.php:98
 #: src/PostTypes/ProductType.php:109
 msgid "Tours"
 msgstr ""
 
-#: src/Admin/Menus.php:79
+#: src/Admin/Menus.php:80
+#: src/Admin/Screens/ZonesScreen.php:71
+msgid "Pickup zones"
+msgstr ""
+
+#: src/Admin/Menus.php:81
 #: src/Admin/Screens/SettingsScreen.php:121
 msgid "Settings"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:59
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:119
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:77
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:137
 msgid "Booking settings"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:91
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:109
 msgid "Pricing"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:92
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:110
 msgid "Options"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:93
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:111
 msgid "Sessions"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:94
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:112
 msgid "Add-ons"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:95
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:113
 msgid "Pickup & location"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:96
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:114
 msgid "Rules"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:97
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:115
 msgid "Schema & SEO"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:114
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:132
 msgid "Take bookings for this tour"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:116
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:134
 msgid "The booking widget only shows on tours with this switched on."
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:143
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:424
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:161
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:457
 msgid "Per person"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:143
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:161
 msgid "Option price × adults + child price × children."
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:144
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:425
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:162
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:458
 msgid "Per vehicle"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:144
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:162
 msgid "Option price × vehicles. Guests are checked against the seats."
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:145
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:163
 msgid "Per group / car"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:145
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:163
 msgid "Price per car up to the maximum guests; extra cars are added automatically."
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:146
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:426
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:164
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:459
 msgid "On request"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:146
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:164
 msgid "No price is shown. The guest sends a quote request."
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:150
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:168
 msgid "Pricing mode"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:162
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:180
 msgid "Seats per vehicle"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:166
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:184
 msgid "Maximum guests per car"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:170
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:188
 msgid "VAT"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:175
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:190
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:193
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:208
 msgid "Site setting"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:176
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:194
 msgid "Prices include VAT"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:177
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:195
 msgid "Prices exclude VAT"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:185
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:203
 msgid "Deposit"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:191
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:209
 msgid "No deposit for this tour"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:192
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:210
 msgid "Custom percentage"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:198
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:216
 msgid "Only offered when deposits are on in Settings › Payments."
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:201
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:219
 msgid "Custom deposit"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:205
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:223
 msgid "Weekend uplift"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:212
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:230
 msgid "Enquiry only: show “Request a quote” instead of taking payment"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:225
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:240
+msgid "Shown to guests as: Price on request"
+msgstr ""
+
+#. translators: 1: currency code, 2: lowest option price.
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:243
+#, php-format
+msgid "Shown to guests as: From %1$s %2$s"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:246
+msgid "Lowest active option. The page, schema and llms.txt use the same value."
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:258
 msgid "Each option is a duration or seat variant. “Compare-at” only shows while the promotion dates are running."
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:229
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:251
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:262
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:284
 msgid "Label"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:230
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:263
 msgid "Duration (min)"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:231
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:258
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:386
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:411
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:264
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:291
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:419
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:444
 msgid "Price"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:232
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:269
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:265
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:302
 msgid "Child price"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:233
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:266
 msgid "Compare-at"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:234
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:286
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:267
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:319
 msgid "Promotion from"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:235
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:287
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:268
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:320
 msgid "Promotion to"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:236
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:288
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:311
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:372
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:390
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:440
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:269
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:321
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:344
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:405
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:423
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:473
 msgid "Active"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:240
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:273
 msgid "Add option"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:251
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:284
 msgid "e.g. 1 hour"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:252
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:285
 msgid "Duration in minutes"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:280
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:313
 msgid "Compare-at price"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:298
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:331
 msgid "The pickup time guests see comes from the session they book, not from the tour."
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:302
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:335
+#: src/Admin/Screens/ZonesScreen.php:144
+#: src/Admin/Screens/ZonesScreen.php:171
 msgid "Name"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:303
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:336
 msgid "Type"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:304
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:337
 msgid "Start"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:305
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:338
 msgid "End"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:306
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:339
 msgid "Pickup from"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:307
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:340
 msgid "Pickup to"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:308
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:341
 msgid "Days"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:309
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:370
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:342
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:403
 msgid "Season from"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:310
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:371
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:343
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:404
 msgid "Season to"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:315
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:348
 msgid "Add session"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:326
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:359
 msgid "Session name"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:326
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:359
 msgid "e.g. Evening"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:331
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:364
 msgid "Session type"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:333
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:366
 msgid "Morning"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:334
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:367
 msgid "Evening"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:335
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:368
 msgid "Overnight"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:336
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:369
 msgid "Fixed slot"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:343
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:376
 msgid "Start time"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:344
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:377
 msgid "End time"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:345
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:378
 msgid "Pickup window from"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:346
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:379
 msgid "Pickup window to"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:350
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:383
 msgid "Mon"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:351
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:384
 msgid "Tue"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:352
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:385
 msgid "Wed"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:353
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:386
 msgid "Thu"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:354
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:387
 msgid "Fri"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:355
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:388
 msgid "Sat"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:356
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:389
 msgid "Sun"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:358
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:391
 msgid "Days of the week"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:385
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:418
 msgid "Add-on"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:387
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:421
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:420
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:454
 msgid "Charged"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:388
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:433
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:421
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:466
 msgid "Shows when"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:389
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:439
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:422
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:472
 msgid "Required"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:394
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:427
 msgid "Add add-on"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:405
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:438
 msgid "Add-on name"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:405
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:438
 msgid "e.g. Hotel pickup"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:423
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:456
 msgid "Per booking"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:435
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:468
 msgid "Always"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:436
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:469
 msgid "Guest chooses hotel pickup"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:449
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:482
 msgid "— None —"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:456
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:477
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:489
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:510
 msgid "Hotel pickup"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:461
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:494
 msgid "Included in the price"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:462
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:495
 msgid "Guest may add it (set the price under Add-ons)"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:463
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:496
+#: src/Admin/Screens/ZonesScreen.php:85
 msgid "Not offered"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:471
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:504
 msgid "Preselected choice"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:476
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:509
 msgid "Meet at the meeting point"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:485
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:518
+#: src/Admin/Screens/ZonesScreen.php:101
 msgid "Meeting point"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:490
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:523
 msgid "No meeting points yet. They are added under Digitum Bookings › Pickup zones."
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:504
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:537
 msgid "Same-day cut-off"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:504
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:537
 msgid "hours before the session"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:505
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:538
 msgid "Minimum notice"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:505
-#: src/Settings/Settings.php:244
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:538
+#: src/Settings/Settings.php:259
 msgid "hours"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:506
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:539
 msgid "Book up to"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:506
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:539
 msgid "days ahead"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:507
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:540
 msgid "Minimum age"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:507
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:540
 msgid "years (0 = no limit)"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:522
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:555
 msgid "The driver must show a driving licence"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:527
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:560
 msgid "Included (one per line)"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:528
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:561
 msgid "Not included (one per line)"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:529
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:562
 msgid "Requirements (one per line)"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:551
-msgid "Schema type"
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:575
+msgid "All sessions"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:563
-msgid "Price in structured data always matches the price shown on the page."
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:579
+msgid "Closed dates and price changes"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:580
+msgid "Close a date range (for example a holiday or when you are fully booked), or change prices for it by a percentage. Newly added sessions appear here after saving."
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:584
+msgid "From"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:585
+msgid "To"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:586
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:606
+msgid "Session"
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:587
-msgid "Row actions"
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:611
+msgid "Rule"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:621
-msgid "Move up"
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:588
+msgid "Price change %"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:589
+msgid "Note (staff only)"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:593
+msgid "Add closed dates or price change"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:604
+msgid "From date"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:605
+msgid "To date"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:613
+msgid "Closed"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:614
+msgid "Price change"
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:622
+msgid "Price change in percent, e.g. 20 or -10"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:629
+msgid "Note"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:640
+msgid "Schema type"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:652
+msgid "Price in structured data always matches the price shown on the page."
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:676
+msgid "Row actions"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:710
+msgid "Move up"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:711
 msgid "Move down"
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:623
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:712
 msgid "Remove"
 msgstr ""
 
@@ -609,6 +698,161 @@ msgstr ""
 msgid "Settings sections"
 msgstr ""
 
+#: src/Admin/Screens/ZonesScreen.php:47
+#: src/Admin/Screens/ZonesScreen.php:273
+msgid "You do not have permission to manage pickup zones."
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:60
+msgid "Saved."
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:61
+msgid "Deleted."
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:62
+msgid "Please enter a name."
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:66
+msgid "Pickup zones and meeting points"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:72
+msgid "Areas guests can be picked up from. A zone without pickup shows the meeting point instead of a price."
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:75
+msgid "Zone"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:76
+#: src/Admin/Screens/ZonesScreen.php:146
+msgid "Pickup"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:77
+#: src/Admin/Screens/ZonesScreen.php:148
+msgid "Surcharge"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:78
+msgid "Notes"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:79
+#: src/Admin/Screens/ZonesScreen.php:104
+msgid "Actions"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:85
+msgid "Offered"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:89
+#: src/Admin/Screens/ZonesScreen.php:119
+msgid "Edit"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:98
+msgid "Meeting points"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:102
+#: src/Admin/Screens/ZonesScreen.php:187
+#: src/Settings/Settings.php:69
+msgid "Address"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:103
+msgid "Map"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:113
+msgid "Open map"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:139
+msgid "Edit zone"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:139
+msgid "Add a zone"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:147
+msgid "Hotel pickup is offered from this zone"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:150
+msgid "Extra per booking for pickups from this zone. Leave empty for none."
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:151
+msgid "Notes for guests"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:153
+msgid "Order"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:156
+msgid "Save zone"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:156
+msgid "Add zone"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:158
+#: src/Admin/Screens/ZonesScreen.php:194
+msgid "Cancel"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:172
+msgid "Latitude"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:173
+msgid "Longitude"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:174
+msgid "Map link"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:178
+msgid "Edit meeting point"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:178
+msgid "Add a meeting point"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:189
+msgid "Arrival instructions"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:192
+msgid "Save meeting point"
+msgstr ""
+
+#: src/Admin/Screens/ZonesScreen.php:192
+msgid "Add meeting point"
+msgstr ""
+
+#. translators: %s: zone or meeting point name.
+#: src/Admin/Screens/ZonesScreen.php:213
+#, php-format
+msgid "Delete %s"
+msgstr ""
+
+#. translators: %s: zone or meeting point name.
+#: src/Admin/Screens/ZonesScreen.php:213
+msgid "Delete"
+msgstr ""
+
 #: src/PostTypes/ProductType.php:99
 msgid "Tour"
 msgstr ""
@@ -657,6 +901,54 @@ msgstr ""
 msgid "Tour guide"
 msgstr ""
 
+#: src/Services/Holds.php:69
+msgid "Every five minutes"
+msgstr ""
+
+#: src/Services/Holds.php:129
+msgid "Bank transfer not received in time; booking released."
+msgstr ""
+
+#: src/Services/Holds.php:130
+msgid "Payment not completed in time; booking released."
+msgstr ""
+
+#: src/Services/Pricing/ErrorMessages.php:26
+msgid "Please choose an option."
+msgstr ""
+
+#: src/Services/Pricing/ErrorMessages.php:28
+msgid "Please add at least one guest."
+msgstr ""
+
+#. translators: 1: number of seats, 2: vehicles needed.
+#: src/Services/Pricing/ErrorMessages.php:32
+#, php-format
+msgid "There are only %1$d seats. Add vehicles (%2$d needed) or remove guests."
+msgstr ""
+
+#: src/Services/Pricing/ErrorMessages.php:37
+msgid "Hotel pickup is not offered for this tour. Please meet us at the meeting point."
+msgstr ""
+
+#: src/Services/Pricing/ErrorMessages.php:39
+msgid "Please choose your pickup area."
+msgstr ""
+
+#. translators: %s: pickup area, e.g. Abu Dhabi.
+#: src/Services/Pricing/ErrorMessages.php:43
+#, php-format
+msgid "Pickup is not available from %s. Please meet us at the meeting point."
+msgstr ""
+
+#: src/Services/Pricing/ErrorMessages.php:47
+msgid "This coupon code cannot be used for this booking."
+msgstr ""
+
+#: src/Services/Pricing/ErrorMessages.php:49
+msgid "This booking cannot be priced. Please contact us."
+msgstr ""
+
 #: src/Settings/Settings.php:33
 msgid "General"
 msgstr ""
@@ -687,10 +979,6 @@ msgstr ""
 
 #: src/Settings/Settings.php:64
 msgid "Email"
-msgstr ""
-
-#: src/Settings/Settings.php:69
-msgid "Address"
 msgstr ""
 
 #: src/Settings/Settings.php:70
@@ -789,122 +1077,158 @@ msgstr ""
 msgid "Shown on receipts."
 msgstr ""
 
-#: src/Settings/Settings.php:175
-msgid "Deposits"
+#: src/Settings/Settings.php:173
+msgid "Weekend days"
+msgstr ""
+
+#: src/Settings/Settings.php:174
+msgid "A tour’s weekend uplift applies on these days."
 msgstr ""
 
 #: src/Settings/Settings.php:176
-msgid "Let guests pay part now and the rest on arrival"
+msgid "Monday"
 msgstr ""
 
 #: src/Settings/Settings.php:177
-msgid "When this is off, guests always pay the full amount or choose pay on arrival. Each tour can turn deposits off or use its own percentage."
+msgid "Tuesday"
+msgstr ""
+
+#: src/Settings/Settings.php:178
+msgid "Wednesday"
+msgstr ""
+
+#: src/Settings/Settings.php:179
+msgid "Thursday"
+msgstr ""
+
+#: src/Settings/Settings.php:180
+msgid "Friday"
+msgstr ""
+
+#: src/Settings/Settings.php:181
+msgid "Saturday"
 msgstr ""
 
 #: src/Settings/Settings.php:182
-msgid "Deposit percentage"
+msgid "Sunday"
+msgstr ""
+
+#: src/Settings/Settings.php:190
+msgid "Deposits"
 msgstr ""
 
 #: src/Settings/Settings.php:191
-msgid "Deposit allowed with"
+msgid "Let guests pay part now and the rest on arrival"
 msgstr ""
 
-#: src/Settings/Settings.php:193
-msgid "Stripe"
+#: src/Settings/Settings.php:192
+msgid "When this is off, guests always pay the full amount or choose pay on arrival. Each tour can turn deposits off or use its own percentage."
 msgstr ""
 
-#: src/Settings/Settings.php:194
-msgid "PayPal"
-msgstr ""
-
-#: src/Settings/Settings.php:195
-msgid "Bank transfer"
-msgstr ""
-
-#: src/Settings/Settings.php:201
-msgid "Bank transfer: account name"
+#: src/Settings/Settings.php:197
+msgid "Deposit percentage"
 msgstr ""
 
 #: src/Settings/Settings.php:206
-msgid "Bank name"
+msgid "Deposit allowed with"
 msgstr ""
 
-#: src/Settings/Settings.php:211
-msgid "IBAN"
+#: src/Settings/Settings.php:208
+msgid "Stripe"
+msgstr ""
+
+#: src/Settings/Settings.php:209
+msgid "PayPal"
+msgstr ""
+
+#: src/Settings/Settings.php:210
+msgid "Bank transfer"
 msgstr ""
 
 #: src/Settings/Settings.php:216
-msgid "Account number"
+msgid "Bank transfer: account name"
 msgstr ""
 
 #: src/Settings/Settings.php:221
-msgid "SWIFT / BIC"
+msgid "Bank name"
 msgstr ""
 
 #: src/Settings/Settings.php:226
-msgid "Instructions for the guest"
-msgstr ""
-
-#: src/Settings/Settings.php:227
-msgid "Use your booking reference as the payment reference. After paying, upload a screenshot of the transfer on the booking page. We confirm your booking by email once the payment is checked."
+msgid "IBAN"
 msgstr ""
 
 #: src/Settings/Settings.php:231
+msgid "Account number"
+msgstr ""
+
+#: src/Settings/Settings.php:236
+msgid "SWIFT / BIC"
+msgstr ""
+
+#: src/Settings/Settings.php:241
+msgid "Instructions for the guest"
+msgstr ""
+
+#: src/Settings/Settings.php:242
+msgid "Use your booking reference as the payment reference. After paying, upload a screenshot of the transfer on the booking page. We confirm your booking by email once the payment is checked."
+msgstr ""
+
+#: src/Settings/Settings.php:246
 msgid "Screenshot upload"
 msgstr ""
 
-#: src/Settings/Settings.php:232
+#: src/Settings/Settings.php:247
 msgid "Let guests upload the transfer screenshot on the booking page or from the email link"
 msgstr ""
 
-#: src/Settings/Settings.php:237
+#: src/Settings/Settings.php:252
 msgid "WhatsApp number (other way to send it)"
 msgstr ""
 
-#: src/Settings/Settings.php:238
+#: src/Settings/Settings.php:253
 msgid "Shown as a small link under the upload box. Leave empty to hide."
 msgstr ""
 
-#: src/Settings/Settings.php:243
+#: src/Settings/Settings.php:258
 msgid "Hold bank transfer bookings for"
 msgstr ""
 
-#: src/Settings/Settings.php:245
+#: src/Settings/Settings.php:260
 msgid "If the booking is not marked as paid by then, it is cancelled and both sides get an email."
 msgstr ""
 
-#: src/Settings/Settings.php:255
+#: src/Settings/Settings.php:270
 msgid "On uninstall"
 msgstr ""
 
-#: src/Settings/Settings.php:256
+#: src/Settings/Settings.php:271
 msgid "Delete all booking tables and settings when the plugin is deleted"
 msgstr ""
 
-#: src/Settings/Settings.php:257
+#: src/Settings/Settings.php:272
 msgid "Off keeps your data. Guest data is never deleted automatically; erase it from a booking when needed."
 msgstr ""
 
-#: src/Settings/Settings.php:264
+#: src/Settings/Settings.php:279
 msgid "Admin menu name"
 msgstr ""
 
-#: src/Settings/Settings.php:265
+#: src/Settings/Settings.php:280
 msgid "Rename the menu for a client (white label)."
 msgstr ""
 
-#: src/Settings/Settings.php:270
+#: src/Settings/Settings.php:285
 msgid "Front-end credit"
 msgstr ""
 
-#: src/Settings/Settings.php:271
+#: src/Settings/Settings.php:286
 msgid "Show “Booking by Digitum” under the booking widget"
 msgstr ""
 
-#: src/Settings/Settings.php:276
+#: src/Settings/Settings.php:291
 msgid "Widget accent colour"
 msgstr ""
 
-#: src/Settings/Settings.php:304
+#: src/Settings/Settings.php:319
 msgid "— Choose —"
 msgstr ""

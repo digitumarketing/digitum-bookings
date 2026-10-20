@@ -48,7 +48,7 @@ Custom tables for transactional data; post meta only for product configuration. 
 | Payment | `dgb_payments` | booking_id, gateway, intent_id, amount, type (deposit, full, balance, refund), status, raw payload |
 | Payment proof | `dgb_payment_proofs` | booking_id, file path (protected), mime, size, uploaded_at, reviewed_by, reviewed_at |
 | Coupon | `dgb_coupons` | code, type (percent, fixed), scope, limits, dates |
-| Closure / override | `dgb_calendar_overrides` | product, session (optional), date range, rule (closed, price override) |
+| Closure / override | `dgb_calendar_overrides` | product, session (optional), date range, rule (`closed`, or `adjust` with `adjust_percent`), note |
 | Notification log | `dgb_notifications` | booking_id, channel (email, webhook), template, recipient, status, error, timestamp |
 
 Booking statuses: `pending_payment`, `awaiting_transfer`, `quote_requested`, `confirmed`, `checked_in`, `no_show`, `cancelled`.
@@ -61,8 +61,8 @@ One service class (`PriceCalculator`) returns a full line-item breakdown, unit-t
 
 | Mode | Total | Example |
 |---|---|---|
-| `per_person` | variant price × adults + child price × children | Evening desert safari |
-| `per_vehicle` | variant price × units; guests only validate against seats_per_unit × units | Polaris RZR 2-seater, 30 min |
+| `per_person` | variant price × adults + child price × children (no child price = adult price; infants free) | Evening desert safari |
+| `per_vehicle` | variant price × units; all guests (infants too) must fit in seats_per_unit × units | Polaris RZR 2-seater, 30 min |
 | `per_group` | price per car up to `max_pax_per_unit`; extra cars added automatically | Private safari, up to 7 per car |
 | `on_request` | no price; flow becomes an enquiry (6.4) | New Year safari, Ramadan iftar, corporate, photoshoot, buggy safari combo |
 
@@ -70,7 +70,7 @@ Also:
 
 1. Duration ladders as variants (30 min, 1 h, 2 h, 3 h).
 2. Child pricing and age bands per product (infant free, child, adult).
-3. Seasonal and date price overrides, plus weekday/weekend uplift.
+3. Date price changes: a row in the tour's “Closed dates and price changes” table with rule `adjust` changes prices by ±% for a date range (whole tour or one session). A weekend uplift % applies on the weekend days set in Settings › Currency & VAT (default Saturday and Sunday).
 4. Add-ons with conditions (e.g. "Hotel pickup, AED 300 per booking" only when pickup is chosen and the zone is allowed).
 5. **Deposits are optional.** A global switch plus a percentage set by the site owner; the switch also chooses which payment methods allow a deposit. Each product can use the site setting, turn deposits off, or set its own percentage. When deposits are off the guest never sees the choice. "Full amount" is always preselected.
 6. VAT inclusive or exclusive, rate setting (UAE default 5%), shown in the breakdown.
