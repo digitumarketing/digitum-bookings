@@ -10,6 +10,9 @@ namespace Digitum\Bookings;
 use Digitum\Bookings\Admin\Menus;
 use Digitum\Bookings\Admin\MetaBoxes\BookingSettingsBox;
 use Digitum\Bookings\Admin\Screens\SettingsScreen;
+use Digitum\Bookings\Admin\Screens\ZonesScreen;
+use Digitum\Bookings\Services\Holds;
+use Digitum\Bookings\Services\QuoteService;
 use Digitum\Bookings\Database\Migrator;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Roles\Capabilities;
@@ -83,6 +86,13 @@ final class Plugin {
 	}
 
 	/**
+	 * Price service (every visible price goes through it).
+	 */
+	public function quotes(): QuoteService {
+		return new QuoteService( $this->settings );
+	}
+
+	/**
 	 * Register hooks (runs on plugins_loaded).
 	 */
 	public function boot(): void {
@@ -96,11 +106,13 @@ final class Plugin {
 		add_action( 'wp_initialize_site', array( Activator::class, 'on_new_site' ), 20 );
 
 		$this->product_type->register_hooks();
+		( new Holds( $this->settings ) )->register_hooks();
 
 		if ( is_admin() ) {
 			( new Menus( $this->settings, $this->product_type ) )->register_hooks();
 			( new SettingsScreen( $this->settings ) )->register_hooks();
-			( new BookingSettingsBox( $this->product_type ) )->register_hooks();
+			( new ZonesScreen() )->register_hooks();
+			( new BookingSettingsBox( $this->product_type, $this->quotes() ) )->register_hooks();
 		}
 	}
 
@@ -115,10 +127,11 @@ final class Plugin {
 	 * Run migrations and refresh roles after the plugin files were updated.
 	 */
 	public function maybe_upgrade(): void {
-		if ( DGB_VERSION === get_option( 'dgb_version' ) ) {
+		$migrator = new Migrator();
+		if ( DGB_VERSION === get_option( 'dgb_version' ) && $migrator->current() === $migrator->latest() ) {
 			return;
 		}
-		( new Migrator() )->migrate();
+		$migrator->migrate();
 		Capabilities::maybe_upgrade();
 		update_option( 'dgb_version', DGB_VERSION, true );
 	}

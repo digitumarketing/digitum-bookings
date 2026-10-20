@@ -18,6 +18,6 @@ final class Deactivator {
 	 * Deactivation hook.
 	 */
 	public static function deactivate(): void {
-		// Scheduled jobs are unscheduled here once they exist (M2: hold expiry).
+		Services\Holds::unschedule();
 	}
 }
