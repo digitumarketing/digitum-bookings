@@ -1,0 +1,50 @@
+{
+  "name": "digitum/digitum-bookings",
+  "description": "Tour and activity booking plugin for WordPress by Digitum Marketing Ltd.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Digitum Marketing Ltd",
+      "homepage": "https://digitum.marketing/"
+    }
+  ],
+  "require": {
+    "php": ">=8.1"
+  },
+  "require-dev": {
+    "brain/monkey": "^2.6",
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "phpcompatibility/phpcompatibility-wp": "^2.1",
+    "phpunit/phpunit": "^10.5",
+    "squizlabs/php_codesniffer": "^3.10",
+    "wp-coding-standards/wpcs": "^3.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Digitum\\Bookings\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Digitum\\Bookings\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    },
+    "optimize-autoloader": true,
+    "platform": {
+      "php": "8.1.0"
+    },
+    "sort-packages": true
+  },
+  "scripts": {
+    "lint": "phpcs",
+    "lint:fix": "phpcbf",
+    "test": "phpunit",
+    "test:integration": "php tests/Integration/run.php",
+    "build": "bash bin/build-zip.sh"
+  }
+}

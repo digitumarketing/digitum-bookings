@@ -1,0 +1,14 @@
+{
+  "name": "digitum-bookings",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Front-end and admin assets for the Digitum Bookings WordPress plugin.",
+  "license": "GPL-2.0-or-later",
+  "scripts": {
+    "build": "esbuild assets/src/admin/meta-box.js assets/src/admin/admin.css --bundle --minify --target=es2019 --outdir=assets/build",
+    "watch": "npm run build -- --watch"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.2"
+  }
+}
