@@ -90,7 +90,7 @@ final class Menus {
 		if ( ! in_array( $page, array( self::SLUG, SettingsScreen::SLUG, ZonesScreen::SLUG ), true ) ) {
 			return;
 		}
-		wp_enqueue_style( 'dgb-admin', DGB_PLUGIN_URL . 'assets/build/admin.css', array(), DGB_VERSION );
+		wp_enqueue_style( 'dgb-admin', DGB_PLUGIN_URL . 'assets/build/admin/admin.css', array(), DGB_VERSION );
 	}
 
 	/**

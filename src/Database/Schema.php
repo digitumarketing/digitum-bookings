@@ -126,6 +126,7 @@ final class Schema {
 			'bookings'           => array(
 				$id,
 				'reference varchar(20) NOT NULL',
+				"access_key varchar(32) NOT NULL DEFAULT ''",
 				"status varchar(30) NOT NULL DEFAULT 'pending_payment'",
 				"customer_name varchar(191) NOT NULL DEFAULT ''",
 				"customer_email varchar(191) NOT NULL DEFAULT ''",

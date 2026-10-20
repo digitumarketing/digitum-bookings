@@ -235,6 +235,7 @@ final class SettingsScreen {
 					'email' => 'email',
 					'tel'   => 'tel',
 					'color' => 'color',
+					'url'   => 'url',
 				)[ $type ] ?? 'text';
 				printf(
 					'<input type="%1$s" id="%2$s" name="%3$s" value="%4$s" class="%5$s">',

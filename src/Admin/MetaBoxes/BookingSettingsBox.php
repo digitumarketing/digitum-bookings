@@ -95,8 +95,8 @@ final class BookingSettingsBox {
 		if ( ! $screen || $screen->post_type !== $this->product_type->key() ) {
 			return;
 		}
-		wp_enqueue_style( 'dgb-admin', DGB_PLUGIN_URL . 'assets/build/admin.css', array(), DGB_VERSION );
-		wp_enqueue_script( 'dgb-meta-box', DGB_PLUGIN_URL . 'assets/build/meta-box.js', array(), DGB_VERSION, true );
+		wp_enqueue_style( 'dgb-admin', DGB_PLUGIN_URL . 'assets/build/admin/admin.css', array(), DGB_VERSION );
+		wp_enqueue_script( 'dgb-meta-box', DGB_PLUGIN_URL . 'assets/build/admin/meta-box.js', array(), DGB_VERSION, true );
 	}
 
 	/**

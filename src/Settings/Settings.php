@@ -30,11 +30,12 @@ final class Settings {
 	 */
 	public static function tabs(): array {
 		return array(
-			'general'  => __( 'General', 'digitum-bookings' ),
-			'currency' => __( 'Currency & VAT', 'digitum-bookings' ),
-			'payments' => __( 'Payments', 'digitum-bookings' ),
-			'privacy'  => __( 'Privacy', 'digitum-bookings' ),
-			'branding' => __( 'Branding', 'digitum-bookings' ),
+			'general'   => __( 'General', 'digitum-bookings' ),
+			'currency'  => __( 'Currency & VAT', 'digitum-bookings' ),
+			'payments'  => __( 'Payments', 'digitum-bookings' ),
+			'analytics' => __( 'Analytics', 'digitum-bookings' ),
+			'privacy'   => __( 'Privacy', 'digitum-bookings' ),
+			'branding'  => __( 'Branding', 'digitum-bookings' ),
 		);
 	}
 
@@ -48,7 +49,7 @@ final class Settings {
 	 */
 	public static function fields(): array {
 		return array(
-			'general'  => array(
+			'general'   => array(
 				'business_name'    => array(
 					'type'    => 'text',
 					'label'   => __( 'Business name', 'digitum-bookings' ),
@@ -124,8 +125,25 @@ final class Settings {
 					'step'    => 1,
 					'default' => 15,
 				),
+				'terms_url'        => array(
+					'type'    => 'url',
+					'label'   => __( 'Booking terms page', 'digitum-bookings' ),
+					'help'    => __( 'Link shown next to “I accept the booking terms”.', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'cancellation'     => array(
+					'type'    => 'textarea',
+					'label'   => __( 'Cancellation policy (short)', 'digitum-bookings' ),
+					'help'    => __( 'One or two sentences shown at payment and on the confirmation.', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'country_code'     => array(
+					'type'    => 'tel',
+					'label'   => __( 'Default phone country code', 'digitum-bookings' ),
+					'default' => '+971',
+				),
 			),
-			'currency' => array(
+			'currency'  => array(
 				'currency'     => array(
 					'type'    => 'select',
 					'label'   => __( 'Currency', 'digitum-bookings' ),
@@ -184,7 +202,19 @@ final class Settings {
 					'default' => array( '6', '7' ),
 				),
 			),
-			'payments' => array(
+			'payments'  => array(
+				'arrival_enabled'     => array(
+					'type'    => 'checkbox',
+					'label'   => __( 'Pay on arrival', 'digitum-bookings' ),
+					'text'    => __( 'Guests can book now and pay cash or card at the meeting point', 'digitum-bookings' ),
+					'default' => true,
+				),
+				'bank_enabled'        => array(
+					'type'    => 'checkbox',
+					'label'   => __( 'Bank transfer', 'digitum-bookings' ),
+					'text'    => __( 'Offer bank transfer (fill in the bank details below)', 'digitum-bookings' ),
+					'default' => false,
+				),
 				'deposit_enabled'     => array(
 					'type'    => 'checkbox',
 					'label'   => __( 'Deposits', 'digitum-bookings' ),
@@ -264,7 +294,42 @@ final class Settings {
 					'default' => 24,
 				),
 			),
-			'privacy'  => array(
+			'analytics' => array(
+				'datalayer'            => array(
+					'type'    => 'checkbox',
+					'label'   => __( 'dataLayer events', 'digitum-bookings' ),
+					'text'    => __( 'Push GA4 ecommerce events (view_item … purchase, generate_lead) to dataLayer for Google Tag Manager', 'digitum-bookings' ),
+					'help'    => __( 'No tags are fired directly; Google Tag Manager owns all tags.', 'digitum-bookings' ),
+					'default' => true,
+				),
+				'enhanced_conversions' => array(
+					'type'    => 'checkbox',
+					'label'   => __( 'Enhanced conversions', 'digitum-bookings' ),
+					'text'    => __( 'Add the guest’s hashed (SHA-256) email and phone to the purchase event', 'digitum-bookings' ),
+					'default' => true,
+				),
+				'attribution_days'     => array(
+					'type'    => 'number',
+					'label'   => __( 'Attribution cookie', 'digitum-bookings' ),
+					'suffix'  => __( 'days (UTM and gclid, first-party)', 'digitum-bookings' ),
+					'min'     => 1,
+					'max'     => 365,
+					'step'    => 1,
+					'default' => 90,
+				),
+				'turnstile_site_key'   => array(
+					'type'    => 'text',
+					'label'   => __( 'Cloudflare Turnstile site key', 'digitum-bookings' ),
+					'help'    => __( 'Optional bot check on booking and enquiry forms. A hidden honeypot field is always on.', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'turnstile_secret'     => array(
+					'type'    => 'text',
+					'label'   => __( 'Cloudflare Turnstile secret key', 'digitum-bookings' ),
+					'default' => '',
+				),
+			),
+			'privacy'   => array(
 				'delete_on_uninstall' => array(
 					'type'    => 'checkbox',
 					'label'   => __( 'On uninstall', 'digitum-bookings' ),
@@ -273,7 +338,7 @@ final class Settings {
 					'default' => false,
 				),
 			),
-			'branding' => array(
+			'branding'  => array(
 				'menu_label'   => array(
 					'type'    => 'text',
 					'label'   => __( 'Admin menu name', 'digitum-bookings' ),
@@ -448,6 +513,9 @@ final class Settings {
 
 			case 'tel':
 				return is_string( $value ) ? trim( (string) preg_replace( '/[^0-9+()\-\s]/', '', $value ) ) : '';
+
+			case 'url':
+				return is_string( $value ) ? esc_url_raw( trim( $value ), array( 'http', 'https' ) ) : '';
 
 			case 'textarea':
 				return is_string( $value ) ? sanitize_textarea_field( $value ) : '';
