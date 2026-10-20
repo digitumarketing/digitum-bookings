@@ -1,0 +1,48 @@
+name: Release
+
+# Push a tag like v0.1.0 to build digitum-bookings.zip and attach it to a GitHub release.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer:v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check the tag matches the plugin version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          HEADER=$(grep -m1 -E '^ \* Version:' digitum-bookings.php | awk '{print $3}')
+          CONSTANT=$(grep -m1 "define( 'DGB_VERSION'" digitum-bookings.php | sed -E "s/.*'([0-9][^']*)'.*/\1/")
+          STABLE=$(grep -m1 -E '^Stable tag:' readme.txt | awk '{print $3}')
+          echo "tag=$TAG header=$HEADER constant=$CONSTANT readme=$STABLE"
+          if [ "$TAG" != "$HEADER" ] || [ "$TAG" != "$CONSTANT" ] || [ "$TAG" != "$STABLE" ]; then
+            echo "::error::Tag v$TAG does not match the versions in digitum-bookings.php and readme.txt"
+            exit 1
+          fi
+
+      - name: Build zip
+        run: bash bin/build-zip.sh
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" build/digitum-bookings.zip \
+            --title "Digitum Bookings $GITHUB_REF_NAME" \
+            --notes "Download **digitum-bookings.zip** below and upload it in WordPress under Plugins › Add New › Upload Plugin. Changes: see docs/CHANGELOG.md." \
+            --verify-tag

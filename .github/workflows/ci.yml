@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, intl, pdo_sqlite
+          tools: composer:v2
+
+      - run: composer install --no-interaction --no-progress
+
+      - name: Coding standards
+        run: composer lint
+
+      - name: Unit tests
+        run: composer test
+
+  integration:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        wordpress: ['6.5.5', '7.1.3']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, intl, pdo_sqlite
+          tools: composer:v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: composer install --no-interaction --no-progress
+      - run: npm install --no-audit --no-fund && npm run build
+
+      - name: Download WordPress and the SQLite driver
+        run: |
+          git clone --quiet --depth 1 --branch ${{ matrix.wordpress }} https://github.com/WordPress/WordPress.git .wp-test/wordpress
+          git clone --quiet --depth 1 --branch v2.1.16 https://github.com/WordPress/sqlite-database-integration.git .wp-test/sqlite
+
+      - name: Activation tests
+        run: composer test:integration
+        env:
+          DGB_WP_DIR: .wp-test/wordpress
+          DGB_SQLITE_DIR: .wp-test/sqlite
