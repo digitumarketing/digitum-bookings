@@ -1,0 +1,910 @@
+# Copyright (C) 2026 Digitum Marketing Ltd
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Digitum Bookings 0.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/digitumarketing/digitum-bookings/issues\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-10-20T12:42:02+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: digitum-bookings\n"
+
+#. Plugin Name of the plugin
+#: digitum-bookings.php:3
+msgid "Digitum Bookings"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: digitum-bookings.php:4
+msgid "https://github.com/digitumarketing/digitum-bookings"
+msgstr ""
+
+#. Description of the plugin
+#: digitum-bookings.php:5
+msgid "Tour and activity bookings with live pricing, optional deposits, bank transfer and email notifications."
+msgstr ""
+
+#. Author of the plugin
+#: digitum-bookings.php:9
+msgid "Digitum Marketing Ltd"
+msgstr ""
+
+#. Author URI of the plugin
+#: digitum-bookings.php:10
+msgid "https://digitum.marketing/"
+msgstr ""
+
+#. translators: 1: required PHP version, 2: current PHP version.
+#: digitum-bookings.php:38
+#, php-format
+msgid "Digitum Bookings needs PHP %1$s or newer. This site runs PHP %2$s."
+msgstr ""
+
+#: src/Admin/Menus.php:77
+#: src/Admin/Screens/DashboardScreen.php:84
+msgid "Dashboard"
+msgstr ""
+
+#: src/Admin/Menus.php:78
+#: src/PostTypes/ProductType.php:98
+#: src/PostTypes/ProductType.php:109
+msgid "Tours"
+msgstr ""
+
+#: src/Admin/Menus.php:79
+#: src/Admin/Screens/SettingsScreen.php:121
+msgid "Settings"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:59
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:119
+msgid "Booking settings"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:91
+msgid "Pricing"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:92
+msgid "Options"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:93
+msgid "Sessions"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:94
+msgid "Add-ons"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:95
+msgid "Pickup & location"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:96
+msgid "Rules"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:97
+msgid "Schema & SEO"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:114
+msgid "Take bookings for this tour"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:116
+msgid "The booking widget only shows on tours with this switched on."
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:143
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:424
+msgid "Per person"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:143
+msgid "Option price × adults + child price × children."
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:144
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:425
+msgid "Per vehicle"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:144
+msgid "Option price × vehicles. Guests are checked against the seats."
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:145
+msgid "Per group / car"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:145
+msgid "Price per car up to the maximum guests; extra cars are added automatically."
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:146
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:426
+msgid "On request"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:146
+msgid "No price is shown. The guest sends a quote request."
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:150
+msgid "Pricing mode"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:162
+msgid "Seats per vehicle"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:166
+msgid "Maximum guests per car"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:170
+msgid "VAT"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:175
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:190
+msgid "Site setting"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:176
+msgid "Prices include VAT"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:177
+msgid "Prices exclude VAT"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:185
+msgid "Deposit"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:191
+msgid "No deposit for this tour"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:192
+msgid "Custom percentage"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:198
+msgid "Only offered when deposits are on in Settings › Payments."
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:201
+msgid "Custom deposit"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:205
+msgid "Weekend uplift"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:212
+msgid "Enquiry only: show “Request a quote” instead of taking payment"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:225
+msgid "Each option is a duration or seat variant. “Compare-at” only shows while the promotion dates are running."
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:229
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:251
+msgid "Label"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:230
+msgid "Duration (min)"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:231
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:258
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:386
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:411
+msgid "Price"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:232
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:269
+msgid "Child price"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:233
+msgid "Compare-at"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:234
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:286
+msgid "Promotion from"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:235
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:287
+msgid "Promotion to"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:236
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:288
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:311
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:372
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:390
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:440
+msgid "Active"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:240
+msgid "Add option"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:251
+msgid "e.g. 1 hour"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:252
+msgid "Duration in minutes"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:280
+msgid "Compare-at price"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:298
+msgid "The pickup time guests see comes from the session they book, not from the tour."
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:302
+msgid "Name"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:303
+msgid "Type"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:304
+msgid "Start"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:305
+msgid "End"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:306
+msgid "Pickup from"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:307
+msgid "Pickup to"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:308
+msgid "Days"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:309
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:370
+msgid "Season from"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:310
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:371
+msgid "Season to"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:315
+msgid "Add session"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:326
+msgid "Session name"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:326
+msgid "e.g. Evening"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:331
+msgid "Session type"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:333
+msgid "Morning"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:334
+msgid "Evening"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:335
+msgid "Overnight"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:336
+msgid "Fixed slot"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:343
+msgid "Start time"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:344
+msgid "End time"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:345
+msgid "Pickup window from"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:346
+msgid "Pickup window to"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:350
+msgid "Mon"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:351
+msgid "Tue"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:352
+msgid "Wed"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:353
+msgid "Thu"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:354
+msgid "Fri"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:355
+msgid "Sat"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:356
+msgid "Sun"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:358
+msgid "Days of the week"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:385
+msgid "Add-on"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:387
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:421
+msgid "Charged"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:388
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:433
+msgid "Shows when"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:389
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:439
+msgid "Required"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:394
+msgid "Add add-on"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:405
+msgid "Add-on name"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:405
+msgid "e.g. Hotel pickup"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:423
+msgid "Per booking"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:435
+msgid "Always"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:436
+msgid "Guest chooses hotel pickup"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:449
+msgid "— None —"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:456
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:477
+msgid "Hotel pickup"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:461
+msgid "Included in the price"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:462
+msgid "Guest may add it (set the price under Add-ons)"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:463
+msgid "Not offered"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:471
+msgid "Preselected choice"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:476
+msgid "Meet at the meeting point"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:485
+msgid "Meeting point"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:490
+msgid "No meeting points yet. They are added under Digitum Bookings › Pickup zones."
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:504
+msgid "Same-day cut-off"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:504
+msgid "hours before the session"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:505
+msgid "Minimum notice"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:505
+#: src/Settings/Settings.php:244
+msgid "hours"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:506
+msgid "Book up to"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:506
+msgid "days ahead"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:507
+msgid "Minimum age"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:507
+msgid "years (0 = no limit)"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:522
+msgid "The driver must show a driving licence"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:527
+msgid "Included (one per line)"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:528
+msgid "Not included (one per line)"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:529
+msgid "Requirements (one per line)"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:551
+msgid "Schema type"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:563
+msgid "Price in structured data always matches the price shown on the page."
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:587
+msgid "Row actions"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:621
+msgid "Move up"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:622
+msgid "Move down"
+msgstr ""
+
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:623
+msgid "Remove"
+msgstr ""
+
+#. translators: %s: post type name, e.g. st_tours.
+#: src/Admin/Screens/DashboardScreen.php:58
+#, php-format
+msgid "Using the existing post type “%s”. Tour URLs are unchanged."
+msgstr ""
+
+#. translators: %s: URL slug.
+#: src/Admin/Screens/DashboardScreen.php:60
+#, php-format
+msgid "Using the Digitum Bookings Tours post type at /%s/."
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:65
+msgid "Add business name, phone and email"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:71
+msgid "Create or import your tours"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:77
+msgid "Fill in “Booking settings” on each tour and switch on “Take bookings”"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:87
+msgid "Set up"
+msgstr ""
+
+#. translators: 1: number of tours taking bookings, 2: number of published tours.
+#: src/Admin/Screens/DashboardScreen.php:93
+#, php-format
+msgid "%1$d of %2$d published tours take bookings."
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:102
+msgid "Done"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:102
+msgid "To do"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:112
+msgid "The tour post type is not registered. Check Settings › General."
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:116
+msgid "About Digitum"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:117
+msgid "Digitum Bookings is built and supported by Digitum Marketing Ltd."
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:118
+msgid "digitum.marketing"
+msgstr ""
+
+#. translators: %s: plugin version.
+#: src/Admin/Screens/DashboardScreen.php:122
+#, php-format
+msgid "Version %s"
+msgstr ""
+
+#: src/Admin/Screens/SettingsScreen.php:90
+msgid "Choose the existing post type to attach to. Tours keep using the Digitum Bookings post type until you do."
+msgstr ""
+
+#: src/Admin/Screens/SettingsScreen.php:109
+msgid "You do not have permission to change these settings."
+msgstr ""
+
+#: src/Admin/Screens/SettingsScreen.php:123
+msgid "Settings sections"
+msgstr ""
+
+#: src/PostTypes/ProductType.php:99
+msgid "Tour"
+msgstr ""
+
+#: src/PostTypes/ProductType.php:100
+msgid "Add New"
+msgstr ""
+
+#: src/PostTypes/ProductType.php:101
+msgid "Add New Tour"
+msgstr ""
+
+#: src/PostTypes/ProductType.php:102
+msgid "Edit Tour"
+msgstr ""
+
+#: src/PostTypes/ProductType.php:103
+msgid "New Tour"
+msgstr ""
+
+#: src/PostTypes/ProductType.php:104
+msgid "View Tour"
+msgstr ""
+
+#: src/PostTypes/ProductType.php:105
+msgid "Search Tours"
+msgstr ""
+
+#: src/PostTypes/ProductType.php:106
+msgid "No tours found."
+msgstr ""
+
+#: src/PostTypes/ProductType.php:107
+msgid "No tours found in Trash."
+msgstr ""
+
+#: src/PostTypes/ProductType.php:108
+msgid "All Tours"
+msgstr ""
+
+#: src/Roles/Capabilities.php:73
+msgid "Booking manager"
+msgstr ""
+
+#: src/Roles/Capabilities.php:77
+msgid "Tour guide"
+msgstr ""
+
+#: src/Settings/Settings.php:33
+msgid "General"
+msgstr ""
+
+#: src/Settings/Settings.php:34
+msgid "Currency & VAT"
+msgstr ""
+
+#: src/Settings/Settings.php:35
+msgid "Payments"
+msgstr ""
+
+#: src/Settings/Settings.php:36
+msgid "Privacy"
+msgstr ""
+
+#: src/Settings/Settings.php:37
+msgid "Branding"
+msgstr ""
+
+#: src/Settings/Settings.php:54
+msgid "Business name"
+msgstr ""
+
+#: src/Settings/Settings.php:59
+msgid "Phone"
+msgstr ""
+
+#: src/Settings/Settings.php:64
+msgid "Email"
+msgstr ""
+
+#: src/Settings/Settings.php:69
+msgid "Address"
+msgstr ""
+
+#: src/Settings/Settings.php:70
+msgid "Used in emails, schema and llms.txt."
+msgstr ""
+
+#: src/Settings/Settings.php:75
+msgid "Tours come from"
+msgstr ""
+
+#: src/Settings/Settings.php:77
+msgid "Digitum Bookings “Tours” post type"
+msgstr ""
+
+#: src/Settings/Settings.php:78
+msgid "An existing post type on this site"
+msgstr ""
+
+#: src/Settings/Settings.php:81
+msgid "Attach to an existing post type to keep its URLs. Changing this refreshes permalinks once."
+msgstr ""
+
+#: src/Settings/Settings.php:85
+msgid "Existing post type"
+msgstr ""
+
+#: src/Settings/Settings.php:88
+msgid "Used when “Tours come from” is set to an existing post type. If that post type later disappears (for example the theme is removed), Digitum Bookings registers it with the same name and URL slug."
+msgstr ""
+
+#: src/Settings/Settings.php:96
+msgid "Post type name"
+msgstr ""
+
+#: src/Settings/Settings.php:98
+msgid "Internal name, 20 characters at most. Only change this on a new site."
+msgstr ""
+
+#: src/Settings/Settings.php:102
+msgid "URL slug"
+msgstr ""
+
+#: src/Settings/Settings.php:104
+msgid "Tours appear at /slug/tour-name/."
+msgstr ""
+
+#: src/Settings/Settings.php:108
+msgid "Booking widget"
+msgstr ""
+
+#: src/Settings/Settings.php:109
+msgid "Add the booking widget to single tour pages automatically"
+msgstr ""
+
+#: src/Settings/Settings.php:114
+msgid "Mobile sticky bar"
+msgstr ""
+
+#: src/Settings/Settings.php:115
+msgid "Show price and Book button at the bottom of the screen on phones"
+msgstr ""
+
+#: src/Settings/Settings.php:120
+msgid "Unpaid hold (card, PayPal)"
+msgstr ""
+
+#: src/Settings/Settings.php:121
+msgid "minutes"
+msgstr ""
+
+#: src/Settings/Settings.php:131
+msgid "Currency"
+msgstr ""
+
+#: src/Settings/Settings.php:149
+msgid "Prices are entered"
+msgstr ""
+
+#: src/Settings/Settings.php:151
+msgid "Including VAT"
+msgstr ""
+
+#: src/Settings/Settings.php:152
+msgid "Excluding VAT"
+msgstr ""
+
+#: src/Settings/Settings.php:158
+msgid "VAT rate"
+msgstr ""
+
+#: src/Settings/Settings.php:167
+msgid "Tax registration number (TRN)"
+msgstr ""
+
+#: src/Settings/Settings.php:168
+msgid "Shown on receipts."
+msgstr ""
+
+#: src/Settings/Settings.php:175
+msgid "Deposits"
+msgstr ""
+
+#: src/Settings/Settings.php:176
+msgid "Let guests pay part now and the rest on arrival"
+msgstr ""
+
+#: src/Settings/Settings.php:177
+msgid "When this is off, guests always pay the full amount or choose pay on arrival. Each tour can turn deposits off or use its own percentage."
+msgstr ""
+
+#: src/Settings/Settings.php:182
+msgid "Deposit percentage"
+msgstr ""
+
+#: src/Settings/Settings.php:191
+msgid "Deposit allowed with"
+msgstr ""
+
+#: src/Settings/Settings.php:193
+msgid "Stripe"
+msgstr ""
+
+#: src/Settings/Settings.php:194
+msgid "PayPal"
+msgstr ""
+
+#: src/Settings/Settings.php:195
+msgid "Bank transfer"
+msgstr ""
+
+#: src/Settings/Settings.php:201
+msgid "Bank transfer: account name"
+msgstr ""
+
+#: src/Settings/Settings.php:206
+msgid "Bank name"
+msgstr ""
+
+#: src/Settings/Settings.php:211
+msgid "IBAN"
+msgstr ""
+
+#: src/Settings/Settings.php:216
+msgid "Account number"
+msgstr ""
+
+#: src/Settings/Settings.php:221
+msgid "SWIFT / BIC"
+msgstr ""
+
+#: src/Settings/Settings.php:226
+msgid "Instructions for the guest"
+msgstr ""
+
+#: src/Settings/Settings.php:227
+msgid "Use your booking reference as the payment reference. After paying, upload a screenshot of the transfer on the booking page. We confirm your booking by email once the payment is checked."
+msgstr ""
+
+#: src/Settings/Settings.php:231
+msgid "Screenshot upload"
+msgstr ""
+
+#: src/Settings/Settings.php:232
+msgid "Let guests upload the transfer screenshot on the booking page or from the email link"
+msgstr ""
+
+#: src/Settings/Settings.php:237
+msgid "WhatsApp number (other way to send it)"
+msgstr ""
+
+#: src/Settings/Settings.php:238
+msgid "Shown as a small link under the upload box. Leave empty to hide."
+msgstr ""
+
+#: src/Settings/Settings.php:243
+msgid "Hold bank transfer bookings for"
+msgstr ""
+
+#: src/Settings/Settings.php:245
+msgid "If the booking is not marked as paid by then, it is cancelled and both sides get an email."
+msgstr ""
+
+#: src/Settings/Settings.php:255
+msgid "On uninstall"
+msgstr ""
+
+#: src/Settings/Settings.php:256
+msgid "Delete all booking tables and settings when the plugin is deleted"
+msgstr ""
+
+#: src/Settings/Settings.php:257
+msgid "Off keeps your data. Guest data is never deleted automatically; erase it from a booking when needed."
+msgstr ""
+
+#: src/Settings/Settings.php:264
+msgid "Admin menu name"
+msgstr ""
+
+#: src/Settings/Settings.php:265
+msgid "Rename the menu for a client (white label)."
+msgstr ""
+
+#: src/Settings/Settings.php:270
+msgid "Front-end credit"
+msgstr ""
+
+#: src/Settings/Settings.php:271
+msgid "Show “Booking by Digitum” under the booking widget"
+msgstr ""
+
+#: src/Settings/Settings.php:276
+msgid "Widget accent colour"
+msgstr ""
+
+#: src/Settings/Settings.php:304
+msgid "— Choose —"
+msgstr ""
