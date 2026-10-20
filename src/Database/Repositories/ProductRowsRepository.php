@@ -24,7 +24,7 @@ abstract class ProductRowsRepository {
 	/**
 	 * Editable columns (id, product_id and sort are handled here).
 	 *
-	 * Each column: `type` (string, int, money, time, date, datetime, bool, enum, days),
+	 * Each column: `type` (string, int, money, percent, time, date, datetime, bool, enum, days),
 	 * plus `max`, `options`, `default`, `required` where they apply.
 	 *
 	 * @return array<string, array<string, mixed>>
@@ -159,6 +159,12 @@ abstract class ProductRowsRepository {
 					return null;
 				}
 				return sprintf( '%s-%s-%s %s:%s:00', $m[1], $m[2], $m[3], $m[4] ?? '00', $m[5] ?? '00' );
+
+			case 'percent':
+				if ( ! is_numeric( $value ) ) {
+					return null;
+				}
+				return round( max( -100.0, min( 1000.0, (float) $value ) ), 2 );
 
 			case 'enum':
 				return is_scalar( $value ) && in_array( (string) $value, $column['options'], true ) ? (string) $value : $column['default'];

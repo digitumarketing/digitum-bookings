@@ -126,7 +126,7 @@ final class Settings {
 				),
 			),
 			'currency' => array(
-				'currency' => array(
+				'currency'     => array(
 					'type'    => 'select',
 					'label'   => __( 'Currency', 'digitum-bookings' ),
 					'options' => array(
@@ -144,7 +144,7 @@ final class Settings {
 					),
 					'default' => 'AED',
 				),
-				'vat_mode' => array(
+				'vat_mode'     => array(
 					'type'    => 'select',
 					'label'   => __( 'Prices are entered', 'digitum-bookings' ),
 					'options' => array(
@@ -153,7 +153,7 @@ final class Settings {
 					),
 					'default' => 'inclusive',
 				),
-				'vat_rate' => array(
+				'vat_rate'     => array(
 					'type'    => 'number',
 					'label'   => __( 'VAT rate', 'digitum-bookings' ),
 					'suffix'  => '%',
@@ -162,11 +162,26 @@ final class Settings {
 					'step'    => 0.01,
 					'default' => 5,
 				),
-				'trn'      => array(
+				'trn'          => array(
 					'type'    => 'text',
 					'label'   => __( 'Tax registration number (TRN)', 'digitum-bookings' ),
 					'help'    => __( 'Shown on receipts.', 'digitum-bookings' ),
 					'default' => '',
+				),
+				'weekend_days' => array(
+					'type'    => 'multicheck',
+					'label'   => __( 'Weekend days', 'digitum-bookings' ),
+					'help'    => __( 'A tour’s weekend uplift applies on these days.', 'digitum-bookings' ),
+					'options' => array(
+						'1' => __( 'Monday', 'digitum-bookings' ),
+						'2' => __( 'Tuesday', 'digitum-bookings' ),
+						'3' => __( 'Wednesday', 'digitum-bookings' ),
+						'4' => __( 'Thursday', 'digitum-bookings' ),
+						'5' => __( 'Friday', 'digitum-bookings' ),
+						'6' => __( 'Saturday', 'digitum-bookings' ),
+						'7' => __( 'Sunday', 'digitum-bookings' ),
+					),
+					'default' => array( '6', '7' ),
 				),
 			),
 			'payments' => array(
@@ -406,7 +421,7 @@ final class Settings {
 				return ! empty( $value );
 
 			case 'multicheck':
-				$allowed = array_keys( self::resolve_options( $field ) );
+				$allowed = array_map( 'strval', array_keys( self::resolve_options( $field ) ) );
 				$value   = is_array( $value ) ? array_map( 'strval', $value ) : array();
 				return array_values( array_intersect( $allowed, $value ) );
 

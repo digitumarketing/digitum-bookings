@@ -9,10 +9,12 @@ namespace Digitum\Bookings\Admin\MetaBoxes;
 
 use Digitum\Bookings\Database\Repositories\AddonRepository;
 use Digitum\Bookings\Database\Repositories\LocationRepository;
+use Digitum\Bookings\Database\Repositories\OverrideRepository;
 use Digitum\Bookings\Database\Repositories\SessionRepository;
 use Digitum\Bookings\Database\Repositories\VariantRepository;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\PostTypes\ProductType;
+use Digitum\Bookings\Services\QuoteService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -32,12 +34,28 @@ final class BookingSettingsBox {
 	private ProductType $product_type;
 
 	/**
+	 * Price service.
+	 *
+	 * @var QuoteService
+	 */
+	private QuoteService $quotes;
+
+	/**
+	 * Session choices for the closures table of the tour being rendered.
+	 *
+	 * @var array<string, string>
+	 */
+	private array $session_options = array();
+
+	/**
 	 * Constructor.
 	 *
-	 * @param ProductType $product_type Tour post type resolver.
+	 * @param ProductType  $product_type Tour post type resolver.
+	 * @param QuoteService $quotes       Price service.
 	 */
-	public function __construct( ProductType $product_type ) {
+	public function __construct( ProductType $product_type, QuoteService $quotes ) {
 		$this->product_type = $product_type;
+		$this->quotes       = $quotes;
 	}
 
 	/**
@@ -211,6 +229,21 @@ final class BookingSettingsBox {
 				<input type="checkbox" name="dgb[product][enquiry_only]" value="1" <?php checked( $product->get( 'enquiry_only' ) ); ?>>
 				<?php esc_html_e( 'Enquiry only: show “Request a quote” instead of taking payment', 'digitum-bookings' ); ?>
 			</label>
+		</p>
+		<?php
+		$from     = $this->quotes->from_price( $product->id() );
+		$currency = (string) $this->quotes->config( $product )->currency;
+		?>
+		<p class="dgb-display-price">
+			<?php
+			if ( null === $from ) {
+				esc_html_e( 'Shown to guests as: Price on request', 'digitum-bookings' );
+			} else {
+				/* translators: 1: currency code, 2: lowest option price. */
+				echo esc_html( sprintf( __( 'Shown to guests as: From %1$s %2$s', 'digitum-bookings' ), $currency, number_format_i18n( (float) $from, 2 ) ) );
+			}
+			?>
+			<span class="description"><?php esc_html_e( 'Lowest active option. The page, schema and llms.txt use the same value.', 'digitum-bookings' ); ?></span>
 		</p>
 		<?php
 	}
@@ -538,6 +571,62 @@ final class BookingSettingsBox {
 			);
 		}
 		echo '</div>';
+
+		$this->session_options = array( '' => __( 'All sessions', 'digitum-bookings' ) );
+		foreach ( ( new SessionRepository() )->for_product( $product->id() ) as $session ) {
+			$this->session_options[ (string) $session['id'] ] = (string) $session['name'];
+		}
+		echo '<h3 class="dgb-subhead">' . esc_html__( 'Closed dates and price changes', 'digitum-bookings' ) . '</h3>';
+		echo '<p class="description">' . esc_html__( 'Close a date range (for example a holiday or when you are fully booked), or change prices for it by a percentage. Newly added sessions appear here after saving.', 'digitum-bookings' ) . '</p>';
+		$this->repeater(
+			'overrides',
+			array(
+				'date_from'      => __( 'From', 'digitum-bookings' ),
+				'date_to'        => __( 'To', 'digitum-bookings' ),
+				'session_id'     => __( 'Session', 'digitum-bookings' ),
+				'rule'           => __( 'Rule', 'digitum-bookings' ),
+				'adjust_percent' => __( 'Price change %', 'digitum-bookings' ),
+				'note'           => __( 'Note (staff only)', 'digitum-bookings' ),
+			),
+			( new OverrideRepository() )->for_product( $product->id() ),
+			array( $this, 'override_cells' ),
+			__( 'Add closed dates or price change', 'digitum-bookings' )
+		);
+	}
+
+	/**
+	 * Cells of one closure / price change row.
+	 *
+	 * @param string               $name Field name prefix.
+	 * @param array<string, mixed> $row  Row values.
+	 */
+	public function override_cells( string $name, array $row ): void {
+		$this->cell_input( $name, 'date_from', $row, 'date', __( 'From date', 'digitum-bookings' ) );
+		$this->cell_input( $name, 'date_to', $row, 'date', __( 'To date', 'digitum-bookings' ) );
+		$this->cell_select( $name, 'session_id', $row, __( 'Session', 'digitum-bookings' ), $this->session_options );
+		$this->cell_select(
+			$name,
+			'rule',
+			$row,
+			__( 'Rule', 'digitum-bookings' ),
+			array(
+				'closed' => __( 'Closed', 'digitum-bookings' ),
+				'adjust' => __( 'Price change', 'digitum-bookings' ),
+			)
+		);
+		$this->cell_input(
+			$name,
+			'adjust_percent',
+			$row,
+			'number',
+			__( 'Price change in percent, e.g. 20 or -10', 'digitum-bookings' ),
+			array(
+				'step' => '0.01',
+				'min'  => '-100',
+				'max'  => '1000',
+			)
+		);
+		$this->cell_input( $name, 'note', $row, 'text', __( 'Note', 'digitum-bookings' ) );
 	}
 
 	/**
@@ -723,6 +812,7 @@ final class BookingSettingsBox {
 		( new VariantRepository() )->sync( $post_id, $this->rows( $input, 'variants' ) );
 		( new SessionRepository() )->sync( $post_id, $this->rows( $input, 'sessions' ) );
 		( new AddonRepository() )->sync( $post_id, $this->rows( $input, 'addons' ) );
+		( new OverrideRepository() )->sync( $post_id, $this->rows( $input, 'overrides' ) );
 	}
 
 	/**
@@ -739,7 +829,7 @@ final class BookingSettingsBox {
 	}
 
 	/**
-	 * Remove a tour's options, sessions and add-ons when the post is deleted for good.
+	 * Remove a tour's options, sessions, add-ons and closures when the post is deleted for good.
 	 *
 	 * @param int $post_id Post ID.
 	 */
@@ -750,5 +840,6 @@ final class BookingSettingsBox {
 		( new VariantRepository() )->delete_for_product( $post_id );
 		( new SessionRepository() )->delete_for_product( $post_id );
 		( new AddonRepository() )->delete_for_product( $post_id );
+		( new OverrideRepository() )->delete_for_product( $post_id );
 	}
 }
