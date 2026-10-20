@@ -67,3 +67,39 @@ jobs:
         env:
           DGB_WP_DIR: .wp-test/wordpress
           DGB_SQLITE_DIR: .wp-test/sqlite
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, intl, pdo_sqlite
+          tools: composer:v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: composer install --no-interaction --no-progress --no-dev
+      - run: npm install --no-audit --no-fund && npm run build
+      - run: npx playwright install --with-deps chromium
+
+      - name: Download WordPress and the SQLite driver
+        run: |
+          git clone --quiet --depth 1 --branch 6.5.5 https://github.com/WordPress/WordPress.git .wp-test/wordpress
+          git clone --quiet --depth 1 --branch v2.1.16 https://github.com/WordPress/sqlite-database-integration.git .wp-test/sqlite
+
+      - name: Browser tests (desktop and phone, axe)
+        run: npm run test:e2e
+        env:
+          DGB_WP_DIR: .wp-test/wordpress
+          DGB_SQLITE_DIR: .wp-test/sqlite
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: test-results/
