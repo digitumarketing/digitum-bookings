@@ -27,10 +27,13 @@ function dgb_uninstall_site(): void {
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off cleanup of our own meta keys.
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE %s", $wpdb->esc_like( '_dgb_' ) . '%' ) );
 
-	foreach ( array( 'dgb_settings', 'dgb_db_version', 'dgb_version', 'dgb_flush_rewrite', 'dgb_roles_version' ) as $option ) {
+	foreach ( array( 'dgb_settings', 'dgb_db_version', 'dgb_version', 'dgb_flush_rewrite', 'dgb_roles_version', 'dgb_emails', 'dgb_summary_schedule' ) as $option ) {
 		delete_option( $option );
 	}
 	\Digitum\Bookings\Roles\Capabilities::uninstall();
+	if ( function_exists( 'as_unschedule_all_actions' ) ) {
+		as_unschedule_all_actions( '', array(), 'digitum-bookings' );
+	}
 
 	// Payment screenshots (private folder, see ProofService::dir()).
 	$dir = \Digitum\Bookings\Services\ProofService::dir();

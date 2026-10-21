@@ -19,5 +19,6 @@ final class Deactivator {
 	 */
 	public static function deactivate(): void {
 		Services\Holds::unschedule();
+		Services\Notifications\Scheduler::unschedule_all();
 	}
 }

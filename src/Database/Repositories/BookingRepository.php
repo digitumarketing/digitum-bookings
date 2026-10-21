@@ -228,6 +228,112 @@ final class BookingRepository {
 	}
 
 	/**
+	 * Search bookings for the admin list and CSV export (each row carries its first item's tour and date).
+	 *
+	 * @param array<string, mixed> $args status, product, date_from, date_to, source, payment_method, search,
+	 *                                   orderby (created_at, date, reference, total), order, per_page (0 = all), page.
+	 * @return array{rows: array<int, array<string, mixed>>, total: int}
+	 */
+	public function search( array $args ): array {
+		$bookings = $this->table( 'bookings' );
+		$items    = $this->table( 'booking_items' );
+		$where    = array( '1=1' );
+		$params   = array();
+
+		foreach ( array( 'status', 'source', 'payment_method' ) as $field ) {
+			if ( ! empty( $args[ $field ] ) ) {
+				$where[]  = "b.{$field} = %s";
+				$params[] = (string) $args[ $field ];
+			}
+		}
+		if ( ! empty( $args['product'] ) ) {
+			$where[]  = 'i.product_id = %d';
+			$params[] = (int) $args['product'];
+		}
+		if ( ! empty( $args['date_from'] ) ) {
+			$where[]  = 'i.date >= %s';
+			$params[] = (string) $args['date_from'];
+		}
+		if ( ! empty( $args['date_to'] ) ) {
+			$where[]  = 'i.date <= %s';
+			$params[] = (string) $args['date_to'];
+		}
+		if ( isset( $args['search'] ) && '' !== trim( (string) $args['search'] ) ) {
+			$like    = '%' . $this->db->esc_like( trim( (string) $args['search'] ) ) . '%';
+			$where[] = '(b.reference LIKE %s OR b.customer_name LIKE %s OR b.customer_email LIKE %s OR b.customer_phone LIKE %s)';
+			$params  = array_merge( $params, array( $like, $like, $like, $like ) );
+		}
+
+		$orderby  = array(
+			'created_at' => 'b.id',
+			'date'       => 'i.date',
+			'reference'  => 'b.reference',
+			'total'      => 'b.total',
+		)[ $args['orderby'] ?? 'created_at' ] ?? 'b.id';
+		$order    = 'asc' === strtolower( (string) ( $args['order'] ?? 'desc' ) ) ? 'ASC' : 'DESC';
+		$from     = "FROM {$bookings} b LEFT JOIN {$items} i ON i.id = (SELECT MIN(i2.id) FROM {$items} i2 WHERE i2.booking_id = b.id) WHERE " . implode( ' AND ', $where );
+		$per_page = max( 0, (int) ( $args['per_page'] ?? 20 ) );
+		$limit    = $per_page ? $this->db->prepare( ' LIMIT %d OFFSET %d', $per_page, $per_page * max( 0, (int) ( $args['page'] ?? 1 ) - 1 ) ) : '';
+
+		$count_sql = "SELECT COUNT(*) {$from}";
+		$rows_sql  = "SELECT b.*, i.product_id, i.variant_id, i.session_id, i.date, i.start_time, i.adults, i.children, i.infants, i.units, i.pickup_type {$from} ORDER BY {$orderby} {$order}, b.id {$order}";
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery -- table names from constants; values prepared.
+		$total = (int) $this->db->get_var( $params ? $this->db->prepare( $count_sql, $params ) : $count_sql );
+		$rows  = $this->db->get_results( ( $params ? $this->db->prepare( $rows_sql, $params ) : $rows_sql ) . $limit, ARRAY_A );
+		// phpcs:enable
+		return array(
+			'rows'  => is_array( $rows ) ? $rows : array(),
+			'total' => $total,
+		);
+	}
+
+	/**
+	 * Number of bookings per status.
+	 *
+	 * @return array<string, int>
+	 */
+	public function status_counts(): array {
+		$table = $this->table( 'bookings' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery -- table name from a constant.
+		$rows = $this->db->get_results( "SELECT status, COUNT(*) AS n FROM {$table} GROUP BY status", ARRAY_A );
+		$out  = array();
+		foreach ( (array) $rows as $row ) {
+			$out[ (string) $row['status'] ] = (int) $row['n'];
+		}
+		return $out;
+	}
+
+	/**
+	 * Bookings of a date (optionally one tour and session), in session order, with their first item.
+	 *
+	 * @param string   $date       Y-m-d.
+	 * @param int      $product_id Tour (0 = all).
+	 * @param int|null $session_id Session (null = all).
+	 * @param string[] $statuses   Statuses to include.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function on_date( string $date, int $product_id = 0, ?int $session_id = null, array $statuses = array( 'confirmed', 'checked_in', 'no_show', 'awaiting_transfer', 'pending_payment' ) ): array {
+		$bookings = $this->table( 'bookings' );
+		$items    = $this->table( 'booking_items' );
+		$where    = array( 'i.date = %s' );
+		$params   = array( $date );
+		if ( $product_id ) {
+			$where[]  = 'i.product_id = %d';
+			$params[] = $product_id;
+		}
+		if ( null !== $session_id ) {
+			$where[]  = 'i.session_id = %d';
+			$params[] = $session_id;
+		}
+		$where[] = 'b.status IN (' . implode( ',', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
+		$params  = array_merge( $params, $statuses );
+		$sql     = "SELECT b.*, i.product_id, i.session_id, i.date, i.start_time FROM {$bookings} b INNER JOIN {$items} i ON i.booking_id = b.id WHERE " . implode( ' AND ', $where ) . ' ORDER BY i.start_time ASC, i.product_id ASC, b.id ASC';
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery -- built from placeholders above.
+		$rows = $this->db->get_results( $this->db->prepare( $sql, $params ), ARRAY_A );
+		return is_array( $rows ) ? $rows : array();
+	}
+
+	/**
 	 * Held bookings whose deadline has passed.
 	 *
 	 * @param \DateTimeImmutable $now   Current time.

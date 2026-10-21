@@ -9,6 +9,11 @@ namespace Digitum\Bookings;
 
 use Digitum\Bookings\Admin\Menus;
 use Digitum\Bookings\Admin\MetaBoxes\BookingSettingsBox;
+use Digitum\Bookings\Admin\Screens\BookingsScreen;
+use Digitum\Bookings\Admin\Screens\CalendarScreen;
+use Digitum\Bookings\Admin\Screens\CheckInScreen;
+use Digitum\Bookings\Admin\Screens\EmailsScreen;
+use Digitum\Bookings\Admin\Screens\ManifestScreen;
 use Digitum\Bookings\Admin\Screens\PaymentsScreen;
 use Digitum\Bookings\Admin\Screens\SettingsScreen;
 use Digitum\Bookings\Admin\Screens\ZonesScreen;
@@ -20,10 +25,14 @@ use Digitum\Bookings\Frontend\ProofForm;
 use Digitum\Bookings\Frontend\Widget;
 use Digitum\Bookings\Integrations\Elementor\ElementorIntegration;
 use Digitum\Bookings\Integrations\Gutenberg\BookingBlock;
+use Digitum\Bookings\Rest\AdminController;
 use Digitum\Bookings\Rest\PaymentsController;
 use Digitum\Bookings\Rest\PublicController;
 use Digitum\Bookings\Services\BookingService;
 use Digitum\Bookings\Services\Holds;
+use Digitum\Bookings\Services\Notifications\Listener;
+use Digitum\Bookings\Services\Notifications\Scheduler;
+use Digitum\Bookings\Services\Notifications\WebhookOut;
 use Digitum\Bookings\Services\PaymentService;
 use Digitum\Bookings\Services\QuoteService;
 use Digitum\Bookings\PostTypes\ProductType;
@@ -134,6 +143,10 @@ final class Plugin {
 			new BookingService( $this->settings, $this->product_type, $quotes, new BookingRepository() )
 		) )->register_hooks();
 		( new PaymentsController( $this->settings, new PaymentService( $this->settings ) ) )->register_hooks();
+		( new AdminController( $this->settings ) )->register_hooks();
+		( new Listener( $this->settings ) )->register_hooks();
+		( new Scheduler( $this->settings ) )->register_hooks();
+		( new WebhookOut( $this->settings ) )->register_hooks();
 		( new ProofForm( $this->settings ) )->register_hooks();
 
 		if ( is_admin() ) {
@@ -141,6 +154,11 @@ final class Plugin {
 			( new SettingsScreen( $this->settings ) )->register_hooks();
 			( new ZonesScreen() )->register_hooks();
 			( new PaymentsScreen( $this->settings ) )->register_hooks();
+			( new BookingsScreen( $this->settings, $this->product_type ) )->register_hooks();
+			( new CalendarScreen( $this->settings, $this->product_type ) )->register_hooks();
+			( new ManifestScreen( $this->settings, $this->product_type ) )->register_hooks();
+			( new CheckInScreen( $this->settings ) )->register_hooks();
+			( new EmailsScreen( $this->settings ) )->register_hooks();
 			( new BookingSettingsBox( $this->product_type, $this->quotes() ) )->register_hooks();
 		}
 	}

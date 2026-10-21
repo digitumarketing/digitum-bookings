@@ -60,7 +60,23 @@ final class PaymentsScreen {
 	 * Submenu entry.
 	 */
 	public function menu(): void {
-		add_submenu_page( Menus::SLUG, __( 'Payments', 'digitum-bookings' ), __( 'Payments', 'digitum-bookings' ), Capabilities::MANAGE_BOOKINGS, self::SLUG, array( $this, 'render' ), 2 );
+		$hook = add_submenu_page( Menus::SLUG, __( 'Payments', 'digitum-bookings' ), __( 'Payments', 'digitum-bookings' ), Capabilities::MANAGE_BOOKINGS, self::SLUG, array( $this, 'render' ), 3 );
+		if ( $hook ) {
+			add_action( 'load-' . $hook, array( $this, 'open_booking' ) );
+		}
+	}
+
+	/**
+	 * A reference typed in the search box opens that booking's page.
+	 */
+	public function open_booking(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- navigation only.
+		$reference = isset( $_GET['booking'] ) ? strtoupper( sanitize_text_field( wp_unslash( $_GET['booking'] ) ) ) : '';
+		$booking   = '' !== $reference ? $this->payments->bookings()->find_by_reference( $reference ) : null;
+		if ( $booking && current_user_can( Capabilities::MANAGE_BOOKINGS ) ) {
+			wp_safe_redirect( BookingsScreen::url( (int) $booking['id'] ) );
+			exit;
+		}
 	}
 
 	/**
@@ -108,13 +124,9 @@ final class PaymentsScreen {
 			if ( '' !== $reference && ! $booking ) {
 				echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'No booking with this reference.', 'digitum-bookings' ) . '</p></div>';
 			}
-			if ( $booking ) {
-				$this->booking( $booking );
-			} else {
-				echo '<h2>' . esc_html__( 'Waiting for bank transfer', 'digitum-bookings' ) . '</h2>';
-				self::awaiting_table( $this->payments );
-				$this->recent();
-			}
+			echo '<h2>' . esc_html__( 'Waiting for bank transfer', 'digitum-bookings' ) . '</h2>';
+			self::awaiting_table( $this->payments );
+			$this->recent();
 			?>
 		</div>
 		<?php
@@ -152,7 +164,7 @@ final class PaymentsScreen {
 						$due   = $payments->due( $row );
 						?>
 						<tr>
-							<td><a href="<?php echo esc_url( self::url( (string) $row['reference'] ) ); ?>"><strong><?php echo esc_html( $row['reference'] ); ?></strong></a><br><?php echo esc_html( $payments->tour_name( $row ) ); ?></td>
+							<td><a href="<?php echo esc_url( BookingsScreen::url( (int) $row['id'] ) ); ?>"><strong><?php echo esc_html( $row['reference'] ); ?></strong></a><br><?php echo esc_html( $payments->tour_name( $row ) ); ?></td>
 							<td><?php echo esc_html( $row['customer_name'] ); ?><br><?php echo esc_html( $row['customer_phone'] ); ?></td>
 							<td><?php echo esc_html( Format::money( $due['amount'], (string) $row['currency'] ) ); ?></td>
 							<td><?php echo esc_html( self::when( $row['hold_expires_at'] ) ); ?></td>
@@ -194,11 +206,12 @@ final class PaymentsScreen {
 	}
 
 	/**
-	 * One booking's money.
+	 * One booking's money: totals, Mark as paid, payment link, screenshots, payments with refunds, manual
+	 * payment (shown on the booking page).
 	 *
 	 * @param array<string, mixed> $booking Booking row.
 	 */
-	private function booking( array $booking ): void {
+	public function money( array $booking ): void {
 		$currency = (string) $booking['currency'];
 		$decimals = Money::decimals( $currency );
 		$rows     = $this->payments->repository()->for_booking( (int) $booking['id'] );
@@ -210,31 +223,7 @@ final class PaymentsScreen {
 		$can_mark = in_array( $booking['status'], array( BookingStatus::AWAITING_TRANSFER, BookingStatus::PENDING_PAYMENT ), true )
 			|| ( BookingStatus::CANCELLED === $booking['status'] && $this->payments->cancelled_by_hold( (int) $booking['id'] ) );
 		?>
-		<h2>
-			<?php
-			/* translators: %s: booking reference. */
-			echo esc_html( sprintf( __( 'Booking %s', 'digitum-bookings' ), $booking['reference'] ) );
-			?>
-		</h2>
 		<div class="dgb-pay-grid">
-			<section class="dgb-panel-card">
-				<h3><?php esc_html_e( 'Booking', 'digitum-bookings' ); ?></h3>
-				<dl>
-					<dt><?php esc_html_e( 'Status', 'digitum-bookings' ); ?></dt>
-					<dd><span class="dgb-status is-<?php echo esc_attr( (string) $booking['status'] ); ?>"><?php echo esc_html( self::label( (string) $booking['status'] ) ); ?></span></dd>
-					<dt><?php esc_html_e( 'Tour', 'digitum-bookings' ); ?></dt>
-					<dd><?php echo esc_html( $this->payments->tour_name( $booking ) ); ?><?php echo ! empty( $item['date'] ) ? ' · ' . esc_html( Format::date( (string) $item['date'] ) ) : ''; ?></dd>
-					<dt><?php esc_html_e( 'Guest', 'digitum-bookings' ); ?></dt>
-					<dd><?php echo esc_html( $booking['customer_name'] ); ?><br><?php echo esc_html( $booking['customer_email'] ); ?><br><?php echo esc_html( $booking['customer_phone'] ); ?></dd>
-					<dt><?php esc_html_e( 'Chosen method', 'digitum-bookings' ); ?></dt>
-					<dd><?php echo esc_html( $this->payments->method_name( (string) $booking['payment_method'] ) ); ?></dd>
-					<?php if ( ! empty( $booking['hold_expires_at'] ) ) : ?>
-						<dt><?php esc_html_e( 'Held until', 'digitum-bookings' ); ?></dt>
-						<dd><?php echo esc_html( self::when( $booking['hold_expires_at'] ) ); ?></dd>
-					<?php endif; ?>
-				</dl>
-				<p><a href="<?php echo esc_url( $page ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Open the guest’s booking page', 'digitum-bookings' ); ?></a></p>
-			</section>
 			<section class="dgb-panel-card">
 				<h3><?php esc_html_e( 'Money', 'digitum-bookings' ); ?></h3>
 				<dl>
@@ -336,12 +325,6 @@ final class PaymentsScreen {
 			<button class="button"><?php esc_html_e( 'Record payment', 'digitum-bookings' ); ?></button>
 		</form>
 
-		<h3><?php esc_html_e( 'Timeline', 'digitum-bookings' ); ?></h3>
-		<ul class="dgb-timeline">
-			<?php foreach ( array_reverse( $this->payments->bookings()->events( (int) $booking['id'] ) ) as $event ) : ?>
-				<li><time><?php echo esc_html( self::when( $event['created_at'] ) ); ?></time> · <?php echo esc_html( '' !== (string) $event['message'] ? $event['message'] : $event['type'] ); ?></li>
-			<?php endforeach; ?>
-		</ul>
 		<?php
 	}
 
@@ -388,7 +371,7 @@ final class PaymentsScreen {
 			printf(
 				'<tr><td>%1$s</td><td><a href="%2$s">%3$s</a><br>%4$s</td><td>%5$s</td><td>%6$s</td><td>%7$s</td><td><span class="dgb-status is-%8$s">%9$s</span></td></tr>',
 				esc_html( self::when( $row['created_at'] ) ),
-				esc_url( self::url( (string) $row['reference'] ) ),
+				esc_url( BookingsScreen::url( (int) $row['booking_id'] ) ),
 				esc_html( $row['reference'] ),
 				esc_html( $row['customer_name'] ),
 				esc_html( $this->payments->method_name( (string) $row['gateway'] ) ),
@@ -506,7 +489,7 @@ final class PaymentsScreen {
 	private function back( int $booking_id, $result, string $done ): void {
 		$booking = $this->payments->bookings()->find( $booking_id );
 		$args    = is_wp_error( $result ) ? array( 'dgb_error' => $result->get_error_message() ) : array( 'dgb_notice' => $done );
-		$target  = $booking ? self::url( (string) $booking['reference'], $args ) : self::url( '', $args );
+		$target  = $booking ? BookingsScreen::url( (int) $booking['id'], $args ) : self::url( '', $args );
 		wp_safe_redirect( $target );
 		exit;
 	}
@@ -516,7 +499,7 @@ final class PaymentsScreen {
 	 *
 	 * @param string|null $utc Y-m-d H:i:s in UTC.
 	 */
-	private static function when( ?string $utc ): string {
+	public static function when( ?string $utc ): string {
 		return $utc ? (string) wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $utc . ' UTC' ) ) : '';
 	}
 
@@ -525,7 +508,7 @@ final class PaymentsScreen {
 	 *
 	 * @param string $key Status or type.
 	 */
-	private static function label( string $key ): string {
+	public static function label( string $key ): string {
 		$labels = array(
 			'pending_payment'    => __( 'Waiting for payment', 'digitum-bookings' ),
 			'awaiting_transfer'  => __( 'Waiting for bank transfer', 'digitum-bookings' ),

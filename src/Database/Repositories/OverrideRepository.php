@@ -68,4 +68,49 @@ final class OverrideRepository extends ProductRowsRepository {
 		}
 		return $row;
 	}
+
+	/**
+	 * Close one date for a tour (all sessions, or one).
+	 *
+	 * @param int      $product_id Tour.
+	 * @param string   $date       Y-m-d.
+	 * @param int|null $session_id Session, or null for the whole day.
+	 * @param string   $note       Note.
+	 */
+	public function close( int $product_id, string $date, ?int $session_id, string $note = '' ): void {
+		global $wpdb;
+		$row = self::sanitize_row(
+			array(
+				'date_from'  => $date,
+				'date_to'    => $date,
+				'session_id' => $session_id,
+				'rule'       => 'closed',
+				'note'       => $note,
+			)
+		);
+		if ( null === $row || \Digitum\Bookings\Services\Availability::matching( $this->for_product( $product_id ), $date, (int) $session_id, 'closed' ) ) {
+			return;
+		}
+		$row['product_id'] = $product_id;
+		$row['sort']       = count( $this->for_product( $product_id ) );
+		$wpdb->insert( self::table(), $row ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	}
+
+	/**
+	 * Re-open a date closed with close(). Ranges set in the tour's settings are left alone.
+	 *
+	 * @param int      $product_id Tour.
+	 * @param string   $date       Y-m-d.
+	 * @param int|null $session_id Session, or null for the whole day.
+	 * @return bool True when the date (and session) is open now.
+	 */
+	public function open( int $product_id, string $date, ?int $session_id ): bool {
+		global $wpdb;
+		foreach ( $this->for_product( $product_id ) as $row ) {
+			if ( 'closed' === $row['rule'] && $date === $row['date_from'] && $date === (string) $row['date_to'] && (int) $row['session_id'] === (int) $session_id ) {
+				$wpdb->delete( self::table(), array( 'id' => (int) $row['id'] ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			}
+		}
+		return array() === \Digitum\Bookings\Services\Availability::matching( $this->for_product( $product_id ), $date, (int) $session_id, 'closed' );
+	}
 }

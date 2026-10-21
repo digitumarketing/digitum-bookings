@@ -283,3 +283,61 @@
 .dgb-timeline { margin: 0; max-width: 900px; }
 .dgb-timeline li { margin: 0 0 4px; }
 .dgb-timeline time { color: #50575e; }
+
+/* Booking page */
+.dgb-actions-bar { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 16px; }
+.dgb-actions-bar form { margin: 0; }
+.dgb-wrap h1 + .dgb-status { margin-left: 6px; vertical-align: middle; }
+.dgb-notes { background: #fff; border: 1px solid #dcdcde; padding: 8px 12px; max-width: 900px; margin-bottom: 8px; }
+.dgb-quote { margin: 16px 0; max-width: 1200px; }
+.dgb-filters input[type="date"] { vertical-align: middle; }
+.dgb-email-event { margin: 0 0 10px; max-width: 1200px; }
+.dgb-email-event summary { cursor: pointer; padding: 10px 0; }
+.dgb-email-event summary .description { display: block; font-weight: 400; }
+.dgb-email-audiences { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.dgb-email-audiences fieldset { border: 1px solid #dcdcde; padding: 8px 12px; }
+.dgb-kpis { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; font-size: 15px; }
+.dgb-kpis dd { margin: 0; font-weight: 600; }
+
+/* Calendar */
+.dgb-cal-toolbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 12px 0; }
+.dgb-cal-title { font-size: 16px; margin: 0 8px; }
+.dgb-cal-views { display: inline-flex; gap: 4px; margin-right: 8px; }
+.dgb-cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.dgb-cal-grid.dgb-cal-day { grid-template-columns: 1fr; max-width: 900px; }
+.dgb-cal-head { font-weight: 600; text-align: center; padding: 4px; color: #50575e; }
+.dgb-cal-day { background: #fff; border: 1px solid #dcdcde; border-radius: 6px; min-height: 96px; padding: 4px; font-size: 12px; min-width: 0; }
+.dgb-cal-day.is-outside { opacity: .55; }
+.dgb-cal-day.is-today { border-color: #2271b1; box-shadow: inset 0 0 0 1px #2271b1; }
+.dgb-cal-day.is-closed { background: repeating-linear-gradient(135deg, #fff, #fff 6px, #f6f7f7 6px, #f6f7f7 12px); }
+.dgb-cal-day.is-drop-target, .dgb-cal-session.is-drop-target { outline: 2px dashed #2271b1; }
+.dgb-cal-date { display: flex; justify-content: space-between; gap: 4px; font-weight: 600; margin-bottom: 2px; }
+.dgb-cal-session { border-top: 1px solid #f0f0f1; padding: 3px 0; }
+.dgb-cal-session.is-closed .dgb-cal-session-name { text-decoration: line-through; }
+.dgb-cal-session-name { font-weight: 600; text-decoration: none; }
+.dgb-cal-count { display: block; color: #50575e; }
+.dgb-cal-toggle { font-size: 11px; }
+.dgb-chip { display: block; margin: 2px 0; padding: 2px 6px; border-radius: 4px; background: #f0f6fc; border: 1px solid #c5d9ed; text-decoration: none; color: #1d2327; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: grab; }
+.dgb-chip.is-awaiting_transfer, .dgb-chip.is-pending_payment { background: #fcf9e8; border-color: #f0d98c; }
+.dgb-chip.is-checked_in { background: #edfaef; border-color: #a7dcb0; }
+.dgb-chip.is-dragging { opacity: .5; }
+@media (max-width: 782px) { .dgb-cal-grid { grid-template-columns: 1fr; } .dgb-cal-head { display: none; } .dgb-cal-day.is-outside { display: none; } }
+
+/* Manifest */
+.dgb-manifest .dgb-vehicle-input { width: 9em; }
+
+/* Check-in (phones first) */
+.dgb-checkin-days { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+.dgb-checkin-status { font-weight: 600; min-height: 1.4em; }
+.dgb-checkin h2 { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; }
+.dgb-checkin-count { font-weight: 400; color: #50575e; }
+.dgb-checkin-list { margin: 0; }
+.dgb-checkin-card { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; background: #fff; border: 1px solid #dcdcde; border-left: 6px solid #dcdcde; border-radius: 8px; padding: 10px 12px; margin: 0 0 8px; }
+.dgb-checkin-card.is-checked_in { border-left-color: #00a32a; }
+.dgb-checkin-card.is-no_show { border-left-color: #d63638; opacity: .8; }
+.dgb-checkin-who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dgb-checkin-who strong { font-size: 16px; }
+.dgb-checkin-due { color: #b32d2e; font-weight: 600; }
+.dgb-checkin-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.dgb-checkin-actions form { margin: 0; }
+.dgb-checkin-actions .button-hero { min-width: 110px; }

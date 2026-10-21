@@ -188,4 +188,21 @@ final class PaymentRepository {
 		}
 		return $out;
 	}
+
+	/**
+	 * Money received minus refunds since a time, per currency.
+	 *
+	 * @param string $since_utc Y-m-d H:i:s (UTC).
+	 * @return array<string, float> Currency => amount.
+	 */
+	public function revenue_since( string $since_utc ): array {
+		$table = $this->table();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery -- table name from a constant.
+		$rows = $this->db->get_results( $this->db->prepare( "SELECT currency, SUM(CASE WHEN type = 'refund' THEN -amount ELSE amount END) AS total FROM {$table} WHERE created_at >= %s AND ((type <> 'refund' AND status = 'succeeded') OR (type = 'refund' AND status <> 'failed')) GROUP BY currency", $since_utc ), ARRAY_A );
+		$out  = array();
+		foreach ( (array) $rows as $row ) {
+			$out[ (string) $row['currency'] ] = (float) $row['total'];
+		}
+		return $out;
+	}
 }

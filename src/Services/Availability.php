@@ -188,7 +188,7 @@ final class Availability {
 	 * @param string                           $rule       closed or adjust.
 	 * @return array<int, array<string, mixed>>
 	 */
-	private static function matching( array $overrides, string $date, int $session_id, string $rule ): array {
+	public static function matching( array $overrides, string $date, int $session_id, string $rule ): array {
 		return array_values(
 			array_filter(
 				$overrides,
