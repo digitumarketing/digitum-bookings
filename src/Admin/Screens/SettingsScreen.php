@@ -137,6 +137,13 @@ final class SettingsScreen {
 								" class="nav-tab <?php echo $id === $tab ? 'nav-tab-active' : ''; ?>" <?php echo $id === $tab ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $label ); ?></a>
 				<?php endforeach; ?>
 			</nav>
+			<?php if ( 'payments' === $tab ) : ?>
+				<div class="dgb-callout">
+					<p><strong><?php esc_html_e( 'Webhook URLs', 'digitum-bookings' ); ?></strong></p>
+					<p><?php esc_html_e( 'Stripe:', 'digitum-bookings' ); ?> <code><?php echo esc_html( rest_url( 'dgb/v1/webhooks/stripe' ) ); ?></code></p>
+					<p><?php esc_html_e( 'PayPal:', 'digitum-bookings' ); ?> <code><?php echo esc_html( rest_url( 'dgb/v1/webhooks/paypal' ) ); ?></code></p>
+				</div>
+			<?php endif; ?>
 			<form method="post" action="options.php">
 				<?php settings_fields( self::GROUP ); ?>
 				<input type="hidden" name="<?php echo esc_attr( Settings::OPTION ); ?>[_tab]" value="<?php echo esc_attr( $tab ); ?>">
@@ -167,6 +174,14 @@ final class SettingsScreen {
 	 * @param mixed                $value Current value.
 	 */
 	private function row( string $tab, string $key, array $field, $value ): void {
+		if ( 'heading' === $field['type'] ) {
+			printf( '<tr class="dgb-settings-heading"><th colspan="2" scope="rowgroup"><h2>%s</h2>', esc_html( $field['label'] ) );
+			if ( ! empty( $field['help'] ) ) {
+				printf( '<p class="description">%s</p>', esc_html( $field['help'] ) );
+			}
+			echo '</th></tr>';
+			return;
+		}
 		$id       = 'dgb-' . $tab . '-' . $key;
 		$name     = sprintf( '%s[%s][%s]', Settings::OPTION, $tab, $key );
 		$type     = $field['type'];
@@ -211,6 +226,15 @@ final class SettingsScreen {
 					printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( (string) $option ), selected( (string) $option, (string) $value, false ), esc_html( $label ) );
 				}
 				echo '</select>';
+				break;
+
+			case 'secret':
+				printf(
+					'<input type="password" id="%1$s" name="%2$s" value="" class="regular-text" autocomplete="new-password" spellcheck="false" placeholder="%3$s">',
+					esc_attr( $id ),
+					esc_attr( $name ),
+					'' !== (string) $value ? esc_attr__( 'Saved. Leave empty to keep it.', 'digitum-bookings' ) : ''
+				);
 				break;
 
 			case 'textarea':

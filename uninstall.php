@@ -27,10 +27,20 @@ function dgb_uninstall_site(): void {
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off cleanup of our own meta keys.
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE %s", $wpdb->esc_like( '_dgb_' ) . '%' ) );
 
-	foreach ( array( 'dgb_settings', 'dgb_db_version', 'dgb_version', 'dgb_flush_rewrite' ) as $option ) {
+	foreach ( array( 'dgb_settings', 'dgb_db_version', 'dgb_version', 'dgb_flush_rewrite', 'dgb_roles_version' ) as $option ) {
 		delete_option( $option );
 	}
 	\Digitum\Bookings\Roles\Capabilities::uninstall();
+
+	// Payment screenshots (private folder, see ProofService::dir()).
+	$dir = \Digitum\Bookings\Services\ProofService::dir();
+	if ( is_string( $dir ) && str_ends_with( $dir, 'dgb-private' ) ) {
+		$files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $dir, FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
+		foreach ( $files as $file ) {
+			$file->isDir() ? rmdir( $file->getPathname() ) : wp_delete_file( $file->getPathname() ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- removing our own folder.
+		}
+		rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- removing our own folder.
+	}
 }
 
 if ( is_multisite() ) {

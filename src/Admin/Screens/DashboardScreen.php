@@ -10,6 +10,7 @@ namespace Digitum\Bookings\Admin\Screens;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Roles\Capabilities;
+use Digitum\Bookings\Services\PaymentService;
 use Digitum\Bookings\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
@@ -112,6 +113,12 @@ final class DashboardScreen {
 						<p class="dgb-warning"><?php esc_html_e( 'The tour post type is not registered. Check Settings › General.', 'digitum-bookings' ); ?></p>
 					<?php endif; ?>
 				</section>
+				<?php if ( current_user_can( Capabilities::MANAGE_BOOKINGS ) ) : ?>
+					<section class="dgb-panel-card dgb-panel-wide">
+						<h2><?php esc_html_e( 'Waiting for bank transfer', 'digitum-bookings' ); ?></h2>
+						<?php PaymentsScreen::awaiting_table( new PaymentService( $this->settings ) ); ?>
+					</section>
+				<?php endif; ?>
 				<section class="dgb-panel-card">
 					<h2><?php esc_html_e( 'About Digitum', 'digitum-bookings' ); ?></h2>
 					<p><?php esc_html_e( 'Digitum Bookings is built and supported by Digitum Marketing Ltd.', 'digitum-bookings' ); ?></p>

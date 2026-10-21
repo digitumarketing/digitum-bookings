@@ -260,3 +260,26 @@
 	border: 1px solid var(--dgb-border);
 	border-radius: 8px;
 }
+
+/* Settings: section headings and callouts */
+.dgb-settings-heading th { padding: 24px 0 4px; }
+.dgb-settings-heading h2 { margin: 0; font-size: 1.15em; }
+.dgb-settings-heading .description { font-weight: 400; margin-top: 4px; }
+.dgb-callout { background: #fff; border: 1px solid #c3c4c7; border-left: 4px solid #2271b1; padding: 4px 14px; margin: 16px 0; max-width: 900px; }
+.dgb-callout code { user-select: all; }
+
+/* Payments screen */
+.dgb-pay-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; max-width: 1200px; margin-bottom: 16px; }
+.dgb-pay-grid dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0; }
+.dgb-pay-grid dt { color: #50575e; }
+.dgb-pay-grid dd { margin: 0; }
+.dgb-inline-form { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0; }
+.dgb-inline-form input[type="number"] { width: 110px; }
+.dgb-status { display: inline-block; padding: 1px 8px; border-radius: 10px; background: #f0f0f1; font-size: 12px; }
+.dgb-status.is-succeeded, .dgb-status.is-confirmed, .dgb-status.is-paid { background: #d1f0d6; }
+.dgb-status.is-failed, .dgb-status.is-cancelled, .dgb-status.is-refunded { background: #fbd7d7; }
+.dgb-status.is-pending, .dgb-status.is-awaiting_transfer, .dgb-status.is-pending_payment, .dgb-status.is-deposit_paid, .dgb-status.is-partially_refunded { background: #fcf0c3; }
+.dgb-panel-wide { grid-column: 1 / -1; }
+.dgb-timeline { margin: 0; max-width: 900px; }
+.dgb-timeline li { margin: 0 0 4px; }
+.dgb-timeline time { color: #50575e; }

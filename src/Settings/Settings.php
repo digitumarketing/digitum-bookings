@@ -42,7 +42,8 @@ final class Settings {
 	/**
 	 * Field definitions per tab.
 	 *
-	 * Supported types: text, email, tel, textarea, number, checkbox, select, multicheck, color, key, slug.
+	 * Supported types: text, email, tel, url, textarea, number, checkbox, select, multicheck, color, key, slug,
+	 * secret (never shown again; empty input keeps it) and heading (a section title, not stored).
 	 * Keys starting with an underscore are internal: stored, never rendered.
 	 *
 	 * @return array<string, array<string, array<string, mixed>>>
@@ -203,26 +204,133 @@ final class Settings {
 				),
 			),
 			'payments'  => array(
-				'arrival_enabled'     => array(
+				'arrival_enabled'            => array(
 					'type'    => 'checkbox',
 					'label'   => __( 'Pay on arrival', 'digitum-bookings' ),
 					'text'    => __( 'Guests can book now and pay cash or card at the meeting point', 'digitum-bookings' ),
 					'default' => true,
 				),
-				'bank_enabled'        => array(
+				'stripe_heading'             => array(
+					'type'    => 'heading',
+					'label'   => 'Stripe',
+					'help'    => __( 'Cards, Apple Pay and Google Pay. Card details go straight from the guest to Stripe; this site never sees them.', 'digitum-bookings' ),
+					'default' => null,
+				),
+				'stripe_enabled'             => array(
 					'type'    => 'checkbox',
-					'label'   => __( 'Bank transfer', 'digitum-bookings' ),
-					'text'    => __( 'Offer bank transfer (fill in the bank details below)', 'digitum-bookings' ),
+					'label'   => __( 'Card payments', 'digitum-bookings' ),
+					'text'    => __( 'Accept cards, Apple Pay and Google Pay through Stripe', 'digitum-bookings' ),
 					'default' => false,
 				),
-				'deposit_enabled'     => array(
+				'stripe_mode'                => array(
+					'type'    => 'select',
+					'label'   => __( 'Stripe mode', 'digitum-bookings' ),
+					'options' => array(
+						'test' => __( 'Test (no real money)', 'digitum-bookings' ),
+						'live' => __( 'Live', 'digitum-bookings' ),
+					),
+					'default' => 'test',
+				),
+				'stripe_test_publishable'    => array(
+					'type'    => 'text',
+					'label'   => __( 'Test publishable key', 'digitum-bookings' ),
+					'help'    => __( 'Starts with pk_test_. Stripe › Developers › API keys.', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'stripe_test_secret'         => array(
+					'type'    => 'secret',
+					'label'   => __( 'Test secret key', 'digitum-bookings' ),
+					'help'    => __( 'Starts with sk_test_ (or a restricted key rk_test_ with PaymentIntents and Refunds write access).', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'stripe_test_webhook_secret' => array(
+					'type'    => 'secret',
+					'label'   => __( 'Test webhook signing secret', 'digitum-bookings' ),
+					'help'    => __( 'Starts with whsec_. Add the webhook URL shown above in Stripe › Developers › Webhooks with the events payment_intent.succeeded, payment_intent.payment_failed and charge.refunded.', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'stripe_live_publishable'    => array(
+					'type'    => 'text',
+					'label'   => __( 'Live publishable key', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'stripe_live_secret'         => array(
+					'type'    => 'secret',
+					'label'   => __( 'Live secret key', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'stripe_live_webhook_secret' => array(
+					'type'    => 'secret',
+					'label'   => __( 'Live webhook signing secret', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'paypal_heading'             => array(
+					'type'    => 'heading',
+					'label'   => 'PayPal',
+					'help'    => __( 'PayPal Checkout. Create a REST app at developer.paypal.com to get the client id and secret.', 'digitum-bookings' ),
+					'default' => null,
+				),
+				'paypal_enabled'             => array(
+					'type'    => 'checkbox',
+					'label'   => __( 'PayPal', 'digitum-bookings' ),
+					'text'    => __( 'Accept PayPal', 'digitum-bookings' ),
+					'default' => false,
+				),
+				'paypal_mode'                => array(
+					'type'    => 'select',
+					'label'   => __( 'PayPal mode', 'digitum-bookings' ),
+					'options' => array(
+						'sandbox' => __( 'Sandbox (no real money)', 'digitum-bookings' ),
+						'live'    => __( 'Live', 'digitum-bookings' ),
+					),
+					'default' => 'sandbox',
+				),
+				'paypal_client_id'           => array(
+					'type'    => 'text',
+					'label'   => __( 'Client id', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'paypal_secret'              => array(
+					'type'    => 'secret',
+					'label'   => __( 'Secret', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'paypal_webhook_id'          => array(
+					'type'    => 'text',
+					'label'   => __( 'Webhook id', 'digitum-bookings' ),
+					'help'    => __( 'Add the webhook URL shown above to your PayPal app with the events Payment capture completed, denied and refunded, then paste the webhook id here.', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'paypal_currency'            => array(
+					'type'    => 'select',
+					'label'   => __( 'Charge PayPal payments in', 'digitum-bookings' ),
+					'options' => array( self::class, 'paypal_currencies' ),
+					'help'    => __( 'PayPal does not accept AED, SAR, OMR, QAR, BHD or KWD. Amounts in those currencies are converted to this currency, and the guest sees both amounts before paying.', 'digitum-bookings' ),
+					'default' => 'USD',
+				),
+				'paypal_rate'                => array(
+					'type'    => 'number',
+					'label'   => __( 'Exchange rate', 'digitum-bookings' ),
+					'suffix'  => __( 'of your currency = 1 unit of the PayPal currency', 'digitum-bookings' ),
+					'help'    => __( 'For AED and USD the official rate is 3.6725. Only used when your currency is not accepted by PayPal.', 'digitum-bookings' ),
+					'min'     => 0.0001,
+					'max'     => 100000,
+					'step'    => 0.0001,
+					'default' => 3.6725,
+				),
+				'deposit_heading'            => array(
+					'type'    => 'heading',
+					'label'   => __( 'Deposits', 'digitum-bookings' ),
+					'default' => null,
+				),
+				'deposit_enabled'            => array(
 					'type'    => 'checkbox',
 					'label'   => __( 'Deposits', 'digitum-bookings' ),
 					'text'    => __( 'Let guests pay part now and the rest on arrival', 'digitum-bookings' ),
 					'help'    => __( 'When this is off, guests always pay the full amount or choose pay on arrival. Each tour can turn deposits off or use its own percentage.', 'digitum-bookings' ),
 					'default' => false,
 				),
-				'deposit_percent'     => array(
+				'deposit_percent'            => array(
 					'type'    => 'number',
 					'label'   => __( 'Deposit percentage', 'digitum-bookings' ),
 					'suffix'  => '%',
@@ -231,7 +339,7 @@ final class Settings {
 					'step'    => 1,
 					'default' => 20,
 				),
-				'deposit_methods'     => array(
+				'deposit_methods'            => array(
 					'type'    => 'multicheck',
 					'label'   => __( 'Deposit allowed with', 'digitum-bookings' ),
 					'options' => array(
@@ -241,49 +349,60 @@ final class Settings {
 					),
 					'default' => array( 'stripe', 'paypal', 'bank_transfer' ),
 				),
-				'bank_account_name'   => array(
+				'bank_heading'               => array(
+					'type'    => 'heading',
+					'label'   => __( 'Bank transfer', 'digitum-bookings' ),
+					'default' => null,
+				),
+				'bank_enabled'               => array(
+					'type'    => 'checkbox',
+					'label'   => __( 'Bank transfer', 'digitum-bookings' ),
+					'text'    => __( 'Offer bank transfer (fill in the bank details below)', 'digitum-bookings' ),
+					'default' => false,
+				),
+				'bank_account_name'          => array(
 					'type'    => 'text',
 					'label'   => __( 'Bank transfer: account name', 'digitum-bookings' ),
 					'default' => '',
 				),
-				'bank_name'           => array(
+				'bank_name'                  => array(
 					'type'    => 'text',
 					'label'   => __( 'Bank name', 'digitum-bookings' ),
 					'default' => '',
 				),
-				'bank_iban'           => array(
+				'bank_iban'                  => array(
 					'type'    => 'text',
 					'label'   => __( 'IBAN', 'digitum-bookings' ),
 					'default' => '',
 				),
-				'bank_account_number' => array(
+				'bank_account_number'        => array(
 					'type'    => 'text',
 					'label'   => __( 'Account number', 'digitum-bookings' ),
 					'default' => '',
 				),
-				'bank_swift'          => array(
+				'bank_swift'                 => array(
 					'type'    => 'text',
 					'label'   => __( 'SWIFT / BIC', 'digitum-bookings' ),
 					'default' => '',
 				),
-				'bank_instructions'   => array(
+				'bank_instructions'          => array(
 					'type'    => 'textarea',
 					'label'   => __( 'Instructions for the guest', 'digitum-bookings' ),
 					'default' => __( 'Use your booking reference as the payment reference. After paying, upload a screenshot of the transfer on the booking page. We confirm your booking by email once the payment is checked.', 'digitum-bookings' ),
 				),
-				'bank_upload'         => array(
+				'bank_upload'                => array(
 					'type'    => 'checkbox',
 					'label'   => __( 'Screenshot upload', 'digitum-bookings' ),
 					'text'    => __( 'Let guests upload the transfer screenshot on the booking page or from the email link', 'digitum-bookings' ),
 					'default' => true,
 				),
-				'bank_whatsapp'       => array(
+				'bank_whatsapp'              => array(
 					'type'    => 'tel',
 					'label'   => __( 'WhatsApp number (other way to send it)', 'digitum-bookings' ),
 					'help'    => __( 'Shown as a small link under the upload box. Leave empty to hide.', 'digitum-bookings' ),
 					'default' => '',
 				),
-				'bank_hold_hours'     => array(
+				'bank_hold_hours'            => array(
 					'type'    => 'number',
 					'label'   => __( 'Hold bank transfer bookings for', 'digitum-bookings' ),
 					'suffix'  => __( 'hours', 'digitum-bookings' ),
@@ -369,10 +488,22 @@ final class Settings {
 		$defaults = array();
 		foreach ( self::fields() as $tab => $fields ) {
 			foreach ( $fields as $key => $field ) {
+				if ( 'heading' === $field['type'] ) {
+					continue;
+				}
 				$defaults[ $tab ][ $key ] = $field['default'];
 			}
 		}
 		return $defaults;
+	}
+
+	/**
+	 * Currencies PayPal accepts.
+	 *
+	 * @return array<string, string>
+	 */
+	public static function paypal_currencies(): array {
+		return array_combine( \Digitum\Bookings\Gateways\PayPal::CURRENCIES, \Digitum\Bookings\Gateways\PayPal::CURRENCIES );
 	}
 
 	/**
@@ -464,7 +595,11 @@ final class Settings {
 			return $result;
 		}
 		foreach ( $fields[ $tab ] as $key => $field ) {
-			if ( str_starts_with( $key, '_' ) ) {
+			if ( str_starts_with( $key, '_' ) || 'heading' === $field['type'] ) {
+				continue;
+			}
+			// A secret left empty keeps the saved value (the form never shows it).
+			if ( 'secret' === $field['type'] && '' === trim( (string) ( $input[ $key ] ?? '' ) ) ) {
 				continue;
 			}
 			$result[ $tab ][ $key ] = self::sanitize_value( $field, $input[ $key ] ?? null );
@@ -506,7 +641,12 @@ final class Settings {
 					$number = min( (float) $field['max'], $number );
 				}
 				$is_int = ! isset( $field['step'] ) || floor( (float) $field['step'] ) === (float) $field['step'];
-				return $is_int ? (int) round( $number ) : round( $number, 2 );
+				if ( $is_int ) {
+					return (int) round( $number );
+				}
+				// Keep as many decimals as the step has (at least 2): step 0.0001 keeps 4.
+				$step_decimals = strlen( rtrim( substr( sprintf( '%.6F', (float) $field['step'] ), -6 ), '0' ) );
+				return round( $number, max( 2, $step_decimals ) );
 
 			case 'email':
 				return is_string( $value ) ? sanitize_email( $value ) : '';
@@ -519,6 +659,9 @@ final class Settings {
 
 			case 'textarea':
 				return is_string( $value ) ? sanitize_textarea_field( $value ) : '';
+
+			case 'secret':
+				return is_string( $value ) ? trim( sanitize_text_field( $value ) ) : '';
 
 			case 'color':
 				$color = is_string( $value ) ? sanitize_hex_color( $value ) : null;

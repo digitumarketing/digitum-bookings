@@ -8,6 +8,7 @@
 namespace Digitum\Bookings\Admin;
 
 use Digitum\Bookings\Admin\Screens\DashboardScreen;
+use Digitum\Bookings\Admin\Screens\PaymentsScreen;
 use Digitum\Bookings\Admin\Screens\SettingsScreen;
 use Digitum\Bookings\Admin\Screens\ZonesScreen;
 use Digitum\Bookings\PostTypes\ProductType;
@@ -87,7 +88,7 @@ final class Menus {
 	public function enqueue(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only decides whether to load a stylesheet.
 		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
-		if ( ! in_array( $page, array( self::SLUG, SettingsScreen::SLUG, ZonesScreen::SLUG ), true ) ) {
+		if ( ! in_array( $page, array( self::SLUG, SettingsScreen::SLUG, ZonesScreen::SLUG, PaymentsScreen::SLUG ), true ) ) {
 			return;
 		}
 		wp_enqueue_style( 'dgb-admin', DGB_PLUGIN_URL . 'assets/build/admin/admin.css', array(), DGB_VERSION );
