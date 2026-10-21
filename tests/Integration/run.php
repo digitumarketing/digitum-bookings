@@ -364,6 +364,265 @@ if ( scenario( 'E' ) ) {
 }
 
 /* -------------------------------------------------------------------- */
+if ( scenario( 'F' ) ) {
+	echo "\nScenario F: payments (M4) against fake Stripe and PayPal APIs\n";
+	$site = make_site( 'm4' );
+	copy( __DIR__ . '/fake-gateways.php', "{$site}/wp-content/mu-plugins/fake-gateways.php" );
+	step( $site, 'install' );
+	step( $site, 'activate' );
+	$demo = step( $site, 'demo_setup' );
+	$rzr  = $demo['tours']['rzr'];
+	$day  = $demo['tomorrow'];
+	$r    = step( $site, 'payments_setup' );
+	check( array( 'stripe', 'paypal', 'bank_transfer', 'arrival' ) === $r['methods'], 'checkout offers card, PayPal, bank transfer and pay on arrival, in that order' );
+
+	// SQLite returns decimals without trailing zeros; compare amounts as money.
+	$amt  = static fn( $v ) => number_format( (float) $v, 2, '.', '' );
+	$ip   = 0;
+	$book = static function ( string $method, array $extra = array() ) use ( $site, $rzr, $day, &$ip ) {
+		++$ip;
+		$body = array_merge(
+			array(
+				'product'        => $rzr['id'],
+				'variant_id'     => $rzr['variants']['30 min'],
+				'date'           => $day,
+				'session_id'     => $rzr['sessions']['Evening'],
+				'adults'         => 2,
+				'units'          => 1,
+				'pickup'         => false,
+				'payment_method' => $method,
+				'name'           => 'Pay Guest',
+				'email'          => 'pay@example.com',
+				'phone_code'     => '+971',
+				'phone'          => '501234567',
+				'terms'          => true,
+			),
+			$extra
+		);
+		return step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'body' => $body, 'nonce' => true, 'ip' => '10.4.0.' . $ip ) );
+	};
+	$state  = static fn( string $ref ) => step( $site, 'booking_state', array( 'reference' => $ref ) );
+	$secret = static function ( string $html ): array {
+		preg_match( '/data-dgb-pay="([^"]+)"/', $html, $m );
+		return json_decode( html_entity_decode( $m[1] ?? '', ENT_QUOTES ), true ) ?: array();
+	};
+	$succeeded = static fn( array $st ) => array_values( array_filter( $st['payments'], static fn( $p ) => 'succeeded' === $p['status'] && 'refund' !== $p['type'] ) );
+
+	// Stripe: pay in full, webhook confirms, retries are harmless.
+	$r   = $book( 'stripe' );
+	$ref = $r['data']['reference'] ?? '';
+	$cfg = $secret( $r['data']['html'] ?? '' );
+	check( 201 === $r['status'] && 'pending_payment' === $r['data']['status'] && 'stripe' === ( $cfg['type'] ?? '' ) && 'pk_test_fake' === $cfg['publishableKey'] && str_contains( (string) $cfg['clientSecret'], '_secret_' ), 'card booking: held as pending payment, pay box with the Stripe client secret' );
+	check( false === strpos( $r['data']['html'], 'sk_test_fake' ) && false === strpos( $r['data']['html'], 'whsec_fake_secret' ), 'secret keys never reach the page' );
+	check( null === $r['data']['event'], 'no purchase event before the money arrives' );
+	$st  = $state( $ref );
+	$req = current( array_filter( $st['fake']['log'], static fn( $l ) => 'POST' === $l['method'] && str_ends_with( $l['url'], '/v1/payment_intents' ) ) );
+	$pi  = $st['payments'][0]['intent_id'] ?? '';
+	check( 1 === count( $st['payments'] ) && 'pending' === $st['payments'][0]['status'] && '699.00' === $amt( $st['payments'][0]['amount'] ) && 69900 === (int) $st['fake']['pi'][ $pi ]['amount'] && 'aed' === $st['fake']['pi'][ $pi ]['currency'], 'PaymentIntent for AED 699.00 (69900 fils)' );
+	check( 'Bearer sk_test_fake' === $req['auth'] && '' !== $req['idem'] && $ref === $st['fake']['pi'][ $pi ]['metadata']['booking_reference'] && 'pay@example.com' === $st['fake']['pi'][ $pi ]['receipt_email'], 'Stripe request: secret key, idempotency key, booking reference, receipt email' );
+	$v = step( $site, 'view', array( 'reference' => $ref ) );
+	check( $cfg['clientSecret'] === $v['pay']['config']['clientSecret'] && 1 === count( $state( $ref )['payments'] ), 'reloading the page reuses the same PaymentIntent' );
+
+	$f = step( $site, 'fake_stripe', array( 'client_secret' => $cfg['clientSecret'], 'card' => '4242 4242 4242 4242' ) );
+	$w = step( $site, 'stripe_webhook', array( 'type' => 'payment_intent.succeeded', 'pi' => $pi ) );
+	$st = $state( $ref );
+	check( 'succeeded' === $f['status'] && 200 === $w['status'] && true === $w['data']['handled'], 'payment_intent.succeeded webhook accepted' );
+	check( 'confirmed' === $st['booking']['status'] && 'paid' === $st['booking']['payment_status'] && '699.00' === $amt( $st['booking']['amount_paid'] ) && '0.00' === $amt( $st['booking']['balance_due'] ) && null === $st['booking']['hold_expires_at'], 'booking confirmed, paid in full, hold cleared' );
+	check( in_array( 'payment_received', $st['events'], true ) && 1 === ( $st['fake']['hooks']['dgb_payment_completed'] ?? 0 ), 'timeline event and dgb_payment_completed fired once' );
+	$w2 = step( $site, 'stripe_webhook', array( 'type' => 'payment_intent.succeeded', 'pi' => $pi ) );
+	$c  = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'payments/stripe/confirm', 'body' => array( 'reference' => $ref, 'key' => $st['booking']['access_key'] ), 'nonce' => true ) );
+	$st = $state( $ref );
+	check( 200 === $w2['status'] && false === $w2['data']['handled'] && 'confirmed' === $c['data']['status'] && 1 === count( $succeeded( $st ) ) && 1 === $st['fake']['hooks']['dgb_payment_completed'], 'same webhook again and the browser confirmation record nothing twice' );
+	$bad = step( $site, 'stripe_webhook', array( 'type' => 'payment_intent.succeeded', 'pi' => $pi, 'secret' => 'whsec_wrong' ) );
+	$old = step( $site, 'stripe_webhook', array( 'type' => 'payment_intent.succeeded', 'pi' => $pi, 'age' => 600 ) );
+	check( 400 === $bad['status'] && 'dgb_webhook_signature' === $bad['data']['code'] && 400 === $old['status'], 'webhooks with a wrong or 10-minute-old signature are refused' );
+	$c = step( $site, 'view', array( 'reference' => $ref ) );
+	check( null === $c['pay'] && 'purchase' === ( json_decode( html_entity_decode( preg_match( '/data-dgb-event="([^"]+)"/', $c['html'], $m ) ? $m[1] : '', ENT_QUOTES ), true )['event'] ?? '' ), 'paid booking page: no pay box, purchase event for analytics' );
+
+	// Stripe: refunds through the API, then the charge.refunded webhook.
+	$pay = $succeeded( $st )[0];
+	$x   = step( $site, 'money', array( 'op' => 'refund', 'payment' => $pay['id'], 'amount' => '200', 'note' => 'Shorter ride' ) );
+	$st  = $state( $ref );
+	$re  = array_values( array_filter( $st['payments'], static fn( $p ) => 'refund' === $p['type'] ) );
+	check( 'succeeded' === ( $x['result']['status'] ?? '' ) && 1 === count( $re ) && '200.00' === $amt( $re[0]['amount'] ) && str_starts_with( (string) $re[0]['transaction_id'], 're_fake' ) && 20000 === (int) $st['fake']['refunds'][ $re[0]['transaction_id'] ]['amount'], 'partial refund of AED 200 sent to Stripe and recorded' );
+	check( 'partially_refunded' === $st['booking']['payment_status'] && '499.00' === $amt( $st['booking']['amount_paid'] ) && 'confirmed' === $st['booking']['status'], 'payment status partly refunded, net paid AED 499' );
+	$w = step( $site, 'stripe_webhook', array( 'type' => 'charge.refunded', 'pi' => $pi ) );
+	check( 200 === $w['status'] && false === $w['data']['handled'] && 1 === count( array_filter( $state( $ref )['payments'], static fn( $p ) => 'refund' === $p['type'] ) ), 'charge.refunded webhook does not record the refund twice' );
+	$x = step( $site, 'money', array( 'op' => 'refund', 'payment' => $pay['id'], 'amount' => '500' ) );
+	check( 'dgb_refund_amount' === ( $x['error'] ?? '' ) && str_contains( $x['message'], '499.00' ), 'refunding more than is left is refused before calling Stripe' );
+	$x  = step( $site, 'money', array( 'op' => 'refund', 'payment' => $pay['id'], 'amount' => '499' ) );
+	$st = $state( $ref );
+	check( 'refunded' === $st['booking']['payment_status'] && '0.00' === $amt( $st['booking']['amount_paid'] ) && 2 === ( $st['fake']['hooks']['dgb_payment_refunded'] ?? 0 ), 'refund of the rest: fully refunded' );
+
+	// Stripe: deposit, a declined card, success without a webhook.
+	$r   = $book( 'stripe', array( 'pay_deposit' => true ) );
+	$ref = $r['data']['reference'];
+	$cfg = $secret( $r['data']['html'] );
+	$st  = $state( $ref );
+	$pi  = $st['payments'][0]['intent_id'];
+	check( 'deposit' === $st['payments'][0]['type'] && '139.80' === $amt( $st['payments'][0]['amount'] ) && 13980 === (int) $st['fake']['pi'][ $pi ]['amount'] && false !== strpos( $r['data']['html'], 'Pay the deposit: AED 139.80' ), 'deposit booking charges 20% (AED 139.80)' );
+	$f  = step( $site, 'fake_stripe', array( 'client_secret' => $cfg['clientSecret'], 'card' => '4000000000000002' ) );
+	$w  = step( $site, 'stripe_webhook', array( 'type' => 'payment_intent.payment_failed', 'pi' => $pi ) );
+	$w2 = step( $site, 'stripe_webhook', array( 'type' => 'payment_intent.payment_failed', 'pi' => $pi ) );
+	$st = $state( $ref );
+	$failed = array_values( array_filter( $st['payments'], static fn( $p ) => 'failed' === $p['status'] ) );
+	check( 'failed' === $f['status'] && true === $w['data']['handled'] && false === $w2['data']['handled'] && 1 === count( $failed ) && 'Your card was declined.' === $failed[0]['note'], 'declined card: one failed attempt recorded, repeated webhook ignored' );
+	check( 'pending_payment' === $st['booking']['status'] && in_array( 'payment_failed', $st['events'], true ) && 1 === ( $st['fake']['hooks']['dgb_payment_failed'] ?? 0 ), 'booking stays held so the guest can try another card' );
+	step( $site, 'fake_stripe', array( 'client_secret' => $cfg['clientSecret'], 'card' => '4242424242424242' ) );
+	$c  = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'payments/stripe/confirm', 'body' => array( 'reference' => $ref, 'key' => $st['booking']['access_key'] ), 'nonce' => true ) );
+	$st = $state( $ref );
+	check( 'confirmed' === $c['data']['status'] && 'deposit_paid' === $st['booking']['payment_status'] && '139.80' === $amt( $st['booking']['amount_paid'] ) && '559.20' === $amt( $st['booking']['balance_due'] ), 'second card works; confirmed without waiting for the webhook; balance AED 559.20' );
+	$w = step( $site, 'stripe_webhook', array( 'type' => 'payment_intent.succeeded', 'pi' => $pi ) );
+	check( false === $w['data']['handled'] && 1 === count( $succeeded( $state( $ref ) ) ), 'the late webhook is ignored' );
+	$c = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'payments/stripe/confirm', 'body' => array( 'reference' => $ref, 'key' => 'wrong-key-wrong-key-wrong-key-xx' ), 'nonce' => true ) );
+	check( 404 === $c['status'], 'payment endpoints need the booking key' );
+	$v = step( $site, 'view', array( 'reference' => $ref, 'link' => true ) );
+	check( 'balance' === ( $v['pay']['type'] ?? '' ) && 'AED 559.20' === $v['pay']['amount'], 'payment link offers the balance (AED 559.20)' );
+
+	// Stripe: 3-D Secure, the guest comes back through the return URL (no webhook yet).
+	$r   = $book( 'stripe' );
+	$ref = $r['data']['reference'];
+	$cfg = $secret( $r['data']['html'] );
+	$f1  = step( $site, 'fake_stripe', array( 'client_secret' => $cfg['clientSecret'], 'card' => '4000002500003155' ) );
+	$v   = step( $site, 'view', array( 'reference' => $ref ) );
+	$f2  = step( $site, 'fake_stripe', array( 'client_secret' => $cfg['clientSecret'], 'card' => '4000002500003155', 'authenticate' => true ) );
+	$v2  = step( $site, 'view', array( 'reference' => $ref, 'get' => array( 'dgb_return' => 'stripe' ) ) );
+	check( 'requires_action' === $f1['status'] && 'pending_payment' === $v['status'] && 'succeeded' === $f2['status'] && 'confirmed' === $v2['status'] && null === $v2['pay'], '3-D Secure: pending while authenticating, confirmed when the guest returns' );
+	check( str_contains( (string) $cfg['returnUrl'], 'dgb_return=stripe' ) && str_contains( (string) $cfg['returnUrl'], 'dgb_key=' ), 'return URL is the private booking page' );
+
+	// Stripe: hold expiry.
+	$r   = $book( 'stripe' );
+	$ref = $r['data']['reference'];
+	$cfg = $secret( $r['data']['html'] );
+	$pi  = $state( $ref )['payments'][0]['intent_id'];
+	$r2  = $book( 'stripe' );
+	$ref2 = $r2['data']['reference'];
+	$cfg2 = $secret( $r2['data']['html'] );
+	step( $site, 'fake_stripe', array( 'client_secret' => $cfg2['clientSecret'], 'card' => '4242424242424242' ) );
+	step( $site, 'money', array( 'op' => 'expire', 'at' => gmdate( 'Y-m-d H:i:s', time() + 20 * 60 ) ) );
+	check( 'cancelled' === $state( $ref )['booking']['status'], 'unpaid card booking released after 15 minutes' );
+	check( 'confirmed' === $state( $ref2 )['booking']['status'], 'a booking paid without a webhook is checked with Stripe before release and kept' );
+	step( $site, 'fake_stripe', array( 'client_secret' => $cfg['clientSecret'], 'card' => '4242424242424242' ) );
+	$w  = step( $site, 'stripe_webhook', array( 'type' => 'payment_intent.succeeded', 'pi' => $pi ) );
+	$st = $state( $ref );
+	check( true === $w['data']['handled'] && 'confirmed' === $st['booking']['status'] && in_array( 'reinstated', $st['events'], true ), 'payment arriving after the hold expired reinstates the booking' );
+
+	// PayPal: AED converted to USD, capture, idempotency, decline, webhooks, refunds.
+	$r   = $book( 'paypal' );
+	$ref = $r['data']['reference'];
+	$cfg = $secret( $r['data']['html'] );
+	$key = $state( $ref )['booking']['access_key'];
+	check( 'pending_payment' === $r['data']['status'] && 'paypal' === ( $cfg['type'] ?? '' ) && 'client-fake' === $cfg['clientId'] && 'USD' === $cfg['currency'] && 'USD 190.33' === $cfg['charge'] && false !== strpos( $r['data']['html'], 'PayPal charges USD 190.33 (AED 699.00)' ), 'PayPal pay box: AED 699 shown as USD 190.33 at 3.6725' );
+	$o  = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'payments/paypal/order', 'body' => array( 'reference' => $ref, 'key' => $key ), 'nonce' => true ) );
+	$st = $state( $ref );
+	$order = $st['fake']['orders'][ $o['data']['id'] ?? '' ] ?? array();
+	check( 200 === $o['status'] && 'CAPTURE' === ( $order['intent'] ?? '' ) && '190.33' === $order['purchase_units'][0]['amount']['value'] && 'USD' === $order['purchase_units'][0]['amount']['currency_code'] && $ref === $order['purchase_units'][0]['reference_id'], 'PayPal order: USD 190.33 with the booking reference' );
+	check( 'NO_SHIPPING' === ( $order['application_context']['shipping_preference'] ?? '' ) && 'pending' === end( $st['payments'] )['status'], 'no shipping address asked; pending payment row' );
+	$early = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'payments/paypal/capture', 'body' => array( 'reference' => $ref, 'key' => $key, 'order_id' => $o['data']['id'] ), 'nonce' => true ) );
+	check( 502 === $early['status'] && 'pending_payment' === $state( $ref )['booking']['status'], 'capture before the guest approved fails and changes nothing' );
+	step( $site, 'fake_paypal', array( 'order_id' => $o['data']['id'] ) );
+	$c  = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'payments/paypal/capture', 'body' => array( 'reference' => $ref, 'key' => $key, 'order_id' => $o['data']['id'] ), 'nonce' => true ) );
+	$c2 = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'payments/paypal/capture', 'body' => array( 'reference' => $ref, 'key' => $key, 'order_id' => $o['data']['id'] ), 'nonce' => true ) );
+	$st = $state( $ref );
+	$cap = $succeeded( $st )[0] ?? array();
+	check( 'confirmed' === ( $c['data']['status'] ?? '' ) && 'succeeded' === ( $c2['data']['capture'] ?? '' ) && 1 === count( $succeeded( $st ) ) && '699.00' === $amt( $cap['amount'] ) && str_starts_with( (string) $cap['transaction_id'], 'CAP' ), 'captured: booking confirmed, AED 699 recorded once' );
+	$w  = step( $site, 'paypal_webhook', array( 'type' => 'PAYMENT.CAPTURE.COMPLETED', 'capture' => $cap['transaction_id'] ) );
+	$wb = step( $site, 'paypal_webhook', array( 'type' => 'PAYMENT.CAPTURE.COMPLETED', 'capture' => $cap['transaction_id'], 'valid' => false ) );
+	check( 200 === $w['status'] && false === $w['data']['handled'] && 400 === $wb['status'] && 1 === count( $succeeded( $state( $ref ) ) ), 'PayPal webhook: verified, duplicate ignored; forged one refused' );
+	$x  = step( $site, 'money', array( 'op' => 'refund', 'payment' => $cap['id'], 'amount' => '100' ) );
+	$st = $state( $ref );
+	$pr = array_values( $st['fake']['pp_refunds'] );
+	$re = array_values( array_filter( $st['payments'], static fn( $p ) => 'refund' === $p['type'] ) );
+	check( 'succeeded' === ( $x['result']['status'] ?? '' ) && '27.23' === ( $pr[0]['amount']['value'] ?? '' ) && '100.00' === $amt( $re[0]['amount'] ?? 0 ), 'refund of AED 100 sent to PayPal as USD 27.23' );
+	$w  = step( $site, 'paypal_webhook', array( 'type' => 'PAYMENT.CAPTURE.REFUNDED', 'refund' => $re[0]['transaction_id'] ) );
+	$w2 = step( $site, 'paypal_webhook', array( 'type' => 'PAYMENT.CAPTURE.REFUNDED', 'refund' => 'REFDASHBOARD1', 'refund_capture' => $cap['transaction_id'], 'refund_amount' => array( 'value' => '10.00', 'currency_code' => 'USD' ) ) );
+	$st = $state( $ref );
+	$re = array_values( array_filter( $st['payments'], static fn( $p ) => 'refund' === $p['type'] ) );
+	check( false === $w['data']['handled'] && true === $w2['data']['handled'] && 2 === count( $re ) && '36.73' === $amt( $re[1]['amount'] ) && '562.27' === $amt( $st['booking']['amount_paid'] ), 'refund made in the PayPal dashboard arrives by webhook (USD 10 = AED 36.73)' );
+
+	$r   = $book( 'paypal' );
+	$ref = $r['data']['reference'];
+	$key = $state( $ref )['booking']['access_key'];
+	$o   = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'payments/paypal/order', 'body' => array( 'reference' => $ref, 'key' => $key ), 'nonce' => true ) );
+	step( $site, 'fake_paypal', array( 'order_id' => $o['data']['id'], 'outcome' => 'decline' ) );
+	$c = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'payments/paypal/capture', 'body' => array( 'reference' => $ref, 'key' => $key, 'order_id' => $o['data']['id'] ), 'nonce' => true ) );
+	check( 402 === $c['status'] && 'dgb_paypal_declined' === $c['data']['code'] && 'pending_payment' === $state( $ref )['booking']['status'], 'PayPal decline: guest asked to pick another funding source, booking still held' );
+	step( $site, 'fake_paypal', array( 'order_id' => $o['data']['id'] ) );
+	$c = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'payments/paypal/capture', 'body' => array( 'reference' => $ref, 'key' => $key, 'order_id' => $o['data']['id'] ), 'nonce' => true ) );
+	check( 'confirmed' === ( $c['data']['status'] ?? '' ), 'second attempt on the same order succeeds' );
+	$c = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'payments/paypal/capture', 'body' => array( 'reference' => $ref, 'key' => $key, 'order_id' => 'ORDER999999' ), 'nonce' => true ) );
+	check( 404 === $c['status'], 'an order id of another booking is refused' );
+
+	// Bank transfer: screenshot, mark as paid, manual refund.
+	$r   = $book( 'bank_transfer' );
+	$ref = $r['data']['reference'];
+	check( 'awaiting_transfer' === $r['data']['status'] && false !== strpos( $r['data']['html'], 'data-dgb-proof=' ) && false !== strpos( $r['data']['html'], 'enctype="multipart/form-data"' ) && false !== strpos( $r['data']['html'], 'name="dgb_proof_nonce"' ), 'bank transfer page has the upload form (works without JavaScript too)' );
+	$p = step( $site, 'proof_store', array( 'reference' => $ref, 'kind' => 'png', 'name' => 'My transfer.png' ) );
+	check( isset( $p['id'] ) && $p['exists'] && preg_match( '#^\d{4}/\d{2}/[a-f0-9]{32}\.png$#', $p['proof']['file_path'] ) && 'image/png' === $p['proof']['mime'] && 'My-transfer.png' === $p['proof']['original_name'], 'screenshot stored under a random 32-character name' );
+	check( str_contains( $p['htaccess'], 'Require all denied' ) && $p['index'] && 0 === $p['media'], 'private folder denies web access; nothing added to the Media Library' );
+	$e1 = step( $site, 'proof_store', array( 'reference' => $ref, 'kind' => 'exe', 'name' => 'invoice.jpg' ) );
+	$e2 = step( $site, 'proof_store', array( 'reference' => $ref, 'kind' => 'big', 'name' => 'huge.jpg' ) );
+	check( 'dgb_proof_type' === ( $e1['error'] ?? '' ) && 'dgb_proof_size' === ( $e2['error'] ?? '' ), 'a renamed program and a file over 5 MB are refused' );
+	$st = $state( $ref );
+	check( 1 === count( $st['proofs'] ) && in_array( 'proof_uploaded', $st['events'], true ) && 1 === ( $st['fake']['hooks']['dgb_payment_proof_uploaded'] ?? 0 ), 'one screenshot on the booking, timeline event, dgb_payment_proof_uploaded fired' );
+	$u = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings/' . $ref . '/proof', 'body' => array( 'key' => $st['booking']['access_key'] ), 'nonce' => true ) );
+	$u2 = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings/' . $ref . '/proof', 'body' => array( 'key' => 'wrong-key-wrong-key-wrong-key-xx' ), 'nonce' => true ) );
+	check( 400 === $u['status'] && 'dgb_proof_missing' === $u['data']['code'] && 404 === $u2['status'], 'upload endpoint: needs a real uploaded file and the booking key' );
+	$v = step( $site, 'view', array( 'reference' => $ref ) );
+	check( false !== strpos( $v['html'], 'My-transfer.png' ), 'booking page lists the received screenshot' );
+	$a = step( $site, 'render_admin', array( 'screen' => 'dashboard' ) );
+	check( false !== strpos( $a['html'], $ref ) && false !== strpos( $a['html'], 'Screenshot 1' ) && false !== strpos( $a['html'], 'value="dgb_mark_paid"' ), 'dashboard: waiting bank transfers with screenshot link and Mark as paid' );
+	$x  = step( $site, 'money', array( 'op' => 'mark_paid', 'reference' => $ref ) );
+	$st = $state( $ref );
+	$bt = $succeeded( $st )[0] ?? array();
+	check( true === ( $x['result'] ?? null ) && 'confirmed' === $st['booking']['status'] && 'paid' === $st['booking']['payment_status'] && 'bank_transfer' === $bt['gateway'] && '699.00' === $amt( $bt['amount'] ) && ! empty( $st['proofs'][0]['reviewed_at'] ), 'Mark as paid: AED 699 recorded, booking confirmed, screenshot marked as checked' );
+	$x2 = step( $site, 'money', array( 'op' => 'mark_paid', 'reference' => $ref ) );
+	$e3 = step( $site, 'proof_store', array( 'reference' => $ref, 'kind' => 'pdf' ) );
+	check( 'dgb_mark_paid' === ( $x2['error'] ?? '' ) && 'dgb_proof_closed' === ( $e3['error'] ?? '' ), 'cannot be marked as paid twice; no more uploads after payment' );
+	$calls = count( $st['fake']['refunds'] ) + count( $st['fake']['pp_refunds'] );
+	$x     = step( $site, 'money', array( 'op' => 'refund', 'payment' => $bt['id'], 'amount' => '99', 'note' => 'Returned by bank' ) );
+	$st    = $state( $ref );
+	check( 'succeeded' === ( $x['result']['status'] ?? '' ) && 'partially_refunded' === $st['booking']['payment_status'] && '600.00' === $amt( $st['booking']['amount_paid'] ) && count( $st['fake']['refunds'] ) + count( $st['fake']['pp_refunds'] ) === $calls, 'bank transfer refund is recorded only (no gateway call)' );
+
+	// Pay on arrival: cash recorded on the day.
+	$r   = $book( 'arrival' );
+	$ref = $r['data']['reference'];
+	$x   = step( $site, 'money', array( 'op' => 'manual', 'reference' => $ref, 'method' => 'cash', 'amount' => '699', 'note' => 'Receipt 42' ) );
+	$x2  = step( $site, 'money', array( 'op' => 'manual', 'reference' => $ref, 'method' => 'cheque', 'amount' => '1' ) );
+	$st  = $state( $ref );
+	check( 'confirmed' === $r['data']['status'] && is_int( $x['result'] ?? null ) && 'paid' === $st['booking']['payment_status'] && 'dgb_payment_method' === ( $x2['error'] ?? '' ), 'pay on arrival: cash recorded, unknown methods refused' );
+
+	// Admin screens.
+	$a = step( $site, 'render_admin', array( 'screen' => 'payments', 'get' => array( 'booking' => $ref ) ) );
+	check( false !== strpos( $a['html'], 'Receipt 42' ) && false !== strpos( $a['html'], 'value="dgb_refund"' ) && false !== strpos( $a['html'], 'value="dgb_record_payment"' ) && substr_count( $a['html'], 'name="_wpnonce"' ) >= 2, 'Payments screen: payments with refund form, record payment form, nonces' );
+	$a = step( $site, 'render_admin', array( 'screen' => 'payments' ) );
+	check( false !== strpos( $a['html'], 'Recent payments' ) && false !== strpos( $a['html'], 'Waiting for bank transfer' ), 'Payments screen without a reference: waiting transfers and recent payments' );
+	$a = step( $site, 'render_admin', array( 'screen' => 'settings', 'get' => array( 'tab' => 'payments' ) ) );
+	check( false !== strpos( $a['html'], '/wp-json/dgb/v1/webhooks/stripe' ) && false !== strpos( $a['html'], 'webhooks/paypal' ) && false === strpos( $a['html'], 'sk_test_fake' ) && false === strpos( $a['html'], 'secret-fake' ) && false !== strpos( $a['html'], 'type="password"' ), 'settings: webhook URLs shown, saved secrets never printed' );
+	$a = step( $site, 'render_admin', array( 'screen' => 'payments', 'user' => 0 ) );
+	check( isset( $a['died'] ) && false === strpos( $a['html'], 'Recent payments' ), 'Payments screen needs the manage bookings capability' );
+}
+
+/* -------------------------------------------------------------------- */
+$stripe_mock = getenv( 'DGB_STRIPE_MOCK' ) ?: '';
+if ( '' !== $stripe_mock && scenario( 'G' ) ) {
+	echo "\nScenario G: Stripe requests match Stripe's API (stripe-mock at {$stripe_mock})\n";
+	$site = make_site( 'm4-contract' );
+	copy( __DIR__ . '/fake-gateways.php', "{$site}/wp-content/mu-plugins/fake-gateways.php" );
+	step( $site, 'install' );
+	step( $site, 'activate' );
+	$demo = step( $site, 'demo_setup' );
+	step( $site, 'payments_setup' );
+	$rzr = $demo['tours']['rzr'];
+	$r   = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'body' => array( 'product' => $rzr['id'], 'variant_id' => $rzr['variants']['30 min'], 'date' => $demo['tomorrow'], 'session_id' => $rzr['sessions']['Evening'], 'adults' => 2, 'units' => 1, 'payment_method' => 'stripe', 'name' => 'Contract Guest', 'email' => 'contract@example.com', 'phone_code' => '+971', 'phone' => '501234567', 'terms' => true ) ) );
+	$c   = step( $site, 'stripe_contract', array( 'url' => $stripe_mock, 'reference' => $r['data']['reference'] ) );
+	check( 'ok' === $c['pay_box'] && in_array( 'automatic_payment_methods', $c['args'] ?? array(), true ), 'PaymentIntent create accepted by the Stripe API schema' );
+	check( 'ok' === $c['retrieve'] && 'ok' === $c['list'], 'PaymentIntent retrieve and refund list accepted' );
+	check( 'ok' === $c['refund'], 'refund create accepted' );
+	check( true === $c['validating'], 'stripe-mock rejects an unknown parameter (the check is real)' );
+}
+
+/* -------------------------------------------------------------------- */
 if ( ! getenv( 'DGB_KEEP_SITES' ) ) {
 	exec( 'rm -rf ' . escapeshellarg( $work ) );
 }

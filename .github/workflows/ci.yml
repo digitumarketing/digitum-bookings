@@ -28,6 +28,12 @@ jobs:
 
   integration:
     runs-on: ubuntu-latest
+    services:
+      # Stripe's official mock: checks every Stripe request the plugin makes against Stripe's API schema.
+      stripe-mock:
+        image: stripe/stripe-mock:v0.206.0
+        ports:
+          - 12111:12111
     strategy:
       matrix:
         wordpress: ['6.5.5', '7.1.3']
@@ -62,11 +68,12 @@ jobs:
             echo "DGB_PREVIOUS_DIR=$GITHUB_WORKSPACE/.wp-test/previous" >> "$GITHUB_ENV"
           fi
 
-      - name: WordPress tests (activation, pricing, holds, concurrency, upgrade)
+      - name: WordPress tests (activation, pricing, holds, concurrency, upgrade, booking flow, payments)
         run: composer test:integration
         env:
           DGB_WP_DIR: .wp-test/wordpress
           DGB_SQLITE_DIR: .wp-test/sqlite
+          DGB_STRIPE_MOCK: http://localhost:12111
 
   e2e:
     runs-on: ubuntu-latest

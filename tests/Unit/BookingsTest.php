@@ -129,7 +129,7 @@ final class BookingsTest extends TestCase {
 		$count = ( new Holds( new Settings(), new BookingRepository( $db ) ) )->expire( new \DateTimeImmutable( '2026-10-21 10:00:00', new \DateTimeZone( 'UTC' ) ) );
 
 		$this->assertSame( 2, $count );
-		$this->assertStringContainsString( "'2026-10-21 10:00:00'", $db->last_query );
+		$this->assertStringContainsString( "'2026-10-21 10:00:00'", $db->queries[0] );
 		$this->assertSame( 'Bank transfer not received in time; booking released.', $db->inserts['wp_dgb_booking_events'][1]['message'] );
 	}
 
@@ -153,6 +153,7 @@ final class FakeWpdb {
 	public $update_result = 1;
 	public array $last_update_where = array();
 	public string $last_query = '';
+	public array $queries = array();
 
 	/**
 	 * @param string[] $booking_errors Errors returned by the first booking inserts.
@@ -191,11 +192,13 @@ final class FakeWpdb {
 
 	public function get_results( $query, $output = null ) {
 		$this->last_query = $query;
+		$this->queries[]  = $query;
 		return $this->rows;
 	}
 
 	public function get_row( $query, $output = null ) {
 		$this->last_query = $query;
+		$this->queries[]  = $query;
 		return $this->rows[0] ?? null;
 	}
 }

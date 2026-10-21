@@ -14,9 +14,34 @@ require __DIR__ . '/../Integration/lib.php';
 
 $port = getenv( 'DGB_E2E_PORT' ) ?: '8889';
 $site = make_site( 'e2e', null, "http://127.0.0.1:{$port}" );
+// Real Stripe / PayPal sandboxes when their test keys are in the environment (tests/e2e/sandbox.spec.ts),
+// otherwise fake APIs (the browser then loads the fake SDKs in tests/e2e/fakes).
+$sandbox = array_filter(
+	array(
+		'stripe_test_publishable' => getenv( 'DGB_SANDBOX_STRIPE_PK' ) ?: '',
+		'stripe_test_secret'      => getenv( 'DGB_SANDBOX_STRIPE_SK' ) ?: '',
+		'paypal_client_id'        => getenv( 'DGB_SANDBOX_PAYPAL_CLIENT' ) ?: '',
+		'paypal_secret'           => getenv( 'DGB_SANDBOX_PAYPAL_SECRET' ) ?: '',
+	)
+);
+if ( array() === $sandbox ) {
+	copy( __DIR__ . '/../Integration/fake-gateways.php', "{$site}/wp-content/mu-plugins/fake-gateways.php" );
+}
+// Every browser test books from 127.0.0.1: lift the per-IP booking limit on this test site.
+file_put_contents( "{$site}/wp-content/mu-plugins/dgb-e2e.php", "<?php\nadd_filter( 'dgb_rate_limit', static fn( \$limit, \$action ) => 'create' === \$action ? 1000 : \$limit, 10, 2 );\n" );
 step( $site, 'install' );
 step( $site, 'activate' );
 $demo = step( $site, 'demo_setup' );
+step(
+	$site,
+	'payments_setup',
+	array(
+		'payments' => array() === $sandbox ? array() : $sandbox + array(
+			'stripe_enabled' => ! empty( $sandbox['stripe_test_secret'] ),
+			'paypal_enabled' => ! empty( $sandbox['paypal_secret'] ),
+		),
+	)
+);
 
 // Router for PHP's built-in server: real files as they are, everything else through WordPress, gzipped like
 // any real host would (Lighthouse otherwise measures the missing compression, not the plugin).
@@ -50,9 +75,10 @@ file_put_contents(
 	"{$root}/.wp-test/e2e.json",
 	json_encode(
 		array(
-			'site' => $site,
-			'port' => $port,
-			'demo' => $demo,
+			'site'    => $site,
+			'port'    => $port,
+			'demo'    => $demo,
+			'sandbox' => array() !== $sandbox,
 		),
 		JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
 	)

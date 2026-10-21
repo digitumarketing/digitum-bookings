@@ -1,46 +1,5 @@
-import { test, expect, Page, Locator } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
-import { readFileSync } from 'fs';
-
-const e2e = JSON.parse( readFileSync( '.wp-test/e2e.json', 'utf8' ) );
-const { tours, tomorrow } = e2e.demo;
-const path = ( url: string ) => new URL( url ).pathname;
-
-declare global {
-	interface Window {
-		dataLayer: Array< Record< string, any > >;
-	}
-}
-
-const events = ( page: Page ) => page.evaluate( () => ( window.dataLayer || [] ).filter( ( e ) => e.event ).map( ( e ) => e.event ) );
-
-async function axe( page: Page ) {
-	const result = await new AxeBuilder( { page } ).include( '[data-dgb-widget]' ).withTags( [ 'wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa' ] ).analyze();
-	expect( result.violations.map( ( v ) => `${ v.id }: ${ v.nodes.map( ( n ) => n.target.join( ' ' ) ).join( ', ' ) }` ) ).toEqual( [] );
-}
-
-async function pickTomorrow( w: Locator ) {
-	const day = w.locator( `.dgb-day[data-date="${ tomorrow }"]` );
-	await expect( w.locator( '.dgb-day' ).first() ).toBeVisible();
-	if ( ! ( await day.count() ) ) {
-		await w.locator( '[data-dgb-next-month]' ).click();
-	}
-	await day.click();
-}
-
-async function chooseRide( w: Locator ) {
-	await w.getByRole( 'radio', { name: /^1 hour/ } ).check();
-	await pickTomorrow( w );
-	await w.getByRole( 'radio', { name: /^Evening/ } ).check();
-	await w.getByRole( 'button', { name: 'More: Adults' } ).click();
-}
-
-async function fillDetails( w: Locator ) {
-	await w.getByLabel( 'Full name' ).fill( 'Test Guest' );
-	await w.getByLabel( 'Email', { exact: true } ).fill( 'guest@example.com' );
-	await w.getByLabel( 'Phone', { exact: true } ).fill( '501234567' );
-	await w.getByRole( 'checkbox', { name: /I accept the booking terms/ } ).check();
-}
+import { test, expect } from '@playwright/test';
+import { tours, path, events, axe, pickTomorrow, chooseRide, fillDetails } from './helpers';
 
 test.describe( 'desktop', () => {
 	test.skip( ( { isMobile } ) => isMobile, 'desktop layout' );

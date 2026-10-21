@@ -325,6 +325,204 @@ switch ( $dgb_action ) {
 		$dgb_out['has_block']   = WP_Block_Type_Registry::get_instance()->is_registered( 'digitum-bookings/booking' );
 		break;
 
+	case 'payments_setup':
+		$dgb_settings = \Digitum\Bookings\Plugin::instance()->settings();
+		$dgb_all      = $dgb_settings->all();
+		$dgb_settings->update(
+			array(
+				'payments' => array_merge(
+					$dgb_all['payments'],
+					array(
+						'stripe_enabled'             => true,
+						'stripe_mode'                => 'test',
+						'stripe_test_publishable'    => 'pk_test_fake',
+						'stripe_test_secret'         => 'sk_test_fake',
+						'stripe_test_webhook_secret' => defined( 'DGB_FAKE_WEBHOOK' ) ? DGB_FAKE_WEBHOOK : '',
+						'paypal_enabled'             => true,
+						'paypal_mode'                => 'sandbox',
+						'paypal_client_id'           => 'client-fake',
+						'paypal_secret'              => 'secret-fake',
+						'paypal_webhook_id'          => 'WH-FAKE',
+						'paypal_currency'            => 'USD',
+						'paypal_rate'                => 3.6725,
+						'bank_upload'                => true,
+					),
+					$dgb_args['payments'] ?? array()
+				),
+			)
+		);
+		$dgb_out['methods'] = array_keys( ( new \Digitum\Bookings\Services\PaymentMethods( $dgb_settings ) )->available() );
+		break;
+
+	case 'booking_state':
+		global $wpdb;
+		$dgb_repo            = new \Digitum\Bookings\Database\Repositories\BookingRepository();
+		$dgb_booking         = $dgb_repo->find_by_reference( $dgb_args['reference'] );
+		$dgb_out['booking']  = $dgb_booking;
+		$dgb_out['payments'] = $dgb_booking ? ( new \Digitum\Bookings\Database\Repositories\PaymentRepository() )->for_booking( (int) $dgb_booking['id'] ) : array();
+		$dgb_out['events']   = $dgb_booking ? array_column( $dgb_repo->events( (int) $dgb_booking['id'] ), 'type' ) : array();
+		$dgb_out['proofs']   = $dgb_booking ? ( new \Digitum\Bookings\Database\Repositories\ProofRepository() )->for_booking( (int) $dgb_booking['id'] ) : array();
+		$dgb_out['fake']     = dgb_fake_state();
+		$dgb_out['fake']['log'] = array_slice( $dgb_out['fake']['log'], -6 );
+		break;
+
+	case 'view':
+		$_GET         = $dgb_args['get'] ?? array();
+		$dgb_booking  = ( new \Digitum\Bookings\Database\Repositories\BookingRepository() )->find_by_reference( $dgb_args['reference'] );
+		$dgb_conf     = new \Digitum\Bookings\Frontend\Confirmation( \Digitum\Bookings\Plugin::instance()->settings() );
+		$dgb_view     = $dgb_conf->view( $dgb_booking, ! empty( $dgb_args['link'] ) );
+		$dgb_out      = array(
+			'status' => $dgb_view['status'],
+			'title'  => $dgb_view['title'],
+			'pay'    => $dgb_view['pay'],
+			'proof'  => $dgb_view['proof'],
+			'bank'   => $dgb_view['bank'],
+			'html'   => $dgb_conf->render( $dgb_booking, ! empty( $dgb_args['link'] ) ),
+		);
+		break;
+
+	case 'fake_stripe':
+		$dgb_out = dgb_fake_stripe_confirm( $dgb_args['client_secret'], $dgb_args['card'], $dgb_args['authenticate'] ?? null );
+		break;
+
+	case 'fake_paypal':
+		$dgb_out['ok'] = dgb_fake_paypal_approve( $dgb_args['order_id'], $dgb_args['outcome'] ?? 'approve' );
+		break;
+
+	case 'stripe_webhook':
+		[ $dgb_body, $dgb_sig ] = dgb_fake_stripe_event( $dgb_args['type'], $dgb_args['pi'], $dgb_args['secret'] ?? DGB_FAKE_WEBHOOK, isset( $dgb_args['age'] ) ? time() - (int) $dgb_args['age'] : 0 );
+		$dgb_req                = new WP_REST_Request( 'POST', '/dgb/v1/webhooks/stripe' );
+		$dgb_req->set_header( 'content-type', 'application/json' );
+		$dgb_req->set_header( 'stripe-signature', $dgb_sig );
+		$dgb_req->set_body( $dgb_body );
+		$dgb_res            = rest_do_request( $dgb_req );
+		$dgb_out['status']  = $dgb_res->get_status();
+		$dgb_out['data']    = rest_get_server()->response_to_data( $dgb_res, false );
+		break;
+
+	case 'paypal_webhook':
+		$dgb_state    = dgb_fake_state();
+		$dgb_resource = $dgb_args['resource'] ?? array();
+		if ( ! empty( $dgb_args['capture'] ) ) {
+			$dgb_resource = $dgb_state['captures'][ $dgb_args['capture'] ];
+		}
+		if ( ! empty( $dgb_args['refund'] ) ) {
+			$dgb_refund   = $dgb_state['pp_refunds'][ $dgb_args['refund'] ] ?? array( 'id' => $dgb_args['refund'], 'status' => 'COMPLETED', 'capture' => $dgb_args['refund_capture'], 'amount' => $dgb_args['refund_amount'] );
+			$dgb_resource = array(
+				'id'     => $dgb_refund['id'],
+				'status' => $dgb_refund['status'],
+				'amount' => $dgb_refund['amount'],
+				'links'  => array( array( 'rel' => 'up', 'href' => 'https://api.sandbox.paypal.com/v2/payments/captures/' . $dgb_refund['capture'] ) ),
+			);
+		}
+		[ $dgb_body, $dgb_headers ] = dgb_fake_paypal_event( $dgb_args['type'], $dgb_resource, $dgb_args['valid'] ?? true );
+		$dgb_req                    = new WP_REST_Request( 'POST', '/dgb/v1/webhooks/paypal' );
+		$dgb_req->set_header( 'content-type', 'application/json' );
+		foreach ( $dgb_headers as $dgb_name => $dgb_value ) {
+			$dgb_req->set_header( $dgb_name, $dgb_value );
+		}
+		$dgb_req->set_body( $dgb_body );
+		$dgb_res            = rest_do_request( $dgb_req );
+		$dgb_out['status']  = $dgb_res->get_status();
+		$dgb_out['data']    = rest_get_server()->response_to_data( $dgb_res, false );
+		break;
+
+	case 'money':
+		$dgb_payments = new \Digitum\Bookings\Services\PaymentService( \Digitum\Bookings\Plugin::instance()->settings() );
+		$dgb_booking  = ( new \Digitum\Bookings\Database\Repositories\BookingRepository() )->find_by_reference( $dgb_args['reference'] ?? '' );
+		switch ( $dgb_args['op'] ) {
+			case 'refund':
+				$dgb_result = $dgb_payments->refund( (int) $dgb_args['payment'], (string) $dgb_args['amount'], (string) ( $dgb_args['note'] ?? '' ), 1 );
+				break;
+			case 'mark_paid':
+				$dgb_result = $dgb_payments->mark_paid( (int) $dgb_booking['id'], 1 );
+				break;
+			case 'manual':
+				$dgb_result = $dgb_payments->record_manual( (int) $dgb_booking['id'], $dgb_args['method'], (string) $dgb_args['amount'], (string) ( $dgb_args['note'] ?? '' ), 1 );
+				break;
+			case 'expire':
+				$dgb_result = ( new \Digitum\Bookings\Services\Holds( \Digitum\Bookings\Plugin::instance()->settings() ) )->expire( new DateTimeImmutable( $dgb_args['at'], new DateTimeZone( 'UTC' ) ) );
+				break;
+		}
+		$dgb_out = is_wp_error( $dgb_result ) ? array( 'error' => $dgb_result->get_error_code(), 'message' => $dgb_result->get_error_message() ) : array( 'result' => $dgb_result );
+		break;
+
+	case 'proof_store':
+		$dgb_booking = ( new \Digitum\Bookings\Database\Repositories\BookingRepository() )->find_by_reference( $dgb_args['reference'] );
+		$dgb_tmp     = tempnam( sys_get_temp_dir(), 'dgb-proof' );
+		$dgb_bytes   = array(
+			'png' => "\x89PNG\r\n\x1A\n" . str_repeat( "\0", 2048 ),
+			'pdf' => "%PDF-1.4\n" . str_repeat( ' ', 2048 ) . "\n%%EOF\n",
+			'exe' => "MZ\x90\0" . str_repeat( "\0", 2048 ),
+			'big' => "\xFF\xD8\xFF\xE0" . str_repeat( 'x', 6 * 1024 * 1024 ),
+		)[ $dgb_args['kind'] ];
+		file_put_contents( $dgb_tmp, $dgb_bytes );
+		$dgb_result = ( new \Digitum\Bookings\Services\ProofService( \Digitum\Bookings\Plugin::instance()->settings() ) )->store( $dgb_booking, $dgb_tmp, $dgb_args['name'] ?? 'transfer.png' );
+		@unlink( $dgb_tmp );
+		if ( is_wp_error( $dgb_result ) ) {
+			$dgb_out['error'] = $dgb_result->get_error_code();
+		} else {
+			$dgb_proof          = ( new \Digitum\Bookings\Database\Repositories\ProofRepository() )->find( $dgb_result );
+			$dgb_dir            = \Digitum\Bookings\Services\ProofService::dir();
+			$dgb_out['id']      = $dgb_result;
+			$dgb_out['proof']   = $dgb_proof;
+			$dgb_out['exists']  = is_file( $dgb_dir . '/' . $dgb_proof['file_path'] );
+			$dgb_out['in_uploads'] = str_starts_with( $dgb_dir, wp_upload_dir()['basedir'] );
+			$dgb_out['htaccess'] = is_file( $dgb_dir . '/.htaccess' ) ? file_get_contents( $dgb_dir . '/.htaccess' ) : '';
+			$dgb_out['index']    = is_file( $dgb_dir . '/index.php' );
+			$dgb_out['media']    = (int) ( wp_count_attachments()->{'image/png'} ?? 0 );
+		}
+		break;
+
+	case 'render_admin':
+		wp_set_current_user( $dgb_args['user'] ?? 1 );
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		$_GET    = $dgb_args['get'] ?? array();
+		$dgb_set = \Digitum\Bookings\Plugin::instance()->settings();
+		add_filter( 'wp_die_handler', static fn() => static function ( $message ) {
+			throw new RuntimeException( is_string( $message ) ? $message : 'wp_die' );
+		} );
+		ob_start();
+		try {
+		if ( 'dashboard' === $dgb_args['screen'] ) {
+			( new \Digitum\Bookings\Admin\Screens\DashboardScreen( $dgb_set, \Digitum\Bookings\Plugin::instance()->product_type() ) )->render();
+		} elseif ( 'settings' === $dgb_args['screen'] ) {
+			( new \Digitum\Bookings\Admin\Screens\SettingsScreen( $dgb_set ) )->render();
+		} else {
+			( new \Digitum\Bookings\Admin\Screens\PaymentsScreen( $dgb_set ) )->render();
+		}
+		} catch ( RuntimeException $dgb_e ) {
+			$dgb_out['died'] = $dgb_e->getMessage();
+		}
+		$dgb_out['html'] = ob_get_clean();
+		break;
+
+	case 'stripe_contract':
+		// The plugin's Stripe requests against stripe-mock, which validates them against Stripe's OpenAPI spec.
+		add_filter( 'dgb_stripe_api_base', static fn() => $dgb_args['url'], 99 );
+		$dgb_payments = new \Digitum\Bookings\Services\PaymentService( \Digitum\Bookings\Plugin::instance()->settings() );
+		$dgb_stripe   = $dgb_payments->gateways()->get( 'stripe' );
+		$dgb_booking  = $dgb_payments->bookings()->find_by_reference( $dgb_args['reference'] );
+		add_filter( 'dgb_stripe_payment_intent_args', static function ( $args ) use ( &$dgb_out ) {
+			$dgb_out['args'] = array_keys( $args );
+			return $args;
+		} );
+		global $wpdb;
+		$wpdb->delete( $wpdb->prefix . 'dgb_payments', array( 'booking_id' => (int) $dgb_booking['id'] ) ); // Force a new PaymentIntent.
+		$dgb_box               = $dgb_stripe->pay_box( $dgb_booking, $dgb_payments->due( $dgb_booking ), $dgb_payments );
+		$dgb_out['pay_box']    = is_wp_error( $dgb_box ) ? $dgb_box->get_error_message() : 'ok';
+		$dgb_row               = end( $dgb_payments->repository()->for_booking( (int) $dgb_booking['id'] ) );
+		$dgb_get               = $dgb_stripe->api( 'GET', '/v1/payment_intents/' . $dgb_row['intent_id'] );
+		$dgb_out['retrieve']   = is_wp_error( $dgb_get ) ? $dgb_get->get_error_message() : 'ok';
+		$dgb_ref               = $dgb_stripe->refund( $dgb_row, '100.00', 'Contract test', 'dgb-refund-contract-' . wp_generate_uuid4() );
+		$dgb_out['refund']     = is_wp_error( $dgb_ref ) ? $dgb_ref->get_error_message() : 'ok';
+		$dgb_list              = $dgb_stripe->api( 'GET', '/v1/refunds?' . http_build_query( array( 'payment_intent' => $dgb_row['intent_id'], 'limit' => 100 ) ) );
+		$dgb_out['list']       = is_wp_error( $dgb_list ) ? $dgb_list->get_error_message() : 'ok';
+		$dgb_bad               = $dgb_stripe->api( 'POST', '/v1/payment_intents', array( 'amount' => 100, 'currency' => 'aed', 'not_a_parameter' => 'x' ) );
+		$dgb_out['validating'] = is_wp_error( $dgb_bad );
+		break;
+
 	case 'install':
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		wp_install( 'Test site', 'admin', 'admin@example.test', true, '', 'password' );
