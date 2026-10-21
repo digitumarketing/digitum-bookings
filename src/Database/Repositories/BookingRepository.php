@@ -190,6 +190,44 @@ final class BookingRepository {
 	}
 
 	/**
+	 * Update columns of a booking (not its status: use transition() for that).
+	 *
+	 * @param int                  $id   Booking id.
+	 * @param array<string, mixed> $data Columns.
+	 * @param \DateTimeImmutable   $now  Current time.
+	 */
+	public function update( int $id, array $data, \DateTimeImmutable $now ): void {
+		unset( $data['id'], $data['status'], $data['reference'] );
+		$data['updated_at'] = self::utc( $now );
+		$this->db->update( $this->table( 'bookings' ), $data, array( 'id' => $id ) );
+	}
+
+	/**
+	 * Type of the most recent timeline event of a booking.
+	 *
+	 * @param int $booking_id Booking id.
+	 */
+	public function last_event_type( int $booking_id ): string {
+		$table = $this->table( 'booking_events' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery -- table name from a constant.
+		return (string) $this->db->get_var( $this->db->prepare( "SELECT type FROM {$table} WHERE booking_id = %d ORDER BY id DESC LIMIT 1", $booking_id ) );
+	}
+
+	/**
+	 * Bookings with a status, oldest first.
+	 *
+	 * @param string $status Booking status.
+	 * @param int    $limit  Rows.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function with_status( string $status, int $limit = 100 ): array {
+		$table = $this->table( 'bookings' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery -- table name from a constant.
+		$rows = $this->db->get_results( $this->db->prepare( "SELECT * FROM {$table} WHERE status = %s ORDER BY id ASC LIMIT %d", $status, $limit ), ARRAY_A );
+		return is_array( $rows ) ? $rows : array();
+	}
+
+	/**
 	 * Held bookings whose deadline has passed.
 	 *
 	 * @param \DateTimeImmutable $now   Current time.

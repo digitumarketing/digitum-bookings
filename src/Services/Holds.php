@@ -125,6 +125,13 @@ final class Holds {
 		$bookings = $this->bookings ?? new BookingRepository();
 		$count    = 0;
 		foreach ( $bookings->expired_holds( $now ) as $row ) {
+			// A card payment may have succeeded without its webhook arriving: ask Stripe before releasing.
+			if ( BookingStatus::PENDING_PAYMENT === $row['status'] ) {
+				$booking = $bookings->find( (int) $row['id'] );
+				if ( $booking && 'stripe' === ( $booking['payment_method'] ?? '' ) && BookingStatus::PENDING_PAYMENT !== ( new PaymentService( $this->settings, null, $bookings ) )->refresh( $booking )['status'] ) {
+					continue;
+				}
+			}
 			$message = BookingStatus::AWAITING_TRANSFER === $row['status']
 				? __( 'Bank transfer not received in time; booking released.', 'digitum-bookings' )
 				: __( 'Payment not completed in time; booking released.', 'digitum-bookings' );

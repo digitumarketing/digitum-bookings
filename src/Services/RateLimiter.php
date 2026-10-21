@@ -23,6 +23,14 @@ final class RateLimiter {
 	 * @param string $client  Client key (defaults to the IP address).
 	 */
 	public function hit( string $action, int $limit, int $window, string $client = '' ): bool {
+		/**
+		 * Filters a rate limit: requests allowed per client in the window.
+		 *
+		 * @param int    $limit  Requests allowed. Defaults: quote 120/minute, create 10/hour, pay 30 and proof 10 per 10 minutes.
+		 * @param string $action quote, create, pay or proof.
+		 * @param int    $window Window in seconds.
+		 */
+		$limit  = (int) apply_filters( 'dgb_rate_limit', $limit, $action, $window );
 		$client = '' !== $client ? $client : self::client_ip();
 		$key    = 'dgb_rl_' . md5( $action . '|' . $client );
 		$state  = get_transient( $key );
