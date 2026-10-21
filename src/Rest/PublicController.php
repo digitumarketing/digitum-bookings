@@ -345,28 +345,7 @@ final class PublicController {
 			return new \WP_Error( 'dgb_not_found', __( 'Booking not found.', 'digitum-bookings' ), array( 'status' => 404 ) );
 		}
 
-		$view = ( new Confirmation( $this->settings ) )->view( $booking );
-		$time = (string) ( $item['pickup_window_start'] ?? '' );
-		if ( '' === $time ) {
-			$time = (string) ( $item['start_time'] ?? '' );
-		}
-		$start   = new \DateTimeImmutable( $item['date'] . ' ' . substr( '' !== $time ? $time : '09:00:00', 0, 8 ), wp_timezone() );
-		$minutes = 180;
-		foreach ( ( new VariantRepository() )->for_product( (int) $item['product_id'] ) as $row ) {
-			if ( (int) $row['id'] === (int) $item['variant_id'] && ! empty( $row['duration_minutes'] ) ) {
-				$minutes = (int) $row['duration_minutes'];
-			}
-		}
-		$location = $view['pickup'] ? $view['pickup_text'] : ( $view['meeting'] ? trim( $view['meeting']['name'] . ', ' . $view['meeting']['address'], ', ' ) : '' );
-		$body     = Ics::build(
-			(string) $booking['reference'],
-			$view['tour'],
-			$start,
-			$minutes,
-			$location,
-			sprintf( '%s %s', __( 'Booking reference', 'digitum-bookings' ), $booking['reference'] ),
-			(string) wp_parse_url( home_url(), PHP_URL_HOST )
-		);
+		$body = Ics::for_booking( $booking );
 
 		add_filter(
 			'rest_pre_serve_request',

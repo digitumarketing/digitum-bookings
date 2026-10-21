@@ -7,6 +7,8 @@
 
 namespace Digitum\Bookings\Services;
 
+use Digitum\Bookings\Database\Repositories\VariantRepository;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -46,6 +48,41 @@ final class Ics {
 			'END:VCALENDAR',
 		);
 		return implode( "\r\n", array_map( array( self::class, 'fold' ), $lines ) ) . "\r\n";
+	}
+
+	/**
+	 * Calendar file of a booking (start = pickup window, else the session start).
+	 *
+	 * @param array<string, mixed> $booking Booking row.
+	 * @return string|null Null when the booking has no date.
+	 */
+	public static function for_booking( array $booking ): ?string {
+		$d = BookingDetails::of( $booking );
+		if ( '' === $d['date_raw'] ) {
+			return null;
+		}
+		$item = $d['item'];
+		$time = (string) ( $item['pickup_window_start'] ?? '' );
+		if ( '' === $time ) {
+			$time = (string) ( $item['start_time'] ?? '' );
+		}
+		$start   = new \DateTimeImmutable( $d['date_raw'] . ' ' . substr( '' !== $time ? $time : '09:00:00', 0, 8 ), wp_timezone() );
+		$minutes = 180;
+		foreach ( ( new VariantRepository() )->for_product( (int) $d['product_id'] ) as $row ) {
+			if ( (int) $row['id'] === (int) $item['variant_id'] && ! empty( $row['duration_minutes'] ) ) {
+				$minutes = (int) $row['duration_minutes'];
+			}
+		}
+		$location = $d['pickup'] ? $d['pickup_text'] : ( $d['meeting'] ? trim( $d['meeting']['name'] . ', ' . $d['meeting']['address'], ', ' ) : '' );
+		return self::build(
+			(string) $booking['reference'],
+			$d['tour'],
+			$start,
+			$minutes,
+			$location,
+			sprintf( '%s %s', __( 'Booking reference', 'digitum-bookings' ), $booking['reference'] ),
+			(string) wp_parse_url( home_url(), PHP_URL_HOST )
+		);
 	}
 
 	/**

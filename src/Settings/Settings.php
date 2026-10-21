@@ -33,6 +33,7 @@ final class Settings {
 			'general'   => __( 'General', 'digitum-bookings' ),
 			'currency'  => __( 'Currency & VAT', 'digitum-bookings' ),
 			'payments'  => __( 'Payments', 'digitum-bookings' ),
+			'emails'    => __( 'Emails', 'digitum-bookings' ),
 			'analytics' => __( 'Analytics', 'digitum-bookings' ),
 			'privacy'   => __( 'Privacy', 'digitum-bookings' ),
 			'branding'  => __( 'Branding', 'digitum-bookings' ),
@@ -413,6 +414,59 @@ final class Settings {
 					'default' => 24,
 				),
 			),
+			'emails'    => array(
+				'from_name'        => array(
+					'type'    => 'text',
+					'label'   => __( 'From name', 'digitum-bookings' ),
+					'help'    => __( 'Empty: the business name (Settings › General), or the site title.', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'from_email'       => array(
+					'type'    => 'email',
+					'label'   => __( 'From email', 'digitum-bookings' ),
+					'help'    => __( 'Use an address on your own domain, and an SMTP plugin so emails are delivered reliably. Empty: the business email.', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'admin_recipients' => array(
+					'type'    => 'text',
+					'label'   => __( 'Staff recipients', 'digitum-bookings' ),
+					'help'    => __( 'Comma-separated email addresses for staff emails. Empty: the business email, or the site admin email.', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'reminder_hours'   => array(
+					'type'    => 'number',
+					'label'   => __( 'Reminder', 'digitum-bookings' ),
+					'suffix'  => __( 'hours before the session (0 = no reminder)', 'digitum-bookings' ),
+					'min'     => 0,
+					'max'     => 168,
+					'step'    => 1,
+					'default' => 24,
+				),
+				'summary_enabled'  => array(
+					'type'    => 'checkbox',
+					'label'   => __( 'Daily summary', 'digitum-bookings' ),
+					'text'    => __( 'Email staff a summary of tomorrow’s bookings every day', 'digitum-bookings' ),
+					'default' => true,
+				),
+				'summary_time'     => array(
+					'type'    => 'select',
+					'label'   => __( 'Send the summary at', 'digitum-bookings' ),
+					'options' => array( self::class, 'hours' ),
+					'default' => '18:00',
+				),
+				'webhook_url'      => array(
+					'type'    => 'url',
+					'label'   => __( 'Webhook URL', 'digitum-bookings' ),
+					'help'    => __( 'Optional. Booking and payment events are sent here as signed JSON (Zapier, Make, GoHighLevel…). See docs/DEVELOPER-HOOKS.md.', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'webhook_secret'   => array(
+					'type'    => 'secret',
+					'label'   => __( 'Webhook signing secret', 'digitum-bookings' ),
+					'help'    => __( 'Each request carries X-DGB-Signature: sha256=HMAC of "timestamp.body" with this secret.', 'digitum-bookings' ),
+					'default' => '',
+				),
+			),
 			'analytics' => array(
 				'datalayer'            => array(
 					'type'    => 'checkbox',
@@ -495,6 +549,20 @@ final class Settings {
 			}
 		}
 		return $defaults;
+	}
+
+	/**
+	 * Whole hours of the day for time selects.
+	 *
+	 * @return array<string, string>
+	 */
+	public static function hours(): array {
+		$hours = array();
+		for ( $h = 0; $h < 24; $h++ ) {
+			$value           = sprintf( '%02d:00', $h );
+			$hours[ $value ] = $value;
+		}
+		return $hours;
 	}
 
 	/**
