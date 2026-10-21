@@ -20,8 +20,8 @@ If the site already serves tours under `/tour/` (for example the Traveler theme'
 | M2 Pricing and availability | price calculator, deposits, closures, holds, pickup zones | done (v0.2.0) |
 | M3 Front-end flow | booking widget, block, shortcode, Elementor widget | done (v0.3.0) |
 | M4 Payments | Stripe, PayPal, bank transfer with screenshot upload, pay on arrival | done (v0.4.0) |
-| M5 Admin operations | dashboard, calendar, bookings, manifest, check-in, emails | next |
-| M6 Integrations | schema, llms.txt, REST API, Traveler importer, CSV | |
+| M5 Admin operations | dashboard, calendar, bookings, manifest, check-in, emails | done (v0.5.0) |
+| M6 Integrations | schema, llms.txt, REST API, Traveler importer, CSV | next |
 | M7 Release | update checker, Arabic RTL, docs, demo data | |
 
 The full specification is in [CLAUDE.md](CLAUDE.md). The approved layout is at https://claude.ai/artifact/2bkeTdhGqaG8qRdftzd49h.
@@ -30,12 +30,10 @@ The full specification is in [CLAUDE.md](CLAUDE.md). The approved layout is at h
 
 1. Set the same version in three places: the `Version:` header and `DGB_VERSION` in `digitum-bookings.php`, and `Stable tag:` in `readme.txt`.
 2. Add the changes to `docs/CHANGELOG.md` and the changelog in `readme.txt`.
-3. Commit, then tag and push:
-   ```bash
-   git tag v0.4.0
-   git push origin v0.4.0
-   ```
-4. The **Release** GitHub Action checks that the tag matches the version, builds `digitum-bookings.zip` and attaches it to a new GitHub release.
+3. Commit and push to `main`, then either
+   - open **Actions › Release › Run workflow** on GitHub (it releases the version in `digitum-bookings.php` and creates the tag), or
+   - tag and push: `git tag v0.5.0 && git push origin v0.5.0`.
+4. The **Release** GitHub Action checks that the versions match, builds `digitum-bookings.zip` and attaches it to a new GitHub release.
 
 ## Development
 
@@ -59,7 +57,7 @@ git clone --depth 1 --branch v2.1.16 https://github.com/WordPress/sqlite-databas
 DGB_WP_DIR=.wp-test/wordpress DGB_SQLITE_DIR=.wp-test/sqlite composer test:integration
 ```
 
-Set `DGB_PLUGIN_DIR` to an unzipped `digitum-bookings` folder to test a release build instead of the checkout, and `DGB_PREVIOUS_DIR` to a checkout of the previous release (`git worktree add ../previous v0.3.0`) to test upgrading from it.
+Set `DGB_PLUGIN_DIR` to an unzipped `digitum-bookings` folder to test a release build instead of the checkout, and `DGB_PREVIOUS_DIR` to a checkout of the previous release (`git worktree add ../previous v0.4.0`) to test upgrading from it.
 
 Browser tests (Playwright, desktop and phone, with axe accessibility checks) build a test site from the same checkouts and serve it with PHP's built-in server:
 

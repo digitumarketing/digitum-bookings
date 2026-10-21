@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.5.0 (M5 Admin operations)
+
+- **Bookings** list: status tabs with counts, filters (tour, dates, source, payment method), search by reference, name, email or phone, bulk cancel and bulk erase of guest data, CSV export of the filtered list (spreadsheet formulas neutralised).
+- **Booking page**: trip (tour, option, date, session, guests, pickup, extras, reminder time), guest, source and UTM / gclid, payments (Mark as paid, payment link, manual payments, refunds, screenshots), quote form for price-on-request tours, internal notes, email log with Resend, timeline with staff names, erase guest data. Actions: confirm, cancel, mark arrived / no-show / undo, change date or session (the guest is emailed), email the confirmation again.
+- **Calendar**: month, week and day views; one tour shows all its sessions with bookings and guests, all tours show sessions with bookings. Drag a booking to another day (or session in the day view) to move it; close or open a whole day or one session. Works without JavaScript for viewing; every booking links to its page.
+- **Manifest** per day, tour and session: guests, phone, adults / children / infants, vehicles, pickup zone / hotel / room / window, vehicle or guide assignment, amount to collect. Print view (A4 landscape, header on every page) and CSV.
+- **Check-in** screen for guides on a phone: Arrived / No-show / Undo without a page reload (plain forms without JavaScript).
+- **Dashboard**: today's sessions (bookings, guests, pickups, unpaid), revenue for 7 and 30 days, open quote requests, bank transfers waiting.
+- **Emails** for every event of the spec (booking confirmed with calendar file, bank transfer received with bank details and upload link, screenshot uploaded with the file attached, hold expired, quote request, quote sent with payment link, payment received, booking changed, reminder, cancelled, refund, daily summary of tomorrow), to the guest and to staff. Each can be switched off and edited (subject, HTML, plain text) on Digitum Bookings › Emails, with preview and a test email. HTML with a plain-text part; staff emails reply to the guest. Every email is logged on the booking.
+- **Reminders** before the session (24 hours by default, from the pickup time) and the **daily summary** (18:00 by default) run through Action Scheduler, now bundled with the plugin. Reminders move when a booking is moved and are removed when it is cancelled.
+- **Webhooks** to Zapier, Make, GoHighLevel and similar: booking created, status changed, changed, payment completed, refunded, as signed JSON (HMAC-SHA256), delivered in the background and retried after 1 minute, 10 minutes and 1 hour.
+- `dgb_send_sms` filter to send a text message alongside guest emails through any SMS service.
+- Staff REST API (`dgb/v1/admin/…`): calendar, booking, move, status (guides may check in), closures, manifest.
+- Settings › Emails: sender, staff recipients, reminder hours, daily summary time, webhook URL and secret.
+- Database schema 1.4.0 (vehicle assignment; audience and subject in the notification log).
+- Release workflow can be started from GitHub (Actions › Release › Run workflow) as well as by pushing a tag.
+
 ## 0.4.0 (M4 Payments)
 
 - Payment gateways behind one `GatewayInterface`; new gateways plug in with the `dgb_gateways` filter. Built in: Stripe, PayPal, bank transfer, pay on arrival. Telr and Network International (N-Genius) are registered as stubs with TODOs and are never offered.

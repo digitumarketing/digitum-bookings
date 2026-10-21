@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Digitum Bookings 0.4.0\n"
+"Project-Id-Version: Digitum Bookings 0.5.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/digitum-bookings\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-21T09:59:18+00:00\n"
+"POT-Creation-Date: 2026-10-21T16:31:20+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: digitum-bookings\n"
@@ -45,23 +45,191 @@ msgstr ""
 msgid "Digitum Bookings needs PHP %1$s or newer. This site runs PHP %2$s."
 msgstr ""
 
-#: src/Admin/Menus.php:79
-#: src/Admin/Screens/DashboardScreen.php:85
+#: src/Admin/ListTables/BookingsListTable.php:83
+#: src/Admin/Screens/ManifestScreen.php:228
+#: src/Admin/Screens/ManifestScreen.php:361
+#: src/Admin/Screens/PaymentsScreen.php:152
+#: src/Admin/Screens/PaymentsScreen.php:366
+msgid "Booking"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:84
+#: src/Admin/Screens/BookingsScreen.php:360
+#: src/Admin/Screens/ManifestScreen.php:229
+#: src/Admin/Screens/ManifestScreen.php:362
+#: src/Admin/Screens/PaymentsScreen.php:153
+msgid "Guest"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:85
+#: src/Admin/ListTables/BookingsListTable.php:181
+#: src/Admin/Screens/BookingsScreen.php:300
+#: src/Admin/Screens/CalendarScreen.php:174
+#: src/Admin/Screens/ManifestScreen.php:333
+#: src/Integrations/Elementor/BookingWidget.php:56
+#: src/PostTypes/ProductType.php:99
+#: src/Services/Notifications/MergeTags.php:100
+#: templates/front/confirmation.php:61
+#: assets/src/blocks/booking-block.js:24
+msgid "Tour"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:86
+#: src/Admin/Screens/BookingsScreen.php:302
+#: src/Admin/Screens/BookingsScreen.php:345
+#: src/Admin/Screens/ManifestScreen.php:330
+#: src/Admin/Screens/PaymentsScreen.php:265
+#: src/Admin/Screens/PaymentsScreen.php:366
+#: src/Services/Notifications/MergeTags.php:101
+#: templates/front/booking-widget.php:95
+#: templates/front/confirmation.php:64
+msgid "Date"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:87
+#: src/Admin/Screens/BookingsScreen.php:306
+#: src/Admin/Screens/DashboardScreen.php:159
+#: src/Services/Notifications/MergeTags.php:103
+#: templates/front/booking-widget.php:117
+#: templates/front/confirmation.php:71
+msgid "Guests"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:88
+#: src/Admin/Screens/PaymentsScreen.php:230
+#: src/Frontend/Widget.php:282
+#: src/Services/Notifications/MergeTags.php:105
+#: templates/front/confirmation.php:178
+msgid "Total"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:89
+#: src/Admin/Screens/BookingsScreen.php:490
+#: src/Admin/Screens/ManifestScreen.php:367
+#: src/Admin/Screens/PaymentsScreen.php:269
+#: src/Admin/Screens/PaymentsScreen.php:366
+msgid "Status"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:90
+#: src/Admin/ListTables/BookingsListTable.php:189
+#: src/Admin/Screens/BookingsScreen.php:391
+#: src/Admin/Screens/BookingsScreen.php:395
+msgid "Source"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:114
+#: src/Admin/Screens/ZonesScreen.php:158
+#: src/Admin/Screens/ZonesScreen.php:194
+msgid "Cancel"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:115
+#: src/Admin/Screens/BookingsScreen.php:463
+msgid "Erase guest data"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:128
+msgid "All"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:182
+#: src/Admin/Screens/CalendarScreen.php:176
+#: src/Admin/Screens/ManifestScreen.php:335
+msgid "All tours"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:187
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:584
+#: templates/front/booking-widget.php:43
+#: templates/front/booking-widget.php:56
+#: templates/front/booking-widget.php:347
+msgid "From"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:188
+msgid "to"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:189
+msgid "All sources"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:194
+#: src/Admin/Screens/BookingsScreen.php:403
+#: templates/front/booking-widget.php:301
+msgid "Payment method"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:194
+msgid "All payment methods"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:199
+msgid "Filter"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:200
+msgid "Export CSV"
+msgstr ""
+
+#. translators: %s: booking reference.
+#: src/Admin/ListTables/BookingsListTable.php:211
+#, php-format
+msgid "Select %s"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:231
+msgid "Erased"
+msgstr ""
+
+#. translators: %d: number of vehicles.
+#: src/Admin/ListTables/BookingsListTable.php:262
+#: src/Admin/Screens/BookingsScreen.php:307
+#: src/Admin/Screens/CheckInScreen.php:154
+#: src/Admin/Screens/ManifestScreen.php:376
+#: src/Services/Notifications/MergeTags.php:103
+#: templates/front/confirmation.php:77
+#, php-format
+msgid "%d vehicle"
+msgid_plural "%d vehicles"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Admin/ListTables/BookingsListTable.php:272
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:164
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:459
+#: src/Frontend/Widget.php:296
+msgid "On request"
+msgstr ""
+
+#. translators: %s: amount still to pay.
+#: src/Admin/ListTables/BookingsListTable.php:277
+#, php-format
+msgid "Due %s"
+msgstr ""
+
+#: src/Admin/ListTables/BookingsListTable.php:311
+msgid "No bookings found."
+msgstr ""
+
+#: src/Admin/Menus.php:84
+#: src/Admin/Screens/DashboardScreen.php:86
 msgid "Dashboard"
 msgstr ""
 
-#: src/Admin/Menus.php:80
+#: src/Admin/Menus.php:85
 #: src/PostTypes/ProductType.php:98
 #: src/PostTypes/ProductType.php:109
 msgid "Tours"
 msgstr ""
 
-#: src/Admin/Menus.php:81
+#: src/Admin/Menus.php:86
 #: src/Admin/Screens/ZonesScreen.php:71
 msgid "Pickup zones"
 msgstr ""
 
-#: src/Admin/Menus.php:82
+#: src/Admin/Menus.php:87
 #: src/Admin/Screens/SettingsScreen.php:121
 msgid "Settings"
 msgstr ""
@@ -134,12 +302,6 @@ msgid "Price per car up to the maximum guests; extra cars are added automaticall
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:164
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:459
-#: src/Frontend/Widget.php:296
-msgid "On request"
-msgstr ""
-
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:164
 msgid "No price is shown. The guest sends a quote request."
 msgstr ""
 
@@ -173,8 +335,8 @@ msgid "Prices exclude VAT"
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:203
-#: src/Admin/Screens/PaymentsScreen.php:244
-#: src/Admin/Screens/PaymentsScreen.php:546
+#: src/Admin/Screens/PaymentsScreen.php:233
+#: src/Admin/Screens/PaymentsScreen.php:529
 #: templates/front/confirmation.php:183
 msgid "Deposit"
 msgstr ""
@@ -286,14 +448,15 @@ msgid "The pickup time guests see comes from the session they book, not from the
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:335
+#: src/Admin/Screens/BookingsScreen.php:370
 #: src/Admin/Screens/ZonesScreen.php:144
 #: src/Admin/Screens/ZonesScreen.php:171
 msgid "Name"
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:336
-#: src/Admin/Screens/PaymentsScreen.php:278
-#: src/Admin/Screens/PaymentsScreen.php:383
+#: src/Admin/Screens/PaymentsScreen.php:267
+#: src/Admin/Screens/PaymentsScreen.php:366
 msgid "Type"
 msgstr ""
 
@@ -482,8 +645,14 @@ msgstr ""
 msgid "Meet at the meeting point"
 msgstr ""
 
+#. translators: %d: number of vehicles.
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:518
+#: src/Admin/Screens/BookingsScreen.php:317
+#: src/Admin/Screens/CheckInScreen.php:155
+#: src/Admin/Screens/ManifestScreen.php:249
+#: src/Admin/Screens/ManifestScreen.php:377
 #: src/Admin/Screens/ZonesScreen.php:101
+#: src/Services/Notifications/Listener.php:204
 #: templates/front/booking-widget.php:153
 msgid "Meeting point"
 msgstr ""
@@ -505,7 +674,7 @@ msgid "Minimum notice"
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:538
-#: src/Settings/Settings.php:408
+#: src/Settings/Settings.php:409
 msgid "hours"
 msgstr ""
 
@@ -553,19 +722,17 @@ msgstr ""
 msgid "Close a date range (for example a holiday or when you are fully booked), or change prices for it by a percentage. Newly added sessions appear here after saving."
 msgstr ""
 
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:584
-#: templates/front/booking-widget.php:43
-#: templates/front/booking-widget.php:56
-#: templates/front/booking-widget.php:347
-msgid "From"
-msgstr ""
-
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:585
+#: src/Admin/Screens/BookingsScreen.php:489
 msgid "To"
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:586
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:606
+#: src/Admin/Screens/BookingsScreen.php:304
+#: src/Admin/Screens/BookingsScreen.php:347
+#: src/Admin/Screens/DashboardScreen.php:157
+#: src/Services/Notifications/MergeTags.php:102
 #: templates/front/booking-widget.php:108
 #: templates/front/confirmation.php:68
 msgid "Session"
@@ -597,6 +764,7 @@ msgid "To date"
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:613
+#: src/Admin/Screens/CalendarScreen.php:245
 msgid "Closed"
 msgstr ""
 
@@ -609,7 +777,7 @@ msgid "Price change in percent, e.g. 20 or -10"
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:629
-#: src/Admin/Screens/PaymentsScreen.php:334
+#: src/Admin/Screens/PaymentsScreen.php:323
 msgid "Note"
 msgstr ""
 
@@ -637,379 +805,1018 @@ msgstr ""
 msgid "Remove"
 msgstr ""
 
-#. translators: %s: post type name, e.g. st_tours.
-#: src/Admin/Screens/DashboardScreen.php:59
+#: src/Admin/Screens/BookingsScreen.php:88
+#: src/Admin/Screens/BookingsScreen.php:211
+#: src/Admin/Screens/DashboardScreen.php:158
+msgid "Bookings"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:125
+msgid "Website"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:126
+msgid "Ads"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:127
+msgid "Staff"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:138
+msgid "Card (Stripe)"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:139
+#: src/Gateways/PayPal.php:50
+#: src/Settings/Settings.php:276
+#: src/Settings/Settings.php:348
+msgid "PayPal"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:140
+#: src/Gateways/BankTransfer.php:30
+#: src/Settings/Settings.php:349
+#: src/Settings/Settings.php:355
+#: src/Settings/Settings.php:360
+msgid "Bank transfer"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:141
+#: src/Gateways/PayOnArrival.php:28
+#: src/Settings/Settings.php:210
+msgid "Pay on arrival"
+msgstr ""
+
+#. translators: %d: number of bookings.
+#: src/Admin/Screens/BookingsScreen.php:183
 #, php-format
-msgid "Using the existing post type “%s”. Tour URLs are unchanged."
-msgstr ""
+msgid "Guest data erased from %d booking."
+msgid_plural "Guest data erased from %d bookings."
+msgstr[0] ""
+msgstr[1] ""
 
-#. translators: %s: URL slug.
-#: src/Admin/Screens/DashboardScreen.php:61
+#. translators: %d: number of bookings.
+#: src/Admin/Screens/BookingsScreen.php:185
 #, php-format
-msgid "Using the Digitum Bookings Tours post type at /%s/."
+msgid "%d booking cancelled."
+msgid_plural "%d bookings cancelled."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Admin/Screens/BookingsScreen.php:195
+#: src/Admin/Screens/BookingsScreen.php:657
+msgid "You do not have permission to manage bookings."
 msgstr ""
 
-#: src/Admin/Screens/DashboardScreen.php:66
-msgid "Add business name, phone and email"
+#: src/Admin/Screens/BookingsScreen.php:206
+msgid "Booking not found"
 msgstr ""
 
-#: src/Admin/Screens/DashboardScreen.php:72
-msgid "Create or import your tours"
+#: src/Admin/Screens/BookingsScreen.php:218
+msgid "Search bookings"
 msgstr ""
 
-#: src/Admin/Screens/DashboardScreen.php:78
-msgid "Fill in “Booking settings” on each tour and switch on “Take bookings”"
-msgstr ""
-
-#: src/Admin/Screens/DashboardScreen.php:88
-msgid "Set up"
-msgstr ""
-
-#. translators: 1: number of tours taking bookings, 2: number of published tours.
-#: src/Admin/Screens/DashboardScreen.php:94
+#. translators: %s: booking reference.
+#: src/Admin/Screens/BookingsScreen.php:257
 #, php-format
-msgid "%1$d of %2$d published tours take bookings."
+msgid "Booking %s"
 msgstr ""
 
-#: src/Admin/Screens/DashboardScreen.php:103
-msgid "Done"
+#: src/Admin/Screens/BookingsScreen.php:262
+msgid "All bookings"
 msgstr ""
 
-#: src/Admin/Screens/DashboardScreen.php:103
-msgid "To do"
+#: src/Admin/Screens/BookingsScreen.php:268
+msgid "Confirm"
 msgstr ""
 
-#: src/Admin/Screens/DashboardScreen.php:113
-msgid "The tour post type is not registered. Check Settings › General."
+#: src/Admin/Screens/BookingsScreen.php:269
+msgid "Mark arrived"
 msgstr ""
 
-#: src/Admin/Screens/DashboardScreen.php:118
-#: src/Admin/Screens/PaymentsScreen.php:114
-#: src/Admin/Screens/PaymentsScreen.php:531
-msgid "Waiting for bank transfer"
+#: src/Admin/Screens/BookingsScreen.php:270
+msgid "Mark no-show"
 msgstr ""
 
-#: src/Admin/Screens/DashboardScreen.php:123
-msgid "About Digitum"
+#: src/Admin/Screens/BookingsScreen.php:271
+msgid "Undo check-in"
 msgstr ""
 
-#: src/Admin/Screens/DashboardScreen.php:124
-msgid "Digitum Bookings is built and supported by Digitum Marketing Ltd."
+#: src/Admin/Screens/BookingsScreen.php:272
+msgid "Cancel booking"
 msgstr ""
 
-#: src/Admin/Screens/DashboardScreen.php:125
-msgid "digitum.marketing"
+#: src/Admin/Screens/BookingsScreen.php:276
+msgid "Cancel this booking? The guest is emailed."
 msgstr ""
 
-#. translators: %s: plugin version.
-#: src/Admin/Screens/DashboardScreen.php:129
+#: src/Admin/Screens/BookingsScreen.php:290
+msgid "Email the confirmation again"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:293
+msgid "Guest’s booking page"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:298
+msgid "Trip"
+msgstr ""
+
+#. translators: %d: number of vehicles.
+#: src/Admin/Screens/BookingsScreen.php:308
+#: src/Admin/Screens/ManifestScreen.php:233
+#: src/Admin/Screens/ManifestScreen.php:364
+#: src/Admin/Screens/ZonesScreen.php:76
+#: src/Admin/Screens/ZonesScreen.php:146
+#: src/Services/Notifications/MergeTags.php:104
+msgid "Pickup"
+msgstr ""
+
+#. translators: %s: meeting point.
+#: src/Admin/Screens/BookingsScreen.php:315
 #, php-format
-msgid "Version %s"
+msgid "Meets at %s"
 msgstr ""
 
+#: src/Admin/Screens/BookingsScreen.php:322
+#: templates/front/booking-widget.php:214
+msgid "Extras"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:326
+#: src/Settings/Settings.php:438
+msgid "Reminder"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:334
+#: src/Admin/Screens/ManifestScreen.php:234
+#: src/Admin/Screens/ManifestScreen.php:365
+msgid "Vehicle / guide"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:336
+msgid "Save"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:340
+msgid "Change date or session"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:353
+msgid "Move and email the guest"
+msgstr ""
+
+#. translators: %s: date.
+#: src/Admin/Screens/BookingsScreen.php:365
+#, php-format
+msgid "Personal data erased on %s."
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:372
+#: src/Admin/Screens/BookingsScreen.php:488
+#: src/Settings/Settings.php:67
+#: templates/front/booking-widget.php:250
+msgid "Email"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:374
+#: src/Admin/Screens/ManifestScreen.php:230
+#: src/Settings/Settings.php:62
+#: templates/front/booking-widget.php:256
+msgid "Phone"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:377
+msgid "Nationality"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:381
+msgid "Requests"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:384
+msgid "Marketing emails"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:385
+msgid "Yes"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:385
+msgid "No"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:393
+msgid "Booked"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:411
+msgid "Send a quote"
+msgstr ""
+
+#. translators: %s: currency code.
+#: src/Admin/Screens/BookingsScreen.php:419
+#, php-format
+msgid "Price (%s)"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:423
+msgid "Message"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:425
+msgid "Send quote with payment link"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:430
 #: src/Admin/Screens/PaymentsScreen.php:63
-#: src/Admin/Screens/PaymentsScreen.php:92
+#: src/Admin/Screens/PaymentsScreen.php:108
 #: src/Settings/Settings.php:35
 msgid "Payments"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:82
-#: src/Admin/Screens/PaymentsScreen.php:494
-msgid "You do not have permission to manage payments."
+#: src/Admin/Screens/BookingsScreen.php:433
+msgid "Internal notes"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:102
-#: src/Rest/PublicController.php:367
-#: templates/front/confirmation.php:17
-msgid "Booking reference"
+#: src/Admin/Screens/BookingsScreen.php:441
+msgid "Internal note"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:104
-msgid "Open"
+#: src/Admin/Screens/BookingsScreen.php:442
+msgid "Only staff see notes."
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:109
-msgid "No booking with this reference."
+#: src/Admin/Screens/BookingsScreen.php:443
+msgid "Add note"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:132
-msgid "No bookings are waiting for a bank transfer."
+#: src/Admin/Screens/BookingsScreen.php:448
+msgid "Timeline"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:140
-#: src/Admin/Screens/PaymentsScreen.php:221
-#: src/Admin/Screens/PaymentsScreen.php:383
-msgid "Booking"
+#: src/Admin/Screens/BookingsScreen.php:457
+msgid "Personal data"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:141
-#: src/Admin/Screens/PaymentsScreen.php:227
-msgid "Guest"
+#: src/Admin/Screens/BookingsScreen.php:458
+msgid "Erase this guest’s name, email, phone, requests, hotel and payment screenshots? This cannot be undone."
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:142
-msgid "Amount due"
+#: src/Admin/Screens/BookingsScreen.php:462
+msgid "Removes the guest’s personal data. The booking, its amounts and dates stay for reports."
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:143
-#: src/Admin/Screens/PaymentsScreen.php:232
-msgid "Held until"
+#: src/Admin/Screens/BookingsScreen.php:477
+#: src/Admin/Screens/EmailsScreen.php:48
+#: src/Admin/Screens/EmailsScreen.php:64
+#: src/Settings/Settings.php:36
+msgid "Emails"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:144
-#: src/Admin/Screens/PaymentsScreen.php:363
-#: src/Frontend/Confirmation.php:267
-msgid "Screenshot"
+#: src/Admin/Screens/BookingsScreen.php:479
+msgid "No emails yet."
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:145
+#: src/Admin/Screens/BookingsScreen.php:487
+#: src/Admin/Screens/BookingsScreen.php:500
+msgid "Sent"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:491
+#: src/Admin/Screens/PaymentsScreen.php:157
 #: src/Admin/Screens/ZonesScreen.php:79
 #: src/Admin/Screens/ZonesScreen.php:104
 msgid "Actions"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:162
+#: src/Admin/Screens/BookingsScreen.php:500
+#: src/Admin/Screens/PaymentsScreen.php:526
+msgid "Failed"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:508
+msgid "Resend"
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:526
+msgid "Booking updated."
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:538
+#: src/Admin/Screens/CalendarScreen.php:66
+msgid "Booking moved. The guest was emailed."
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:550
+msgid "Quote sent with the payment link."
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:559
+msgid "Note added."
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:568
+msgid "Vehicle saved."
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:576
+msgid "Guest data erased."
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:598
+msgid "The email could not be sent. Check the site’s mail setup (an SMTP plugin is recommended)."
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:598
+msgid "Email sent."
+msgstr ""
+
+#: src/Admin/Screens/BookingsScreen.php:606
+msgid "You do not have permission to export bookings."
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:46
+#: src/Admin/Screens/CalendarScreen.php:139
+msgid "Calendar"
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:67
+msgid "That did not work:"
+msgstr ""
+
+#. translators: %s: new date (and session).
+#: src/Admin/Screens/CalendarScreen.php:69
+#, php-format
+msgid "Move this booking to %s? The guest is emailed."
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:91
+msgid "You do not have permission to see the calendar."
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:143
+msgid "Previous"
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:144
+#: src/Admin/Screens/DashboardScreen.php:149
+msgid "Today"
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:145
+msgid "Next"
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:150
+msgid "Month"
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:151
+msgid "Week"
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:152
+#: src/Admin/Screens/CheckInScreen.php:104
+msgid "Day"
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:181
+#: src/Admin/Screens/ManifestScreen.php:340
+msgid "Show"
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:185
+msgid "Choose a tour to see all its sessions and to close or open dates. Drag a booking to another day to move it."
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:217
+msgid "Open day"
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:217
+msgid "Close day"
+msgstr ""
+
+#. translators: 1: bookings, 2: guests.
+#: src/Admin/Screens/CalendarScreen.php:241
+#, php-format
+msgid "%1$d bk · %2$d pax"
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:249
+#: src/Admin/Screens/PaymentsScreen.php:120
+msgid "Open"
+msgstr ""
+
+#: src/Admin/Screens/CalendarScreen.php:249
+msgid "Close"
+msgstr ""
+
+#. translators: %d: more bookings.
+#: src/Admin/Screens/CalendarScreen.php:276
+#, php-format
+msgid "+%d more"
+msgstr ""
+
+#: src/Admin/Screens/CheckInScreen.php:46
+#: src/Admin/Screens/CheckInScreen.php:103
+#: src/Admin/Screens/DashboardScreen.php:192
+msgid "Check-in"
+msgstr ""
+
+#. translators: %s: booking reference.
+#: src/Admin/Screens/CheckInScreen.php:72
+#, php-format
+msgid "%s updated."
+msgstr ""
+
+#: src/Admin/Screens/CheckInScreen.php:87
+#: src/Admin/Screens/CheckInScreen.php:201
+msgid "You do not have permission to check guests in."
+msgstr ""
+
+#: src/Admin/Screens/CheckInScreen.php:97
+msgid "Arrived"
+msgstr ""
+
+#: src/Admin/Screens/CheckInScreen.php:98
+#: src/Admin/Screens/PaymentsScreen.php:518
+msgid "No-show"
+msgstr ""
+
+#: src/Admin/Screens/CheckInScreen.php:99
+msgid "Undo"
+msgstr ""
+
+#: src/Admin/Screens/CheckInScreen.php:117
+#: src/Admin/Screens/ManifestScreen.php:329
+msgid "Previous day"
+msgstr ""
+
+#: src/Admin/Screens/CheckInScreen.php:131
+#: src/Admin/Screens/ManifestScreen.php:332
+msgid "Next day"
+msgstr ""
+
+#: src/Admin/Screens/CheckInScreen.php:135
+#: src/Admin/Screens/ManifestScreen.php:344
+msgid "No bookings on this day."
+msgstr ""
+
+#. translators: 1: bookings arrived, 2: bookings.
+#: src/Admin/Screens/CheckInScreen.php:144
+#, php-format
+msgid "%1$d of %2$d arrived"
+msgstr ""
+
+#. translators: %s: amount to collect.
+#: src/Admin/Screens/CheckInScreen.php:163
+#, php-format
+msgid "Collect %s"
+msgstr ""
+
+#. translators: %s: post type name, e.g. st_tours.
+#: src/Admin/Screens/DashboardScreen.php:60
+#, php-format
+msgid "Using the existing post type “%s”. Tour URLs are unchanged."
+msgstr ""
+
+#. translators: %s: URL slug.
+#: src/Admin/Screens/DashboardScreen.php:62
+#, php-format
+msgid "Using the Digitum Bookings Tours post type at /%s/."
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:67
+msgid "Add business name, phone and email"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:73
+msgid "Create or import your tours"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:79
+msgid "Fill in “Booking settings” on each tour and switch on “Take bookings”"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:89
+msgid "Set up"
+msgstr ""
+
+#. translators: 1: number of tours taking bookings, 2: number of published tours.
+#: src/Admin/Screens/DashboardScreen.php:95
+#, php-format
+msgid "%1$d of %2$d published tours take bookings."
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:104
+msgid "Done"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:104
+msgid "To do"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:114
+msgid "The tour post type is not registered. Check Settings › General."
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:121
+#: src/Admin/Screens/PaymentsScreen.php:127
+#: src/Admin/Screens/PaymentsScreen.php:514
+msgid "Waiting for bank transfer"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:126
+msgid "About Digitum"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:127
+msgid "Digitum Bookings is built and supported by Digitum Marketing Ltd."
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:128
+msgid "digitum.marketing"
+msgstr ""
+
+#. translators: %s: plugin version.
+#: src/Admin/Screens/DashboardScreen.php:132
+#, php-format
+msgid "Version %s"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:151
+msgid "No bookings today."
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:160
+msgid "Pickups"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:161
+#: src/Admin/Screens/PaymentsScreen.php:520
+msgid "Unpaid"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:162
+msgid "Links"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:191
+#: src/Admin/Screens/ManifestScreen.php:50
+msgid "Manifest"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:218
+msgid "Revenue"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:220
+msgid "Last 7 days"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:222
+msgid "Last 30 days"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:225
+msgid "Money received (online and recorded by staff) minus refunds."
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:228
+msgid "Quote requests"
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:230
+msgid "No open quote requests."
+msgstr ""
+
+#: src/Admin/Screens/DashboardScreen.php:237
+msgid "All quote requests"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:56
+#: src/Admin/Screens/EmailsScreen.php:160
+#: src/Admin/Screens/EmailsScreen.php:182
+#: src/Admin/Screens/EmailsScreen.php:198
+msgid "You do not have permission to change emails."
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:59
+msgid "To the guest"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:60
+msgid "To staff"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:74
+msgid "Sender, staff recipients, reminder time and the daily summary are in"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:75
+msgid "Settings › Emails"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:76
+msgid "Emails go out through wp_mail(); install an SMTP plugin so they reach inboxes."
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:81
+msgid "Send a test email to"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:83
+msgid "Send test email"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:87
+msgid "Merge tags:"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:109
+msgid "Send this email"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:111
+msgid "Subject"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:115
+msgid "Message (HTML)"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:119
+msgid "Plain-text version (optional; made from the HTML when empty)"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:139
+msgid "Preview"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:141
+msgid "Back to the default wording"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:149
+msgid "Save emails"
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:165
+msgid "Default wording restored."
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:174
+msgid "Emails saved."
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:186
+msgid "Enter a valid email address."
+msgstr ""
+
+#. translators: %s: email address.
+#: src/Admin/Screens/EmailsScreen.php:190
+#, php-format
+msgid "Test email sent to %s."
+msgstr ""
+
+#. translators: %s: email address.
+#: src/Admin/Screens/EmailsScreen.php:190
+msgid "WordPress could not send the email. Check the site’s mail setup (an SMTP plugin is recommended)."
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:203
+msgid "Unknown email."
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:209
+msgid "Make a test booking first; the preview uses the most recent booking."
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:214
+msgid "Moved from Friday to Saturday (example)."
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:215
+msgid "Example message from the team."
+msgstr ""
+
+#: src/Admin/Screens/EmailsScreen.php:223
+msgid "Bookings of tomorrow appear here."
+msgstr ""
+
+#. translators: %s: date.
+#: src/Admin/Screens/ManifestScreen.php:186
+#: src/Admin/Screens/ManifestScreen.php:210
+#, php-format
+msgid "Manifest %s"
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:206
+msgid "Print"
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:215
+#: src/Services/Notifications/Listener.php:216
+#: src/Services/Notifications/Listener.php:217
+msgid "No bookings."
+msgstr ""
+
+#. translators: 1: tour and session, 2: start time, 3: guests, 4: vehicles.
+#: src/Admin/Screens/ManifestScreen.php:221
+#: src/Admin/Screens/ManifestScreen.php:354
+#, php-format
+msgid "%1$s · starts %2$s · %3$d guests · %4$d vehicles"
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:231
+msgid "Pax (A/C/I)"
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:232
+msgid "Veh."
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:235
+#: src/Admin/Screens/ManifestScreen.php:366
+msgid "To pay"
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:236
+#: src/Admin/Screens/ZonesScreen.php:78
+msgid "Notes"
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:244
+msgid "transfer pending"
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:251
+#: src/Admin/Screens/ManifestScreen.php:391
+#: src/Admin/Screens/PaymentsScreen.php:522
+#: src/Services/Notifications/Listener.php:205
+#: src/Services/Notifications/MergeTags.php:106
+msgid "Paid"
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:269
+msgid "You do not have permission to see the manifest."
+msgstr ""
+
+#. translators: %s: date.
+#: src/Admin/Screens/ManifestScreen.php:291
+#, php-format
+msgid "Manifest: %s"
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:306
+msgid "Print view"
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:322
+msgid "CSV"
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:363
+msgid "Pax"
+msgstr ""
+
+#. translators: %s: booking reference.
+#: src/Admin/Screens/ManifestScreen.php:383
+#, php-format
+msgid "Vehicle for %s"
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:400
+msgid "Save vehicles"
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:413
+msgid "You do not have permission to assign vehicles."
+msgstr ""
+
+#: src/Admin/Screens/ManifestScreen.php:420
+msgid "Vehicles saved."
+msgstr ""
+
+#: src/Admin/Screens/PaymentsScreen.php:98
+#: src/Admin/Screens/PaymentsScreen.php:477
+msgid "You do not have permission to manage payments."
+msgstr ""
+
+#: src/Admin/Screens/PaymentsScreen.php:118
+#: src/Services/Ics.php:83
+#: templates/front/confirmation.php:17
+msgid "Booking reference"
+msgstr ""
+
+#: src/Admin/Screens/PaymentsScreen.php:125
+msgid "No booking with this reference."
+msgstr ""
+
+#: src/Admin/Screens/PaymentsScreen.php:144
+msgid "No bookings are waiting for a bank transfer."
+msgstr ""
+
+#: src/Admin/Screens/PaymentsScreen.php:154
+msgid "Amount due"
+msgstr ""
+
+#: src/Admin/Screens/PaymentsScreen.php:155
+msgid "Held until"
+msgstr ""
+
+#: src/Admin/Screens/PaymentsScreen.php:156
+#: src/Admin/Screens/PaymentsScreen.php:346
+#: src/Frontend/Confirmation.php:267
+msgid "Screenshot"
+msgstr ""
+
+#: src/Admin/Screens/PaymentsScreen.php:174
 msgid "No screenshot yet"
 msgstr ""
 
 #. translators: %d: file number.
-#: src/Admin/Screens/PaymentsScreen.php:166
+#: src/Admin/Screens/PaymentsScreen.php:178
 #, php-format
 msgid "Screenshot %d"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:191
+#: src/Admin/Screens/PaymentsScreen.php:203
 msgid "Mark as paid"
 msgstr ""
 
-#. translators: %s: booking reference.
-#: src/Admin/Screens/PaymentsScreen.php:216
-#, php-format
-msgid "Booking %s"
-msgstr ""
-
-#: src/Admin/Screens/PaymentsScreen.php:223
-#: src/Admin/Screens/PaymentsScreen.php:280
-#: src/Admin/Screens/PaymentsScreen.php:383
-msgid "Status"
-msgstr ""
-
-#: src/Admin/Screens/PaymentsScreen.php:225
-#: src/Integrations/Elementor/BookingWidget.php:56
-#: src/PostTypes/ProductType.php:99
-#: templates/front/confirmation.php:61
-#: assets/src/blocks/booking-block.js:24
-msgid "Tour"
-msgstr ""
-
-#: src/Admin/Screens/PaymentsScreen.php:229
-msgid "Chosen method"
-msgstr ""
-
-#: src/Admin/Screens/PaymentsScreen.php:236
-msgid "Open the guest’s booking page"
-msgstr ""
-
-#: src/Admin/Screens/PaymentsScreen.php:239
+#: src/Admin/Screens/PaymentsScreen.php:228
 msgid "Money"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:241
-#: src/Frontend/Widget.php:282
-#: templates/front/confirmation.php:178
-msgid "Total"
-msgstr ""
-
-#: src/Admin/Screens/PaymentsScreen.php:247
+#: src/Admin/Screens/PaymentsScreen.php:236
 msgid "Paid (after refunds)"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:249
-#: src/Admin/Screens/PaymentsScreen.php:547
+#: src/Admin/Screens/PaymentsScreen.php:238
+#: src/Admin/Screens/PaymentsScreen.php:530
 msgid "Balance"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:251
+#: src/Admin/Screens/PaymentsScreen.php:240
 msgid "Payment status"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:259
+#: src/Admin/Screens/PaymentsScreen.php:248
 msgid "Payment link for the guest"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:268
+#: src/Admin/Screens/PaymentsScreen.php:257
 msgid "Payments and refunds"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:270
-#: src/Admin/Screens/PaymentsScreen.php:379
+#: src/Admin/Screens/PaymentsScreen.php:259
+#: src/Admin/Screens/PaymentsScreen.php:362
 msgid "No payments yet."
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:276
-#: src/Admin/Screens/PaymentsScreen.php:383
-#: templates/front/booking-widget.php:95
-#: templates/front/confirmation.php:64
-msgid "Date"
-msgstr ""
-
-#: src/Admin/Screens/PaymentsScreen.php:277
-#: src/Admin/Screens/PaymentsScreen.php:383
+#: src/Admin/Screens/PaymentsScreen.php:266
+#: src/Admin/Screens/PaymentsScreen.php:366
 msgid "Method"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:279
-#: src/Admin/Screens/PaymentsScreen.php:332
-#: src/Admin/Screens/PaymentsScreen.php:383
+#: src/Admin/Screens/PaymentsScreen.php:268
+#: src/Admin/Screens/PaymentsScreen.php:321
+#: src/Admin/Screens/PaymentsScreen.php:366
+#: src/Services/Notifications/MergeTags.php:121
 msgid "Amount"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:281
+#: src/Admin/Screens/PaymentsScreen.php:270
+#: src/Services/Notifications/MergeTags.php:99
 msgid "Reference"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:282
-#: src/Admin/Screens/PaymentsScreen.php:310
-#: src/Admin/Screens/PaymentsScreen.php:549
+#: src/Admin/Screens/PaymentsScreen.php:271
+#: src/Admin/Screens/PaymentsScreen.php:299
+#: src/Admin/Screens/PaymentsScreen.php:532
 msgid "Refund"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:302
+#: src/Admin/Screens/PaymentsScreen.php:291
 msgid "Refund this amount? This cannot be undone."
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:306
+#: src/Admin/Screens/PaymentsScreen.php:295
 msgid "Amount to refund"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:308
-#: src/Admin/Screens/PaymentsScreen.php:309
+#: src/Admin/Screens/PaymentsScreen.php:297
+#: src/Admin/Screens/PaymentsScreen.php:298
 msgid "Reason"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:310
+#: src/Admin/Screens/PaymentsScreen.php:299
 msgid "Record refund"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:321
+#: src/Admin/Screens/PaymentsScreen.php:310
 msgid "Record a payment"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:326
+#: src/Admin/Screens/PaymentsScreen.php:315
 msgid "Received by"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:335
+#: src/Admin/Screens/PaymentsScreen.php:324
 msgid "e.g. bank reference or receipt number"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:336
+#: src/Admin/Screens/PaymentsScreen.php:325
 msgid "Record payment"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:339
-msgid "Timeline"
-msgstr ""
-
-#: src/Admin/Screens/PaymentsScreen.php:358
+#: src/Admin/Screens/PaymentsScreen.php:341
 msgid "Transfer screenshots"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:366
+#: src/Admin/Screens/PaymentsScreen.php:349
 msgid "checked"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:377
+#: src/Admin/Screens/PaymentsScreen.php:360
 msgid "Recent payments"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:410
+#: src/Admin/Screens/PaymentsScreen.php:393
 msgid "Marked as paid. The booking is confirmed."
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:424
+#: src/Admin/Screens/PaymentsScreen.php:407
 msgid "Payment recorded."
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:439
+#: src/Admin/Screens/PaymentsScreen.php:422
 msgid "Refund sent. The payment provider is still processing it."
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:440
+#: src/Admin/Screens/PaymentsScreen.php:423
 msgid "Refund recorded."
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:450
+#: src/Admin/Screens/PaymentsScreen.php:433
 msgid "You do not have permission to see this file."
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:455
+#: src/Admin/Screens/PaymentsScreen.php:438
 msgid "File not found."
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:530
+#: src/Admin/Screens/PaymentsScreen.php:513
 msgid "Waiting for payment"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:532
+#: src/Admin/Screens/PaymentsScreen.php:515
 msgid "Quote requested"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:533
+#: src/Admin/Screens/PaymentsScreen.php:516
 msgid "Confirmed"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:534
+#: src/Admin/Screens/PaymentsScreen.php:517
 msgid "Checked in"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:535
-msgid "No-show"
-msgstr ""
-
-#: src/Admin/Screens/PaymentsScreen.php:536
+#: src/Admin/Screens/PaymentsScreen.php:519
 msgid "Cancelled"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:537
-msgid "Unpaid"
-msgstr ""
-
-#: src/Admin/Screens/PaymentsScreen.php:538
+#: src/Admin/Screens/PaymentsScreen.php:521
 msgid "Part paid"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:539
-msgid "Paid"
-msgstr ""
-
-#: src/Admin/Screens/PaymentsScreen.php:540
+#: src/Admin/Screens/PaymentsScreen.php:523
 msgid "Partly refunded"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:541
+#: src/Admin/Screens/PaymentsScreen.php:524
 msgid "Refunded"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:542
+#: src/Admin/Screens/PaymentsScreen.php:525
 msgid "Received"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:543
-msgid "Failed"
-msgstr ""
-
-#: src/Admin/Screens/PaymentsScreen.php:544
+#: src/Admin/Screens/PaymentsScreen.php:527
 msgid "Processing"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:545
+#: src/Admin/Screens/PaymentsScreen.php:528
 #: src/Frontend/Widget.php:290
 #: templates/front/booking-widget.php:317
 msgid "Full amount"
 msgstr ""
 
-#: src/Admin/Screens/PaymentsScreen.php:548
+#: src/Admin/Screens/PaymentsScreen.php:531
 #: templates/front/booking-widget.php:299
 msgid "Payment"
 msgstr ""
@@ -1071,18 +1878,9 @@ msgstr ""
 msgid "Zone"
 msgstr ""
 
-#: src/Admin/Screens/ZonesScreen.php:76
-#: src/Admin/Screens/ZonesScreen.php:146
-msgid "Pickup"
-msgstr ""
-
 #: src/Admin/Screens/ZonesScreen.php:77
 #: src/Admin/Screens/ZonesScreen.php:148
 msgid "Surcharge"
-msgstr ""
-
-#: src/Admin/Screens/ZonesScreen.php:78
-msgid "Notes"
 msgstr ""
 
 #: src/Admin/Screens/ZonesScreen.php:85
@@ -1100,7 +1898,7 @@ msgstr ""
 
 #: src/Admin/Screens/ZonesScreen.php:102
 #: src/Admin/Screens/ZonesScreen.php:187
-#: src/Settings/Settings.php:71
+#: src/Settings/Settings.php:72
 msgid "Address"
 msgstr ""
 
@@ -1142,11 +1940,6 @@ msgstr ""
 
 #: src/Admin/Screens/ZonesScreen.php:156
 msgid "Add zone"
-msgstr ""
-
-#: src/Admin/Screens/ZonesScreen.php:158
-#: src/Admin/Screens/ZonesScreen.php:194
-msgid "Cancel"
 msgstr ""
 
 #: src/Admin/Screens/ZonesScreen.php:172
@@ -1193,6 +1986,7 @@ msgid "Delete"
 msgstr ""
 
 #: src/Frontend/Confirmation.php:131
+#: src/Services/Notifications/Events.php:34
 msgid "Booking confirmed"
 msgstr ""
 
@@ -1201,6 +1995,7 @@ msgid "Booking received, waiting for payment"
 msgstr ""
 
 #: src/Frontend/Confirmation.php:133
+#: src/Services/Notifications/Events.php:86
 msgid "Quote request received"
 msgstr ""
 
@@ -1291,18 +2086,21 @@ msgid "Uploading…"
 msgstr ""
 
 #: src/Frontend/Confirmation.php:307
+#: src/Services/BookingDetails.php:144
 msgid "child"
 msgid_plural "children"
 msgstr[0] ""
 msgstr[1] ""
 
 #: src/Frontend/Confirmation.php:309
+#: src/Services/BookingDetails.php:146
 msgid "infant"
 msgid_plural "infants"
 msgstr[0] ""
 msgstr[1] ""
 
 #: src/Frontend/Confirmation.php:311
+#: src/Services/BookingDetails.php:148
 msgid "adult"
 msgid_plural "adults"
 msgstr[0] ""
@@ -1521,13 +2319,6 @@ msgstr ""
 msgid "Refunds for this payment method are recorded only. Pay the guest back yourself."
 msgstr ""
 
-#: src/Gateways/BankTransfer.php:30
-#: src/Settings/Settings.php:348
-#: src/Settings/Settings.php:354
-#: src/Settings/Settings.php:359
-msgid "Bank transfer"
-msgstr ""
-
 #: src/Gateways/BankTransfer.php:38
 msgid "Bank details are shown after you book. Upload the transfer screenshot there."
 msgstr ""
@@ -1545,19 +2336,8 @@ msgstr ""
 msgid "Pay by card on a secure payment page."
 msgstr ""
 
-#: src/Gateways/PayOnArrival.php:28
-#: src/Settings/Settings.php:209
-msgid "Pay on arrival"
-msgstr ""
-
 #: src/Gateways/PayOnArrival.php:35
 msgid "Cash or card at the meeting point."
-msgstr ""
-
-#: src/Gateways/PayPal.php:50
-#: src/Settings/Settings.php:275
-#: src/Settings/Settings.php:347
-msgid "PayPal"
 msgstr ""
 
 #: src/Gateways/PayPal.php:57
@@ -1621,7 +2401,7 @@ msgid "Stripe returned an error."
 msgstr ""
 
 #: src/Integrations/Elementor/BookingWidget.php:28
-#: src/Settings/Settings.php:110
+#: src/Settings/Settings.php:111
 msgid "Booking widget"
 msgstr ""
 
@@ -1671,6 +2451,31 @@ msgstr ""
 msgid "All Tours"
 msgstr ""
 
+#: src/Rest/AdminController.php:112
+#: src/Rest/PaymentsController.php:249
+#: src/Rest/PublicController.php:345
+#: src/Services/BookingActions.php:78
+#: src/Services/BookingActions.php:109
+#: src/Services/BookingActions.php:257
+#: src/Services/PaymentService.php:467
+#: src/Services/PaymentService.php:515
+msgid "Booking not found."
+msgstr ""
+
+#: src/Rest/AdminController.php:148
+#: src/Rest/PublicController.php:381
+#: src/Services/BookingService.php:55
+msgid "This tour could not be found."
+msgstr ""
+
+#: src/Rest/AdminController.php:153
+msgid "Closed from the calendar"
+msgstr ""
+
+#: src/Rest/AdminController.php:158
+msgid "This date is closed by a date range in the tour’s Booking settings › Rules. Change it there."
+msgstr ""
+
 #: src/Rest/PaymentsController.php:164
 msgid "PayPal is not available."
 msgstr ""
@@ -1681,15 +2486,8 @@ msgid "Your session expired. Please try again."
 msgstr ""
 
 #: src/Rest/PaymentsController.php:245
-#: src/Rest/PublicController.php:426
+#: src/Rest/PublicController.php:405
 msgid "Too many requests. Please wait a moment and try again."
-msgstr ""
-
-#: src/Rest/PaymentsController.php:249
-#: src/Rest/PublicController.php:345
-#: src/Services/PaymentService.php:467
-#: src/Services/PaymentService.php:515
-msgid "Booking not found."
 msgstr ""
 
 #: src/Rest/PaymentsController.php:270
@@ -1708,17 +2506,80 @@ msgstr ""
 msgid "Please complete the security check."
 msgstr ""
 
-#: src/Rest/PublicController.php:402
-#: src/Services/BookingService.php:55
-msgid "This tour could not be found."
-msgstr ""
-
 #: src/Roles/Capabilities.php:73
 msgid "Booking manager"
 msgstr ""
 
 #: src/Roles/Capabilities.php:77
 msgid "Tour guide"
+msgstr ""
+
+#: src/Services/BookingActions.php:81
+msgid "This change is not possible for the booking’s current status."
+msgstr ""
+
+#: src/Services/BookingActions.php:84
+msgid "Confirmed by staff."
+msgstr ""
+
+#: src/Services/BookingActions.php:85
+msgid "Cancelled by staff."
+msgstr ""
+
+#: src/Services/BookingActions.php:86
+msgid "Guest arrived."
+msgstr ""
+
+#: src/Services/BookingActions.php:87
+msgid "Guest did not show up."
+msgstr ""
+
+#: src/Services/BookingActions.php:88
+msgid "Check-in undone."
+msgstr ""
+
+#: src/Services/BookingActions.php:92
+msgid "The booking was changed by someone else. Reload and try again."
+msgstr ""
+
+#: src/Services/BookingActions.php:112
+msgid "Cancelled or completed bookings cannot be moved."
+msgstr ""
+
+#: src/Services/BookingActions.php:116
+msgid "Choose a valid date."
+msgstr ""
+
+#: src/Services/BookingActions.php:127
+msgid "That session does not belong to this tour."
+msgstr ""
+
+#. translators: 1: old date and session, 2: new date and session.
+#: src/Services/BookingActions.php:151
+#, php-format
+msgid "moved from %1$s to %2$s."
+msgstr ""
+
+#: src/Services/BookingActions.php:177
+msgid "Only quote requests can be quoted."
+msgstr ""
+
+#: src/Services/BookingActions.php:183
+msgid "Enter the price."
+msgstr ""
+
+#. translators: %s: quoted price.
+#: src/Services/BookingActions.php:202
+#, php-format
+msgid "Quote sent: %s."
+msgstr ""
+
+#: src/Services/BookingActions.php:238
+msgid "Write a note first."
+msgstr ""
+
+#: src/Services/BookingActions.php:295
+msgid "Guest personal data erased."
 msgstr ""
 
 #: src/Services/BookingService.php:59
@@ -1770,6 +2631,362 @@ msgstr ""
 
 #: src/Services/Holds.php:137
 msgid "Payment not completed in time; booking released."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:27
+msgid "Hi {guest_name},"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:28
+msgid "Thank you,"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:30
+msgid "Open the booking"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:35
+msgid "A booking is confirmed (paid online, pay on arrival, marked as paid). The guest gets the calendar file."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:38
+msgid "Booking confirmed: {product} on {date} ({reference})"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:39
+msgid "Your booking is confirmed. Here are the details:"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:39
+msgid "The calendar file is attached. You can see your booking at any time here:"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:42
+msgid "New booking {reference}: {product}, {date}"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:43
+msgid "A booking was confirmed."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:48
+msgid "Bank transfer booking received"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:49
+msgid "A guest booked with bank transfer. The guest gets the bank details and the upload link."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:52
+msgid "Please complete your bank transfer ({reference})"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:53
+msgid "We are holding your place until {hold_until}. Please transfer {amount_due} using your booking reference {reference}."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:53
+msgid "After paying, upload a screenshot of the transfer here:"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:56
+msgid "Bank transfer booking {reference}: waiting for payment"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:57
+msgid "A guest booked with bank transfer. Amount due: {amount_due}. Held until {hold_until}."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:62
+msgid "Payment screenshot uploaded"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:63
+msgid "A guest uploaded a bank transfer screenshot (attached)."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:66
+msgid "Payment screenshot for {reference} ({amount_due})"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:67
+msgid "The guest uploaded a transfer screenshot (attached). Check your bank, then mark the booking as paid:"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:67
+msgid "Open the booking and mark as paid"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:72
+msgid "Payment not completed (hold expired)"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:73
+msgid "An unpaid booking was released when its hold ran out."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:76
+msgid "Your booking {reference} was released"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:77
+msgid "We did not receive the payment for your booking in time, so the place was released. If you already paid, or would still like to come, just reply to this email or call us."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:80
+msgid "Unpaid booking released: {reference}"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:81
+msgid "The hold ran out without payment, so the booking was cancelled."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:87
+msgid "A guest asked for a price on a price-on-request tour."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:90
+msgid "We received your request ({reference})"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:91
+msgid "Thank you for your request. We will send you a price and a payment link shortly."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:94
+msgid "Quote request {reference}: {product}, {date}"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:95
+msgid "A guest asked for a quote. Open the booking to send the price."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:100
+msgid "Quote sent"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:101
+msgid "Staff sent a price for a quote request; the guest gets the payment link."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:104
+msgid "Your quote for {product}: {total}"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:105
+msgid "Here is the price for your request: {total}."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:105
+msgid "Pay and confirm your booking"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:110
+msgid "Payment received"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:111
+msgid "A payment was recorded on a booking that was already confirmed (e.g. the balance)."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:114
+msgid "Payment received for {reference}"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:115
+msgid "We received your payment of {amount_received}. Paid so far: {amount_paid}. Still to pay: {balance_due}."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:118
+msgid "Payment received: {reference}, {amount_received}"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:119
+msgid "Payment of {amount_received} recorded. Balance: {balance_due}."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:124
+msgid "Booking changed"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:125
+msgid "Staff changed the date, session or guests of a booking."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:128
+msgid "Your booking {reference} has changed"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:129
+msgid "Your booking was updated: {changes}"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:132
+msgid "Booking {reference} changed"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:138
+msgid "Reminder before the session"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:139
+msgid "Sent before the session (Settings › Emails sets how many hours)."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:142
+msgid "See you soon: {product} on {date}"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:143
+msgid "A reminder of your booking:"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:143
+msgid "Still to pay: {balance_due}."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:148
+msgid "Booking cancelled"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:149
+msgid "Staff cancelled a booking."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:152
+msgid "Booking {reference} cancelled"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:153
+msgid "Your booking was cancelled. If a refund is due, we will send it to the way you paid."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:156
+msgid "Booking cancelled: {reference}"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:162
+msgid "Refund issued"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:163
+msgid "A refund was sent or recorded."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:166
+msgid "Refund of {refund_amount} for {reference}"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:167
+msgid "We refunded {refund_amount}. Card and PayPal refunds usually reach your account within 5–10 working days."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:170
+msgid "Refund issued: {reference}, {refund_amount}"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:171
+msgid "Refund of {refund_amount}. Paid after refunds: {amount_paid}."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:176
+msgid "Tomorrow’s bookings (daily summary)"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:177
+msgid "Every day at the time set in Settings › Emails."
+msgstr ""
+
+#: src/Services/Notifications/Events.php:180
+msgid "Tomorrow, {date}: {booking_count} bookings, {guest_count} guests"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:181
+msgid "Bookings for {date}:"
+msgstr ""
+
+#: src/Services/Notifications/Events.php:181
+msgid "Open the manifest"
+msgstr ""
+
+#: src/Services/Notifications/Mailer.php:215
+msgid "Test email"
+msgstr ""
+
+#: src/Services/Notifications/Mailer.php:216
+msgid "This is a test email from Digitum Bookings. If you can read it, booking emails will arrive too."
+msgstr ""
+
+#: src/Services/Notifications/Mailer.php:222
+msgid "Test email from Digitum Bookings"
+msgstr ""
+
+#. translators: 1: hotel and area, 2: pickup window.
+#: src/Services/Notifications/MergeTags.php:59
+#, php-format
+msgid "Hotel pickup from %1$s between %2$s. Please be ready in the lobby."
+msgstr ""
+
+#. translators: %s: hotel and area.
+#: src/Services/Notifications/MergeTags.php:59
+#, php-format
+msgid "Hotel pickup from %s."
+msgstr ""
+
+#. translators: 1: meeting point, 2: start time.
+#: src/Services/Notifications/MergeTags.php:62
+#, php-format
+msgid "Meet us at %1$s. The session starts at %2$s."
+msgstr ""
+
+#: src/Services/Notifications/MergeTags.php:71
+msgid "there"
+msgstr ""
+
+#: src/Services/Notifications/MergeTags.php:105
+#: templates/front/booking-widget.php:45
+#: templates/front/booking-widget.php:58
+#: templates/front/booking-widget.php:223
+#: templates/front/booking-widget.php:349
+msgid "Price on request"
+msgstr ""
+
+#: src/Services/Notifications/MergeTags.php:107
+#: templates/front/confirmation.php:186
+msgid "Still to pay"
+msgstr ""
+
+#: src/Services/Notifications/MergeTags.php:116
+#: templates/front/confirmation.php:121
+msgid "Account name"
+msgstr ""
+
+#: src/Services/Notifications/MergeTags.php:117
+#: templates/front/confirmation.php:122
+msgid "Bank"
+msgstr ""
+
+#: src/Services/Notifications/MergeTags.php:118
+#: src/Settings/Settings.php:376
+#: templates/front/confirmation.php:123
+msgid "IBAN"
+msgstr ""
+
+#: src/Services/Notifications/MergeTags.php:119
+#: src/Settings/Settings.php:381
+#: templates/front/confirmation.php:124
+msgid "Account number"
+msgstr ""
+
+#: src/Services/Notifications/MergeTags.php:120
+#: src/Settings/Settings.php:386
+#: templates/front/confirmation.php:125
+msgid "SWIFT / BIC"
+msgstr ""
+
+#: src/Services/Notifications/MergeTags.php:122
+#: templates/front/confirmation.php:135
+msgid "Payment reference"
 msgstr ""
 
 #: src/Services/PaymentService.php:169
@@ -1913,454 +3130,485 @@ msgstr ""
 msgid "Currency & VAT"
 msgstr ""
 
-#: src/Settings/Settings.php:36
+#: src/Settings/Settings.php:37
 msgid "Analytics"
 msgstr ""
 
-#: src/Settings/Settings.php:37
+#: src/Settings/Settings.php:38
 msgid "Privacy"
 msgstr ""
 
-#: src/Settings/Settings.php:38
+#: src/Settings/Settings.php:39
 msgid "Branding"
 msgstr ""
 
-#: src/Settings/Settings.php:56
+#: src/Settings/Settings.php:57
 msgid "Business name"
 msgstr ""
 
-#: src/Settings/Settings.php:61
-#: templates/front/booking-widget.php:256
-msgid "Phone"
-msgstr ""
-
-#: src/Settings/Settings.php:66
-#: templates/front/booking-widget.php:250
-msgid "Email"
-msgstr ""
-
-#: src/Settings/Settings.php:72
+#: src/Settings/Settings.php:73
 msgid "Used in emails, schema and llms.txt."
 msgstr ""
 
-#: src/Settings/Settings.php:77
+#: src/Settings/Settings.php:78
 msgid "Tours come from"
 msgstr ""
 
-#: src/Settings/Settings.php:79
+#: src/Settings/Settings.php:80
 msgid "Digitum Bookings “Tours” post type"
 msgstr ""
 
-#: src/Settings/Settings.php:80
+#: src/Settings/Settings.php:81
 msgid "An existing post type on this site"
 msgstr ""
 
-#: src/Settings/Settings.php:83
+#: src/Settings/Settings.php:84
 msgid "Attach to an existing post type to keep its URLs. Changing this refreshes permalinks once."
 msgstr ""
 
-#: src/Settings/Settings.php:87
+#: src/Settings/Settings.php:88
 msgid "Existing post type"
 msgstr ""
 
-#: src/Settings/Settings.php:90
+#: src/Settings/Settings.php:91
 msgid "Used when “Tours come from” is set to an existing post type. If that post type later disappears (for example the theme is removed), Digitum Bookings registers it with the same name and URL slug."
 msgstr ""
 
-#: src/Settings/Settings.php:98
+#: src/Settings/Settings.php:99
 msgid "Post type name"
 msgstr ""
 
-#: src/Settings/Settings.php:100
+#: src/Settings/Settings.php:101
 msgid "Internal name, 20 characters at most. Only change this on a new site."
 msgstr ""
 
-#: src/Settings/Settings.php:104
+#: src/Settings/Settings.php:105
 msgid "URL slug"
 msgstr ""
 
-#: src/Settings/Settings.php:106
+#: src/Settings/Settings.php:107
 msgid "Tours appear at /slug/tour-name/."
 msgstr ""
 
-#: src/Settings/Settings.php:111
+#: src/Settings/Settings.php:112
 msgid "Add the booking widget to single tour pages automatically"
 msgstr ""
 
-#: src/Settings/Settings.php:116
+#: src/Settings/Settings.php:117
 msgid "Mobile sticky bar"
 msgstr ""
 
-#: src/Settings/Settings.php:117
+#: src/Settings/Settings.php:118
 msgid "Show price and Book button at the bottom of the screen on phones"
 msgstr ""
 
-#: src/Settings/Settings.php:122
+#: src/Settings/Settings.php:123
 msgid "Unpaid hold (card, PayPal)"
 msgstr ""
 
-#: src/Settings/Settings.php:123
+#: src/Settings/Settings.php:124
 msgid "minutes"
 msgstr ""
 
-#: src/Settings/Settings.php:131
+#: src/Settings/Settings.php:132
 msgid "Booking terms page"
 msgstr ""
 
-#: src/Settings/Settings.php:132
+#: src/Settings/Settings.php:133
 msgid "Link shown next to “I accept the booking terms”."
 msgstr ""
 
-#: src/Settings/Settings.php:137
+#: src/Settings/Settings.php:138
 msgid "Cancellation policy (short)"
 msgstr ""
 
-#: src/Settings/Settings.php:138
+#: src/Settings/Settings.php:139
 msgid "One or two sentences shown at payment and on the confirmation."
 msgstr ""
 
-#: src/Settings/Settings.php:143
+#: src/Settings/Settings.php:144
 msgid "Default phone country code"
 msgstr ""
 
-#: src/Settings/Settings.php:150
+#: src/Settings/Settings.php:151
 msgid "Currency"
 msgstr ""
 
-#: src/Settings/Settings.php:168
+#: src/Settings/Settings.php:169
 msgid "Prices are entered"
 msgstr ""
 
-#: src/Settings/Settings.php:170
+#: src/Settings/Settings.php:171
 msgid "Including VAT"
 msgstr ""
 
-#: src/Settings/Settings.php:171
+#: src/Settings/Settings.php:172
 msgid "Excluding VAT"
 msgstr ""
 
-#: src/Settings/Settings.php:177
+#: src/Settings/Settings.php:178
 msgid "VAT rate"
 msgstr ""
 
-#: src/Settings/Settings.php:186
+#: src/Settings/Settings.php:187
 msgid "Tax registration number (TRN)"
 msgstr ""
 
-#: src/Settings/Settings.php:187
+#: src/Settings/Settings.php:188
 msgid "Shown on receipts."
 msgstr ""
 
-#: src/Settings/Settings.php:192
+#: src/Settings/Settings.php:193
 msgid "Weekend days"
 msgstr ""
 
-#: src/Settings/Settings.php:193
+#: src/Settings/Settings.php:194
 msgid "A tour’s weekend uplift applies on these days."
 msgstr ""
 
-#: src/Settings/Settings.php:195
+#: src/Settings/Settings.php:196
 msgid "Monday"
 msgstr ""
 
-#: src/Settings/Settings.php:196
+#: src/Settings/Settings.php:197
 msgid "Tuesday"
 msgstr ""
 
-#: src/Settings/Settings.php:197
+#: src/Settings/Settings.php:198
 msgid "Wednesday"
 msgstr ""
 
-#: src/Settings/Settings.php:198
+#: src/Settings/Settings.php:199
 msgid "Thursday"
 msgstr ""
 
-#: src/Settings/Settings.php:199
+#: src/Settings/Settings.php:200
 msgid "Friday"
 msgstr ""
 
-#: src/Settings/Settings.php:200
+#: src/Settings/Settings.php:201
 msgid "Saturday"
 msgstr ""
 
-#: src/Settings/Settings.php:201
+#: src/Settings/Settings.php:202
 msgid "Sunday"
 msgstr ""
 
-#: src/Settings/Settings.php:210
+#: src/Settings/Settings.php:211
 msgid "Guests can book now and pay cash or card at the meeting point"
 msgstr ""
 
-#: src/Settings/Settings.php:216
+#: src/Settings/Settings.php:217
 msgid "Cards, Apple Pay and Google Pay. Card details go straight from the guest to Stripe; this site never sees them."
 msgstr ""
 
-#: src/Settings/Settings.php:221
+#: src/Settings/Settings.php:222
 msgid "Card payments"
 msgstr ""
 
-#: src/Settings/Settings.php:222
+#: src/Settings/Settings.php:223
 msgid "Accept cards, Apple Pay and Google Pay through Stripe"
 msgstr ""
 
-#: src/Settings/Settings.php:227
+#: src/Settings/Settings.php:228
 msgid "Stripe mode"
 msgstr ""
 
-#: src/Settings/Settings.php:229
+#: src/Settings/Settings.php:230
 msgid "Test (no real money)"
 msgstr ""
 
-#: src/Settings/Settings.php:230
-#: src/Settings/Settings.php:284
+#: src/Settings/Settings.php:231
+#: src/Settings/Settings.php:285
 msgid "Live"
 msgstr ""
 
-#: src/Settings/Settings.php:236
+#: src/Settings/Settings.php:237
 msgid "Test publishable key"
 msgstr ""
 
-#: src/Settings/Settings.php:237
+#: src/Settings/Settings.php:238
 msgid "Starts with pk_test_. Stripe › Developers › API keys."
 msgstr ""
 
-#: src/Settings/Settings.php:242
+#: src/Settings/Settings.php:243
 msgid "Test secret key"
 msgstr ""
 
-#: src/Settings/Settings.php:243
+#: src/Settings/Settings.php:244
 msgid "Starts with sk_test_ (or a restricted key rk_test_ with PaymentIntents and Refunds write access)."
 msgstr ""
 
-#: src/Settings/Settings.php:248
+#: src/Settings/Settings.php:249
 msgid "Test webhook signing secret"
 msgstr ""
 
-#: src/Settings/Settings.php:249
+#: src/Settings/Settings.php:250
 msgid "Starts with whsec_. Add the webhook URL shown above in Stripe › Developers › Webhooks with the events payment_intent.succeeded, payment_intent.payment_failed and charge.refunded."
 msgstr ""
 
-#: src/Settings/Settings.php:254
+#: src/Settings/Settings.php:255
 msgid "Live publishable key"
 msgstr ""
 
-#: src/Settings/Settings.php:259
+#: src/Settings/Settings.php:260
 msgid "Live secret key"
 msgstr ""
 
-#: src/Settings/Settings.php:264
+#: src/Settings/Settings.php:265
 msgid "Live webhook signing secret"
 msgstr ""
 
-#: src/Settings/Settings.php:270
+#: src/Settings/Settings.php:271
 msgid "PayPal Checkout. Create a REST app at developer.paypal.com to get the client id and secret."
 msgstr ""
 
-#: src/Settings/Settings.php:276
+#: src/Settings/Settings.php:277
 msgid "Accept PayPal"
 msgstr ""
 
-#: src/Settings/Settings.php:281
+#: src/Settings/Settings.php:282
 msgid "PayPal mode"
 msgstr ""
 
-#: src/Settings/Settings.php:283
+#: src/Settings/Settings.php:284
 msgid "Sandbox (no real money)"
 msgstr ""
 
-#: src/Settings/Settings.php:290
+#: src/Settings/Settings.php:291
 msgid "Client id"
 msgstr ""
 
-#: src/Settings/Settings.php:295
+#: src/Settings/Settings.php:296
 msgid "Secret"
 msgstr ""
 
-#: src/Settings/Settings.php:300
+#: src/Settings/Settings.php:301
 msgid "Webhook id"
 msgstr ""
 
-#: src/Settings/Settings.php:301
+#: src/Settings/Settings.php:302
 msgid "Add the webhook URL shown above to your PayPal app with the events Payment capture completed, denied and refunded, then paste the webhook id here."
 msgstr ""
 
-#: src/Settings/Settings.php:306
+#: src/Settings/Settings.php:307
 msgid "Charge PayPal payments in"
 msgstr ""
 
-#: src/Settings/Settings.php:308
+#: src/Settings/Settings.php:309
 msgid "PayPal does not accept AED, SAR, OMR, QAR, BHD or KWD. Amounts in those currencies are converted to this currency, and the guest sees both amounts before paying."
 msgstr ""
 
-#: src/Settings/Settings.php:313
+#: src/Settings/Settings.php:314
 msgid "Exchange rate"
 msgstr ""
 
-#: src/Settings/Settings.php:314
+#: src/Settings/Settings.php:315
 msgid "of your currency = 1 unit of the PayPal currency"
 msgstr ""
 
-#: src/Settings/Settings.php:315
+#: src/Settings/Settings.php:316
 msgid "For AED and USD the official rate is 3.6725. Only used when your currency is not accepted by PayPal."
 msgstr ""
 
-#: src/Settings/Settings.php:323
-#: src/Settings/Settings.php:328
+#: src/Settings/Settings.php:324
+#: src/Settings/Settings.php:329
 msgid "Deposits"
 msgstr ""
 
-#: src/Settings/Settings.php:329
+#: src/Settings/Settings.php:330
 msgid "Let guests pay part now and the rest on arrival"
 msgstr ""
 
-#: src/Settings/Settings.php:330
+#: src/Settings/Settings.php:331
 msgid "When this is off, guests always pay the full amount or choose pay on arrival. Each tour can turn deposits off or use its own percentage."
 msgstr ""
 
-#: src/Settings/Settings.php:335
+#: src/Settings/Settings.php:336
 msgid "Deposit percentage"
 msgstr ""
 
-#: src/Settings/Settings.php:344
+#: src/Settings/Settings.php:345
 msgid "Deposit allowed with"
 msgstr ""
 
-#: src/Settings/Settings.php:346
+#: src/Settings/Settings.php:347
 msgid "Stripe"
 msgstr ""
 
-#: src/Settings/Settings.php:360
+#: src/Settings/Settings.php:361
 msgid "Offer bank transfer (fill in the bank details below)"
 msgstr ""
 
-#: src/Settings/Settings.php:365
+#: src/Settings/Settings.php:366
 msgid "Bank transfer: account name"
 msgstr ""
 
-#: src/Settings/Settings.php:370
+#: src/Settings/Settings.php:371
 msgid "Bank name"
 msgstr ""
 
-#: src/Settings/Settings.php:375
-#: templates/front/confirmation.php:123
-msgid "IBAN"
-msgstr ""
-
-#: src/Settings/Settings.php:380
-#: templates/front/confirmation.php:124
-msgid "Account number"
-msgstr ""
-
-#: src/Settings/Settings.php:385
-#: templates/front/confirmation.php:125
-msgid "SWIFT / BIC"
-msgstr ""
-
-#: src/Settings/Settings.php:390
+#: src/Settings/Settings.php:391
 msgid "Instructions for the guest"
 msgstr ""
 
-#: src/Settings/Settings.php:391
+#: src/Settings/Settings.php:392
 msgid "Use your booking reference as the payment reference. After paying, upload a screenshot of the transfer on the booking page. We confirm your booking by email once the payment is checked."
 msgstr ""
 
-#: src/Settings/Settings.php:395
+#: src/Settings/Settings.php:396
 msgid "Screenshot upload"
 msgstr ""
 
-#: src/Settings/Settings.php:396
+#: src/Settings/Settings.php:397
 msgid "Let guests upload the transfer screenshot on the booking page or from the email link"
 msgstr ""
 
-#: src/Settings/Settings.php:401
+#: src/Settings/Settings.php:402
 msgid "WhatsApp number (other way to send it)"
 msgstr ""
 
-#: src/Settings/Settings.php:402
+#: src/Settings/Settings.php:403
 msgid "Shown as a small link under the upload box. Leave empty to hide."
 msgstr ""
 
-#: src/Settings/Settings.php:407
+#: src/Settings/Settings.php:408
 msgid "Hold bank transfer bookings for"
 msgstr ""
 
-#: src/Settings/Settings.php:409
+#: src/Settings/Settings.php:410
 msgid "If the booking is not marked as paid by then, it is cancelled and both sides get an email."
 msgstr ""
 
-#: src/Settings/Settings.php:419
-msgid "dataLayer events"
-msgstr ""
-
 #: src/Settings/Settings.php:420
-msgid "Push GA4 ecommerce events (view_item … purchase, generate_lead) to dataLayer for Google Tag Manager"
+msgid "From name"
 msgstr ""
 
 #: src/Settings/Settings.php:421
-msgid "No tags are fired directly; Google Tag Manager owns all tags."
+msgid "Empty: the business name (Settings › General), or the site title."
 msgstr ""
 
 #: src/Settings/Settings.php:426
-msgid "Enhanced conversions"
+msgid "From email"
 msgstr ""
 
 #: src/Settings/Settings.php:427
-msgid "Add the guest’s hashed (SHA-256) email and phone to the purchase event"
+msgid "Use an address on your own domain, and an SMTP plugin so emails are delivered reliably. Empty: the business email."
 msgstr ""
 
 #: src/Settings/Settings.php:432
-msgid "Attribution cookie"
+msgid "Staff recipients"
 msgstr ""
 
 #: src/Settings/Settings.php:433
-msgid "days (UTM and gclid, first-party)"
+msgid "Comma-separated email addresses for staff emails. Empty: the business email, or the site admin email."
 msgstr ""
 
-#: src/Settings/Settings.php:441
-msgid "Cloudflare Turnstile site key"
-msgstr ""
-
-#: src/Settings/Settings.php:442
-msgid "Optional bot check on booking and enquiry forms. A hidden honeypot field is always on."
+#: src/Settings/Settings.php:439
+msgid "hours before the session (0 = no reminder)"
 msgstr ""
 
 #: src/Settings/Settings.php:447
-msgid "Cloudflare Turnstile secret key"
+msgid "Daily summary"
 msgstr ""
 
-#: src/Settings/Settings.php:454
-msgid "On uninstall"
+#: src/Settings/Settings.php:448
+msgid "Email staff a summary of tomorrow’s bookings every day"
 msgstr ""
 
-#: src/Settings/Settings.php:455
-msgid "Delete all booking tables and settings when the plugin is deleted"
+#: src/Settings/Settings.php:453
+msgid "Send the summary at"
 msgstr ""
 
-#: src/Settings/Settings.php:456
-msgid "Off keeps your data. Guest data is never deleted automatically; erase it from a booking when needed."
+#: src/Settings/Settings.php:459
+msgid "Webhook URL"
 msgstr ""
 
-#: src/Settings/Settings.php:463
-msgid "Admin menu name"
+#: src/Settings/Settings.php:460
+msgid "Optional. Booking and payment events are sent here as signed JSON (Zapier, Make, GoHighLevel…). See docs/DEVELOPER-HOOKS.md."
 msgstr ""
 
-#: src/Settings/Settings.php:464
-msgid "Rename the menu for a client (white label)."
+#: src/Settings/Settings.php:465
+msgid "Webhook signing secret"
 msgstr ""
 
-#: src/Settings/Settings.php:469
-msgid "Front-end credit"
+#: src/Settings/Settings.php:466
+msgid "Each request carries X-DGB-Signature: sha256=HMAC of \"timestamp.body\" with this secret."
 msgstr ""
 
-#: src/Settings/Settings.php:470
-msgid "Show “Booking by Digitum” under the booking widget"
+#: src/Settings/Settings.php:473
+msgid "dataLayer events"
+msgstr ""
+
+#: src/Settings/Settings.php:474
+msgid "Push GA4 ecommerce events (view_item … purchase, generate_lead) to dataLayer for Google Tag Manager"
 msgstr ""
 
 #: src/Settings/Settings.php:475
+msgid "No tags are fired directly; Google Tag Manager owns all tags."
+msgstr ""
+
+#: src/Settings/Settings.php:480
+msgid "Enhanced conversions"
+msgstr ""
+
+#: src/Settings/Settings.php:481
+msgid "Add the guest’s hashed (SHA-256) email and phone to the purchase event"
+msgstr ""
+
+#: src/Settings/Settings.php:486
+msgid "Attribution cookie"
+msgstr ""
+
+#: src/Settings/Settings.php:487
+msgid "days (UTM and gclid, first-party)"
+msgstr ""
+
+#: src/Settings/Settings.php:495
+msgid "Cloudflare Turnstile site key"
+msgstr ""
+
+#: src/Settings/Settings.php:496
+msgid "Optional bot check on booking and enquiry forms. A hidden honeypot field is always on."
+msgstr ""
+
+#: src/Settings/Settings.php:501
+msgid "Cloudflare Turnstile secret key"
+msgstr ""
+
+#: src/Settings/Settings.php:508
+msgid "On uninstall"
+msgstr ""
+
+#: src/Settings/Settings.php:509
+msgid "Delete all booking tables and settings when the plugin is deleted"
+msgstr ""
+
+#: src/Settings/Settings.php:510
+msgid "Off keeps your data. Guest data is never deleted automatically; erase it from a booking when needed."
+msgstr ""
+
+#: src/Settings/Settings.php:517
+msgid "Admin menu name"
+msgstr ""
+
+#: src/Settings/Settings.php:518
+msgid "Rename the menu for a client (white label)."
+msgstr ""
+
+#: src/Settings/Settings.php:523
+msgid "Front-end credit"
+msgstr ""
+
+#: src/Settings/Settings.php:524
+msgid "Show “Booking by Digitum” under the booking widget"
+msgstr ""
+
+#: src/Settings/Settings.php:529
 msgid "Widget accent colour"
 msgstr ""
 
-#: src/Settings/Settings.php:515
+#: src/Settings/Settings.php:583
 msgid "— Choose —"
 msgstr ""
 
@@ -2389,13 +3637,6 @@ msgid_plural "%d seats each"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/front/booking-widget.php:45
-#: templates/front/booking-widget.php:58
-#: templates/front/booking-widget.php:223
-#: templates/front/booking-widget.php:349
-msgid "Price on request"
-msgstr ""
-
 #: templates/front/booking-widget.php:48
 #: templates/front/booking-widget.php:53
 #: templates/front/booking-widget.php:332
@@ -2421,11 +3662,6 @@ msgstr ""
 
 #: templates/front/booking-widget.php:117
 msgid "Vehicles and guests"
-msgstr ""
-
-#: templates/front/booking-widget.php:117
-#: templates/front/confirmation.php:71
-msgid "Guests"
 msgstr ""
 
 #. translators: %s: Adults, Children…
@@ -2490,10 +3726,6 @@ msgstr ""
 msgid "Open in maps"
 msgstr ""
 
-#: templates/front/booking-widget.php:214
-msgid "Extras"
-msgstr ""
-
 #: templates/front/booking-widget.php:232
 msgid "included in every booking"
 msgstr ""
@@ -2552,10 +3784,6 @@ msgstr ""
 msgid "Leave this empty"
 msgstr ""
 
-#: templates/front/booking-widget.php:301
-msgid "Payment method"
-msgstr ""
-
 #: templates/front/booking-widget.php:313
 msgid "Online booking is not available right now. Please contact us."
 msgstr ""
@@ -2608,14 +3836,6 @@ msgstr ""
 msgid "Online payment needs JavaScript. Please turn it on or contact us to pay another way."
 msgstr ""
 
-#. translators: %d: number of vehicles.
-#: templates/front/confirmation.php:77
-#, php-format
-msgid "%d vehicle"
-msgid_plural "%d vehicles"
-msgstr[0] ""
-msgstr[1] ""
-
 #. translators: %s: pickup window, e.g. 2:15 pm – 2:45 pm.
 #: templates/front/confirmation.php:91
 #, php-format
@@ -2636,18 +3856,6 @@ msgstr ""
 #: templates/front/confirmation.php:115
 #, php-format
 msgid "Transfer %s"
-msgstr ""
-
-#: templates/front/confirmation.php:121
-msgid "Account name"
-msgstr ""
-
-#: templates/front/confirmation.php:122
-msgid "Bank"
-msgstr ""
-
-#: templates/front/confirmation.php:135
-msgid "Payment reference"
 msgstr ""
 
 #. translators: %s: date and time the booking is held until.
@@ -2686,10 +3894,6 @@ msgstr ""
 
 #: templates/front/confirmation.php:186
 msgid "To pay on arrival"
-msgstr ""
-
-#: templates/front/confirmation.php:186
-msgid "Still to pay"
 msgstr ""
 
 #: templates/front/confirmation.php:197

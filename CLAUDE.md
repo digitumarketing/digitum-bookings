@@ -339,3 +339,7 @@ Document every filter and action in `docs/DEVELOPER-HOOKS.md`. At minimum: `dgb_
 6. PayPal does not accept AED, SAR, OMR, QAR, BHD or KWD: PayPal amounts are converted at a rate in Settings › Payments (default 3.6725 AED per USD) and the guest sees both amounts.
 7. Until the booking screens of M5 exist, money is handled on Digitum Bookings › Payments (mark as paid, manual payments, refunds, screenshots) and the dashboard's "Waiting for bank transfer" panel. Payment emails (section 8) are sent in M5 from the `dgb_payment_*` actions.
 8. A card or PayPal payment that arrives after its hold expired reinstates the booking (no capacity limits, so it never overbooks).
+9. Action Scheduler is bundled (Composer `woocommerce/action-scheduler`) and runs reminders, the daily summary, webhook deliveries and hold expiry; WP-Cron is only a fallback.
+10. The first payment that confirms a booking sends the "booking confirmed" email only; "payment received" is for later payments (balance, manual). Guest emails also call the `dgb_send_sms` filter.
+11. This development session cannot push git tags to GitHub; releases are made with Actions › Release › Run workflow on `main` (or by pushing a tag from a local clone).
+

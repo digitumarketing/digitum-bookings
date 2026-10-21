@@ -4,7 +4,7 @@ Tags: bookings, tours, activities, reservations, deposits
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.4.0
+Stable tag: 0.5.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,11 +21,13 @@ Digitum Bookings adds online booking to tour and activity sites.
 * Optional deposits with a percentage you choose.
 * Booking widget with a mobile booking sheet, as a block, shortcode, Elementor widget or automatic on tour pages.
 * Card payments (Stripe: cards, Apple Pay, Google Pay), PayPal, bank transfer with screenshot upload, pay on arrival; price-on-request tours become quote requests.
-* Refunds, manual payments and "Mark as paid" from the Payments screen.
+* Refunds, manual payments and "Mark as paid".
+* Bookings list and booking page, calendar with drag and drop, printable manifest, phone check-in for guides.
+* Emails to guests and staff for every booking event, reminders, daily summary, signed webhooks.
 * GA4 dataLayer events and UTM / gclid attribution.
 * Booking manager and tour guide roles.
 
-This is an early release (milestones 1–4: foundation, pricing, availability, the booking widget and payments). The booking screens and emails arrive in the next release.
+This is an early release (milestones 1–5). Schema, llms.txt, importers and the update checker arrive in the next releases.
 
 == Installation ==
 
@@ -48,11 +50,20 @@ Copy `templates/front/booking-widget.php` to `your-theme/digitum-bookings/front/
 
 Stripe: publishable and secret keys, plus the webhook signing secret (Settings › Payments shows the webhook URL). PayPal: client id and secret from a REST app, plus the webhook id. Start in test / sandbox mode.
 
+= Emails do not arrive. What can I do? =
+
+Booking emails go through wp_mail(). Install an SMTP plugin (for example one that sends through your email provider) and use Digitum Bookings › Emails › Send test email. Every email is logged on the booking page, with a Resend button.
+
 = Where are payment screenshots stored? =
 
 In wp-content/uploads/dgb-private, outside the Media Library, under random file names, with rules that block web access. Only staff who manage bookings can open them. On nginx, consider moving the folder outside the web root with the dgb_proof_dir filter.
 
 == Changelog ==
+
+= 0.5.0 =
+* Bookings list, booking page, calendar (month / week / day, drag to move, close dates), manifest with print view and CSV, check-in for guides.
+* Emails for every booking event with editable templates, reminders and a daily summary (Action Scheduler).
+* Signed webhooks for Zapier, Make and GoHighLevel.
 
 = 0.4.0 =
 * Stripe card payments (Payment Element, 3-D Secure) and PayPal Checkout, with verified webhooks.

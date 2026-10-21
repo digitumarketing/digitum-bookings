@@ -112,6 +112,47 @@ add_filter( 'dgb_rate_limit', function ( int $limit, string $action, int $window
 
 Base URLs of the Stripe and PayPal APIs. Only for tests and proxies.
 
+### `dgb_email_template` (0.5.0)
+
+Filters an email just before it is sent: `subject`, `html` (the full document) and `text`.
+
+```php
+add_filter( 'dgb_email_template', function ( array $email, string $event, string $audience, ?array $booking ) {
+	if ( 'booking_confirmed' === $event && 'guest' === $audience ) {
+		$email['subject'] = '✅ ' . $email['subject'];
+	}
+	return $email;
+}, 10, 4 );
+```
+
+Events: `booking_confirmed`, `transfer_received`, `proof_uploaded`, `hold_expired`, `quote_requested`, `quote_sent`, `payment_received`, `booking_changed`, `reminder`, `booking_cancelled`, `refund_issued`, `daily_summary`. Audiences: `guest`, `admin`. The layout can also be overridden from the theme at `digitum-bookings/emails/layout.php`.
+
+### `dgb_email_recipients` (0.5.0)
+
+Filters who receives an email.
+
+```php
+add_filter( 'dgb_email_recipients', function ( array $to, string $event, string $audience, ?array $booking ) {
+	if ( 'admin' === $audience && 'proof_uploaded' === $event ) {
+		$to[] = 'accounts@example.com';
+	}
+	return $to;
+}, 10, 4 );
+```
+
+### `dgb_send_sms` (0.5.0)
+
+Called for every guest email with the guest's phone. The plugin sends no SMS itself; return `true` when you sent one (it is logged on the booking).
+
+```php
+add_filter( 'dgb_send_sms', function ( bool $sent, string $phone, string $message, string $event, array $booking ) {
+	if ( in_array( $event, array( 'booking_confirmed', 'reminder' ), true ) ) {
+		return my_sms_gateway_send( $phone, $message ); // your code
+	}
+	return $sent;
+}, 10, 5 );
+```
+
 ## Actions
 
 ### `dgb_booking_created` (0.3.0)
@@ -162,6 +203,34 @@ Fires after a guest uploaded a bank transfer screenshot. `file_path` is relative
 add_action( 'dgb_payment_proof_uploaded', function ( int $booking_id, array $proof ) {}, 10, 2 );
 ```
 
+### `dgb_booking_changed` (0.5.0)
+
+Fires after staff moved a booking to another date or session.
+
+```php
+add_action( 'dgb_booking_changed', function ( int $booking_id, string $changes ) {}, 10, 2 );
+```
+
+### `dgb_quote_sent` (0.5.0)
+
+Fires after staff sent a price for a quote request (the guest gets the payment link).
+
+```php
+add_action( 'dgb_quote_sent', function ( int $booking_id, string $note ) {}, 10, 2 );
+```
+
+### `dgb_booking_erased` (0.5.0)
+
+Fires after a booking's guest data was erased.
+
+```php
+add_action( 'dgb_booking_erased', function ( int $booking_id ) {} );
+```
+
+### Scheduled actions (0.5.0)
+
+Run by Action Scheduler in the group `digitum-bookings`: `dgb_send_reminder` (argument: booking id), `dgb_daily_summary`, `dgb_deliver_webhook`, `dgb_expire_holds`. See them under Tools › Scheduled Actions.
+
 ### `dgb_booking_status_changed` (0.2.0)
 
 Fires after a booking changed status.
@@ -178,14 +247,50 @@ The scheduled job that releases unpaid bookings (every five minutes). Run it by 
 
 ## Planned
 
-The remaining hooks from section 17 of `CLAUDE.md` (`dgb_email_template`, `dgb_email_recipients`, `dgb_send_sms`, `dgb_schema_product`, `dgb_llms_txt_lines`) arrive with the milestones that introduce emails, schema and llms.txt.
+`dgb_schema_product` and `dgb_llms_txt_lines` arrive with schema and llms.txt (M6).
+
+## Outgoing webhooks (0.5.0)
+
+Set a URL and a signing secret in Settings › Emails. Events: `booking.created`, `booking.status_changed`, `booking.changed`, `payment.completed`, `payment.refunded`. Each is a `POST` with a JSON body:
+
+```json
+{
+  "event": "booking.status_changed",
+  "sent_at": "2026-10-21T16:15:25+00:00",
+  "data": { "from": "pending_payment", "to": "confirmed", "reason": "payment_received" },
+  "booking": { "id": 12, "reference": "DGB-261021-AB12", "status": "confirmed", "total": 899, "customer": { "name": "…", "email": "…", "phone": "…" }, "tour": { "name": "…", "date": "2026-10-24", "session": "Evening" }, "pickup": { "zone": "Dubai", "hotel": "…", "window": "2:15 pm – 2:45 pm" }, "attribution": { "source": "ads", "gclid": "…" }, "booking_link": "…", "admin_link": "…" }
+}
+```
+
+Headers: `X-DGB-Event`, `X-DGB-Delivery` (unique id), `X-DGB-Timestamp`, `X-DGB-Signature: sha256=<hex>`. Verify:
+
+```php
+$expected = 'sha256=' . hash_hmac( 'sha256', $_SERVER['HTTP_X_DGB_TIMESTAMP'] . '.' . file_get_contents( 'php://input' ), $secret );
+$valid    = hash_equals( $expected, $_SERVER['HTTP_X_DGB_SIGNATURE'] ) && abs( time() - (int) $_SERVER['HTTP_X_DGB_TIMESTAMP'] ) < 300;
+```
+
+Answer with a 2xx status. Failed deliveries are retried after 1 minute, 10 minutes and 1 hour; every attempt is in the booking's email log.
+
+## Staff REST API (0.5.0)
+
+Namespace `dgb/v1`, logged-in staff (REST nonce) or application passwords:
+
+| Route | Method | Who | |
+|---|---|---|---|
+| `admin/calendar?from=&to=&product=` | GET | managers | sessions and bookings per day |
+| `admin/bookings/{id}` | GET | managers | booking (webhook shape) |
+| `admin/bookings/{id}/reschedule` | POST `date`, `session` | managers | move a booking (the guest is emailed) |
+| `admin/bookings/{id}/status` | POST `action` | guides: `check_in`, `no_show`, `undo`; managers: also `confirm`, `cancel` | |
+| `admin/closures` | POST `product`, `date`, `session`, `closed` | managers | close or open a date or session |
+| `admin/manifest?date=&product=&session=` | GET | guides and managers | |
 
 ## Options and meta (for reference)
 
 | Name | Type | Contents |
 |---|---|---|
 | `dgb_settings` | option | All settings, grouped by tab: `general`, `currency`, `payments`, `analytics`, `privacy`, `branding` |
-| `dgb_db_version` | option | Schema version applied by the migrations runner (1.3.0 in this release) |
+| `dgb_emails` | option | Email templates edited on the Emails screen |
+| `dgb_db_version` | option | Schema version applied by the migrations runner (1.4.0 in this release) |
 | `dgb_version` | option | Plugin version that last ran its upgrade routine |
 | `_dgb_*` | post meta | Booking settings of a tour (see `src/Domain/Product.php`) |
 | `{prefix}dgb_*` | tables | See `src/Database/Schema.php` |

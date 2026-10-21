@@ -1,9 +1,12 @@
 name: Release
 
-# Push a tag like v0.1.0 to build digitum-bookings.zip and attach it to a GitHub release.
+# Builds digitum-bookings.zip and attaches it to a GitHub release, in two ways:
+# - push a tag like v0.5.0, or
+# - Actions › Release › Run workflow (on main): releases the version in digitum-bookings.php and creates its tag.
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -23,15 +26,26 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Check the tag matches the plugin version
+      - name: Check the versions match
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
           HEADER=$(grep -m1 -E '^ \* Version:' digitum-bookings.php | awk '{print $3}')
           CONSTANT=$(grep -m1 "define( 'DGB_VERSION'" digitum-bookings.php | sed -E "s/.*'([0-9][^']*)'.*/\1/")
           STABLE=$(grep -m1 -E '^Stable tag:' readme.txt | awk '{print $3}')
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then TAG="${GITHUB_REF_NAME#v}"; else TAG="$HEADER"; fi
           echo "tag=$TAG header=$HEADER constant=$CONSTANT readme=$STABLE"
           if [ "$TAG" != "$HEADER" ] || [ "$TAG" != "$CONSTANT" ] || [ "$TAG" != "$STABLE" ]; then
-            echo "::error::Tag v$TAG does not match the versions in digitum-bookings.php and readme.txt"
+            echo "::error::Version mismatch: tag v$TAG, header $HEADER, DGB_VERSION $CONSTANT, readme Stable tag $STABLE"
+            exit 1
+          fi
+          echo "RELEASE_TAG=v$TAG" >> "$GITHUB_ENV"
+
+      - name: Refuse to release a version twice
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+            echo "::error::$RELEASE_TAG is already released. Raise the version first."
             exit 1
           fi
 
@@ -42,7 +56,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "$GITHUB_REF_NAME" build/digitum-bookings.zip \
-            --title "Digitum Bookings $GITHUB_REF_NAME" \
-            --notes "Download **digitum-bookings.zip** below and upload it in WordPress under Plugins › Add New › Upload Plugin. Changes: see docs/CHANGELOG.md." \
-            --verify-tag
+          NOTES="Download **digitum-bookings.zip** below and upload it in WordPress under Plugins › Add New › Upload Plugin. Changes: see docs/CHANGELOG.md."
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            gh release create "$RELEASE_TAG" build/digitum-bookings.zip --title "Digitum Bookings $RELEASE_TAG" --notes "$NOTES" --verify-tag
+          else
+            gh release create "$RELEASE_TAG" build/digitum-bookings.zip --title "Digitum Bookings $RELEASE_TAG" --notes "$NOTES" --target "$GITHUB_SHA"
+          fi
