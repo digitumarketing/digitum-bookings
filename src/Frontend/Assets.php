@@ -23,7 +23,8 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Assets {
 
-	public const HANDLE = 'dgb-booking';
+	public const HANDLE  = 'dgb-booking';
+	public const PAYMENT = 'dgb-payment';
 
 	/**
 	 * Constructor.
@@ -57,6 +58,16 @@ final class Assets {
 				'strategy'  => 'defer',
 			)
 		);
+		wp_register_script(
+			self::PAYMENT,
+			DGB_PLUGIN_URL . 'assets/build/front/payment.js',
+			array(),
+			DGB_VERSION,
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
 		if ( ( new Turnstile( $this->settings ) )->enabled() ) {
 			wp_register_script( 'dgb-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', array(), null, array( 'strategy' => 'defer' ) ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- Cloudflare serves the current version.
 		}
@@ -83,6 +94,23 @@ final class Assets {
 		if ( wp_script_is( 'dgb-turnstile', 'registered' ) ) {
 			wp_enqueue_script( 'dgb-turnstile' );
 		}
+	}
+
+	/**
+	 * Load the payment script (pay box and screenshot upload on the booking page).
+	 */
+	public function enqueue_payment(): void {
+		if ( ! wp_script_is( self::PAYMENT, 'registered' ) ) {
+			$this->register();
+		}
+		wp_enqueue_script( self::PAYMENT );
+	}
+
+	/**
+	 * URL of the payment script, for loading it after a booking is made on the page.
+	 */
+	public static function payment_url(): string {
+		return add_query_arg( 'ver', DGB_VERSION, DGB_PLUGIN_URL . 'assets/build/front/payment.js' );
 	}
 
 	/**

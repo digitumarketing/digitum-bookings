@@ -766,3 +766,19 @@
 		transition: none !important;
 	}
 }
+
+/* Payment box and transfer screenshot upload */
+.dgb-pay { border-color: var(--dgb-accent); }
+.dgb-pay h3 { margin-top: 0; }
+.dgb-pay-element { min-height: 220px; margin: 12px 0; }
+.dgb-pay-element.is-paypal { min-height: 150px; }
+.dgb-pay-button { width: 100%; }
+.dgb-pay-message:empty, .dgb-proof-message:empty { display: none; }
+.dgb-pay-message, .dgb-proof-message { margin: 8px 0; font-weight: 600; }
+.dgb-pay-message.is-error, .dgb-proof-message.is-error { color: var(--dgb-danger); }
+.dgb-proof { margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid var(--dgb-line); }
+.dgb-proof label { display: block; font-weight: 600; }
+.dgb-proof .dgb-hint { display: block; color: var(--dgb-muted); font-size: .9em; margin-bottom: 6px; }
+.dgb-proof-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.dgb-proof-row input[type="file"] { flex: 1 1 220px; min-width: 0; max-width: 100%; }
+.dgb-proof-files { color: var(--dgb-muted); }

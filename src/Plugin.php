@@ -9,18 +9,22 @@ namespace Digitum\Bookings;
 
 use Digitum\Bookings\Admin\Menus;
 use Digitum\Bookings\Admin\MetaBoxes\BookingSettingsBox;
+use Digitum\Bookings\Admin\Screens\PaymentsScreen;
 use Digitum\Bookings\Admin\Screens\SettingsScreen;
 use Digitum\Bookings\Admin\Screens\ZonesScreen;
 use Digitum\Bookings\Database\Migrator;
 use Digitum\Bookings\Database\Repositories\BookingRepository;
 use Digitum\Bookings\Frontend\Assets;
 use Digitum\Bookings\Frontend\Placement;
+use Digitum\Bookings\Frontend\ProofForm;
 use Digitum\Bookings\Frontend\Widget;
 use Digitum\Bookings\Integrations\Elementor\ElementorIntegration;
 use Digitum\Bookings\Integrations\Gutenberg\BookingBlock;
+use Digitum\Bookings\Rest\PaymentsController;
 use Digitum\Bookings\Rest\PublicController;
 use Digitum\Bookings\Services\BookingService;
 use Digitum\Bookings\Services\Holds;
+use Digitum\Bookings\Services\PaymentService;
 use Digitum\Bookings\Services\QuoteService;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Roles\Capabilities;
@@ -129,11 +133,14 @@ final class Plugin {
 			$quotes,
 			new BookingService( $this->settings, $this->product_type, $quotes, new BookingRepository() )
 		) )->register_hooks();
+		( new PaymentsController( $this->settings, new PaymentService( $this->settings ) ) )->register_hooks();
+		( new ProofForm( $this->settings ) )->register_hooks();
 
 		if ( is_admin() ) {
 			( new Menus( $this->settings, $this->product_type ) )->register_hooks();
 			( new SettingsScreen( $this->settings ) )->register_hooks();
 			( new ZonesScreen() )->register_hooks();
+			( new PaymentsScreen( $this->settings ) )->register_hooks();
 			( new BookingSettingsBox( $this->product_type, $this->quotes() ) )->register_hooks();
 		}
 	}

@@ -18,6 +18,45 @@ defined( 'ABSPATH' ) || exit;
 		<strong><?php echo esc_html( $view['reference'] ); ?></strong>
 	</p>
 
+	<?php if ( $view['pay'] ) : ?>
+		<div class="dgb-box dgb-pay" data-dgb-pay="<?php echo esc_attr( (string) wp_json_encode( $view['pay']['script'] ) ); ?>">
+			<h3>
+				<?php
+				if ( 'deposit' === $view['pay']['type'] ) {
+					/* translators: %s: deposit amount. */
+					echo esc_html( sprintf( __( 'Pay the deposit: %s', 'digitum-bookings' ), $view['pay']['amount'] ) );
+				} else {
+					/* translators: %s: amount. */
+					echo esc_html( sprintf( __( 'Pay %s', 'digitum-bookings' ), $view['pay']['amount'] ) );
+				}
+				?>
+			</h3>
+			<?php if ( '' !== $view['pay']['error'] ) : ?>
+				<p class="dgb-pay-message is-error" role="alert"><?php echo esc_html( $view['pay']['error'] ); ?></p>
+			<?php else : ?>
+				<div class="dgb-pay-element is-<?php echo esc_attr( $view['pay']['gateway'] ); ?>" data-dgb-pay-element></div>
+				<p class="dgb-pay-message" data-dgb-pay-message role="alert" aria-live="assertive"></p>
+				<?php if ( 'stripe' === $view['pay']['gateway'] ) : ?>
+					<button type="button" class="dgb-btn dgb-btn-primary dgb-pay-button" data-dgb-pay-button disabled>
+						<?php
+						/* translators: %s: amount. */
+						echo esc_html( sprintf( __( 'Pay %s', 'digitum-bookings' ), $view['pay']['amount'] ) );
+						?>
+					</button>
+					<p class="dgb-note"><?php esc_html_e( 'Card details go straight to Stripe over an encrypted connection. We never see or store them.', 'digitum-bookings' ); ?></p>
+				<?php elseif ( 'paypal' === $view['pay']['gateway'] && ! empty( $view['pay']['config']['converted'] ) ) : ?>
+					<p class="dgb-note">
+						<?php
+						/* translators: 1: amount in the PayPal currency, e.g. USD 190.33, 2: amount in the booking currency. */
+						echo esc_html( sprintf( __( 'PayPal charges %1$s (%2$s).', 'digitum-bookings' ), $view['pay']['config']['charge'], $view['pay']['amount'] ) );
+						?>
+					</p>
+				<?php endif; ?>
+				<noscript><p class="dgb-pay-message is-error"><?php esc_html_e( 'Online payment needs JavaScript. Please turn it on or contact us to pay another way.', 'digitum-bookings' ); ?></p></noscript>
+			<?php endif; ?>
+		</div>
+	<?php endif; ?>
+
 	<dl class="dgb-summary">
 		<dt><?php esc_html_e( 'Tour', 'digitum-bookings' ); ?></dt>
 		<dd><?php echo esc_html( $view['tour'] ); ?><?php echo '' !== $view['option'] ? ' · ' . esc_html( $view['option'] ) : ''; ?></dd>
@@ -106,6 +145,27 @@ defined( 'ABSPATH' ) || exit;
 					echo esc_html( sprintf( __( 'Your place is held until %s.', 'digitum-bookings' ), $view['bank']['hold'] ) );
 					?>
 				</p>
+			<?php endif; ?>
+			<?php if ( $view['proof'] ) : ?>
+				<form class="dgb-proof" method="post" enctype="multipart/form-data" action="<?php echo esc_url( $view['proof']['action'] ); ?>" data-dgb-proof="<?php echo esc_attr( (string) wp_json_encode( $view['proof']['script'] ) ); ?>">
+					<?php wp_nonce_field( 'dgb_proof_' . $view['proof']['reference'], 'dgb_proof_nonce' ); ?>
+					<input type="hidden" name="dgb_proof_upload" value="1">
+					<?php if ( array() !== $view['proof']['files'] ) : ?>
+						<p class="dgb-proof-files">
+							<?php esc_html_e( 'Received:', 'digitum-bookings' ); ?>
+							<?php echo esc_html( implode( ', ', array_map( static fn( $f ) => $f['name'] . ' (' . $f['date'] . ')', $view['proof']['files'] ) ) ); ?>
+						</p>
+					<?php endif; ?>
+					<?php if ( ! $view['proof']['full'] ) : ?>
+						<label for="dgb-proof-file-<?php echo esc_attr( $view['reference'] ); ?>"><?php echo array() === $view['proof']['files'] ? esc_html__( 'Upload the transfer screenshot', 'digitum-bookings' ) : esc_html__( 'Upload another file', 'digitum-bookings' ); ?></label>
+						<span class="dgb-hint" id="dgb-proof-hint-<?php echo esc_attr( $view['reference'] ); ?>"><?php esc_html_e( 'JPG, PNG or PDF, up to 5 MB.', 'digitum-bookings' ); ?></span>
+						<span class="dgb-proof-row">
+							<input type="file" id="dgb-proof-file-<?php echo esc_attr( $view['reference'] ); ?>" name="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" required aria-describedby="dgb-proof-hint-<?php echo esc_attr( $view['reference'] ); ?>">
+							<button type="submit" class="dgb-btn"><?php esc_html_e( 'Upload', 'digitum-bookings' ); ?></button>
+						</span>
+					<?php endif; ?>
+					<p class="dgb-proof-message<?php echo $view['proof']['error'] ? ' is-error' : ''; ?>" data-dgb-proof-message role="status" aria-live="polite"><?php echo esc_html( $view['proof']['message'] ); ?></p>
+				</form>
 			<?php endif; ?>
 			<?php if ( '' !== $view['bank']['whatsapp'] ) : ?>
 				<p><a href="<?php echo esc_url( $view['bank']['whatsapp'] ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Send the transfer screenshot on WhatsApp', 'digitum-bookings' ); ?></a></p>

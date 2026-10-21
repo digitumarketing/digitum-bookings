@@ -15,7 +15,10 @@ use Digitum\Bookings\Database\Repositories\ZoneRepository;
 use Digitum\Bookings\Database\Schema;
 use Digitum\Bookings\Domain\BookingStatus;
 use Digitum\Bookings\Domain\Product;
+use Digitum\Bookings\Database\Repositories\ProofRepository;
 use Digitum\Bookings\Services\Analytics;
+use Digitum\Bookings\Services\PaymentService;
+use Digitum\Bookings\Services\ProofService;
 use Digitum\Bookings\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
@@ -84,9 +87,12 @@ final class Confirmation {
 	 * Everything the template shows.
 	 *
 	 * @param array<string, mixed> $booking Booking row.
+	 * @param bool                 $link    Opened from a payment link (offers the balance online).
 	 * @return array<string, mixed>
 	 */
-	public function view( array $booking ): array {
+	public function view( array $booking, bool $link = false ): array {
+		$payments   = new PaymentService( $this->settings );
+		$booking    = $payments->refresh( $booking );
 		$item       = self::item( (int) $booking['id'] ) ?? array();
 		$product_id = (int) ( $item['product_id'] ?? 0 );
 		$product    = Product::find( $product_id );
@@ -125,14 +131,14 @@ final class Confirmation {
 			BookingStatus::CONFIRMED         => __( 'Booking confirmed', 'digitum-bookings' ),
 			BookingStatus::AWAITING_TRANSFER => __( 'Booking received, waiting for payment', 'digitum-bookings' ),
 			BookingStatus::QUOTE_REQUESTED   => __( 'Quote request received', 'digitum-bookings' ),
-			BookingStatus::PENDING_PAYMENT   => __( 'Booking received, waiting for payment', 'digitum-bookings' ),
+			BookingStatus::PENDING_PAYMENT   => __( 'Complete your payment', 'digitum-bookings' ),
 			BookingStatus::CANCELLED         => __( 'This booking was cancelled', 'digitum-bookings' ),
 		);
 		$texts  = array(
 			BookingStatus::CONFIRMED         => __( 'Thank you! Your place is booked. Keep your reference; you may be asked for it on the day.', 'digitum-bookings' ),
 			BookingStatus::AWAITING_TRANSFER => __( 'Your place is held. Complete the bank transfer to confirm it.', 'digitum-bookings' ),
 			BookingStatus::QUOTE_REQUESTED   => __( 'Thank you! We will send you a price and a payment link shortly.', 'digitum-bookings' ),
-			BookingStatus::PENDING_PAYMENT   => __( 'Your place is held while the payment is completed.', 'digitum-bookings' ),
+			BookingStatus::PENDING_PAYMENT   => __( 'Your place is held while you pay. The booking is confirmed as soon as the payment goes through.', 'digitum-bookings' ),
 			BookingStatus::CANCELLED         => __( 'Please contact us if you would like to book again.', 'digitum-bookings' ),
 		);
 
@@ -142,12 +148,15 @@ final class Confirmation {
 		}
 
 		$whatsapp = preg_replace( '/\D+/', '', (string) $all['payments']['bank_whatsapp'] );
+		$pay      = $payments->pay_box( $booking, $link );
+		$proofs   = new ProofService( $this->settings );
+		$url      = self::url( $booking, $product_id );
 		$tracked  = in_array( $status, array( BookingStatus::CONFIRMED, BookingStatus::AWAITING_TRANSFER, BookingStatus::QUOTE_REQUESTED ), true );
 		$event    = $tracked && ! empty( $all['analytics']['datalayer'] )
 			? Analytics::booking_event( $booking, $item, get_the_title( $product_id ), $option, ! empty( $all['analytics']['enhanced_conversions'] ) )
 			: null;
 
-		return array(
+		$view = array(
 			'reference'    => (string) $booking['reference'],
 			'status'       => $status,
 			'title'        => $titles[ $status ] ?? $titles[ BookingStatus::CONFIRMED ],
@@ -181,6 +190,8 @@ final class Confirmation {
 				'hold'         => $hold,
 				'whatsapp'     => '' !== $whatsapp ? 'https://wa.me/' . $whatsapp . '?text=' . rawurlencode( sprintf( 'Payment screenshot for booking %s', $booking['reference'] ) ) : '',
 			) : null,
+			'pay'          => $pay ? array_merge( $pay, array( 'script' => $pay['config'] ? $this->pay_script( $booking, $pay ) : null ) ) : null,
+			'proof'        => $proofs->accepts( $booking ) ? $this->proof_view( $booking, $url ) : null,
 			'cancellation' => (string) $all['general']['cancellation'],
 			'phone'        => (string) $all['general']['phone'],
 			'email'        => (string) $all['general']['email'],
@@ -189,15 +200,99 @@ final class Confirmation {
 				: '',
 			'event'        => $event,
 		);
+
+		if ( $view['bank'] ) {
+			/**
+			 * Filters the bank details shown on the "booking received" page.
+			 *
+			 * @param array $bank    amount, account_name, bank_name, iban, account, swift, instructions, hold, whatsapp.
+			 * @param array $booking Booking row.
+			 */
+			$view['bank'] = (array) apply_filters( 'dgb_bank_details', $view['bank'], $booking );
+		}
+		return $view;
 	}
 
 	/**
 	 * Render the confirmation HTML.
 	 *
 	 * @param array<string, mixed> $booking Booking row.
+	 * @param bool                 $link    Opened from a payment link.
 	 */
-	public function render( array $booking ): string {
-		return Template::render( 'front/confirmation', $this->view( $booking ) );
+	public function render( array $booking, bool $link = false ): string {
+		return Template::render( 'front/confirmation', $this->view( $booking, $link ) );
+	}
+
+	/**
+	 * Settings for the browser payment script.
+	 *
+	 * @param array<string, mixed> $booking Booking row.
+	 * @param array<string, mixed> $pay     PaymentService::pay_box().
+	 * @return array<string, mixed>
+	 */
+	private function pay_script( array $booking, array $pay ): array {
+		return array_merge(
+			(array) $pay['config'],
+			array(
+				'reference' => (string) $booking['reference'],
+				'key'       => (string) $booking['access_key'],
+				'rest'      => esc_url_raw( rest_url( 'dgb/v1/' ) ),
+				'nonce'     => wp_create_nonce( 'dgb_booking' ),
+				'locale'    => substr( determine_locale(), 0, 2 ),
+				'accent'    => (string) $this->settings->get( 'branding', 'accent_color' ),
+				'i18n'      => array(
+					'pay'          => sprintf( /* translators: %s: amount. */ __( 'Pay %s', 'digitum-bookings' ), $pay['amount'] ),
+					'paying'       => __( 'Processing your payment…', 'digitum-bookings' ),
+					'loadError'    => __( 'The payment form could not be loaded. Check your connection and reload the page.', 'digitum-bookings' ),
+					'networkError' => __( 'Something went wrong. Please try again.', 'digitum-bookings' ),
+					'cancelled'    => __( 'The PayPal window was closed. You can try again.', 'digitum-bookings' ),
+					'declined'     => __( 'PayPal declined this payment method. Please choose another one.', 'digitum-bookings' ),
+					'paid'         => __( 'Payment received. Loading your confirmation…', 'digitum-bookings' ),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Upload box data.
+	 *
+	 * @param array<string, mixed> $booking Booking row.
+	 * @param string               $url     Booking page URL.
+	 * @return array<string, mixed>
+	 */
+	private function proof_view( array $booking, string $url ): array {
+		$files = array();
+		foreach ( ( new ProofRepository() )->for_booking( (int) $booking['id'] ) as $row ) {
+			$files[] = array(
+				'name' => '' !== (string) $row['original_name'] ? (string) $row['original_name'] : __( 'Screenshot', 'digitum-bookings' ),
+				'date' => wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $row['uploaded_at'] . ' UTC' ) ),
+			);
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- message flag after a redirect.
+		$flag     = isset( $_GET['dgb_proof'] ) ? sanitize_key( wp_unslash( $_GET['dgb_proof'] ) ) : '';
+		$messages = array(
+			'ok'   => __( 'Thank you! We received your screenshot and will confirm your booking by email once we have checked the payment.', 'digitum-bookings' ),
+			'type' => __( 'Please upload a JPG, PNG or PDF file.', 'digitum-bookings' ),
+			'size' => __( 'The file is larger than 5 MB. Please upload a smaller screenshot.', 'digitum-bookings' ),
+			'fail' => __( 'The file could not be uploaded. Please try again or send it on WhatsApp.', 'digitum-bookings' ),
+		);
+		return array(
+			'action'    => $url,
+			'reference' => (string) $booking['reference'],
+			'files'     => $files,
+			'full'      => count( $files ) >= ProofService::MAX_FILES,
+			'message'   => $messages[ $flag ] ?? '',
+			'error'     => '' !== $flag && 'ok' !== $flag,
+			'script'    => array(
+				'url'       => esc_url_raw( rest_url( 'dgb/v1/bookings/' . rawurlencode( (string) $booking['reference'] ) . '/proof' ) ),
+				'key'       => (string) $booking['access_key'],
+				'nonce'     => wp_create_nonce( 'dgb_booking' ),
+				'maxBytes'  => ProofService::MAX_BYTES,
+				'tooBig'    => $messages['size'],
+				'failed'    => $messages['fail'],
+				'uploading' => __( 'Uploading…', 'digitum-bookings' ),
+			),
+		);
 	}
 
 	/**

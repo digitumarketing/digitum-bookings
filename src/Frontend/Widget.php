@@ -77,7 +77,11 @@ final class Widget {
 			$booking = Confirmation::find( $reference, $key );
 			$item    = $booking ? Confirmation::item( (int) $booking['id'] ) : null;
 			if ( $booking && $item && (int) $item['product_id'] === $product_id ) {
-				return $this->assets->late_styles() . '<section class="dgb-w dgb-w-done" data-dgb-widget>' . ( new Confirmation( $this->settings ) )->render( $booking ) . '</section>';
+				$html = ( new Confirmation( $this->settings ) )->render( $booking, isset( $_GET['dgb_pay'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- payment link flag; the key authorises.
+				if ( str_contains( $html, 'data-dgb-pay=' ) || str_contains( $html, 'data-dgb-proof=' ) ) {
+					$this->assets->enqueue_payment();
+				}
+				return $this->assets->late_styles() . '<section class="dgb-w dgb-w-done" data-dgb-widget>' . $html . '</section>';
 			}
 		}
 
@@ -191,6 +195,7 @@ final class Widget {
 				'value'      => null === $from ? 0 : (float) $from,
 			),
 			'turnstile' => $turnstile->enabled() ? (string) $all['analytics']['turnstile_site_key'] : '',
+			'payment'   => Assets::payment_url(),
 			'i18n'      => self::strings(),
 		);
 
@@ -303,7 +308,7 @@ final class Widget {
 			'choosePayment' => __( 'Please choose how you want to pay.', 'digitum-bookings' ),
 			'terms'         => __( 'Please accept the booking terms.', 'digitum-bookings' ),
 			/* translators: %s: amount. */
-			'bookPay'       => __( 'Book now · pay %s', 'digitum-bookings' ),
+			'bookPay'       => __( 'Continue to payment · %s', 'digitum-bookings' ),
 			'bookArrival'   => __( 'Confirm booking · pay on arrival', 'digitum-bookings' ),
 			'book'          => __( 'Book now', 'digitum-bookings' ),
 			/* translators: %s: amount. */

@@ -12,6 +12,7 @@ use Digitum\Bookings\Database\Repositories\SessionRepository;
 use Digitum\Bookings\Database\Repositories\VariantRepository;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\Frontend\Confirmation;
+use Digitum\Bookings\Frontend\Template;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Services\Availability;
 use Digitum\Bookings\Services\BookingService;
@@ -315,16 +316,15 @@ final class PublicController {
 			return $result;
 		}
 
-		$booking      = Confirmation::find( $result['reference'], $result['access_key'] );
-		$confirmation = new Confirmation( $this->settings );
-		$view         = $booking ? $confirmation->view( $booking ) : array();
+		$booking = Confirmation::find( $result['reference'], $result['access_key'] );
+		$view    = $booking ? ( new Confirmation( $this->settings ) )->view( $booking ) : array();
 
 		$response = rest_ensure_response(
 			array(
 				'reference' => $result['reference'],
 				'status'    => $result['status'],
 				'url'       => $booking ? Confirmation::url( $booking, $product_id ) : '',
-				'html'      => $booking ? $confirmation->render( $booking ) : '',
+				'html'      => $booking ? Template::render( 'front/confirmation', $view ) : '',
 				'event'     => $view['event'] ?? null,
 			)
 		);

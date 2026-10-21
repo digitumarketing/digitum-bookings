@@ -97,6 +97,22 @@
 			.replace( /\u0000/g, '%' );
 	}
 
+	/* Payment script: loaded only when a booking needs online payment or a screenshot upload. */
+	function loadPayments( root ) {
+		if ( window.dgbPayments ) {
+			window.dgbPayments.scan( root );
+			return;
+		}
+		const cfgNode = document.querySelector( '[data-dgb-config]' );
+		const src = cfgNode ? JSON.parse( cfgNode.textContent ).payment : '';
+		if ( src && ! document.querySelector( 'script[data-dgb-payment]' ) ) {
+			const s = document.createElement( 'script' );
+			s.src = src;
+			s.setAttribute( 'data-dgb-payment', '' );
+			document.body.appendChild( s );
+		}
+	}
+
 	/* Widget -------------------------------------------------------------------- */
 
 	function init( root ) {
@@ -719,6 +735,9 @@
 				document.documentElement.classList.remove( 'dgb-lock' );
 				qa( '.dgb-teaser, [data-dgb-sticky]' ).forEach( ( n ) => ( n.hidden = true ) );
 				const confirmation = result.querySelector( '[data-dgb-confirmation]' );
+				if ( result.querySelector( '[data-dgb-pay], [data-dgb-proof]' ) ) {
+					loadPayments( result );
+				}
 				if ( res.url ) {
 					try {
 						window.history.replaceState( null, '', res.url );
