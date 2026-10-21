@@ -331,7 +331,11 @@ Document every filter and action in `docs/DEVELOPER-HOOKS.md`. At minimum: `dgb_
 
 ## 20. Decisions made during development
 
-1. M3 ships pay on arrival and bank transfer at checkout; Stripe and PayPal plug in through the `dgb_payment_methods` filter in M4.
+1. M3 shipped pay on arrival and bank transfer at checkout; M4 added Stripe and PayPal as gateways (`GatewayInterface`, `dgb_gateways` filter).
 2. Confirmation and "booking received" pages are private links on the tour URL (`?dgb_booking=REF&dgb_key=KEY`); the key is a 32-character secret stored on the booking (schema 1.2.0).
 3. The widget stylesheet (under 3 KB gzipped) is printed inline, not linked, so the widget adds no render-blocking request.
 4. Lighthouse is measured on the e2e test site (Twenty Twenty-Four, PHP built-in server with gzip). That theme's 470 KB of web fonts set the mobile LCP; with system fonts the tour page with the widget scores 99.
+5. Card and PayPal bookings are paid on the private booking page right after "Continue to payment" (the booking is held as `pending_payment` first). The gateway SDKs load only there, never on tour pages, and the same page is the payment link for balances.
+6. PayPal does not accept AED, SAR, OMR, QAR, BHD or KWD: PayPal amounts are converted at a rate in Settings › Payments (default 3.6725 AED per USD) and the guest sees both amounts.
+7. Until the booking screens of M5 exist, money is handled on Digitum Bookings › Payments (mark as paid, manual payments, refunds, screenshots) and the dashboard's "Waiting for bank transfer" panel. Payment emails (section 8) are sent in M5 from the `dgb_payment_*` actions.
+8. A card or PayPal payment that arrives after its hold expired reinstates the booking (no capacity limits, so it never overbooks).

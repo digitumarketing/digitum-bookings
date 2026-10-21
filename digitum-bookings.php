@@ -3,7 +3,7 @@
  * Plugin Name:       Digitum Bookings
  * Plugin URI:        https://github.com/digitumarketing/digitum-bookings
  * Description:       Tour and activity bookings with live pricing, optional deposits, bank transfer and email notifications.
- * Version:           0.3.0
+ * Version:           0.4.0
  * Requires at least: 6.5
  * Requires PHP:      8.1
  * Author:            Digitum Marketing Ltd
@@ -19,7 +19,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'DGB_VERSION', '0.3.0' );
+define( 'DGB_VERSION', '0.4.0' );
 define( 'DGB_PLUGIN_FILE', __FILE__ );
 define( 'DGB_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DGB_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

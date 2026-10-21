@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.4.0 (M4 Payments)
+
+- Payment gateways behind one `GatewayInterface`; new gateways plug in with the `dgb_gateways` filter. Built in: Stripe, PayPal, bank transfer, pay on arrival. Telr and Network International (N-Genius) are registered as stubs with TODOs and are never offered.
+- **Stripe** (cards, Apple Pay, Google Pay through the Payment Element). The booking is held as `pending_payment`; the guest pays on the private booking page. Card details go from the browser straight to Stripe (SAQ A). 3-D Secure is handled by Stripe.js; when the guest comes back from a redirect, or the browser reports success before the webhook, the site asks Stripe and confirms the booking. Webhooks `payment_intent.succeeded`, `payment_intent.payment_failed` and `charge.refunded` with signature check (5-minute tolerance). Test and live keys.
+- **PayPal** Checkout (Orders v2): the buttons create the order through the site, the site captures it after approval. A declined funding source lets the guest choose another one. PayPal does not accept AED, SAR, OMR, QAR, BHD or KWD, so those amounts are converted at a rate set in Settings › Payments (default 3.6725 for AED to USD) and the guest sees both amounts. Webhooks capture completed, denied and refunded, verified through PayPal's API. Sandbox and live.
+- Payments are idempotent: each gateway transaction is stored once (unique key), so repeated webhooks, double clicks and a webhook arriving after the browser confirmation never record money twice. Declined attempts are kept for the timeline.
+- Deposits: the pay box charges the deposit when the guest chose one; later payments (payment link) charge the balance.
+- A card or PayPal payment that arrives after the 15-minute hold expired reinstates the booking. Before releasing a card booking, the site checks with Stripe in case the webhook was missed.
+- **Bank transfer screenshot upload** on the "booking received" page: JPG, PNG or PDF up to 5 MB, checked by file content, stored outside the Media Library under random names in a folder that refuses web access. Works without JavaScript too.
+- **Payments screen** (Digitum Bookings › Payments) and a "Waiting for bank transfer" panel on the dashboard: screenshot links (staff only), **Mark as paid**, record cash / bank / card-terminal payments, refunds (full or partial; through Stripe and PayPal, recorded only for manual payments), payment link for the balance, timeline. The full booking screens come in M5.
+- Booking amount paid, balance and payment status (`unpaid`, `deposit_paid`, `paid`, `partially_refunded`, `refunded`) are recalculated from the payment rows after every change.
+- Settings › Payments: Stripe and PayPal sections, webhook URLs to copy, secret keys never shown again after saving.
+- Uninstall (when "delete data" is on) also removes the payment screenshots.
+- Database schema 1.3.0 (payment transaction ids, refund parent, notes; screenshot file names).
+- Tests: integration scenario with fake Stripe and PayPal APIs (success, decline, 3-D Secure, late payment, refunds, webhooks, idempotency, uploads, mark as paid); Stripe requests checked against Stripe's official mock (stripe-mock) in CI; browser tests for card, 3-D Secure, deposit, PayPal, upload (with and without JavaScript), mark as paid and refunds; real-sandbox browser tests that run when sandbox keys are supplied.
+
 ## 0.3.0 (M3 Front-end flow)
 
 - Booking widget on every tour that takes bookings: choose option, date and session, guests, pickup, extras, guest details, payment. One screen on desktop; on phones a sticky “From … / Book” bar opens a stepped bottom sheet. The live price comes from the same `QuoteService` the server uses when it saves the booking.
