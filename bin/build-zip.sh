@@ -22,12 +22,13 @@ mkdir -p "$STAGE"
 # Copy the plugin without dev files (.distignore) or the dev vendor folder.
 tar -c --exclude-vcs --exclude="./vendor" --exclude="./build" --exclude-from=.distignore -f - . | tar -x -C "$STAGE"
 
-# Production autoloader only (the plugin has no runtime dependencies).
-cp composer.json "$STAGE/"
+# Production dependencies only (Action Scheduler), at the locked versions.
+cp composer.json composer.lock "$STAGE/"
 composer install --working-dir="$STAGE" --no-dev --optimize-autoloader --no-interaction --no-progress --quiet
 rm -f "$STAGE/composer.json" "$STAGE/composer.lock"
+rm -rf "$STAGE/vendor/woocommerce/action-scheduler/docs" "$STAGE/vendor/woocommerce/action-scheduler/tests"
 
-for required in digitum-bookings.php uninstall.php readme.txt vendor/autoload.php assets/build/admin/admin.css assets/build/admin/meta-box.js assets/build/front/booking.js assets/build/front/payment.js assets/build/front/booking.css assets/build/blocks/booking-block.js blocks/booking/block.json templates/front/booking-widget.php; do
+for required in digitum-bookings.php uninstall.php readme.txt vendor/autoload.php vendor/woocommerce/action-scheduler/action-scheduler.php assets/build/admin/admin.css assets/build/admin/meta-box.js assets/build/admin/calendar.js assets/build/admin/checkin.js assets/build/front/booking.js assets/build/front/payment.js assets/build/front/booking.css assets/build/blocks/booking-block.js blocks/booking/block.json templates/front/booking-widget.php; do
 	if [ ! -e "$STAGE/$required" ]; then
 		echo "Build is missing $required" >&2
 		exit 1

@@ -186,6 +186,7 @@ final class Schema {
 				'pickup_window_start time DEFAULT NULL',
 				'pickup_window_end time DEFAULT NULL',
 				'addons longtext',
+				"vehicle varchar(100) NOT NULL DEFAULT ''",
 				'PRIMARY KEY  (id)',
 				'KEY booking_id (booking_id)',
 				'KEY product_date (product_id,date)',
@@ -268,12 +269,15 @@ final class Schema {
 				'booking_id bigint(20) unsigned DEFAULT NULL',
 				"channel varchar(20) NOT NULL DEFAULT 'email'",
 				'template varchar(50) NOT NULL',
+				"audience varchar(10) NOT NULL DEFAULT ''",
 				"recipient varchar(191) NOT NULL DEFAULT ''",
+				"subject varchar(255) NOT NULL DEFAULT ''",
 				'status varchar(20) NOT NULL',
 				'error text',
 				'created_at datetime NOT NULL',
 				'PRIMARY KEY  (id)',
 				'KEY booking_id (booking_id)',
+				'KEY created_at (created_at)',
 			),
 		);
 	}
