@@ -43,6 +43,7 @@ function make_site( string $name, ?string $plugin_dir = null, string $home = 'ht
 	$plugins = "{$dir}/wp-content/plugins";
 	@mkdir( $plugins, 0777, true );
 	@mkdir( "{$dir}/wp-content/mu-plugins", 0777, true );
+	copy( __DIR__ . '/test-capture.php', "{$dir}/wp-content/mu-plugins/test-capture.php" );
 	exec( 'cp -R ' . escapeshellarg( $sqlite ) . ' ' . escapeshellarg( "{$plugins}/sqlite-database-integration" ) );
 	symlink( realpath( $plugin_dir ?? ( getenv( 'DGB_PLUGIN_DIR' ) ?: $root ) ), "{$plugins}/digitum-bookings" );
 

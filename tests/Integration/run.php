@@ -218,7 +218,7 @@ if ( scenario( 'C' ) ) {
 	check( array( 'Morning' => 'too_far', 'Evening' => 'too_far' ) === $a['statuses'], 'beyond “book up to” is not bookable' );
 
 	$h = step( $site, 'holds' );
-	check( $h['scheduled'], 'hold expiry job is scheduled' );
+	check( $h['scheduled'] && 'action-scheduler' === $h['scheduler'], 'hold expiry job is scheduled (Action Scheduler)' );
 	check(
 		array(
 			'pending_payment_old'   => 'cancelled',
@@ -593,14 +593,253 @@ if ( scenario( 'F' ) ) {
 	check( 'confirmed' === $r['data']['status'] && is_int( $x['result'] ?? null ) && 'paid' === $st['booking']['payment_status'] && 'dgb_payment_method' === ( $x2['error'] ?? '' ), 'pay on arrival: cash recorded, unknown methods refused' );
 
 	// Admin screens.
-	$a = step( $site, 'render_admin', array( 'screen' => 'payments', 'get' => array( 'booking' => $ref ) ) );
-	check( false !== strpos( $a['html'], 'Receipt 42' ) && false !== strpos( $a['html'], 'value="dgb_refund"' ) && false !== strpos( $a['html'], 'value="dgb_record_payment"' ) && substr_count( $a['html'], 'name="_wpnonce"' ) >= 2, 'Payments screen: payments with refund form, record payment form, nonces' );
+	$a = step( $site, 'render_admin', array( 'screen' => 'bookings', 'get' => array( 'booking' => $st['booking']['id'] ) ) );
+	check( false !== strpos( $a['html'], 'Receipt 42' ) && false !== strpos( $a['html'], 'value="dgb_refund"' ) && false !== strpos( $a['html'], 'value="dgb_record_payment"' ) && substr_count( $a['html'], 'name="_wpnonce"' ) >= 2, 'booking page: payments with refund form, record payment form, nonces' );
 	$a = step( $site, 'render_admin', array( 'screen' => 'payments' ) );
 	check( false !== strpos( $a['html'], 'Recent payments' ) && false !== strpos( $a['html'], 'Waiting for bank transfer' ), 'Payments screen without a reference: waiting transfers and recent payments' );
 	$a = step( $site, 'render_admin', array( 'screen' => 'settings', 'get' => array( 'tab' => 'payments' ) ) );
 	check( false !== strpos( $a['html'], '/wp-json/dgb/v1/webhooks/stripe' ) && false !== strpos( $a['html'], 'webhooks/paypal' ) && false === strpos( $a['html'], 'sk_test_fake' ) && false === strpos( $a['html'], 'secret-fake' ) && false !== strpos( $a['html'], 'type="password"' ), 'settings: webhook URLs shown, saved secrets never printed' );
 	$a = step( $site, 'render_admin', array( 'screen' => 'payments', 'user' => 0 ) );
 	check( isset( $a['died'] ) && false === strpos( $a['html'], 'Recent payments' ), 'Payments screen needs the manage bookings capability' );
+}
+
+/* -------------------------------------------------------------------- */
+if ( scenario( 'H' ) ) {
+	echo "\nScenario H: admin operations, emails, reminders, manifest, webhooks (M5)\n";
+	$site = make_site( 'm5' );
+	copy( __DIR__ . '/fake-gateways.php', "{$site}/wp-content/mu-plugins/fake-gateways.php" );
+	step( $site, 'install' );
+	step( $site, 'activate' );
+	$demo = step( $site, 'demo_setup' );
+	step( $site, 'payments_setup' );
+	step( $site, 'settings_merge', array( 'values' => array( 'emails' => array( 'admin_recipients' => 'ops@example.com, boss@example.com', 'webhook_url' => 'https://hooks.example.test/dgb', 'webhook_secret' => 'whsec_out_test', 'summary_time' => '18:00', 'reminder_hours' => 24 ) ) ) );
+	step( $site, 'mails', array( 'clear' => true ) );
+	$rzr  = $demo['tours']['rzr'];
+	$ny   = $demo['tours']['newyear'];
+	$day  = static fn( int $n ) => ( new DateTimeImmutable( '+' . $n . ' days', new DateTimeZone( 'Asia/Dubai' ) ) )->format( 'Y-m-d' );
+	$ip   = 0;
+	$book = static function ( string $method, array $extra = array(), ?int $product = null ) use ( $site, $rzr, $day, &$ip ) {
+		++$ip;
+		$body = array_merge(
+			array(
+				'product'        => $product ?? $rzr['id'],
+				'variant_id'     => $rzr['variants']['1 hour'],
+				'date'           => $day( 3 ),
+				'session_id'     => $rzr['sessions']['Evening'],
+				'adults'         => 2,
+				'units'          => 1,
+				'pickup'         => true,
+				'zone_id'        => $GLOBALS['dgb_demo_zone'],
+				'hotel'          => 'Atlantis The Palm',
+				'room'           => '1204',
+				'payment_method' => $method,
+				'name'           => 'Mail Guest',
+				'email'          => 'guest@example.com',
+				'phone_code'     => '+971',
+				'phone'          => '501234567',
+				'terms'          => true,
+			),
+			$extra
+		);
+		return step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'body' => $body, 'nonce' => true, 'ip' => '10.5.0.' . $ip ) );
+	};
+	$GLOBALS['dgb_demo_zone'] = $demo['zones']['Dubai'];
+	$mails = static fn() => step( $site, 'mails', array( 'clear' => true ) )['mails'];
+	$find  = static fn( array $list, string $to, string $needle ) => current( array_filter( $list, static fn( $m ) => in_array( $to, $m['to'], true ) && false !== stripos( $m['subject'], $needle ) ) );
+	$state = static fn( string $ref ) => step( $site, 'booking_state', array( 'reference' => $ref ) );
+
+	// Pay on arrival: confirmation to the guest (with .ics) and to staff.
+	$r   = $book( 'arrival' );
+	$ref = $r['data']['reference'];
+	$m   = $mails();
+	$g   = $find( $m, 'guest@example.com', 'Booking confirmed' );
+	$a   = $find( $m, 'ops@example.com', 'New booking ' . $ref );
+	check( 2 === count( $m ) && $g && $a, 'pay on arrival: confirmation to the guest and one email to staff' );
+	check( $g && str_contains( $g['subject'], $ref ) && str_contains( $g['html'], 'Atlantis The Palm' ) && preg_match( '/2:15\s*pm\s*–\s*2:45\s*pm/', $g['html'] ), 'guest email: reference, hotel and the session’s pickup window' );
+	check( $g && 'booking-' . $ref . '.ics' === ( $g['attachments'][0]['name'] ?? '' ) && str_contains( $g['attachments'][0]['body'], 'BEGIN:VEVENT' ), 'calendar file attached to the guest confirmation' );
+	check( $g && str_contains( $g['text'], $ref ) && ! str_contains( $g['text'], '<table' ) && str_contains( $g['text'], 'dgb_key=' ), 'plain-text part with the reference and the booking link' );
+	check( $a && in_array( 'boss@example.com', $a['to'], true ) && (bool) preg_grep( '/^Reply-To: Mail Guest <guest@example.com>$/', $a['headers'] ) && (bool) preg_grep( '/^From: Desert Bookings <info@desertbookings.com>$/', $a['headers'] ), 'staff email to every staff address, From the business, Reply-To the guest' );
+	$sch = step( $site, 'scheduled', array( 'hook' => 'dgb_send_reminder', 'args' => array( (int) $state( $ref )['booking']['id'] ), 'booking' => $ref ) );
+	check( is_int( $sch['next'] ) && $sch['next'] === $sch['start'] - 86400, 'reminder scheduled in Action Scheduler 24 hours before the pickup' );
+
+	// Reminder fires through Action Scheduler.
+	$run = step( $site, 'run_action', array( 'hook' => 'dgb_send_reminder', 'args' => array( $sch['booking_id'] ) ) );
+	$m   = $mails();
+	check( 1 === $run['ran'] && 1 === count( $m ) && str_starts_with( $m[0]['subject'], 'See you soon' ) && 'guest@example.com' === $m[0]['to'][0], 'reminder action runs and emails the guest' );
+
+	// Staff move the booking: changed email, reminder moves with it.
+	$x   = step( $site, 'admin_action', array( 'op' => 'reschedule', 'reference' => $ref, 'date' => $day( 5 ), 'session' => $rzr['sessions']['Morning'] ) );
+	$m   = $mails();
+	$sch2 = step( $site, 'scheduled', array( 'hook' => 'dgb_send_reminder', 'args' => array( $sch['booking_id'] ), 'booking' => $ref ) );
+	check( true === ( $x['result'] ?? null ) && $find( $m, 'guest@example.com', 'has changed' ) && $find( $m, 'ops@example.com', 'changed' ) && str_contains( $find( $m, 'guest@example.com', 'has changed' )['html'], 'Morning' ), 'booking moved to another day and session: guest and staff told what changed' );
+	check( $sch2['next'] === $sch2['start'] - 86400 && $sch2['next'] !== $sch['next'], 'reminder moved with the booking' );
+
+	// Staff cancel: emails, reminder removed.
+	$x  = step( $site, 'admin_action', array( 'op' => 'status', 'reference' => $ref, 'do' => 'cancel' ) );
+	$m  = $mails();
+	$s3 = step( $site, 'scheduled', array( 'hook' => 'dgb_send_reminder', 'args' => array( $sch['booking_id'] ) ) );
+	check( true === ( $x['result'] ?? null ) && $find( $m, 'guest@example.com', 'cancelled' ) && $find( $m, 'ops@example.com', 'cancelled' ) && false === $s3['next'], 'cancelled by staff: both emailed, reminder removed' );
+	$x = step( $site, 'admin_action', array( 'op' => 'status', 'reference' => $ref, 'do' => 'check_in' ) );
+	check( 'dgb_status' === ( $x['error'] ?? '' ), 'a cancelled booking cannot be checked in' );
+
+	// Bank transfer: details and upload link, screenshot to staff, Mark as paid confirms (no extra payment email).
+	$r   = $book( 'bank_transfer', array( 'pay_deposit' => true ) );
+	$ref = $r['data']['reference'];
+	$m   = $mails();
+	$g   = $find( $m, 'guest@example.com', 'complete your bank transfer' );
+	check( $g && str_contains( $g['html'], 'AE070331234567890123456' ) && str_contains( $g['html'], 'dgb_key=' ) && str_contains( $g['html'], '#dgb-bank' ) && $find( $m, 'ops@example.com', 'waiting for payment' ), 'bank transfer: bank details and private upload link to the guest; staff told' );
+	step( $site, 'proof_store', array( 'reference' => $ref, 'kind' => 'png', 'name' => 'transfer.png' ) );
+	$m = $mails();
+	check( 1 === count( $m ) && str_contains( $m[0]['subject'], 'Payment screenshot for ' . $ref ) && preg_match( '/^[a-f0-9]{32}\.png$/', $m[0]['attachments'][0]['name'] ?? '' ) && str_contains( $m[0]['html'], 'page=dgb-bookings' ), 'screenshot emailed to staff (attached) with a link to mark it as paid' );
+	step( $site, 'money', array( 'op' => 'mark_paid', 'reference' => $ref ) );
+	$m = $mails();
+	check( 2 === count( $m ) && $find( $m, 'guest@example.com', 'Booking confirmed' ) && $find( $m, 'ops@example.com', 'New booking' ), 'Mark as paid: confirmation emails only (no separate payment email)' );
+	step( $site, 'money', array( 'op' => 'manual', 'reference' => $ref, 'method' => 'cash', 'amount' => '200' ) );
+	$m = $mails();
+	check( $find( $m, 'guest@example.com', 'Payment received' ) && $find( $m, 'ops@example.com', 'Payment received' ) && str_contains( $find( $m, 'guest@example.com', 'Payment received' )['html'], 'AED 200.00' ), 'payment on a confirmed booking: payment received emails' );
+	$pay = current( array_filter( $state( $ref )['payments'], static fn( $p ) => 'bank_transfer' === $p['gateway'] ) );
+	step( $site, 'money', array( 'op' => 'refund', 'payment' => $pay['id'], 'amount' => '50', 'note' => 'Goodwill' ) );
+	$m = $mails();
+	check( $find( $m, 'guest@example.com', 'Refund of AED 50.00' ) && $find( $m, 'ops@example.com', 'Refund issued' ), 'refund emails' );
+
+	// Card booking: hold expiry emails; paid card booking gets the confirmation only.
+	$r   = $book( 'stripe' );
+	$exp = $r['data']['reference'];
+	$mails();
+	step( $site, 'money', array( 'op' => 'expire', 'at' => gmdate( 'Y-m-d H:i:s', time() + 20 * 60 ) ) );
+	$m = $mails();
+	check( $find( $m, 'guest@example.com', 'was released' ) && $find( $m, 'ops@example.com', 'Unpaid booking released' ), 'hold expired: guest and staff emailed' );
+	$r   = $book( 'stripe' );
+	$ref = $r['data']['reference'];
+	preg_match( '/data-dgb-pay="([^"]+)"/', $r['data']['html'], $pm );
+	$cfg = json_decode( html_entity_decode( $pm[1], ENT_QUOTES ), true );
+	$mails();
+	step( $site, 'fake_stripe', array( 'client_secret' => $cfg['clientSecret'], 'card' => '4242424242424242' ) );
+	step( $site, 'rest', array( 'method' => 'POST', 'route' => 'payments/stripe/confirm', 'body' => array( 'reference' => $ref, 'key' => $state( $ref )['booking']['access_key'] ), 'nonce' => true ) );
+	$m = $mails();
+	check( 2 === count( $m ) && $find( $m, 'guest@example.com', 'Booking confirmed' ), 'card payment: one confirmation to the guest, one to staff' );
+
+	// Quote request → quote sent with the payment link.
+	$r   = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'enquiries', 'nonce' => true, 'ip' => '10.5.9.1', 'body' => array( 'product' => $ny['id'], 'date' => $day( 10 ), 'session_id' => $ny['sessions']['Evening'], 'adults' => 6, 'pickup' => true, 'zone_id' => $demo['zones']['Dubai'], 'hotel' => 'Test Hotel', 'name' => 'Lead Guest', 'email' => 'lead@example.com', 'phone' => '501234567', 'phone_code' => '+971', 'terms' => true, 'requests' => 'Group of 6' ) ) );
+	$q   = $r['data']['reference'];
+	$m   = $mails();
+	check( $find( $m, 'lead@example.com', 'We received your request' ) && $find( $m, 'ops@example.com', 'Quote request ' . $q ) && str_contains( $find( $m, 'ops@example.com', 'Quote request' )['html'], 'Group of 6' ), 'quote request: guest and staff emailed (staff see the requests)' );
+	$x  = step( $site, 'admin_action', array( 'op' => 'quote', 'reference' => $q, 'amount' => '2500', 'note' => 'Includes private camp.' ) );
+	$m  = $mails();
+	$qs = $find( $m, 'lead@example.com', 'Your quote' );
+	$st = $state( $q );
+	check( true === ( $x['result'] ?? null ) && $qs && str_contains( $qs['subject'], 'AED 2,500.00' ) && str_contains( $qs['html'], 'dgb_pay=1' ) && str_contains( $qs['html'], 'Includes private camp.' ), 'quote sent: price and payment link emailed to the guest' );
+	check( 2500.0 === (float) $st['booking']['total'] && 2500.0 === (float) $st['booking']['balance_due'] && 'quote_requested' === $st['booking']['status'], 'quote sets the total; the booking waits for payment' );
+	$v = step( $site, 'view', array( 'reference' => $q, 'link' => true ) );
+	check( 'AED 2,500.00' === ( $v['pay']['amount'] ?? '' ), 'payment link page offers the quoted price' );
+
+	// Daily summary through Action Scheduler.
+	$step = step( $site, 'scheduled', array( 'hook' => 'dgb_daily_summary', 'args' => array() ) );
+	$at   = new DateTimeImmutable( '@' . (int) $step['next'] );
+	check( is_int( $step['next'] ) && '18:00' === $at->setTimezone( new DateTimeZone( 'Asia/Dubai' ) )->format( 'H:i' ), 'daily summary scheduled at 18:00 site time' );
+	step( $site, 'bulk_book', array( 'count' => 2, 'product' => $rzr['id'], 'input' => array( 'variant_id' => $rzr['variants']['30 min'], 'date' => $day( 1 ), 'session_id' => $rzr['sessions']['Evening'] ), 'zone' => $demo['zones']['Dubai'] ) );
+	$mails();
+	$run = step( $site, 'run_action', array( 'hook' => 'dgb_daily_summary', 'args' => array() ) );
+	$m   = $mails();
+	check( 1 === $run['ran'] && 1 === count( $m ) && str_contains( $m[0]['subject'], '2 bookings, 4 guests' ) && str_contains( $m[0]['html'], 'Manifest Guest 1' ), 'daily summary runs and lists tomorrow’s bookings' );
+
+	// Every email of section 8 was sent, to the right audience, and logged.
+	$log  = step( $site, 'notifications' )['rows'];
+	$seen = array();
+	foreach ( $log as $row ) {
+		if ( 'email' === $row['channel'] && 'sent' === $row['status'] ) {
+			$seen[ $row['template'] . '/' . $row['audience'] ] = true;
+		}
+	}
+	$expected = array( 'booking_confirmed/guest', 'booking_confirmed/admin', 'transfer_received/guest', 'transfer_received/admin', 'proof_uploaded/admin', 'hold_expired/guest', 'hold_expired/admin', 'quote_requested/guest', 'quote_requested/admin', 'quote_sent/guest', 'payment_received/guest', 'payment_received/admin', 'booking_changed/guest', 'booking_changed/admin', 'reminder/guest', 'booking_cancelled/guest', 'booking_cancelled/admin', 'refund_issued/guest', 'refund_issued/admin', 'daily_summary/admin' );
+	$missing  = array_diff( $expected, array_keys( $seen ) );
+	check( array() === $missing, 'every email of section 8 sent and logged (' . count( $expected ) . ' event/audience pairs)' . ( $missing ? ' → missing ' . implode( ', ', $missing ) : '' ) );
+
+	// Resend from the log; switched-off template is not sent.
+	$first = $log[0];
+	$x     = step( $site, 'admin_action', array( 'op' => 'resend', 'id' => (int) $first['booking_id'], 'log' => (int) $first['id'] ) );
+	$m     = $mails();
+	check( true === ( $x['result'] ?? null ) && 1 === count( $m ) && str_starts_with( $m[0]['subject'], 'Booking confirmed' ) && $m[0]['to'] === array( $first['recipient'] ), 'Resend sends the email again (with the booking’s current details)' );
+	step( $site, 'set_option', array( 'name' => 'dgb_emails', 'value' => array( 'booking_confirmed' => array( 'admin' => array( 'enabled' => false ) ) ) ) );
+	$book( 'arrival' );
+	$m = $mails();
+	check( 1 === count( $m ) && 'guest@example.com' === $m[0]['to'][0], 'an email switched off on the Emails screen is not sent' );
+	step( $site, 'set_option', array( 'name' => 'dgb_emails', 'value' => array() ) );
+
+	// Webhooks: signed deliveries in the background, retried on failure.
+	step( $site, 'run_action', array( 'hook' => 'dgb_deliver_webhook' ) );
+	$hooks = step( $site, 'hooks', array( 'clear' => true ) )['hooks'];
+	$h     = $hooks[0] ?? array( 'headers' => array(), 'body' => '' );
+	$sig   = 'sha256=' . hash_hmac( 'sha256', ( $h['headers']['X-DGB-Timestamp'] ?? '' ) . '.' . $h['body'], 'whsec_out_test' );
+	$data  = json_decode( $h['body'], true );
+	$names = array_unique( array_map( static fn( $x ) => $x['headers']['X-DGB-Event'] ?? '', $hooks ) );
+	check( count( $hooks ) >= 10 && ( $h['headers']['X-DGB-Signature'] ?? '' ) === $sig && isset( $data['booking']['reference'], $data['booking']['customer']['email'], $data['booking']['tour']['name'] ), 'webhooks delivered with a valid HMAC signature and the booking' );
+	check( array() === array_diff( array( 'booking.created', 'booking.status_changed', 'booking.changed', 'payment.completed', 'payment.refunded' ), $names ), 'webhook events: created, status changed, changed, payment completed, refunded' );
+	step( $site, 'set_option', array( 'name' => 'dgb_test_hook_fail', 'value' => 1 ) );
+	$book( 'arrival' );
+	$mails();
+	step( $site, 'run_action', array( 'hook' => 'dgb_deliver_webhook' ) );
+	$log   = step( $site, 'notifications' )['rows'];
+	$fails = array_filter( $log, static fn( $row ) => 'webhook' === $row['channel'] && 'failed' === $row['status'] );
+	$retry = step( $site, 'scheduled', array( 'hook' => 'dgb_deliver_webhook' ) );
+	check( count( $fails ) >= 1 && is_int( $retry['next'] ) && $retry['next'] > time() + 30, 'failed delivery logged and retried later' );
+	step( $site, 'set_option', array( 'name' => 'dgb_test_hook_fail', 'value' => 0 ) );
+
+	// Manifest with 20 bookings for one session.
+	$mdate = $day( 7 );
+	$bulk  = step( $site, 'bulk_book', array( 'count' => 20, 'product' => $rzr['id'], 'input' => array( 'variant_id' => $rzr['variants']['2 hours'], 'date' => $mdate, 'session_id' => $rzr['sessions']['Evening'] ), 'zone' => $demo['zones']['Dubai'] ) );
+	$mf    = step( $site, 'manifest', array( 'date' => $mdate, 'product' => $rzr['id'], 'session' => $rzr['sessions']['Evening'] ) );
+	$rows  = substr_count( $mf['print'], '<tr>' ) - 1;
+	check( 20 === count( array_filter( $bulk['refs'], static fn( $r ) => str_starts_with( $r, 'DGB-' ) ) ) && 1 === count( $mf['sessions'] ) && 20 === $mf['sessions'][0]['rows'] && 40 === $mf['sessions'][0]['pax'], 'manifest: one session with 20 bookings and 40 guests' );
+	check( 20 === $rows && str_contains( $mf['print'], 'Manifest Guest 20' ) && str_contains( $mf['print'], 'Hotel 3' ) && str_contains( $mf['print'], '@page { size: A4 landscape' ) && str_contains( $mf['print'], 'thead { display: table-header-group; }' ), 'print view: 20 rows, pickups, A4 landscape, header repeated on each page' );
+	check( 21 === count( array_filter( explode( "\n", trim( $mf['csv'] ) ) ) ) && str_contains( $mf['csv'], 'Manifest Guest 7' ), 'manifest CSV: header and 20 rows' );
+
+	// Staff REST API: calendar, closures, check-in by a guide.
+	$guide = step( $site, 'create_user', array( 'login' => 'guide1', 'role' => 'dgb_guide' ) )['id'];
+	$cal   = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'admin/calendar', 'query' => array( 'from' => $mdate, 'to' => $mdate, 'product' => $rzr['id'] ), 'user' => 1 ) );
+	$eve   = current( array_filter( $cal['data']['days'][ $mdate ] ?? array(), static fn( $sess ) => 'Evening' === $sess['name'] ) );
+	check( 200 === $cal['status'] && $eve && 20 === $eve['bookings'] && 40 === $eve['guests'] && 2 === count( $cal['data']['days'][ $mdate ] ), 'calendar: both sessions, 20 bookings in the evening' );
+	$no = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'admin/calendar', 'query' => array( 'from' => $mdate, 'to' => $mdate ), 'user' => $guide ) );
+	check( 403 === $no['status'], 'guides cannot open the calendar' );
+	$c1 = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/closures', 'body' => array( 'product' => $rzr['id'], 'date' => $mdate, 'session' => $rzr['sessions']['Morning'], 'closed' => true ), 'user' => 1 ) );
+	$av = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'availability/sessions', 'query' => array( 'product' => $rzr['id'], 'date' => $mdate ) ) );
+	check( 200 === $c1['status'] && 'closed' === $av['data']['sessions'][0]['status'] && $av['data']['sessions'][1]['bookable'], 'closing the morning session from the calendar stops online bookings for it' );
+	step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/closures', 'body' => array( 'product' => $rzr['id'], 'date' => $mdate, 'session' => $rzr['sessions']['Morning'], 'closed' => false ), 'user' => 1 ) );
+	$av = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'availability/sessions', 'query' => array( 'product' => $rzr['id'], 'date' => $mdate ) ) );
+	check( $av['data']['sessions'][0]['bookable'], 'and opening it again works' );
+	$id = $state( $bulk['refs'][0] )['booking']['id'];
+	$ci = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/bookings/' . $id . '/status', 'body' => array( 'action' => 'check_in' ), 'user' => $guide ) );
+	$cx = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/bookings/' . $id . '/status', 'body' => array( 'action' => 'cancel' ), 'user' => $guide ) );
+	$c0 = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/bookings/' . $id . '/status', 'body' => array( 'action' => 'undo' ), 'user' => 0 ) );
+	check( 200 === $ci['status'] && 'checked_in' === $ci['data']['status'] && 403 === $cx['status'] && 401 === $c0['status'], 'check-in API: guides may check in but not cancel; logged-out requests refused' );
+	$mv = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/bookings/' . $state( $bulk['refs'][1] )['booking']['id'] . '/reschedule', 'body' => array( 'date' => $day( 8 ) ), 'user' => 1 ) );
+	check( 200 === $mv['status'] && $day( 8 ) === $mv['data']['tour']['date'], 'drag and drop endpoint moves a booking to another day' );
+	$mf = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'admin/manifest', 'query' => array( 'date' => $mdate ), 'user' => $guide ) );
+	check( 200 === $mf['status'] && 19 === count( $mf['data']['sessions'][0]['rows'] ), 'manifest API for guides' );
+
+	// Admin screens.
+	$a = step( $site, 'render_admin', array( 'screen' => 'bookings', 'get' => array( 's' => $bulk['refs'][5] ) ) );
+	check( 1 === substr_count( $a['html'], 'name="bookings[]"' ) && str_contains( $a['html'], 'Export CSV' ), 'bookings list: search by reference finds one booking' );
+	$a = step( $site, 'render_admin', array( 'screen' => 'bookings', 'get' => array( 'status' => 'quote_requested' ) ) );
+	check( 1 === substr_count( $a['html'], 'name="bookings[]"' ) && str_contains( $a['html'], $q ), 'bookings list: status tab' );
+	$a = step( $site, 'render_admin', array( 'screen' => 'bookings', 'get' => array( 'booking' => $state( $q )['booking']['id'] ) ) );
+	check( str_contains( $a['html'], 'value="dgb_booking_quote"' ) && str_contains( $a['html'], 'Your quote' ) && str_contains( $a['html'], 'value="dgb_booking_resend"' ) && str_contains( $a['html'], 'Erase guest data' ), 'booking page: quote form, email log with Resend, erase' );
+	$a = step( $site, 'render_admin', array( 'screen' => 'calendar', 'get' => array( 'view' => 'week', 'date' => $mdate, 'product' => $rzr['id'] ) ) );
+	check( substr_count( $a['html'], 'data-dgb-booking=' ) >= 19 && str_contains( $a['html'], 'data-dgb-close' ), 'calendar week view: draggable bookings and close buttons' );
+	$a = step( $site, 'render_admin', array( 'screen' => 'checkin', 'get' => array( 'date' => $mdate ), 'user' => $guide ) );
+	check( 19 === substr_count( $a['html'], 'class="dgb-checkin-card' ) && str_contains( $a['html'], '1 of 19 arrived' ), 'check-in screen for the guide' );
+	$a = step( $site, 'render_admin', array( 'screen' => 'emails' ) );
+	check( 12 === substr_count( $a['html'], 'class="dgb-email-event' ) && str_contains( $a['html'], 'value="dgb_test_email"' ), 'Emails screen lists the 12 emails and the test button' );
+	$a = step( $site, 'render_admin', array( 'screen' => 'dashboard' ) );
+	check( str_contains( $a['html'], 'Last 30 days' ) && str_contains( $a['html'], $q ), 'dashboard: revenue and quote requests' );
+	$csv = step( $site, 'bookings_csv', array( 'filters' => array( 'date_from' => $mdate, 'date_to' => $mdate ) ) );
+	check( 19 === $csv['total'] && 20 === count( array_filter( explode( "\n", trim( $csv['csv'] ) ) ) ) && str_contains( $csv['csv'], 'Manifest Guest 1' ), 'CSV export of the filtered list (19 left on that day after the move)' );
+
+	// Erase guest data.
+	$er = $bulk['refs'][2];
+	$x  = step( $site, 'admin_action', array( 'op' => 'erase', 'reference' => $er ) );
+	$st = $state( $er );
+	check( true === ( $x['result'] ?? null ) && '' === $st['booking']['customer_name'] && '' === $st['booking']['customer_email'] && '' === $st['booking']['customer_phone'] && ! empty( $st['booking']['erased_at'] ) && 699 < (float) $st['booking']['total'], 'erase: name, email and phone gone; amounts kept' );
 }
 
 /* -------------------------------------------------------------------- */

@@ -71,6 +71,28 @@ require __DIR__ . '/index.php';
 PHP
 );
 
+// 20 bookings in one session a week ahead (manifest, calendar, check-in) and a guide account.
+$manifest_date = ( new DateTimeImmutable( '+7 days', new DateTimeZone( 'Asia/Dubai' ) ) )->format( 'Y-m-d' );
+$manifest      = step(
+	$site,
+	'bulk_book',
+	array(
+		'count'   => 20,
+		'product' => $demo['tours']['rzr']['id'],
+		'input'   => array(
+			'variant_id' => $demo['tours']['rzr']['variants']['2 hours'],
+			'date'       => $manifest_date,
+			'session_id' => $demo['tours']['rzr']['sessions']['Evening'],
+		),
+		'zone'    => $demo['zones']['Dubai'],
+	)
+);
+step( $site, 'create_user', array( 'login' => 'guide1', 'role' => 'dgb_guide' ) );
+$demo['manifest'] = array(
+	'date' => $manifest_date,
+	'refs' => $manifest['refs'],
+);
+
 file_put_contents(
 	"{$root}/.wp-test/e2e.json",
 	json_encode(

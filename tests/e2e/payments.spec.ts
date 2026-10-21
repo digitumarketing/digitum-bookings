@@ -169,14 +169,14 @@ test.describe( 'payments', () => {
 
 		const staff = await admin( browser );
 		await staff.goto( '/wp-admin/admin.php?page=dgb-payments&booking=' + ref );
-		await expect( staff.locator( 'h2', { hasText: ref } ) ).toBeVisible();
+		await expect( staff.getByRole( 'heading', { name: 'Booking ' + ref } ) ).toBeVisible();
 		staff.on( 'dialog', ( dialog ) => dialog.accept() );
 		await staff.getByLabel( 'Amount to refund' ).fill( '100' );
 		await staff.getByLabel( 'Reason' ).fill( 'Shorter ride' );
 		await staff.getByRole( 'button', { name: 'Refund', exact: true } ).click();
 		await expect( staff.locator( '.notice-success' ) ).toContainText( 'Refund recorded' );
-		await expect( staff.locator( '.dgb-pay-grid' ) ).toContainText( 'Partly refunded' );
-		await expect( staff.locator( '.dgb-pay-grid' ) ).toContainText( 'AED 799.00' );
+		await expect( staff.locator( '.dgb-panel-card', { hasText: 'Paid (after refunds)' } ) ).toContainText( 'Partly refunded' );
+		await expect( staff.locator( '.dgb-panel-card', { hasText: 'Paid (after refunds)' } ) ).toContainText( 'AED 799.00' );
 		await staff.context().close();
 	} );
 } );

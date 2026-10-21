@@ -129,7 +129,8 @@ switch ( $dgb_action ) {
 				$dgb_now
 			)['id'];
 		}
-		$dgb_out['scheduled'] = (bool) wp_next_scheduled( \Digitum\Bookings\Services\Holds::HOOK );
+		$dgb_out['scheduled'] = function_exists( 'as_next_scheduled_action' ) ? false !== as_next_scheduled_action( \Digitum\Bookings\Services\Holds::HOOK ) : (bool) wp_next_scheduled( \Digitum\Bookings\Services\Holds::HOOK );
+		$dgb_out['scheduler'] = function_exists( 'as_next_scheduled_action' ) ? 'action-scheduler' : 'wp-cron';
 		$dgb_changes          = array();
 		add_action(
 			'dgb_booking_status_changed',
@@ -282,6 +283,9 @@ switch ( $dgb_action ) {
 		break;
 
 	case 'rest':
+		if ( isset( $dgb_args['user'] ) ) {
+			wp_set_current_user( (int) $dgb_args['user'] );
+		}
 		if ( ! empty( $dgb_args['ip'] ) ) {
 			$_SERVER['REMOTE_ADDR'] = $dgb_args['ip'];
 		}
@@ -480,6 +484,9 @@ switch ( $dgb_action ) {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		$_GET    = $dgb_args['get'] ?? array();
 		$dgb_set = \Digitum\Bookings\Plugin::instance()->settings();
+		require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
+		require_once ABSPATH . 'wp-admin/includes/screen.php';
+		set_current_screen( 'digitum-bookings_page_' . $dgb_args['screen'] );
 		add_filter( 'wp_die_handler', static fn() => static function ( $message ) {
 			throw new RuntimeException( is_string( $message ) ? $message : 'wp_die' );
 		} );
@@ -487,6 +494,16 @@ switch ( $dgb_action ) {
 		try {
 		if ( 'dashboard' === $dgb_args['screen'] ) {
 			( new \Digitum\Bookings\Admin\Screens\DashboardScreen( $dgb_set, \Digitum\Bookings\Plugin::instance()->product_type() ) )->render();
+		} elseif ( 'bookings' === $dgb_args['screen'] ) {
+			( new \Digitum\Bookings\Admin\Screens\BookingsScreen( $dgb_set, \Digitum\Bookings\Plugin::instance()->product_type() ) )->render();
+		} elseif ( 'manifest' === $dgb_args['screen'] ) {
+			( new \Digitum\Bookings\Admin\Screens\ManifestScreen( $dgb_set, \Digitum\Bookings\Plugin::instance()->product_type() ) )->render();
+		} elseif ( 'calendar' === $dgb_args['screen'] ) {
+			( new \Digitum\Bookings\Admin\Screens\CalendarScreen( $dgb_set, \Digitum\Bookings\Plugin::instance()->product_type() ) )->render();
+		} elseif ( 'checkin' === $dgb_args['screen'] ) {
+			( new \Digitum\Bookings\Admin\Screens\CheckInScreen( $dgb_set ) )->render();
+		} elseif ( 'emails' === $dgb_args['screen'] ) {
+			( new \Digitum\Bookings\Admin\Screens\EmailsScreen( $dgb_set ) )->render();
 		} elseif ( 'settings' === $dgb_args['screen'] ) {
 			( new \Digitum\Bookings\Admin\Screens\SettingsScreen( $dgb_set ) )->render();
 		} else {
@@ -521,6 +538,153 @@ switch ( $dgb_action ) {
 		$dgb_out['list']       = is_wp_error( $dgb_list ) ? $dgb_list->get_error_message() : 'ok';
 		$dgb_bad               = $dgb_stripe->api( 'POST', '/v1/payment_intents', array( 'amount' => 100, 'currency' => 'aed', 'not_a_parameter' => 'x' ) );
 		$dgb_out['validating'] = is_wp_error( $dgb_bad );
+		break;
+
+	case 'mails':
+		global $wpdb;
+		$dgb_raw         = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'dgb_test_mails' ) );
+		$dgb_out['mails'] = $dgb_raw ? maybe_unserialize( $dgb_raw ) : array();
+		if ( ! empty( $dgb_args['clear'] ) ) {
+			$wpdb->delete( $wpdb->options, array( 'option_name' => 'dgb_test_mails' ) );
+		}
+		break;
+
+	case 'hooks':
+		global $wpdb;
+		$dgb_raw          = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'dgb_test_hooks' ) );
+		$dgb_out['hooks'] = $dgb_raw ? maybe_unserialize( $dgb_raw ) : array();
+		if ( ! empty( $dgb_args['clear'] ) ) {
+			$wpdb->delete( $wpdb->options, array( 'option_name' => 'dgb_test_hooks' ) );
+		}
+		break;
+
+	case 'set_option':
+		update_option( $dgb_args['name'], $dgb_args['value'] );
+		break;
+
+	case 'settings_merge':
+		$dgb_settings = \Digitum\Bookings\Plugin::instance()->settings();
+		$dgb_all      = $dgb_settings->all();
+		foreach ( $dgb_args['values'] as $dgb_tab => $dgb_values ) {
+			$dgb_all[ $dgb_tab ] = array_merge( $dgb_all[ $dgb_tab ], $dgb_values );
+		}
+		$dgb_settings->update( $dgb_all );
+		break;
+
+	case 'bulk_book':
+		$dgb_service = new \Digitum\Bookings\Services\BookingService( \Digitum\Bookings\Plugin::instance()->settings(), \Digitum\Bookings\Plugin::instance()->product_type(), \Digitum\Bookings\Plugin::instance()->quotes(), new \Digitum\Bookings\Database\Repositories\BookingRepository() );
+		$dgb_out['refs'] = array();
+		for ( $dgb_i = 1; $dgb_i <= (int) $dgb_args['count']; $dgb_i++ ) {
+			$dgb_r = $dgb_service->create(
+				(int) $dgb_args['product'],
+				array_merge(
+					array(
+						'name'           => 'Manifest Guest ' . $dgb_i,
+						'email'          => 'guest' . $dgb_i . '@example.com',
+						'phone_code'     => '+971',
+						'phone'          => '50' . str_pad( (string) $dgb_i, 7, '0', STR_PAD_LEFT ),
+						'terms'          => true,
+						'adults'         => 2,
+						'units'          => 1,
+						'payment_method' => 'arrival',
+					),
+					$dgb_args['input'],
+					0 === $dgb_i % 3 ? array( 'pickup' => true, 'zone_id' => $dgb_args['zone'] ?? 0, 'hotel' => 'Hotel ' . $dgb_i, 'room' => (string) ( 100 + $dgb_i ) ) : array()
+				),
+				false
+			);
+			$dgb_out['refs'][] = is_wp_error( $dgb_r ) ? $dgb_r->get_error_code() . ': ' . wp_json_encode( $dgb_r->get_error_data() ) : $dgb_r['reference'];
+		}
+		break;
+
+	case 'admin_action':
+		wp_set_current_user( 1 );
+		$dgb_actions = new \Digitum\Bookings\Services\BookingActions( \Digitum\Bookings\Plugin::instance()->settings() );
+		$dgb_id      = (int) ( $dgb_args['id'] ?? 0 );
+		if ( ! $dgb_id && ! empty( $dgb_args['reference'] ) ) {
+			$dgb_id = (int) ( new \Digitum\Bookings\Database\Repositories\BookingRepository() )->find_by_reference( $dgb_args['reference'] )['id'];
+		}
+		switch ( $dgb_args['op'] ) {
+			case 'status':
+				$dgb_result = $dgb_actions->status( $dgb_id, $dgb_args['do'], 1 );
+				break;
+			case 'reschedule':
+				$dgb_result = $dgb_actions->reschedule( $dgb_id, $dgb_args['date'], (int) ( $dgb_args['session'] ?? 0 ), 1 );
+				break;
+			case 'quote':
+				$dgb_result = $dgb_actions->send_quote( $dgb_id, (string) $dgb_args['amount'], (string) ( $dgb_args['note'] ?? '' ), 1 );
+				break;
+			case 'note':
+				$dgb_result = $dgb_actions->add_note( $dgb_id, (string) $dgb_args['note'], 1 );
+				break;
+			case 'vehicle':
+				$dgb_actions->set_vehicle( $dgb_id, (string) $dgb_args['vehicle'] );
+				$dgb_result = true;
+				break;
+			case 'erase':
+				$dgb_result = $dgb_actions->erase( $dgb_id, 1 );
+				break;
+			case 'resend':
+				$dgb_result = ( new \Digitum\Bookings\Services\Notifications\Mailer( \Digitum\Bookings\Plugin::instance()->settings() ) )->resend( (int) $dgb_args['log'] );
+				break;
+		}
+		$dgb_out = is_wp_error( $dgb_result ) ? array( 'error' => $dgb_result->get_error_code() ) : array( 'result' => $dgb_result, 'id' => $dgb_id );
+		break;
+
+	case 'scheduled':
+		$dgb_out['next'] = function_exists( 'as_next_scheduled_action' ) ? as_next_scheduled_action( $dgb_args['hook'], $dgb_args['args'] ?? null, 'digitum-bookings' ) : false;
+		if ( isset( $dgb_args['booking'] ) ) {
+			$dgb_b                 = ( new \Digitum\Bookings\Database\Repositories\BookingRepository() )->find_by_reference( $dgb_args['booking'] );
+			$dgb_out['start']      = \Digitum\Bookings\Services\Notifications\Scheduler::start( $dgb_b );
+			$dgb_out['booking_id'] = (int) $dgb_b['id'];
+		}
+		break;
+
+	case 'run_action':
+		$dgb_ids = as_get_scheduled_actions(
+			array(
+				'hook'     => $dgb_args['hook'],
+				'args'     => $dgb_args['args'] ?? null,
+				'status'   => ActionScheduler_Store::STATUS_PENDING,
+				'group'    => 'digitum-bookings',
+				'per_page' => 50,
+			),
+			'ids'
+		);
+		$dgb_out['ran'] = 0;
+		foreach ( $dgb_ids as $dgb_action_id ) {
+			ActionScheduler_QueueRunner::instance()->process_action( (int) $dgb_action_id, 'dgb-test' );
+			++$dgb_out['ran'];
+		}
+		break;
+
+	case 'notifications':
+		global $wpdb;
+		$dgb_out['rows'] = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}dgb_notifications ORDER BY id ASC", ARRAY_A );
+		break;
+
+	case 'manifest':
+		$dgb_groups          = \Digitum\Bookings\Admin\Screens\ManifestScreen::groups( $dgb_args['date'], (int) ( $dgb_args['product'] ?? 0 ), isset( $dgb_args['session'] ) ? (int) $dgb_args['session'] : null );
+		$dgb_screen          = new \Digitum\Bookings\Admin\Screens\ManifestScreen( \Digitum\Bookings\Plugin::instance()->settings(), \Digitum\Bookings\Plugin::instance()->product_type() );
+		$dgb_out['print']    = $dgb_screen->print_html( $dgb_args['date'], $dgb_groups );
+		$dgb_mem             = fopen( 'php://memory', 'w+' );
+		\Digitum\Bookings\Admin\Screens\ManifestScreen::write_csv( $dgb_mem, $dgb_groups );
+		rewind( $dgb_mem );
+		$dgb_out['csv']      = stream_get_contents( $dgb_mem );
+		$dgb_out['sessions'] = array_map( static fn( $g ) => array( 'title' => $g['title'], 'rows' => count( $g['rows'] ), 'pax' => $g['pax'] ), array_values( $dgb_groups ) );
+		break;
+
+	case 'bookings_csv':
+		$dgb_rows = ( new \Digitum\Bookings\Database\Repositories\BookingRepository() )->search( $dgb_args['filters'] + array( 'per_page' => 0 ) );
+		$dgb_mem  = fopen( 'php://memory', 'w+' );
+		\Digitum\Bookings\Admin\Screens\BookingsScreen::write_csv( $dgb_mem, $dgb_rows['rows'] );
+		rewind( $dgb_mem );
+		$dgb_out['csv']   = stream_get_contents( $dgb_mem );
+		$dgb_out['total'] = $dgb_rows['total'];
+		break;
+
+	case 'create_user':
+		$dgb_out['id'] = wp_insert_user( array( 'user_login' => $dgb_args['login'], 'user_pass' => 'password', 'user_email' => $dgb_args['login'] . '@example.test', 'role' => $dgb_args['role'] ) );
 		break;
 
 	case 'install':
