@@ -24,9 +24,12 @@ tar -c --exclude-vcs --exclude="./vendor" --exclude="./build" --exclude-from=.di
 
 # Production dependencies only (Action Scheduler), at the locked versions.
 cp composer.json composer.lock "$STAGE/"
-composer install --working-dir="$STAGE" --no-dev --optimize-autoloader --no-interaction --no-progress --quiet
+composer install --working-dir="$STAGE" --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress --quiet
 rm -f "$STAGE/composer.json" "$STAGE/composer.lock"
-rm -rf "$STAGE/vendor/woocommerce/action-scheduler/docs" "$STAGE/vendor/woocommerce/action-scheduler/tests"
+# A source install (no dist available) leaves git checkouts behind; keep them out of the zip.
+find "$STAGE/vendor" -name .git -prune -exec rm -rf {} +
+AS="$STAGE/vendor/woocommerce/action-scheduler"
+rm -rf "$AS/docs" "$AS/tests" "$AS/Gruntfile.js" "$AS/codecov.yml" "$AS/package.json" "$AS/package-lock.json" "$AS/phpcs.xml" "$AS/composer.lock"
 
 for required in digitum-bookings.php uninstall.php readme.txt vendor/autoload.php vendor/woocommerce/action-scheduler/action-scheduler.php assets/build/admin/admin.css assets/build/admin/meta-box.js assets/build/admin/calendar.js assets/build/admin/checkin.js assets/build/front/booking.js assets/build/front/payment.js assets/build/front/booking.css assets/build/blocks/booking-block.js blocks/booking/block.json templates/front/booking-widget.php; do
 	if [ ! -e "$STAGE/$required" ]; then
