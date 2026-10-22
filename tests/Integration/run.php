@@ -1318,6 +1318,58 @@ if ( scenario( 'K' ) ) {
 }
 
 /* -------------------------------------------------------------------- */
+if ( scenario( 'L' ) ) {
+	echo "\nScenario L: Import Desert Bookings demo data (M7)\n";
+	$amt  = static fn( $v ) => null === $v ? null : number_format( (float) $v, 2, '.', '' );
+	$site = make_site( 'm7-demo' );
+	step( $site, 'install' );
+	step( $site, 'activate' );
+	$d    = step( $site, 'demo_import' );
+	$t    = $d['tours'];
+	$g    = $d['settings'];
+	check( 27 === count( $t ) && 27 === count( array_filter( $d['report']['tours'], static fn( $x ) => 'added' === $x['result'] ) ), 'all 27 tours of section 13.2 added' );
+	check( array() === array_filter( $t, static fn( $x, $slug ) => $slug !== $x['slug'] || 'draft' !== $x['status'], ARRAY_FILTER_USE_BOTH ), 'every tour has the slug of the live site’s /tour/ URL; new ones are drafts' );
+	check( array() === array_filter( $t, static fn( $x ) => $x['product']['enabled'] ), 'bookings stay off on every tour until checked' );
+	check( 'Desert Bookings' === $g['general']['business_name'] && '+971 55 526 0561' === $g['general']['phone'] && 'info@desertbookings.com' === $g['general']['email'] && 'AED' === $g['currency']['currency'] && 'inclusive' === $g['currency']['vat_mode'] && 5.0 === (float) $g['currency']['vat_rate'] && false === $g['payments']['deposit_enabled'] && '+971 55 526 0561' === $g['payments']['bank_whatsapp'], 'business details, AED, 5% VAT inclusive, deposit off, WhatsApp number' );
+	$zones = array_column( $d['zones'], 'allowed', 'name' );
+	check( array( 'Dubai' => '1', 'Sharjah' => '1', 'Abu Dhabi' => '0' ) === array_map( 'strval', $zones ) && 'Al Aweer desert' === $d['points'][0]['name'], 'zones Dubai and Sharjah, no pickup from Abu Dhabi; Al Aweer meeting point' );
+	$rzr = $t['2-seater-polaris-rzr-1000-cc-buggy'];
+	check( 'per_vehicle' === $rzr['product']['pricing_mode'] && 2 === $rzr['product']['seats_per_unit'] && array( '30 min' => '699.00', '1 hour' => '899.00', '2 hours' => '1299.00' ) === array_map( $amt, $rzr['variants'] ) && array( 'Morning', 'Evening' ) === array_keys( $rzr['sessions'] ), '2-seater RZR: per vehicle, 2 seats, 699 / 899 / 1,299, morning and evening' );
+	check( 'addon' === $rzr['product']['pickup_policy'] && 'meet' === $rzr['product']['pickup_default'] && 'pickup' === $rzr['addons'][0]['condition_key'] && '300.00' === $amt( $rzr['addons'][0]['price'] ) && 'per_booking' === $rzr['addons'][0]['price_type'], 'buggies meet at Al Aweer; hotel pickup AED 300 per booking (13.3.1)' );
+	$saf = $t['evening-desert-safari-dubai'];
+	check( 'per_person' === $saf['product']['pricing_mode'] && 'included' === $saf['product']['pickup_policy'] && 'pickup' === $saf['product']['pickup_default'] && '99.00' === $amt( $saf['from'] ) && array() === $saf['addons'], 'evening safari: per person from 99, pickup included' );
+	$mor = $t['morning-desert-safari'];
+	check( 'per_group' === $mor['product']['pricing_mode'] && 7 === $mor['product']['max_pax_per_unit'] && '650.00' === $amt( $mor['from'] ), 'morning safari: per car up to 7, from 650' );
+	check( 'on_request' === $t['private-desert-safari-tour']['addons'][0]['price_type'] && 'Private desert setup' === $t['private-desert-safari-tour']['addons'][0]['label'], 'private safari: “Private desert setup” on request' );
+	$req = array( 'new-year-desert-safari-dubai', 'ramadan-iftar-desert-safari', 'desert-photoshoot-dubai', 'dune-buggy-desert-safari', 'corporate-and-group-events' );
+	check( array() === array_filter( $req, static fn( $s ) => 'on_request' !== $t[ $s ]['product']['pricing_mode'] || null !== $t[ $s ]['from'] ), 'the 5 price-on-request tours have no price' );
+	check( array( '729.00', '1249.00', '1899.00' ) === array_values( array_map( $amt, $t['yamaha-raptor-700-cc']['variants'] ) ) && array( '249.00', '349.00', '549.00' ) === array_values( array_map( $amt, $t['desert-yamaha-quad-bike-400-cc']['variants'] ) ) && array( '499.00', '699.00', '849.00' ) === array_values( array_map( $amt, $t['dirt-bike-ktm-rental']['variants'] ) ), 'quads and KTM price ladders' );
+	$confirm = implode( ' ', array_merge( ...array_map( static fn( $x ) => $x['confirm'], $d['report']['tours'] ) ) );
+	check( str_contains( $confirm, 'session times' ) && str_contains( $confirm, 'first option is 1 hour' ) && str_contains( implode( ' ', $d['report']['confirm'] ), 'Stripe and PayPal keys' ), 'report lists the [CONFIRM] items' );
+
+	$tools = step( $site, 'render_admin', array( 'screen' => 'tools', 'get' => array( 'done' => 'demo' ), 'admin' => true ) );
+	check( str_contains( $tools['html'], 'Demo data imported' ) && str_contains( $tools['html'], '[CONFIRM]' ) && str_contains( $tools['html'], 'value="dgb_import_demo"' ) && str_contains( $tools['html'], '2-seater-polaris-rzr-1000-cc-buggy' ), 'Tools screen: demo button and report with [CONFIRM] items' );
+
+	// Second run: nothing duplicated or overwritten.
+	step( $site, 'settings_merge', array( 'values' => array( 'general' => array( 'phone' => '+971 4 000 0000' ) ) ) );
+	$d2 = step( $site, 'demo_import' );
+	check( 27 === count( array_filter( $d2['report']['tours'], static fn( $x ) => 'kept' === $x['result'] ) ) && 3 === count( $d2['zones'] ) && 1 === count( $d2['points'] ) && '+971 4 000 0000' === $d2['settings']['general']['phone'], 'running it again changes nothing and keeps your own settings' );
+
+	// Live site: tours already exist under /tour/ (attached post type), so they are set up in place.
+	$site2 = make_site( 'm7-demo-attach' );
+	file_put_contents( "{$site2}/wp-content/mu-plugins/traveler-stub.php", "<?php\nadd_action( 'init', static fn() => register_post_type( 'st_tours', array( 'public' => true, 'label' => 'Tours', 'rewrite' => array( 'slug' => 'tour', 'with_front' => false ) ) ) );\n" );
+	step( $site2, 'install' );
+	step( $site2, 'activate' );
+	step( $site2, 'settings_merge', array( 'values' => array( 'general' => array( 'product_mode' => 'attach', 'attach_post_type' => 'st_tours', '_attach_slug' => 'tour' ) ) ) );
+	$live = step( $site2, 'create_post', array( 'type' => 'st_tours', 'title' => 'Evening Desert Safari Dubai with BBQ', 'slug' => 'evening-desert-safari-dubai', 'content' => '<p>Live text.</p>' ) );
+	$d3   = step( $site2, 'demo_import' );
+	$e    = $d3['tours']['evening-desert-safari-dubai'];
+	$st   = step( $site2, 'tour_state', array( 'post' => $live['id'] ) );
+	check( $live['id'] === $e['id'] && 'publish' === $e['status'] && $live['permalink'] === $e['permalink'] && 'Evening Desert Safari Dubai with BBQ' === $st['title'] && '<p>Live text.</p>' === $st['content'] && 'per_person' === $e['product']['pricing_mode'], 'existing live tour set up in place: same ID, URL, title and text' );
+	check( 26 === count( array_filter( $d3['report']['tours'], static fn( $x ) => 'added' === $x['result'] ) ), 'the other 26 tours added as drafts' );
+}
+
+/* -------------------------------------------------------------------- */
 $stripe_mock = getenv( 'DGB_STRIPE_MOCK' ) ?: '';
 if ( '' !== $stripe_mock && scenario( 'G' ) ) {
 	echo "\nScenario G: Stripe requests match Stripe's API (stripe-mock at {$stripe_mock})\n";

@@ -13,6 +13,7 @@ use Digitum\Bookings\Integrations\Traveler\TravelerImporter;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Roles\Capabilities;
 use Digitum\Bookings\Services\CsvExchange;
+use Digitum\Bookings\Services\DemoData;
 use Digitum\Bookings\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
@@ -44,6 +45,7 @@ final class ToolsScreen {
 		add_action( 'admin_post_dgb_traveler_import', array( $this, 'traveler_import' ) );
 		add_action( 'admin_post_dgb_export_csv', array( $this, 'export_csv' ) );
 		add_action( 'admin_post_dgb_import_csv', array( $this, 'import_csv' ) );
+		add_action( 'admin_post_dgb_import_demo', array( $this, 'import_demo' ) );
 	}
 
 	/**
@@ -81,6 +83,11 @@ final class ToolsScreen {
 			<h2><?php esc_html_e( 'Import tours from the Traveler theme', 'digitum-bookings' ); ?></h2>
 			<p><?php esc_html_e( 'Each tour keeps its ID, slug, title, text and featured image, so its URL does not change. The Traveler gallery becomes the tour gallery and “Duration | Old Price | New Price” tables become options. Old prices are not imported.', 'digitum-bookings' ); ?></p>
 			<?php $this->traveler_section( $importer, $sources, $source ); ?>
+
+			<?php if ( current_user_can( 'manage_options' ) ) : ?>
+				<h2><?php esc_html_e( 'Import Desert Bookings demo data', 'digitum-bookings' ); ?></h2>
+				<?php $this->demo_section(); ?>
+			<?php endif; ?>
 
 			<h2><?php esc_html_e( 'CSV export', 'digitum-bookings' ); ?></h2>
 			<p><?php esc_html_e( 'Booking settings of every tour, its options and its sessions, as three files. Edit them in a spreadsheet and import them below.', 'digitum-bookings' ); ?></p>
@@ -265,6 +272,75 @@ final class ToolsScreen {
 			<?php submit_button( __( 'Import CSV', 'digitum-bookings' ), 'secondary', 'submit', false ); ?>
 		</form>
 		<?php
+	}
+
+	/**
+	 * Demo data button and the last report.
+	 */
+	private function demo_section(): void {
+		$report = get_option( DemoData::REPORT );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only shows the result of the last run.
+		if ( isset( $_GET['done'] ) && 'demo' === $_GET['done'] && is_array( $report ) ) {
+			$this->demo_report( $report );
+		}
+		?>
+		<p><?php esc_html_e( 'Sets up desertbookings.com: business details, AED with 5% VAT, pickup zones (Dubai, Sharjah; no pickup from Abu Dhabi), the Al Aweer desert meeting point, and every tour with its pricing, options, sessions and hotel pickup rules. Tours that already exist keep their URL and text; missing tours are added as drafts. Your own settings are never overwritten, and running it again changes nothing that is already set up. Bookings stay switched off until you check each tour.', 'digitum-bookings' ); ?></p>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+			<input type="hidden" name="action" value="dgb_import_demo">
+			<?php wp_nonce_field( 'dgb_import_demo' ); ?>
+			<?php submit_button( __( 'Import Desert Bookings demo data', 'digitum-bookings' ), 'secondary', 'submit', false ); ?>
+		</form>
+		<?php
+	}
+
+	/**
+	 * Result of the demo import, with what to confirm.
+	 *
+	 * @param array<string, mixed> $report Report.
+	 */
+	private function demo_report( array $report ): void {
+		$labels = array(
+			'added'      => __( 'added as a draft', 'digitum-bookings' ),
+			'configured' => __( 'booking settings added', 'digitum-bookings' ),
+			'kept'       => __( 'already set up, not changed', 'digitum-bookings' ),
+			'failed'     => __( 'failed', 'digitum-bookings' ),
+		);
+		echo '<div class="notice notice-info"><p><strong>' . esc_html__( 'Demo data imported', 'digitum-bookings' ) . '</strong></p>';
+		echo '<ul>';
+		foreach ( array_merge( (array) $report['done'], (array) $report['kept'] ) as $line ) {
+			echo '<li>' . esc_html( (string) $line ) . '</li>';
+		}
+		echo '</ul><h3>' . esc_html__( 'Tours', 'digitum-bookings' ) . '</h3><ul>';
+		foreach ( (array) $report['tours'] as $tour ) {
+			$name = esc_html( (string) $tour['title'] );
+			if ( ! empty( $tour['id'] ) ) {
+				$name = '<a href="' . esc_url( (string) get_edit_post_link( (int) $tour['id'] ) ) . '">' . $name . '</a>';
+			}
+			printf(
+				'<li>%1$s (<code>/%2$s/</code>): %3$s%4$s</li>',
+				$name, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+				esc_html( (string) $tour['slug'] ),
+				esc_html( $labels[ $tour['result'] ] ?? (string) $tour['result'] ),
+				array() !== (array) $tour['confirm'] ? ' — <strong>[CONFIRM]</strong> ' . esc_html( implode( ', ', (array) $tour['confirm'] ) ) : ''
+			);
+		}
+		echo '</ul><h3>' . esc_html__( 'Still to do', 'digitum-bookings' ) . '</h3><ul>';
+		foreach ( (array) $report['confirm'] as $line ) {
+			echo '<li>' . esc_html( (string) $line ) . '</li>';
+		}
+		echo '</ul></div>';
+	}
+
+	/**
+	 * Run the demo import (administrators only).
+	 */
+	public function import_demo(): void {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'dgb_import_demo' ) ) {
+			wp_die( esc_html__( 'Only administrators can import the demo data.', 'digitum-bookings' ), '', array( 'response' => 403 ) );
+		}
+		( new DemoData( $this->settings, $this->product_type ) )->import();
+		wp_safe_redirect( self::url( array( 'done' => 'demo' ) ) );
+		exit;
 	}
 
 	/**

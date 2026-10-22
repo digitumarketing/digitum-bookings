@@ -868,6 +868,30 @@ switch ( $dgb_action ) {
 		$dgb_out['bookings']   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}dgb_bookings" );
 		break;
 
+	case 'demo_import':
+		wp_set_current_user( 1 );
+		$dgb_plugin        = \Digitum\Bookings\Plugin::instance();
+		$dgb_out['report'] = ( new \Digitum\Bookings\Services\DemoData( $dgb_plugin->settings(), $dgb_plugin->product_type() ) )->import();
+		$dgb_out['settings'] = $dgb_plugin->settings()->all();
+		$dgb_out['zones']    = ( new \Digitum\Bookings\Database\Repositories\ZoneRepository() )->all();
+		$dgb_out['points']   = ( new \Digitum\Bookings\Database\Repositories\LocationRepository() )->all();
+		$dgb_out['tours']    = array();
+		foreach ( $dgb_out['report']['tours'] as $dgb_t ) {
+			$dgb_id = (int) ( $dgb_t['id'] ?? 0 );
+			$dgb_out['tours'][ $dgb_t['slug'] ] = array(
+				'id'        => $dgb_id,
+				'status'    => get_post_status( $dgb_id ),
+				'slug'      => get_post_field( 'post_name', $dgb_id ),
+				'permalink' => get_permalink( $dgb_id ),
+				'product'   => \Digitum\Bookings\Domain\Product::find( $dgb_id )->to_array(),
+				'variants'  => array_column( ( new \Digitum\Bookings\Database\Repositories\VariantRepository() )->for_product( $dgb_id ), 'price', 'label' ),
+				'sessions'  => array_column( ( new \Digitum\Bookings\Database\Repositories\SessionRepository() )->for_product( $dgb_id ), 'pickup_window_start', 'name' ),
+				'addons'    => ( new \Digitum\Bookings\Database\Repositories\AddonRepository() )->for_product( $dgb_id ),
+				'from'      => $dgb_plugin->quotes()->from_price( $dgb_id ),
+			);
+		}
+		break;
+
 	case 'install':
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		wp_install( 'Test site', 'admin', 'admin@example.test', true, '', 'password' );
