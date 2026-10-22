@@ -4,7 +4,7 @@ Tags: bookings, tours, activities, reservations, deposits
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.5.0
+Stable tag: 0.6.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,9 +25,12 @@ Digitum Bookings adds online booking to tour and activity sites.
 * Bookings list and booking page, calendar with drag and drop, printable manifest, phone check-in for guides.
 * Emails to guests and staff for every booking event, reminders, daily summary, signed webhooks.
 * GA4 dataLayer events and UTM / gclid attribution.
+* Product / TouristTrip structured data with the same prices as the page, merged into Rank Math or Yoast SEO; /llms.txt for AI assistants.
+* Importer for Traveler theme tours (URLs kept), CSV import and export, REST API for staff tools.
+* WordPress personal data export and erase.
 * Booking manager and tour guide roles.
 
-This is an early release (milestones 1–5). Schema, llms.txt, importers and the update checker arrive in the next releases.
+This is an early release (milestones 1–6). The update checker, Arabic translation and demo data arrive in the next release.
 
 == Installation ==
 
@@ -54,11 +57,26 @@ Stripe: publishable and secret keys, plus the webhook signing secret (Settings �
 
 Booking emails go through wp_mail(). Install an SMTP plugin (for example one that sends through your email provider) and use Digitum Bookings › Emails › Send test email. Every email is logged on the booking page, with a Resend button.
 
+= Does it work with Rank Math or Yoast SEO? =
+
+Yes. With either plugin active, the tour's Product data joins that plugin's schema graph, and any other Product schema on the tour page is replaced so search engines see one product with the price shown on the page. Without an SEO plugin, Digitum Bookings prints the data itself (Settings › Schema & SEO).
+
+= I use the Traveler theme. Will my tour URLs change? =
+
+No. Digitum Bookings › Tools › Import tours from the Traveler theme keeps each tour's ID and slug, and reads the "Duration | Old Price | New Price" tables into bookable options.
+
 = Where are payment screenshots stored? =
 
 In wp-content/uploads/dgb-private, outside the Media Library, under random file names, with rules that block web access. Only staff who manage bookings can open them. On nginx, consider moving the folder outside the web root with the dgb_proof_dir filter.
 
 == Changelog ==
+
+= 0.6.0 =
+* Structured data for tours (Product / TouristTrip, offers per option), merged into Rank Math and Yoast SEO graphs.
+* /llms.txt listing tours, prices, sessions, pickup and contact details.
+* Traveler theme importer and CSV import / export (Digitum Bookings › Tools).
+* REST API: tour list, staff bookings (list, create, update, cancel), check-in.
+* Personal data exporter and eraser.
 
 = 0.5.0 =
 * Bookings list, booking page, calendar (month / week / day, drag to move, close dates), manifest with print view and CSV, check-in for guides.

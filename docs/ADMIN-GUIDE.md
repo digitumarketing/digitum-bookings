@@ -29,10 +29,27 @@ Digitum Bookings › **Emails** lists every email (to the guest and to staff). S
 
 Settings › **Emails**: sender name and address, staff recipients (comma-separated), reminder time (24 hours before by default), the daily summary of tomorrow's bookings (18:00 by default), and a webhook URL for Zapier, Make or GoHighLevel.
 
+## Search engines and AI assistants
+
+- Every tour that takes bookings tells search engines what it is and what it costs (structured data). The price is always the one the page shows. Tours with a price on request never show a price. If Rank Math or Yoast SEO is active, the tour joins their data automatically; you do not need a Product schema in Rank Math for tours (if one exists, Digitum Bookings replaces it on tour pages).
+- Give each tour a **featured image**; Google only shows product results with an image. More pictures can go in Booking settings › Schema & SEO › **Gallery images**.
+- **/llms.txt** (link in Settings › Schema & SEO) lists your tours, prices, sessions with pickup times, pickup areas, meeting point and contact details for AI assistants such as ChatGPT. It updates within the hour when you change a tour. Write one or two sentences about the business in **llms.txt introduction**.
+
+## Tools: importing tours and spreadsheets
+
+Digitum Bookings › **Tools** (administrators only):
+
+- **Import tours from the Traveler theme**: the list shows each Traveler tour with the options found in its "Duration | Old Price | New Price" table. Tick the tours, choose how tours with a table are priced (per vehicle for buggies, quads and bikes), and import. URLs, titles, text and images stay as they are. Old prices are not copied: a crossed-out price only shows during a dated promotion (set in Booking settings › Options). Read the log: tours without seats in their title, or without any price, need a look in their Booking settings. Tick **Switch on bookings** only after checking, or switch each tour on yourself.
+- **CSV export / import**: download tours, options or sessions, change them in Excel or Google Sheets, and upload the file again. Rows with an id update that row; rows without one are added. Tick the "delete" box only when the file holds the complete list for those tours. The report lists every line that failed.
+
+## Privacy requests
+
+When a guest asks for their data, use WordPress's **Tools › Export Personal Data** with their email: the file includes their bookings, uploaded screenshots and the emails sent to them. **Tools › Erase Personal Data** removes their name, email, phone, nationality, requests, hotel and screenshots from every booking; the bookings and amounts stay for your accounts. Nothing is ever deleted automatically. Settings › Privacy › Policy Guide has suggested wording for your privacy policy.
+
 ## Who can do what
 
 | Role | Can |
 |---|---|
-| Administrator | everything |
+| Administrator | everything, including Settings, Emails and Tools |
 | Booking manager | everything except Settings and Emails |
 | Tour guide | Dashboard (today), Manifest (view and print), Check-in |

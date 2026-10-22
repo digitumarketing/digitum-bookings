@@ -32,6 +32,8 @@ file_put_contents( "{$site}/wp-content/mu-plugins/dgb-e2e.php", "<?php\nadd_filt
 step( $site, 'install' );
 step( $site, 'activate' );
 $demo = step( $site, 'demo_setup' );
+// A featured image, so the safari is marked up as a Product (Google needs an image for that).
+step( $site, 'attach_image', array( 'post' => $demo['tours']['safari']['id'] ) );
 step(
 	$site,
 	'payments_setup',

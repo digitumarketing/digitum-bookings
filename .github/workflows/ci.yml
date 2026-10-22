@@ -68,7 +68,21 @@ jobs:
             echo "DGB_PREVIOUS_DIR=$GITHUB_WORKSPACE/.wp-test/previous" >> "$GITHUB_ENV"
           fi
 
-      - name: WordPress tests (activation, pricing, holds, concurrency, upgrade, booking flow, payments)
+      # Current Rank Math and Yoast need WordPress 6.7+. Built from their repositories; if that ever fails the
+      # schema merge scenario (J) is skipped and the rest still runs.
+      - name: Rank Math and Yoast SEO (schema merge test)
+        if: matrix.wordpress != '6.5.5'
+        continue-on-error: true
+        run: |
+          git clone --quiet --depth 1 https://github.com/rankmath/seo-by-rank-math.git .wp-test/seo/rank-math
+          composer dump-autoload --no-dev --no-scripts --working-dir=.wp-test/seo/rank-math
+          git clone --quiet --depth 1 https://github.com/Yoast/wordpress-seo.git .wp-test/seo/yoast
+          php -r '$f = ".wp-test/seo/yoast/composer.json"; $c = json_decode( file_get_contents( $f ), true ); foreach ( array_keys( $c["require-dev"] ) as $k ) { if ( str_starts_with( $k, "wpackagist" ) ) { unset( $c["require-dev"][ $k ] ); } } unset( $c["repositories"] ); file_put_contents( $f, json_encode( $c, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );'
+          composer update --no-interaction --no-progress --working-dir=.wp-test/seo/yoast wpackagist-plugin/easy-digital-downloads wpackagist-plugin/google-site-kit wpackagist-plugin/woocommerce
+          echo "DGB_RANKMATH_DIR=$GITHUB_WORKSPACE/.wp-test/seo/rank-math" >> "$GITHUB_ENV"
+          echo "DGB_YOAST_DIR=$GITHUB_WORKSPACE/.wp-test/seo/yoast" >> "$GITHUB_ENV"
+
+      - name: WordPress tests (activation, pricing, holds, concurrency, upgrade, booking flow, payments, admin, integrations)
         run: composer test:integration
         env:
           DGB_WP_DIR: .wp-test/wordpress

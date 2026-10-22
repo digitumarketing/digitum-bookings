@@ -255,14 +255,15 @@ final class TravelerImporter {
 	}
 
 	/**
-	 * Post types that have posts and look like tours: st_tours first, then the attached type.
+	 * Post types that have posts and look like tours: st_tours, and the attached post type (never our own).
 	 *
 	 * @return array<string, int> Post type => number of posts.
 	 */
 	public function sources(): array {
 		global $wpdb;
-		$out = array();
-		foreach ( array_unique( array( self::SOURCE, $this->product_type->key() ) ) as $type ) {
+		$out   = array();
+		$types = $this->product_type->attached() ? array( self::SOURCE, $this->product_type->key() ) : array( self::SOURCE );
+		foreach ( array_unique( $types ) as $type ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- admin screen, counts posts of unregistered types too.
 			$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status NOT IN ('trash','auto-draft','inherit')", $type ) );
 			if ( $count ) {

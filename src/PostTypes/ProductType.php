@@ -58,6 +58,13 @@ final class ProductType {
 	}
 
 	/**
+	 * Whether tours live in an existing post type of the site (attached) rather than in our own.
+	 */
+	public function attached(): bool {
+		return 'attach' === $this->settings->get( 'general', 'product_mode' ) && '' !== (string) $this->settings->get( 'general', 'attach_post_type' );
+	}
+
+	/**
 	 * Whether a post belongs to the tour post type.
 	 *
 	 * @param int|\WP_Post|null $post Post.

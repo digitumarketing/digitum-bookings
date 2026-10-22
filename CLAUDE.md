@@ -342,4 +342,8 @@ Document every filter and action in `docs/DEVELOPER-HOOKS.md`. At minimum: `dgb_
 9. Action Scheduler is bundled (Composer `woocommerce/action-scheduler`) and runs reminders, the daily summary, webhook deliveries and hold expiry; WP-Cron is only a fallback.
 10. The first payment that confirms a booking sends the "booking confirmed" email only; "payment received" is for later payments (balance, manual). Guest emails also call the `dgb_send_sms` filter.
 11. This development session cannot push git tags to GitHub; releases are made with Actions › Release › Run workflow on `main` (or by pushing a tag from a local clone).
-
+12. Schema: tours without a price (on request) or without any image are marked up as `TouristTrip`, since Google's Product result needs both; the site logo counts as an image. With Rank Math or Yoast active the tour node is merged into their graph and replaces other Product nodes on the page (including a Rank Math Schema Generator Product); otherwise a standalone graph is printed. Rank Math's global entities are kept on tour pages.
+13. `/llms.txt` is answered in `parse_request` (no rewrite rule, so no flush); it needs pretty permalinks, and a physical `llms.txt` file in the WordPress folder takes priority (Settings › Schema & SEO warns).
+14. REST `DELETE admin/bookings/{id}` cancels; bookings are never deleted. Staff bookings through REST have source `admin` and no recorded terms acceptance.
+15. The Traveler importer works in place: in attach mode posts stay `st_tours`; in own-CPT mode they move to the plugin's post type with the same row (ID and slug cannot change). Old prices from Traveler tables are logged, not imported (13.4). Seats are read from titles like "2-Seater".
+16. Rich Results are checked offline with `@adobe/structured-data-validator` (Google's Rich Results Test has no API); Rank Math and Yoast merge tests need WordPress 6.7+ and run in CI on the 7.x matrix entry.

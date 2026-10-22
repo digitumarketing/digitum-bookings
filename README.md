@@ -21,8 +21,8 @@ If the site already serves tours under `/tour/` (for example the Traveler theme'
 | M3 Front-end flow | booking widget, block, shortcode, Elementor widget | done (v0.3.0) |
 | M4 Payments | Stripe, PayPal, bank transfer with screenshot upload, pay on arrival | done (v0.4.0) |
 | M5 Admin operations | dashboard, calendar, bookings, manifest, check-in, emails | done (v0.5.0) |
-| M6 Integrations | schema, llms.txt, REST API, Traveler importer, CSV | next |
-| M7 Release | update checker, Arabic RTL, docs, demo data | |
+| M6 Integrations | schema, llms.txt, REST API, Traveler importer, CSV, privacy | done (v0.6.0) |
+| M7 Release | update checker, Arabic RTL, docs, demo data | next |
 
 The full specification is in [CLAUDE.md](CLAUDE.md). The approved layout is at https://claude.ai/artifact/2bkeTdhGqaG8qRdftzd49h.
 
@@ -32,7 +32,7 @@ The full specification is in [CLAUDE.md](CLAUDE.md). The approved layout is at h
 2. Add the changes to `docs/CHANGELOG.md` and the changelog in `readme.txt`.
 3. Commit and push to `main`, then either
    - open **Actions › Release › Run workflow** on GitHub (it releases the version in `digitum-bookings.php` and creates the tag), or
-   - tag and push: `git tag v0.5.0 && git push origin v0.5.0`.
+   - tag and push: `git tag v0.6.0 && git push origin v0.6.0`.
 4. The **Release** GitHub Action checks that the versions match, builds `digitum-bookings.zip` and attaches it to a new GitHub release.
 
 ## Development
@@ -69,6 +69,8 @@ DGB_WP_DIR=.wp-test/wordpress DGB_SQLITE_DIR=.wp-test/sqlite npm run test:e2e
 The browser tests use fake Stripe and PayPal SDKs and APIs (`tests/e2e/fakes`, `tests/Integration/fake-gateways.php`). To run `tests/e2e/sandbox.spec.ts` against the real Stripe test mode and PayPal sandbox, prepare the site with `DGB_SANDBOX_STRIPE_PK`, `DGB_SANDBOX_STRIPE_SK`, `DGB_SANDBOX_PAYPAL_CLIENT`, `DGB_SANDBOX_PAYPAL_SECRET` (and `DGB_SANDBOX_PAYPAL_BUYER` / `DGB_SANDBOX_PAYPAL_BUYER_PASSWORD` for the PayPal buyer login).
 
 Set `DGB_STRIPE_MOCK=http://localhost:12111` with [stripe-mock](https://github.com/stripe/stripe-mock) running to check the plugin's Stripe requests against Stripe's API schema (CI does this).
+
+The integration tests also check structured data with Google's rich result rules (`tests/schema/rich-results.mjs`, using `@adobe/structured-data-validator`; it downloads the schema.org vocabulary into `.wp-test` on first use). To test the merge into Rank Math and Yoast SEO (WordPress 6.7+), point `DGB_RANKMATH_DIR` and `DGB_YOAST_DIR` at built copies of those plugins; `.github/workflows/ci.yml` shows how CI builds them from their repositories.
 
 Lighthouse can be run against that site while it is up: `npx lighthouse http://127.0.0.1:8889/tour/rzr/`.
 

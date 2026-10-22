@@ -153,6 +153,41 @@ add_filter( 'dgb_send_sms', function ( bool $sent, string $phone, string $messag
 }, 10, 5 );
 ```
 
+### `dgb_schema_product` (0.6.0)
+
+Filters a tour's structured data node (`Product` or `TouristTrip`) before it is printed or merged into Rank Math or Yoast.
+
+```php
+add_filter( 'dgb_schema_product', function ( array $node, int $post_id ) {
+	$node['sku'] = 'TOUR-' . $post_id;
+	return $node;
+}, 10, 2 );
+```
+
+### `dgb_schema_rating` (0.6.0)
+
+The connection point for a review source. Nothing about ratings is output unless this returns data. Return `null` or an array: `value` (average), `count`, optional `best` (5) and `worst` (1), and optional `reviews` (each: `author`, `rating`, `body`, `date` as Y-m-d).
+
+```php
+add_filter( 'dgb_schema_rating', function ( $rating, int $post_id ) {
+	$data = my_reviews_for( $post_id ); // From your review platform.
+	return $data ? array( 'value' => $data['average'], 'count' => $data['total'] ) : null;
+}, 10, 2 );
+```
+
+### `dgb_llms_txt_lines` (0.6.0)
+
+Filters the lines (Markdown) of `/llms.txt`. The file is cached for an hour; call `\Digitum\Bookings\Services\LlmsTxt::flush()` after changing what the filter adds.
+
+```php
+add_filter( 'dgb_llms_txt_lines', function ( array $lines ) {
+	$lines[] = '';
+	$lines[] = '## Opening hours';
+	$lines[] = '- Every day 7:00 to 22:00';
+	return $lines;
+} );
+```
+
 ## Actions
 
 ### `dgb_booking_created` (0.3.0)
@@ -245,10 +280,6 @@ add_action( 'dgb_booking_status_changed', function ( int $booking_id, string $fr
 
 The scheduled job that releases unpaid bookings (every five minutes). Run it by hand with `do_action( 'dgb_expire_holds' )`.
 
-## Planned
-
-`dgb_schema_product` and `dgb_llms_txt_lines` arrive with schema and llms.txt (M6).
-
 ## Outgoing webhooks (0.5.0)
 
 Set a URL and a signing secret in Settings › Emails. Events: `booking.created`, `booking.status_changed`, `booking.changed`, `payment.completed`, `payment.refunded`. Each is a `POST` with a JSON body:
@@ -271,26 +302,37 @@ $valid    = hash_equals( $expected, $_SERVER['HTTP_X_DGB_SIGNATURE'] ) && abs( t
 
 Answer with a 2xx status. Failed deliveries are retried after 1 minute, 10 minutes and 1 hour; every attempt is in the booking's email log.
 
-## Staff REST API (0.5.0)
+## Staff REST API (0.5.0, extended in 0.6.0)
 
-Namespace `dgb/v1`, logged-in staff (REST nonce) or application passwords:
+Namespace `dgb/v1`. Logged-in staff send the REST nonce (`X-WP-Nonce`); external tools (Zapier, Make, a phone app) use an application password from Users › Profile with HTTP Basic auth over HTTPS.
 
 | Route | Method | Who | |
 |---|---|---|---|
-| `admin/calendar?from=&to=&product=` | GET | managers | sessions and bookings per day |
-| `admin/bookings/{id}` | GET | managers | booking (webhook shape) |
+| `admin/bookings?status=&product=&date_from=&date_to=&source=&payment_method=&search=&orderby=&order=&page=&per_page=` | GET | managers | bookings (webhook shape); `X-WP-Total` and `X-WP-TotalPages` headers |
+| `admin/bookings` | POST `product` + the public booking fields (`variant_id`, `date`, `session_id`, `adults`, `children`, `infants`, `units`, `pickup`, `zone_id`, `hotel`, `room`, `addons`, `payment_method`, `name`, `email`, `phone_code`, `phone`, …) | managers | booking or enquiry taken by staff (source `admin`, no terms checkbox); returns `booking_page` and `payment_link`; 201 |
+| `admin/bookings/{id}` | GET | managers | one booking |
+| `admin/bookings/{id}` | PATCH `customer` {`name`, `email`, `phone`, `nationality`}, `special_requests`, `vehicle`, `note`, `date` + `session`, `action` | managers | change a booking |
+| `admin/bookings/{id}` | DELETE | managers | cancels the booking (bookings are never deleted; use the privacy eraser for guest data) |
+| `admin/bookings/{id}/checkin` | POST `arrived` (true / false) | guides and managers | arrived or no-show |
 | `admin/bookings/{id}/reschedule` | POST `date`, `session` | managers | move a booking (the guest is emailed) |
 | `admin/bookings/{id}/status` | POST `action` | guides: `check_in`, `no_show`, `undo`; managers: also `confirm`, `cancel` | |
+| `admin/calendar?from=&to=&product=` | GET | managers | sessions and bookings per day |
 | `admin/closures` | POST `product`, `date`, `session`, `closed` | managers | close or open a date or session |
 | `admin/manifest?date=&product=&session=` | GET | guides and managers | |
+
+Public routes (no login): `products` (paged, `page`, `per_page`), `products/{id}`, `availability?product=&month=`, `availability/sessions?product=&date=`, `quote`, `bookings`, `enquiries` (these three need the `X-DGB-Nonce` the widget prints, and are rate limited), `bookings/{reference}/proof` (payment screenshot, authorised by the booking's private key).
+
+Errors use WordPress's REST format: `{ "code": "dgb_invalid", "message": "…", "data": { "status": 400, "fields": { "email": "…" } } }`. A status change that is not possible (for example cancelling a checked-in booking) answers 409.
 
 ## Options and meta (for reference)
 
 | Name | Type | Contents |
 |---|---|---|
-| `dgb_settings` | option | All settings, grouped by tab: `general`, `currency`, `payments`, `analytics`, `privacy`, `branding` |
+| `dgb_settings` | option | All settings, grouped by tab: `general`, `currency`, `payments`, `emails`, `analytics`, `seo`, `privacy`, `branding` |
 | `dgb_emails` | option | Email templates edited on the Emails screen |
 | `dgb_db_version` | option | Schema version applied by the migrations runner (1.4.0 in this release) |
 | `dgb_version` | option | Plugin version that last ran its upgrade routine |
-| `_dgb_*` | post meta | Booking settings of a tour (see `src/Domain/Product.php`) |
+| `dgb_traveler_import_log` | option | Result of the last Traveler import |
+| `_dgb_*` | post meta | Booking settings of a tour (see `src/Domain/Product.php`); `_dgb_gallery` holds image IDs |
+| `_dgb_imported_from` | post meta | `traveler` on tours brought in by the importer |
 | `{prefix}dgb_*` | tables | See `src/Database/Schema.php` |
