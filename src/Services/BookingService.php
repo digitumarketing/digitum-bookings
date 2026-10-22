@@ -46,10 +46,15 @@ final class BookingService {
 	 * @param array<string, mixed>    $input      Widget fields.
 	 * @param bool                    $enquiry    True for an enquiry.
 	 * @param \DateTimeImmutable|null $now        Current time.
+	 * @param bool                    $staff      Taken by staff (REST API): source "admin", no attribution, and the
+	 *                                            guest's terms acceptance is not recorded.
 	 * @return array<string, mixed>|\WP_Error Booking id, reference, status, access key and breakdown.
 	 */
-	public function create( int $product_id, array $input, bool $enquiry, ?\DateTimeImmutable $now = null ) {
-		$now  = $now ?? current_datetime();
+	public function create( int $product_id, array $input, bool $enquiry, ?\DateTimeImmutable $now = null, bool $staff = false ) {
+		$now = $now ?? current_datetime();
+		if ( $staff ) {
+			$input['terms'] = 1;
+		}
 		$post = get_post( $product_id );
 		if ( ! $post || ! $this->product_type->is_product( $post ) || 'publish' !== $post->post_status ) {
 			return new \WP_Error( 'dgb_not_found', __( 'This tour could not be found.', 'digitum-bookings' ), array( 'status' => 404 ) );
@@ -139,13 +144,13 @@ final class BookingService {
 		$status = $enquiry ? BookingStatus::QUOTE_REQUESTED : (string) $methods[ $method ]['status'];
 		$money  = $breakdown ? $breakdown->to_array() : null;
 
-		$attribution = Attribution::current();
+		$attribution = $staff ? array_fill_keys( Attribution::KEYS, '' ) + array( 'source' => 'admin' ) : Attribution::current();
 		$booking     = array_merge(
 			$details['data'],
 			array(
 				'status'            => $status,
 				'access_key'        => wp_generate_password( 32, false, false ),
-				'terms_accepted_at' => BookingRepository::utc( $now ),
+				'terms_accepted_at' => $staff ? null : BookingRepository::utc( $now ),
 				'source'            => $attribution['source'],
 				'currency'          => (string) $this->settings->get( 'currency', 'currency' ),
 				'subtotal'          => $money['subtotal'] ?? '0.00',

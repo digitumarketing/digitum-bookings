@@ -38,6 +38,7 @@ use Digitum\Bookings\Services\Notifications\Listener;
 use Digitum\Bookings\Services\Notifications\Scheduler;
 use Digitum\Bookings\Services\Notifications\WebhookOut;
 use Digitum\Bookings\Services\PaymentService;
+use Digitum\Bookings\Services\Privacy;
 use Digitum\Bookings\Services\QuoteService;
 use Digitum\Bookings\Services\Schema;
 use Digitum\Bookings\PostTypes\ProductType;
@@ -166,6 +167,7 @@ final class Plugin {
 		( new RankMathSchema( $schema_output ) )->register_hooks();
 		( new YoastSchema( $schema_output ) )->register_hooks();
 		( new LlmsTxt( $this->settings, $this->product_type, $quotes ) )->register_hooks();
+		( new Privacy( $this->settings ) )->register_hooks();
 
 		if ( is_admin() ) {
 			( new Menus( $this->settings, $this->product_type ) )->register_hooks();

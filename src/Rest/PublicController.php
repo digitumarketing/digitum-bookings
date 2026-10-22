@@ -9,7 +9,6 @@ namespace Digitum\Bookings\Rest;
 
 use Digitum\Bookings\Database\Repositories\OverrideRepository;
 use Digitum\Bookings\Database\Repositories\SessionRepository;
-use Digitum\Bookings\Database\Repositories\VariantRepository;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\Frontend\Confirmation;
 use Digitum\Bookings\Frontend\Template;
@@ -71,6 +70,28 @@ final class PublicController {
 			'sanitize_callback' => 'absint',
 		);
 
+		register_rest_route(
+			self::NAMESPACE,
+			'/products',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'products' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'page'     => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+						'default' => 1,
+					),
+					'per_page' => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+						'maximum' => 100,
+						'default' => 50,
+					),
+				),
+			)
+		);
 		register_rest_route(
 			self::NAMESPACE,
 			'/products/(?P<id>\d+)',
@@ -166,6 +187,33 @@ final class PublicController {
 	}
 
 	/**
+	 * Published tours that take bookings or enquiries, by title; X-WP-Total and X-WP-TotalPages headers.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 */
+	public function products( \WP_REST_Request $request ): \WP_REST_Response {
+		$query    = new \WP_Query(
+			array(
+				'post_type'      => $this->product_type->key(),
+				'post_status'    => 'publish',
+				'has_password'   => false,
+				'orderby'        => 'title',
+				'order'          => 'ASC',
+				'fields'         => 'ids',
+				'posts_per_page' => (int) $request['per_page'],
+				'paged'          => (int) $request['page'],
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- one indexed meta key.
+				'meta_key'       => Product::META_PREFIX . 'enabled',
+				'meta_value'     => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			)
+		);
+		$response = rest_ensure_response( array_map( fn( $id ) => $this->summary( (int) $id ), $query->posts ) );
+		$response->header( 'X-WP-Total', (string) (int) $query->found_posts );
+		$response->header( 'X-WP-TotalPages', (string) (int) $query->max_num_pages );
+		return $response;
+	}
+
+	/**
 	 * Tour data (only for tours that take bookings).
 	 *
 	 * @param \WP_REST_Request $request Request.
@@ -177,27 +225,55 @@ final class PublicController {
 		if ( $error ) {
 			return $error;
 		}
-		$product = Product::find( $id );
-		return rest_ensure_response(
-			array(
-				'id'         => $id,
-				'name'       => get_the_title( $id ),
-				'url'        => get_permalink( $id ),
-				'mode'       => $this->quotes->config( $product )->mode,
-				'from_price' => $this->quotes->from_price( $id ),
-				'currency'   => (string) $this->settings->get( 'currency', 'currency' ),
-				'variants'   => array_values(
-					array_map(
-						static fn( $row ) => array(
-							'id'       => (int) $row['id'],
-							'label'    => (string) $row['label'],
-							'duration' => null === $row['duration_minutes'] ? null : (int) $row['duration_minutes'],
-							'price'    => $product->is_on_request() ? null : $row['price'],
-						),
-						array_filter( ( new VariantRepository() )->for_product( $id ), static fn( $row ) => ! empty( $row['active'] ) )
-					)
+		return rest_ensure_response( $this->summary( $id ) );
+	}
+
+	/**
+	 * One tour: prices from the same calculator call as the page and the schema.
+	 *
+	 * @param int $id Post ID.
+	 * @return array<string, mixed>
+	 */
+	private function summary( int $id ): array {
+		$product  = Product::find( $id );
+		$points   = $this->quotes->price_points( $id );
+		$on_req   = 'on_request' === $points['mode'];
+		$sessions = array();
+		foreach ( ( new SessionRepository() )->for_product( $id ) as $row ) {
+			if ( empty( $row['active'] ) ) {
+				continue;
+			}
+			$sessions[] = array(
+				'id'           => (int) $row['id'],
+				'name'         => (string) $row['name'],
+				'start'        => null === $row['start_time'] ? null : substr( (string) $row['start_time'], 0, 5 ),
+				'pickup_start' => null === $row['pickup_window_start'] ? null : substr( (string) $row['pickup_window_start'], 0, 5 ),
+				'pickup_end'   => null === $row['pickup_window_end'] ? null : substr( (string) $row['pickup_window_end'], 0, 5 ),
+			);
+		}
+		return array(
+			'id'            => $id,
+			'name'          => wp_strip_all_tags( get_the_title( $id ) ),
+			'url'           => get_permalink( $id ),
+			'mode'          => $points['mode'],
+			'on_request'    => $on_req,
+			'from_price'    => $on_req ? null : $points['from'],
+			'currency'      => $points['currency'],
+			'vat_included'  => $points['vat_included'],
+			'seats'         => 'per_vehicle' === $points['mode'] ? (int) $product->get( 'seats_per_unit' ) : null,
+			'max_per_car'   => 'per_group' === $points['mode'] ? (int) $product->get( 'max_pax_per_unit' ) : null,
+			'pickup_policy' => (string) $product->get( 'pickup_policy' ),
+			'min_age'       => (int) $product->get( 'min_age' ),
+			'variants'      => array_map(
+				static fn( $option ) => array(
+					'id'       => $option['id'],
+					'label'    => $option['label'],
+					'duration' => $option['duration'],
+					'price'    => $on_req ? null : $option['price'],
 				),
-			)
+				$points['options']
+			),
+			'sessions'      => $sessions,
 		);
 	}
 

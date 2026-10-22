@@ -288,6 +288,25 @@ final class BookingRepository {
 	}
 
 	/**
+	 * Bookings of a guest email address, oldest first (privacy export and erasure).
+	 *
+	 * @param string $email  Email address (case-insensitive).
+	 * @param int    $limit  Rows per page.
+	 * @param int    $offset Rows to skip.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function by_email( string $email, int $limit = 50, int $offset = 0 ): array {
+		$email = strtolower( trim( $email ) );
+		if ( '' === $email ) {
+			return array();
+		}
+		$table = $this->table( 'bookings' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery -- table name from a constant.
+		$rows = $this->db->get_results( $this->db->prepare( "SELECT * FROM {$table} WHERE LOWER(customer_email) = %s ORDER BY id ASC LIMIT %d OFFSET %d", $email, $limit, $offset ), ARRAY_A );
+		return is_array( $rows ) ? $rows : array();
+	}
+
+	/**
 	 * Number of bookings per status.
 	 *
 	 * @return array<string, int>
