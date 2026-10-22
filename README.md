@@ -22,7 +22,7 @@ If the site already serves tours under `/tour/` (for example the Traveler theme'
 | M4 Payments | Stripe, PayPal, bank transfer with screenshot upload, pay on arrival | done (v0.4.0) |
 | M5 Admin operations | dashboard, calendar, bookings, manifest, check-in, emails | done (v0.5.0) |
 | M6 Integrations | schema, llms.txt, REST API, Traveler importer, CSV, privacy | done (v0.6.0) |
-| M7 Release | update checker, Arabic RTL, docs, demo data | next |
+| M7 Release | update checker, Arabic RTL, docs, demo data, coupons and reports | done (v0.7.0) |
 
 The full specification is in [CLAUDE.md](CLAUDE.md). The approved layout is at https://claude.ai/artifact/2bkeTdhGqaG8qRdftzd49h.
 
@@ -32,7 +32,7 @@ The full specification is in [CLAUDE.md](CLAUDE.md). The approved layout is at h
 2. Add the changes to `docs/CHANGELOG.md` and the changelog in `readme.txt`.
 3. Commit and push to `main`, then either
    - open **Actions › Release › Run workflow** on GitHub (it releases the version in `digitum-bookings.php` and creates the tag), or
-   - tag and push: `git tag v0.6.0 && git push origin v0.6.0`.
+   - tag and push: `git tag v0.7.0 && git push origin v0.7.0`.
 4. The **Release** GitHub Action checks that the versions match, builds `digitum-bookings.zip` and attaches it to a new GitHub release.
 
 ## Development

@@ -2,6 +2,17 @@
 
 For the people who run bookings day to day. Menu: **Digitum Bookings**.
 
+## Getting started
+
+1. **Install**: Plugins › Add New › Upload Plugin with `digitum-bookings.zip` from the latest GitHub release, then activate. If the site already has tours under `/tour/` (for example the Traveler theme's), the plugin uses them and their URLs stay the same (Settings › General › “Tours come from”).
+2. **Settings › General**: business name, phone, email and address (used in emails, the confirmation page, structured data and llms.txt), booking terms link, cancellation summary, hold time for card payments.
+3. **Settings › Currency & VAT**: currency, VAT rate and whether prices include it, weekend days.
+4. **Pickup zones**: the areas you pick up from (and those you do not, with the message guests see), plus meeting points with address, map link and arrival instructions.
+5. **Tours**: open a tour, fill in **Booking settings** (Pricing, Options, Sessions, Add-ons, Pickup & location, Rules, Schema & SEO), then tick **Take bookings for this tour**. The booking widget appears on the tour page.
+6. **Settings › Payments**: switch on pay on arrival, bank transfer (with your account details), Stripe and PayPal (start in test mode), and deposits if you take them.
+7. **Settings › Emails**: sender, staff recipients, reminder time; **Digitum Bookings › Emails › Send test email** checks that mail arrives (install an SMTP plugin if it does not).
+8. For desertbookings.com, **Tools › Import Desert Bookings demo data** does steps 2 to 5 in one go with the agreed tours and prices; every tour stays switched off until you check its [CONFIRM] items.
+
 ## Every day
 
 - **Dashboard**: today's sessions (bookings, guests, pickups, unpaid), revenue for the last 7 and 30 days, open quote requests and bank transfers waiting, each with **Mark as paid** and the screenshot when the guest sent one.
@@ -40,16 +51,33 @@ Settings › **Emails**: sender name and address, staff recipients (comma-separa
 Digitum Bookings › **Tools** (administrators only):
 
 - **Import tours from the Traveler theme**: the list shows each Traveler tour with the options found in its "Duration | Old Price | New Price" table. Tick the tours, choose how tours with a table are priced (per vehicle for buggies, quads and bikes), and import. URLs, titles, text and images stay as they are. Old prices are not copied: a crossed-out price only shows during a dated promotion (set in Booking settings › Options). Read the log: tours without seats in their title, or without any price, need a look in their Booking settings. Tick **Switch on bookings** only after checking, or switch each tour on yourself.
+- **Import Desert Bookings demo data** (administrators): sets up the business details, AED with 5% VAT, the Dubai / Sharjah / Abu Dhabi zones, the Al Aweer meeting point and all tours of the site with their options, sessions and pickup rules. Existing tours keep their URL, title and text; missing ones are added as drafts; your own settings are never overwritten and running it twice changes nothing. Bookings stay off on every tour: the report lists what to confirm first (session times, prices marked [CONFIRM], payment keys, the meeting point pin).
 - **CSV export / import**: download tours, options or sessions, change them in Excel or Google Sheets, and upload the file again. Rows with an id update that row; rows without one are added. Tick the "delete" box only when the file holds the complete list for those tours. The report lists every line that failed.
 
 ## Privacy requests
 
 When a guest asks for their data, use WordPress's **Tools › Export Personal Data** with their email: the file includes their bookings, uploaded screenshots and the emails sent to them. **Tools › Erase Personal Data** removes their name, email, phone, nationality, requests, hotel and screenshots from every booking; the bookings and amounts stay for your accounts. Nothing is ever deleted automatically. Settings › Privacy › Policy Guide has suggested wording for your privacy policy.
 
+## Coupons
+
+Digitum Bookings › **Coupons**: add a code (letters and numbers), a discount (a percentage of the price before VAT, or a fixed amount off the booking), the tours it is for (none ticked = all), how many bookings may use it and the days it works. Guests type the code in the payment step of the booking widget; the field only shows while at least one coupon can be used. A wrong or expired code is explained to the guest and ignored. The list shows how often each code was used; the code is also on the booking, in the CSV export and in webhooks.
+
+## Reports
+
+Digitum Bookings › **Reports** for any period (or Last 7 days, Last 30 days, This month, Last month, This year): bookings made, sold (confirmed, checked in or no-show), booked value, money collected (payments minus refunds), conversion (sold ÷ bookings made), cancellation rate and quote requests; then the same figures **by tour** and **by source** (from ads, organic, or taken by staff), and what each coupon brought in.
+
+## Updates
+
+New versions are published as GitHub releases. WordPress shows them under **Dashboard › Updates** and on the Plugins screen, where automatic updates can be switched on. **Settings › Updates** shows the installed and latest version and has **Check for updates now**. If the GitHub repository is made private, paste a read-only token there.
+
+## Arabic
+
+The plugin is translated into Arabic. When the site language (Settings › General › Site Language) or a user's profile language is Arabic, the booking widget, emails and admin screens are in Arabic and the widget reads right to left. Tour names, options and session names are your own text: write them in the language your guests read.
+
 ## Who can do what
 
 | Role | Can |
 |---|---|
 | Administrator | everything, including Settings, Emails and Tools |
-| Booking manager | everything except Settings and Emails |
+| Booking manager | everything except Settings, Emails and Tools: bookings, calendar, payments, coupons, reports, pickup zones, tours |
 | Tour guide | Dashboard (today), Manifest (view and print), Check-in |

@@ -3,6 +3,7 @@
 	<description>WordPress Coding Standards for Digitum Bookings.</description>
 
 	<file>.</file>
+	<exclude-pattern>/languages/*</exclude-pattern>
 	<exclude-pattern>/vendor/*</exclude-pattern>
 	<exclude-pattern>/node_modules/*</exclude-pattern>
 	<exclude-pattern>/assets/*</exclude-pattern>

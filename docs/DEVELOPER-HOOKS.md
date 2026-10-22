@@ -188,6 +188,14 @@ add_filter( 'dgb_llms_txt_lines', function ( array $lines ) {
 } );
 ```
 
+### `dgb_update_repository` (0.7.0)
+
+The GitHub repository (owner/name) updates come from. Default `digitumarketing/digitum-bookings`. The latest release must carry a `digitum-bookings.zip` asset; its `readme.txt` (at the release tag) gives "Tested up to", "Requires PHP" and the changelog shown in "View details".
+
+```php
+add_filter( 'dgb_update_repository', fn() => 'my-agency/digitum-bookings-fork' );
+```
+
 ## Actions
 
 ### `dgb_booking_created` (0.3.0)
@@ -289,7 +297,7 @@ Set a URL and a signing secret in Settings › Emails. Events: `booking.created`
   "event": "booking.status_changed",
   "sent_at": "2026-10-21T16:15:25+00:00",
   "data": { "from": "pending_payment", "to": "confirmed", "reason": "payment_received" },
-  "booking": { "id": 12, "reference": "DGB-261021-AB12", "status": "confirmed", "total": 899, "customer": { "name": "…", "email": "…", "phone": "…" }, "tour": { "name": "…", "date": "2026-10-24", "session": "Evening" }, "pickup": { "zone": "Dubai", "hotel": "…", "window": "2:15 pm – 2:45 pm" }, "attribution": { "source": "ads", "gclid": "…" }, "booking_link": "…", "admin_link": "…" }
+  "booking": { "id": 12, "reference": "DGB-261021-AB12", "status": "confirmed", "total": 899, "discount": 0, "coupon": "", "customer": { "name": "…", "email": "…", "phone": "…" }, "tour": { "name": "…", "date": "2026-10-24", "session": "Evening" }, "pickup": { "zone": "Dubai", "hotel": "…", "window": "2:15 pm – 2:45 pm" }, "attribution": { "source": "ads", "gclid": "…" }, "booking_link": "…", "admin_link": "…" }
 }
 ```
 
@@ -328,11 +336,14 @@ Errors use WordPress's REST format: `{ "code": "dgb_invalid", "message": "…", 
 
 | Name | Type | Contents |
 |---|---|---|
-| `dgb_settings` | option | All settings, grouped by tab: `general`, `currency`, `payments`, `emails`, `analytics`, `seo`, `privacy`, `branding` |
+| `dgb_settings` | option | All settings, grouped by tab: `general`, `currency`, `payments`, `emails`, `analytics`, `seo`, `privacy`, `branding`, `updates` |
 | `dgb_emails` | option | Email templates edited on the Emails screen |
-| `dgb_db_version` | option | Schema version applied by the migrations runner (1.4.0 in this release) |
+| `dgb_db_version` | option | Schema version applied by the migrations runner (1.5.0 in this release) |
 | `dgb_version` | option | Plugin version that last ran its upgrade routine |
 | `dgb_traveler_import_log` | option | Result of the last Traveler import |
+| `dgb_demo_report` | option | Result of the last demo data import |
+| `dgb_update_release` | site transient | Latest GitHub release (6 hours) |
+| `_dgb_demo` | post meta | Set on tours created or set up by the demo data import |
 | `_dgb_*` | post meta | Booking settings of a tour (see `src/Domain/Product.php`); `_dgb_gallery` holds image IDs |
 | `_dgb_imported_from` | post meta | `traveler` on tours brought in by the importer |
 | `{prefix}dgb_*` | tables | See `src/Database/Schema.php` |

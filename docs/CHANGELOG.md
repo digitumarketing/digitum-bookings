@@ -1,7 +1,12 @@
 # Changelog
 
-## Unreleased (M7)
+## 0.7.0 (M7 Release)
 
+- **Updates from GitHub**: the plugin reads the latest release of github.com/digitumarketing/digitum-bookings; WordPress shows “update available” under Dashboard › Updates and on the Plugins screen, installs `digitum-bookings.zip` from the release, and automatic updates can be switched on. “View details” shows the release changelog and requirements. Settings › **Updates** shows the installed and latest version, has “Check for updates now”, and takes a read-only token if the repository is ever private (the zip is then fetched through the GitHub API).
+- **Arabic**: complete Arabic translation (1093 strings, six plural forms) with PHP, `.mo` and block-editor files; right-to-left fixes (mirrored calendar arrows and arrow keys, option and session labels keep their own direction).
+- **Import Desert Bookings demo data** (Tools, administrators): business details, AED and 5% VAT, pickup zones, the Al Aweer meeting point and all 27 tours of section 13 with options, sessions and pickup rules. Safe on the live site and when run twice; bookings stay off until each tour's [CONFIRM] items are checked.
+- **Coupons** screen (booking managers) and a coupon field in the payment step of the widget; uses are counted when a booking is saved, and the code is stored on the booking, in the CSV export and in webhooks.
+- **Reports**: bookings made, sold, booked value, money collected, conversion, cancellation rate and quote requests for a period, by tour, by source and by coupon.
 - No white label: the admin menu is always “Digitum Bookings”, and the “Admin menu name” setting (Settings › Branding) is gone. Digitum branding is used everywhere.
 - “Booking by Digitum” (linked to digitum.marketing) is always shown under every booking widget and booking page; the on/off setting is gone, and theme template overrides cannot remove it.
 - Admin pages of the plugin show “Digitum Bookings by Digitum Marketing” in the footer; the Plugins screen links the admin guide and Digitum support.

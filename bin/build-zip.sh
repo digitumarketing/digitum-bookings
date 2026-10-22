@@ -31,7 +31,7 @@ find "$STAGE/vendor" -name .git -prune -exec rm -rf {} +
 AS="$STAGE/vendor/woocommerce/action-scheduler"
 rm -rf "$AS/docs" "$AS/tests" "$AS/Gruntfile.js" "$AS/codecov.yml" "$AS/package.json" "$AS/package-lock.json" "$AS/phpcs.xml" "$AS/composer.lock"
 
-for required in digitum-bookings.php uninstall.php readme.txt vendor/autoload.php vendor/woocommerce/action-scheduler/action-scheduler.php assets/build/admin/admin.css assets/build/admin/meta-box.js assets/build/admin/calendar.js assets/build/admin/checkin.js assets/build/front/booking.js assets/build/front/payment.js assets/build/front/booking.css assets/build/blocks/booking-block.js blocks/booking/block.json templates/front/booking-widget.php; do
+for required in digitum-bookings.php uninstall.php readme.txt vendor/autoload.php vendor/woocommerce/action-scheduler/action-scheduler.php assets/build/admin/admin.css assets/build/admin/meta-box.js assets/build/admin/calendar.js assets/build/admin/checkin.js assets/build/front/booking.js assets/build/front/payment.js assets/build/front/booking.css assets/build/blocks/booking-block.js blocks/booking/block.json templates/front/booking-widget.php assets/icon.svg languages/digitum-bookings-ar.mo languages/digitum-bookings-ar.l10n.php; do
 	if [ ! -e "$STAGE/$required" ]; then
 		echo "Build is missing $required" >&2
 		exit 1
