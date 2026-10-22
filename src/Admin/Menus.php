@@ -67,8 +67,8 @@ final class Menus {
 	 * Add the menu.
 	 */
 	public function register(): void {
-		$label     = (string) $this->settings->get( 'branding', 'menu_label' );
-		$label     = '' !== $label ? $label : 'Digitum Bookings';
+		// Always Digitum's own name: the plugin is not white-labelled.
+		$label     = 'Digitum Bookings';
 		$dashboard = new DashboardScreen( $this->settings, $this->product_type );
 		$settings  = new SettingsScreen( $this->settings );
 

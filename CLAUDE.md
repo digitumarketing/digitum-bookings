@@ -192,7 +192,7 @@ Namespace `dgb/v1`. Public: products, availability, quote, create booking, creat
 
 1. Admin menu "Digitum Bookings" with the Digitum mark and an "About Digitum" panel linking to digitum.marketing.
 2. Front-end credit "Booking by Digitum", off by default.
-3. White-label setting to rename the admin menu.
+3. ~~White-label setting to rename the admin menu.~~ Dropped (decision 17): Digitum branding everywhere.
 4. **Releases live on GitHub** (`digitumarketing/digitum-bookings`). Pushing a tag `vX.Y.Z` runs a GitHub Action that builds `digitum-bookings.zip` (no dev files) and attaches it to the release. Sites download that zip.
 5. An update checker reads the latest GitHub release so WordPress shows "update available" and installs it. For a private repository each site stores a read-only token in Settings › Updates.
 
@@ -281,7 +281,7 @@ One-click "Import Desert Bookings demo data" tool (admin only). Prices in AED. [
 | M4 Payments | Stripe, PayPal, bank transfer + screenshot upload, pay on arrival, deposits, webhooks, refunds | Stripe and PayPal sandbox e2e: success, failure, 3DS, refund; bank transfer upload + mark as paid |
 | M5 Admin operations | dashboard, calendar, bookings, manifest, check-in, emails, ICS, reminders, webhook out | Manifest prints for a session with 20 bookings; reminders fire through Action Scheduler; every email in section 8 sends |
 | M6 Integrations | schema (Rank Math, Yoast, standalone), llms.txt, REST API, Traveler importer, CSV, privacy exporter/eraser | Rich Results valid; schema price = visible price; import keeps every slug |
-| M7 Release | branding, white label, GitHub update checker, i18n (Arabic RTL), docs, demo data | Installs on clean WP 6.5; update from one GitHub release to the next works; readme.txt complete |
+| M7 Release | branding, GitHub update checker, i18n (Arabic RTL), docs, demo data | Installs on clean WP 6.5; update from one GitHub release to the next works; readme.txt complete |
 
 ## 16. Repository layout
 
@@ -347,3 +347,4 @@ Document every filter and action in `docs/DEVELOPER-HOOKS.md`. At minimum: `dgb_
 14. REST `DELETE admin/bookings/{id}` cancels; bookings are never deleted. Staff bookings through REST have source `admin` and no recorded terms acceptance.
 15. The Traveler importer works in place: in attach mode posts stay `st_tours`; in own-CPT mode they move to the plugin's post type with the same row (ID and slug cannot change). Old prices from Traveler tables are logged, not imported (13.4). Seats are read from titles like "2-Seater".
 16. Rich Results are checked offline with `@adobe/structured-data-validator` (Google's Rich Results Test has no API); Rank Math and Yoast merge tests need WordPress 6.7+ and run in CI on the 7.x matrix entry.
+17. No white label (owner's decision, October 2026): the admin menu is always "Digitum Bookings" with the Digitum mark, and Digitum branding is used everywhere. The "Admin menu name" setting from M1 was removed; a stored value is ignored.

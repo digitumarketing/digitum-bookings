@@ -1,6 +1,6 @@
 # Digitum Bookings: admin guide
 
-For the people who run bookings day to day. Menu: **Digitum Bookings** (or the name set in Settings › Branding).
+For the people who run bookings day to day. Menu: **Digitum Bookings**.
 
 ## Every day
 

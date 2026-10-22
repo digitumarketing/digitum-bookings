@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (M7)
+
+- No white label: the admin menu is always “Digitum Bookings”, and the “Admin menu name” setting (Settings › Branding) is gone. Digitum branding is used everywhere.
+
 ## 0.6.0 (M6 Integrations)
 
 - **Structured data** (JSON-LD) on every tour that takes bookings: `Product` (or `TouristTrip`, set per tour) with an `Offer`, or an `AggregateOffer` with one `Offer` per option, each with a `UnitPriceSpecification` and `referenceQuantity` (one person, one vehicle with its seats, one car with its guest limit) and VAT included or not. Prices come from the same calculator call as the "From" price on the page; tests check they match. Price-on-request tours have no price at all, a "Request a quote" `QuoteAction`, and are marked up as `TouristTrip`; so are tours without any image (Google's Product result needs one, and the site logo is used before giving up). Ratings only through a connected review source (`dgb_schema_rating`). The business (name, phone, email, address) is the seller.

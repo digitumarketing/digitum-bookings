@@ -45,7 +45,7 @@ final class SettingsTest extends TestCase {
 
 	public function test_sanitize_tab_only_changes_the_submitted_tab(): void {
 		$current                                    = Settings::defaults();
-		$current['branding']['menu_label']          = 'Client Bookings';
+		$current['branding']['accent_color']        = '#123456';
 		$current['payments']['deposit_enabled']     = true;
 
 		$result = Settings::sanitize_tab(
@@ -62,7 +62,7 @@ final class SettingsTest extends TestCase {
 		$this->assertSame( 99, $result['payments']['deposit_percent'], 'Percent is clamped to the field maximum.' );
 		$this->assertSame( array( 'stripe', 'bank_transfer' ), $result['payments']['deposit_methods'] );
 		$this->assertSame( 'AE07 0331 234', $result['payments']['bank_iban'] );
-		$this->assertSame( 'Client Bookings', $result['branding']['menu_label'], 'Other tabs are kept.' );
+		$this->assertSame( '#123456', $result['branding']['accent_color'], 'Other tabs are kept.' );
 	}
 
 	public function test_sanitize_tab_keeps_internal_fields(): void {

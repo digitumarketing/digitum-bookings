@@ -549,12 +549,6 @@ final class Settings {
 				),
 			),
 			'branding'  => array(
-				'menu_label'   => array(
-					'type'    => 'text',
-					'label'   => __( 'Admin menu name', 'digitum-bookings' ),
-					'help'    => __( 'Rename the menu for a client (white label).', 'digitum-bookings' ),
-					'default' => 'Digitum Bookings',
-				),
 				'front_credit' => array(
 					'type'    => 'checkbox',
 					'label'   => __( 'Front-end credit', 'digitum-bookings' ),
