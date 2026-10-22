@@ -158,6 +158,7 @@ final class Schema {
 				'created_at datetime NOT NULL',
 				'updated_at datetime NOT NULL',
 				'erased_at datetime DEFAULT NULL',
+				"coupon_code varchar(50) NOT NULL DEFAULT ''",
 				'PRIMARY KEY  (id)',
 				'UNIQUE KEY reference (reference)',
 				'KEY status (status)',

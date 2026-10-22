@@ -13,7 +13,7 @@ async function arabicPage( page: Page, url: string ) {
 }
 
 test.describe( 'Arabic (RTL)', () => {
-	test( 'tour page is right to left, translated and fits the screen', async ( { page }, info ) => {
+	test( 'tour page is right to left, translated and fits the screen', async ( { page, isMobile }, info ) => {
 		await arabicPage( page, path( tours.rzr.url ) );
 		await expect( page.locator( 'html' ) ).toHaveAttribute( 'dir', 'rtl' );
 		const w = page.locator( '[data-dgb-widget]' );
@@ -23,6 +23,11 @@ test.describe( 'Arabic (RTL)', () => {
 		await expect( page.locator( '.dgb-credit' ) ).toContainText( arabic );
 		await expect( page.locator( '.dgb-credit a' ) ).toHaveText( 'Digitum' );
 		expect( await page.evaluate( () => document.documentElement.scrollWidth <= window.innerWidth + 1 ) ).toBe( true );
+		if ( isMobile ) {
+			await page.screenshot( { path: `test-results/rtl-${ info.project.name }-closed.png`, fullPage: false } );
+			await page.locator( '.dgb-sticky [data-dgb-open]' ).click();
+			await expect( w.locator( '[data-dgb-next-month]' ) ).toBeVisible();
+		}
 		expect( await w.locator( '[data-dgb-next-month]' ).evaluate( ( el ) => getComputedStyle( el ).transform ) ).toBe( 'matrix(-1, 0, 0, 1, 0, 0)' );
 		expect( await w.locator( '.dgb-card-title' ).first().evaluate( ( el ) => getComputedStyle( el ).unicodeBidi ) ).toBe( 'plaintext' );
 		await axe( page );

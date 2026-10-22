@@ -237,6 +237,9 @@
 				payment_method: radio( 'payment_method' ),
 				pay_deposit: '1' === radio( 'pay_deposit' ),
 			};
+			if ( state.coupon ) {
+				out.coupon = state.coupon;
+			}
 			[ 'name', 'email', 'phone_code', 'phone', 'nationality', 'requests', 'hotel', 'room', 'dgb_website', 'turnstile' ].forEach( ( key ) => {
 				if ( data.has( key ) ) {
 					out[ key ] = String( data.get( key ) );
@@ -327,7 +330,9 @@
 		} );
 
 		days.addEventListener( 'keydown', ( e ) => {
-			const moves = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
+			// In a right-to-left page the next day is on the left.
+			const rtl = 'rtl' === window.getComputedStyle( days ).direction;
+			const moves = { ArrowLeft: rtl ? 1 : -1, ArrowRight: rtl ? -1 : 1, ArrowUp: -7, ArrowDown: 7 };
 			if ( ! ( e.key in moves ) && 'Home' !== e.key && 'End' !== e.key ) {
 				return;
 			}
@@ -478,7 +483,18 @@
 			}
 			box.appendChild( list );
 
-			const problems = ( r.errors || [] ).filter( ( e ) => e.message );
+			const couponStatus = q( '[data-dgb-coupon-status]' );
+			if ( couponStatus && state.coupon ) {
+				const bad = ( r.errors || [] ).find( ( e ) => 'coupon_invalid' === e.code );
+				couponStatus.textContent = bad ? bad.message : sprintf( t.couponApplied, state.coupon );
+				couponStatus.classList.toggle( 'is-error', !! bad );
+				if ( bad ) {
+					// Price without the code, so the guest can still book.
+					state.coupon = '';
+					update();
+				}
+			}
+			const problems = ( r.errors || [] ).filter( ( e ) => e.message && 'coupon_invalid' !== e.code );
 			if ( problems.length ) {
 				box.appendChild( el( 'ul', { class: 'dgb-price-errors' }, problems.map( ( e ) => el( 'li', { text: e.message } ) ) ) );
 			}
@@ -851,6 +867,22 @@
 				showStep( state.step - 1, true );
 			}
 		} );
+
+		const couponButton = q( '[data-dgb-coupon]' );
+		if ( couponButton ) {
+			const applyCoupon = () => {
+				state.coupon = String( field( 'coupon_entry' ).value || '' ).trim().toUpperCase();
+				q( '[data-dgb-coupon-status]' ).textContent = '';
+				update();
+			};
+			couponButton.addEventListener( 'click', applyCoupon );
+			field( 'coupon_entry' ).addEventListener( 'keydown', ( e ) => {
+				if ( 'Enter' === e.key ) {
+					e.preventDefault();
+					applyCoupon();
+				}
+			} );
+		}
 
 		q( '[data-dgb-prev]' ).addEventListener( 'click', () => moveMonth( -1 ) );
 		q( '[data-dgb-next-month]' ).addEventListener( 'click', () => moveMonth( 1 ) );

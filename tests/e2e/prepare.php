@@ -54,6 +54,8 @@ step( $site, 'activate' );
 $demo = step( $site, 'demo_setup' );
 // A featured image, so the safari is marked up as a Product (Google needs an image for that).
 step( $site, 'attach_image', array( 'post' => $demo['tours']['safari']['id'] ) );
+// A coupon for the coupon field in the payment step.
+step( $site, 'coupon_save', array( 'coupon' => array( 'code' => 'WELCOME10', 'type' => 'percent', 'amount' => '10', 'active' => 1 ) ) );
 step(
 	$site,
 	'payments_setup',

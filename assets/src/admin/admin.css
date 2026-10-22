@@ -341,3 +341,10 @@
 .dgb-checkin-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .dgb-checkin-actions form { margin: 0; }
 .dgb-checkin-actions .button-hero { min-width: 110px; }
+
+/* Reports and coupons (M7) */
+.dgb-presets { margin-inline-start: 12px; }
+.dgb-presets a { margin-inline-end: 10px; }
+.dgb-stat h2 { margin: 0 0 4px; font-size: 13px; font-weight: 500; color: #50575e; }
+.dgb-stat-value { margin: 0; font-size: 22px; font-weight: 600; }
+.dgb-check-list { max-height: 260px; overflow: auto; }

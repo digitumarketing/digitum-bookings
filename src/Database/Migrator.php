@@ -13,6 +13,7 @@ use Digitum\Bookings\Database\Migrations\Migration_1_1_0;
 use Digitum\Bookings\Database\Migrations\Migration_1_2_0;
 use Digitum\Bookings\Database\Migrations\Migration_1_3_0;
 use Digitum\Bookings\Database\Migrations\Migration_1_4_0;
+use Digitum\Bookings\Database\Migrations\Migration_1_5_0;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -42,6 +43,7 @@ final class Migrator {
 			'1.2.0' => Migration_1_2_0::class,
 			'1.3.0' => Migration_1_3_0::class,
 			'1.4.0' => Migration_1_4_0::class,
+			'1.5.0' => Migration_1_5_0::class,
 		);
 		uksort( $this->migrations, 'version_compare' );
 	}

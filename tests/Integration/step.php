@@ -325,6 +325,7 @@ switch ( $dgb_action ) {
 		$dgb_out['widget']      = substr_count( $dgb_html, 'data-dgb-widget' );
 		$dgb_out['form']        = false !== strpos( $dgb_html, 'data-dgb-form' );
 		$dgb_out['confirmation'] = false !== strpos( $dgb_html, 'data-dgb-confirmation' );
+		$dgb_out['coupon']      = str_contains( $dgb_html, 'data-dgb-coupon' );
 		$dgb_out['credit']      = substr_count( $dgb_html, '<p class="dgb-credit">Booking by <a href="https://digitum.marketing/" rel="nofollow">Digitum</a></p>' );
 		$dgb_out['sticky']      = false !== strpos( $dgb_html, 'data-dgb-sticky' );
 		$dgb_out['js']          = wp_script_is( 'dgb-booking', 'enqueued' );
@@ -514,6 +515,10 @@ switch ( $dgb_action ) {
 			( new \Digitum\Bookings\Admin\Screens\EmailsScreen( $dgb_set ) )->render();
 		} elseif ( 'settings' === $dgb_args['screen'] ) {
 			( new \Digitum\Bookings\Admin\Screens\SettingsScreen( $dgb_set ) )->render();
+		} elseif ( 'coupons' === $dgb_args['screen'] ) {
+			( new \Digitum\Bookings\Admin\Screens\CouponsScreen( $dgb_set, \Digitum\Bookings\Plugin::instance()->product_type() ) )->render();
+		} elseif ( 'reports' === $dgb_args['screen'] ) {
+			( new \Digitum\Bookings\Admin\Screens\ReportsScreen( $dgb_set ) )->render();
 		} elseif ( 'tools' === $dgb_args['screen'] ) {
 			( new \Digitum\Bookings\Admin\Screens\ToolsScreen( $dgb_set, \Digitum\Bookings\Plugin::instance()->product_type() ) )->render();
 		} else {
@@ -890,6 +895,18 @@ switch ( $dgb_action ) {
 				'from'      => $dgb_plugin->quotes()->from_price( $dgb_id ),
 			);
 		}
+		break;
+
+	case 'coupon_save':
+		$dgb_data = \Digitum\Bookings\Database\Repositories\CouponRepository::sanitize( $dgb_args['coupon'] );
+		$dgb_id   = is_wp_error( $dgb_data ) ? $dgb_data : ( new \Digitum\Bookings\Database\Repositories\CouponRepository() )->save( $dgb_data, (int) ( $dgb_args['id'] ?? 0 ) );
+		$dgb_out['id']    = is_wp_error( $dgb_id ) ? 0 : $dgb_id;
+		$dgb_out['error'] = is_wp_error( $dgb_id ) ? $dgb_id->get_error_code() : '';
+		$dgb_out['row']   = $dgb_out['id'] ? ( new \Digitum\Bookings\Database\Repositories\CouponRepository() )->find( $dgb_out['id'] ) : null;
+		break;
+
+	case 'reports':
+		$dgb_out['report'] = ( new \Digitum\Bookings\Services\Reports( \Digitum\Bookings\Plugin::instance()->settings() ) )->period( $dgb_args['from'], $dgb_args['to'] );
 		break;
 
 	case 'install':

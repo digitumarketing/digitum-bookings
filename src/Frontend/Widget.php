@@ -8,6 +8,7 @@
 namespace Digitum\Bookings\Frontend;
 
 use Digitum\Bookings\Database\Repositories\AddonRepository;
+use Digitum\Bookings\Database\Repositories\CouponRepository;
 use Digitum\Bookings\Database\Repositories\LocationRepository;
 use Digitum\Bookings\Database\Repositories\VariantRepository;
 use Digitum\Bookings\Database\Repositories\ZoneRepository;
@@ -222,6 +223,7 @@ final class Widget {
 			'terms_url'    => (string) $all['general']['terms_url'],
 			'cancellation' => (string) $all['general']['cancellation'],
 			'country_code' => (string) $all['general']['country_code'],
+			'coupons'      => ! $on_req && ( new CouponRepository() )->any_active( $now ),
 			'sticky'       => ! empty( $all['general']['sticky_bar'] ) && is_singular( $this->product_type->key() ) && get_queried_object_id() === $product_id,
 			'accent'       => (string) $all['branding']['accent_color'],
 			'turnstile'    => $script['turnstile'],
@@ -324,6 +326,8 @@ final class Widget {
 			'book'          => __( 'Book now', 'digitum-bookings' ),
 			/* translators: %s: amount. */
 			'bookTransfer'  => __( 'Book now · %s by bank transfer', 'digitum-bookings' ),
+			/* translators: %s: coupon code. */
+			'couponApplied' => __( 'Coupon %s applied.', 'digitum-bookings' ),
 		);
 	}
 }

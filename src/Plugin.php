@@ -12,9 +12,11 @@ use Digitum\Bookings\Admin\MetaBoxes\BookingSettingsBox;
 use Digitum\Bookings\Admin\Screens\BookingsScreen;
 use Digitum\Bookings\Admin\Screens\CalendarScreen;
 use Digitum\Bookings\Admin\Screens\CheckInScreen;
+use Digitum\Bookings\Admin\Screens\CouponsScreen;
 use Digitum\Bookings\Admin\Screens\EmailsScreen;
 use Digitum\Bookings\Admin\Screens\ManifestScreen;
 use Digitum\Bookings\Admin\Screens\PaymentsScreen;
+use Digitum\Bookings\Admin\Screens\ReportsScreen;
 use Digitum\Bookings\Admin\Screens\SettingsScreen;
 use Digitum\Bookings\Admin\Screens\ToolsScreen;
 use Digitum\Bookings\Admin\Screens\ZonesScreen;
@@ -183,6 +185,8 @@ final class Plugin {
 			( new CheckInScreen( $this->settings ) )->register_hooks();
 			( new EmailsScreen( $this->settings ) )->register_hooks();
 			( new ToolsScreen( $this->settings, $this->product_type ) )->register_hooks();
+			( new CouponsScreen( $this->settings, $this->product_type ) )->register_hooks();
+			( new ReportsScreen( $this->settings ) )->register_hooks();
 			( new BookingSettingsBox( $this->product_type, $this->quotes() ) )->register_hooks();
 		}
 	}

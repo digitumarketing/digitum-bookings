@@ -1370,6 +1370,78 @@ if ( scenario( 'L' ) ) {
 }
 
 /* -------------------------------------------------------------------- */
+if ( scenario( 'M' ) ) {
+	echo "\nScenario M: coupons and reports (M7)\n";
+	$amt  = static fn( $v ) => null === $v ? null : number_format( (float) $v, 2, '.', '' );
+	$site = make_site( 'm7-coupons' );
+	copy( __DIR__ . '/fake-gateways.php', "{$site}/wp-content/mu-plugins/fake-gateways.php" );
+	step( $site, 'install' );
+	step( $site, 'activate' );
+	$demo = step( $site, 'demo_setup' );
+	$rzr  = $demo['tours']['rzr'];
+	$saf  = $demo['tours']['safari'];
+	$day  = static fn( int $n ) => ( new DateTimeImmutable( ( $n >= 0 ? '+' : '' ) . $n . ' days', new DateTimeZone( 'Asia/Dubai' ) ) )->format( 'Y-m-d' );
+
+	$r = step( $site, 'render_page', array( 'url' => $rzr['url'] ) );
+	check( 1 === $r['widget'] && ! $r['coupon'], 'no coupon field while there is no coupon' );
+	check( 'dgb_coupon_amount' === step( $site, 'coupon_save', array( 'coupon' => array( 'code' => 'BAD', 'type' => 'percent', 'amount' => '150' ) ) )['error'], 'a percentage above 100 is refused' );
+	$c10 = step( $site, 'coupon_save', array( 'coupon' => array( 'code' => ' desert-10 ', 'type' => 'percent', 'amount' => '10', 'product_ids' => array( $rzr['id'] ), 'usage_limit' => 2, 'active' => 1 ) ) );
+	check( 'DESERT-10' === $c10['row']['code'] && 2 === (int) $c10['row']['usage_limit'], 'coupon saved, code in capitals' );
+	check( 'dgb_coupon_taken' === step( $site, 'coupon_save', array( 'coupon' => array( 'code' => 'Desert-10', 'type' => 'fixed', 'amount' => '5', 'active' => 1 ) ) )['error'], 'a code can only exist once' );
+	step( $site, 'coupon_save', array( 'coupon' => array( 'code' => 'OLD50', 'type' => 'fixed', 'amount' => '50', 'ends_at' => $day( -1 ), 'active' => 1 ) ) );
+	$r = step( $site, 'render_page', array( 'url' => $rzr['url'] ) );
+	check( $r['coupon'], 'coupon field shown in the payment step while a coupon can be used' );
+
+	$quote = static fn( string $code, array $tour, string $variant ) => step( $site, 'rest', array( 'method' => 'POST', 'route' => 'quote', 'body' => array( 'product' => $tour['id'], 'variant_id' => $tour['variants'][ $variant ], 'date' => $day( 3 ), 'session_id' => $tour['sessions']['Evening'], 'adults' => 2, 'units' => 1, 'coupon' => $code ) ) )['data'];
+	$q = $quote( 'desert-10', $rzr, '1 hour' );
+	$d = array_values( array_filter( $q['lines'], static fn( $l ) => 'coupon' === $l['key'] ) );
+	check( 1 === count( $d ) && '-89.90' === $amt( $d[0]['amount'] ) && '809.10' === $amt( $q['total'] ), 'quote: 10% off AED 899 = 809.10 (code typed in lower case)' );
+	$q = $quote( 'DESERT-10', $saf, 'Standard' );
+	check( in_array( 'coupon_invalid', array_column( $q['errors'], 'code' ), true ) && '198.00' === $amt( $q['total'] ), 'coupon for another tour: refused, full price' );
+	$q = $quote( 'OLD50', $rzr, '1 hour' );
+	check( in_array( 'coupon_invalid', array_column( $q['errors'], 'code' ), true ), 'expired coupon refused' );
+
+	$ip   = 0;
+	$book = static function ( string $code, string $method = 'arrival', ?array $tour = null ) use ( $site, $rzr, $day, $demo, &$ip ) {
+		++$ip;
+		$tour = $tour ?? $rzr;
+		$body = array( 'product' => $tour['id'], 'variant_id' => reset( $tour['variants'] ), 'date' => $day( 3 ), 'session_id' => $tour['sessions']['Evening'], 'adults' => 2, 'units' => 1, 'payment_method' => $method, 'name' => 'Coupon Guest', 'email' => 'coupon@example.com', 'phone_code' => '+971', 'phone' => '501234567', 'terms' => true );
+		if ( '' !== $code ) {
+			$body['coupon'] = $code;
+		}
+		return step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'body' => $body, 'nonce' => true, 'ip' => '10.7.0.' . $ip ) );
+	};
+	$b1 = $book( 'desert-10' );
+	$s1 = step( $site, 'booking_state', array( 'reference' => $b1['data']['reference'] ) );
+	check( 201 === $b1['status'] && 'DESERT-10' === $s1['booking']['coupon_code'] && '69.90' === $amt( $s1['booking']['discount'] ) && '629.10' === $amt( $s1['booking']['total'] ), 'booking with the coupon: discount saved and code recorded' );
+	$b2 = $book( 'DESERT-10', 'bank_transfer' );
+	$b3 = $book( 'DESERT-10' );
+	$c  = step( $site, 'coupon_save', array( 'id' => $c10['id'], 'coupon' => array( 'code' => 'DESERT-10', 'type' => 'percent', 'amount' => '10', 'product_ids' => array( $rzr['id'] ), 'usage_limit' => 2, 'active' => 1 ) ) );
+	check( 201 === $b2['status'] && 400 === $b3['status'] && isset( $b3['data']['data']['fields']['price_coupon_invalid'] ) && 2 === (int) $c['row']['used_count'], 'usage limit 2: the third booking with the code is refused' );
+
+	// Reports: one sold with coupon, one waiting for transfer, one sold without coupon, one cancelled, one quote request.
+	$b4 = $book( '' );
+	$b5 = $book( '', 'arrival', $saf );
+	step( $site, 'admin_action', array( 'op' => 'status', 'reference' => $b5['data']['reference'], 'do' => 'cancel' ) );
+	step( $site, 'rest', array( 'method' => 'POST', 'route' => 'enquiries', 'nonce' => true, 'ip' => '10.7.1.1', 'body' => array( 'product' => $demo['tours']['newyear']['id'], 'date' => $day( 5 ), 'session_id' => $demo['tours']['newyear']['sessions']['Evening'], 'adults' => 4, 'name' => 'Quote Guest', 'email' => 'q@example.com', 'phone_code' => '+971', 'phone' => '501234567', 'terms' => true ) ) );
+	$rep = step( $site, 'reports', array( 'from' => $day( -1 ), 'to' => $day( 0 ) ) )['report'];
+	$t   = $rep['totals'];
+	check( 4 === $t['made'] && 2 === $t['sold'] && 1 === $t['cancelled'] && 1 === $t['open'] && 1 === $t['quotes'], 'report: 4 bookings made, 2 sold, 1 cancelled, 1 waiting, 1 quote request' );
+	check( '1328.10' === $amt( $t['value'] ) && 4 === $t['guests'], 'booked value 629.10 + 699 = 1,328.10 for 4 guests' );
+	check( 50.0 === round( 100 * $t['sold'] / $t['made'], 1 ) && 25.0 === round( 100 * $t['cancelled'] / $t['made'], 1 ), 'conversion 50%, cancellation rate 25%' );
+	check( 3 === $rep['tours'][ $rzr['id'] ]['made'] && 1 === $rep['tours'][ $saf['id'] ]['cancelled'] && 2 === $rep['sources']['organic']['sold'], 'by tour and by source' );
+	check( 2 === $rep['coupons']['DESERT-10']['uses'] && '139.80' === $amt( $rep['coupons']['DESERT-10']['discount'] ), 'coupon report: 2 bookings, AED 139.80 discount given' );
+
+	$cs = step( $site, 'render_admin', array( 'screen' => 'coupons', 'admin' => true ) );
+	check( empty( $cs['died'] ) && str_contains( $cs['html'], 'DESERT-10' ) && str_contains( $cs['html'], '2 / 2' ) && str_contains( $cs['html'], 'Used up' ) && str_contains( $cs['html'], 'Expired' ) && str_contains( $cs['html'], 'value="dgb_save_coupon"' ), 'Coupons screen: list with uses, used up and expired, add form' );
+	$rs = step( $site, 'render_admin', array( 'screen' => 'reports', 'get' => array( 'from' => $day( -1 ), 'to' => $day( 0 ) ), 'admin' => true ) );
+	check( empty( $rs['died'] ) && str_contains( $rs['html'], 'data-dgb-report="tours"' ) && str_contains( $rs['html'], 'data-dgb-report="sources"' ) && str_contains( $rs['html'], 'data-dgb-report="coupons"' ) && str_contains( $rs['html'], '50.0%' ) && str_contains( $rs['html'], '25.0%' ), 'Reports screen: tours, sources, coupons, conversion and cancellation rate' );
+	$guide = step( $site, 'create_user', array( 'login' => 'guide1', 'role' => 'dgb_guide' ) )['id'];
+	$rs    = step( $site, 'render_admin', array( 'screen' => 'reports', 'user' => $guide, 'admin' => true ) );
+	check( ! empty( $rs['died'] ), 'guides cannot see reports' );
+}
+
+/* -------------------------------------------------------------------- */
 $stripe_mock = getenv( 'DGB_STRIPE_MOCK' ) ?: '';
 if ( '' !== $stripe_mock && scenario( 'G' ) ) {
 	echo "\nScenario G: Stripe requests match Stripe's API (stripe-mock at {$stripe_mock})\n";

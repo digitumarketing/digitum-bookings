@@ -8,6 +8,7 @@
 namespace Digitum\Bookings\Services;
 
 use Digitum\Bookings\Database\Repositories\BookingRepository;
+use Digitum\Bookings\Database\Repositories\CouponRepository;
 use Digitum\Bookings\Database\Repositories\VariantRepository;
 use Digitum\Bookings\Database\Repositories\ZoneRepository;
 use Digitum\Bookings\Domain\BookingStatus;
@@ -144,6 +145,22 @@ final class BookingService {
 		$status = $enquiry ? BookingStatus::QUOTE_REQUESTED : (string) $methods[ $method ]['status'];
 		$money  = $breakdown ? $breakdown->to_array() : null;
 
+		// A coupon counts one use when the booking is saved; it may have been used up since the price was shown.
+		$coupon = '';
+		foreach ( (array) ( $money['lines'] ?? array() ) as $line ) {
+			$coupon = 'coupon' === $line['key'] ? (string) $line['label'] : $coupon;
+		}
+		if ( '' !== $coupon && ! ( new CouponRepository() )->claim( $coupon ) ) {
+			return new \WP_Error(
+				'dgb_invalid',
+				__( 'Please check the highlighted fields.', 'digitum-bookings' ),
+				array(
+					'status' => 400,
+					'fields' => array( 'price_coupon_invalid' => __( 'This coupon code cannot be used for this booking.', 'digitum-bookings' ) ),
+				)
+			);
+		}
+
 		$attribution = $staff ? array_fill_keys( Attribution::KEYS, '' ) + array( 'source' => 'admin' ) : Attribution::current();
 		$booking     = array_merge(
 			$details['data'],
@@ -162,6 +179,7 @@ final class BookingService {
 				'balance_due'       => $money['total'] ?? '0.00',
 				'payment_method'    => $method,
 				'payment_status'    => 'unpaid',
+				'coupon_code'       => $coupon,
 				'hold_expires_at'   => ( new Holds( $this->settings ) )->expires_at( $status, $now ),
 				'created_by'        => get_current_user_id() ? get_current_user_id() : null,
 			)

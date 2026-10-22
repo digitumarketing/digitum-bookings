@@ -171,6 +171,8 @@ final class WebhookOut {
 				'deposit'        => (float) $booking['deposit_amount'],
 				'amount_paid'    => (float) $booking['amount_paid'],
 				'balance_due'    => (float) $booking['balance_due'],
+				'discount'       => (float) $booking['discount'],
+				'coupon'         => (string) ( $booking['coupon_code'] ?? '' ),
 				'created_at'     => (string) $booking['created_at'],
 				'customer'       => array(
 					'name'              => (string) $booking['customer_name'],

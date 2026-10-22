@@ -10,10 +10,12 @@ namespace Digitum\Bookings\Admin;
 use Digitum\Bookings\Admin\Screens\BookingsScreen;
 use Digitum\Bookings\Admin\Screens\CalendarScreen;
 use Digitum\Bookings\Admin\Screens\CheckInScreen;
+use Digitum\Bookings\Admin\Screens\CouponsScreen;
 use Digitum\Bookings\Admin\Screens\DashboardScreen;
 use Digitum\Bookings\Admin\Screens\EmailsScreen;
 use Digitum\Bookings\Admin\Screens\ManifestScreen;
 use Digitum\Bookings\Admin\Screens\PaymentsScreen;
+use Digitum\Bookings\Admin\Screens\ReportsScreen;
 use Digitum\Bookings\Admin\Screens\SettingsScreen;
 use Digitum\Bookings\Admin\Screens\ToolsScreen;
 use Digitum\Bookings\Admin\Screens\ZonesScreen;
@@ -71,7 +73,7 @@ final class Menus {
 	 * @return array<int, string>
 	 */
 	public static function pages(): array {
-		return array( self::SLUG, SettingsScreen::SLUG, ZonesScreen::SLUG, PaymentsScreen::SLUG, BookingsScreen::SLUG, CalendarScreen::SLUG, ManifestScreen::SLUG, CheckInScreen::SLUG, EmailsScreen::SLUG, ToolsScreen::SLUG );
+		return array( self::SLUG, SettingsScreen::SLUG, ZonesScreen::SLUG, PaymentsScreen::SLUG, BookingsScreen::SLUG, CalendarScreen::SLUG, ManifestScreen::SLUG, CheckInScreen::SLUG, EmailsScreen::SLUG, ToolsScreen::SLUG, CouponsScreen::SLUG, ReportsScreen::SLUG );
 	}
 
 	/**

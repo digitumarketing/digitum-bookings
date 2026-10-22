@@ -795,3 +795,18 @@
 .dgb-w[dir="rtl"] [data-dgb-next-month] {
 	transform: scaleX(-1);
 }
+
+.dgb-coupon-row {
+	display: flex;
+	gap: 8px;
+}
+
+.dgb-coupon-row input {
+	flex: 1;
+	min-width: 0;
+	text-transform: uppercase;
+}
+
+.dgb-hint.is-error {
+	color: var(--dgb-danger);
+}

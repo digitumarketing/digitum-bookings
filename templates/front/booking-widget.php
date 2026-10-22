@@ -313,6 +313,16 @@ $dgb_selectable = array_filter( $view['extras'], static fn( $e ) => ! $e['requir
 						<p class="dgb-hint"><?php esc_html_e( 'Online booking is not available right now. Please contact us.', 'digitum-bookings' ); ?></p>
 					<?php endif; ?>
 					<p class="dgb-field-error" data-dgb-error="payment_method" hidden></p>
+					<?php if ( ! empty( $view['coupons'] ) ) : ?>
+						<div class="dgb-field dgb-coupon">
+							<label for="<?php echo esc_attr( $dgb_id ); ?>-coupon"><?php esc_html_e( 'Coupon code (optional)', 'digitum-bookings' ); ?></label>
+							<div class="dgb-coupon-row">
+								<input type="text" id="<?php echo esc_attr( $dgb_id ); ?>-coupon" name="coupon_entry" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="50" aria-describedby="<?php echo esc_attr( $dgb_id ); ?>-coupon-status">
+								<button type="button" class="dgb-btn dgb-btn-quiet" data-dgb-coupon><?php esc_html_e( 'Apply', 'digitum-bookings' ); ?></button>
+							</div>
+							<p class="dgb-hint" id="<?php echo esc_attr( $dgb_id ); ?>-coupon-status" data-dgb-coupon-status aria-live="polite"></p>
+						</div>
+					<?php endif; ?>
 					<div class="dgb-options dgb-options-2" data-dgb-amount role="radiogroup" aria-label="<?php esc_attr_e( 'How much to pay now', 'digitum-bookings' ); ?>" hidden>
 						<label class="dgb-card"><input type="radio" name="pay_deposit" value="0" checked> <span class="dgb-card-body"><span class="dgb-card-title"><?php esc_html_e( 'Full amount', 'digitum-bookings' ); ?></span><span class="dgb-card-meta" data-dgb-full-text></span></span></label>
 						<label class="dgb-card"><input type="radio" name="pay_deposit" value="1"> <span class="dgb-card-body"><span class="dgb-card-title" data-dgb-deposit-title></span><span class="dgb-card-meta" data-dgb-deposit-text></span></span></label>
