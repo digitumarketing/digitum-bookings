@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-22T16:32:13+00:00\n"
+"POT-Creation-Date: 2026-10-22T16:46:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: digitum-bookings\n"
@@ -69,6 +69,7 @@ msgstr ""
 #: src/Admin/Screens/BookingsScreen.php:300
 #: src/Admin/Screens/CalendarScreen.php:174
 #: src/Admin/Screens/ManifestScreen.php:333
+#: src/Admin/Screens/ReportsScreen.php:140
 #: src/Admin/Screens/ToolsScreen.php:162
 #: src/Integrations/Elementor/BookingWidget.php:56
 #: src/PostTypes/ProductType.php:106
@@ -95,6 +96,7 @@ msgstr ""
 #: src/Admin/ListTables/BookingsListTable.php:87
 #: src/Admin/Screens/BookingsScreen.php:306
 #: src/Admin/Screens/DashboardScreen.php:159
+#: src/Admin/Screens/ReportsScreen.php:204
 #: src/Services/Notifications/MergeTags.php:103
 #: src/Services/Privacy.php:145
 #: templates/front/booking-widget.php:117
@@ -104,7 +106,7 @@ msgstr ""
 
 #: src/Admin/ListTables/BookingsListTable.php:88
 #: src/Admin/Screens/PaymentsScreen.php:230
-#: src/Frontend/Widget.php:293
+#: src/Frontend/Widget.php:295
 #: src/Services/Notifications/MergeTags.php:105
 #: src/Services/Privacy.php:154
 #: templates/front/confirmation.php:178
@@ -113,6 +115,8 @@ msgstr ""
 
 #: src/Admin/ListTables/BookingsListTable.php:89
 #: src/Admin/Screens/BookingsScreen.php:490
+#: src/Admin/Screens/CouponsScreen.php:93
+#: src/Admin/Screens/CouponsScreen.php:187
 #: src/Admin/Screens/ManifestScreen.php:367
 #: src/Admin/Screens/PaymentsScreen.php:269
 #: src/Admin/Screens/PaymentsScreen.php:366
@@ -124,11 +128,13 @@ msgstr ""
 #: src/Admin/ListTables/BookingsListTable.php:189
 #: src/Admin/Screens/BookingsScreen.php:391
 #: src/Admin/Screens/BookingsScreen.php:395
+#: src/Admin/Screens/ReportsScreen.php:152
 #: src/Services/Privacy.php:158
 msgid "Source"
 msgstr ""
 
 #: src/Admin/ListTables/BookingsListTable.php:114
+#: src/Admin/Screens/CouponsScreen.php:193
 #: src/Admin/Screens/ZonesScreen.php:158
 #: src/Admin/Screens/ZonesScreen.php:194
 msgid "Cancel"
@@ -145,19 +151,22 @@ msgstr ""
 
 #: src/Admin/ListTables/BookingsListTable.php:182
 #: src/Admin/Screens/CalendarScreen.php:176
+#: src/Admin/Screens/CouponsScreen.php:102
 #: src/Admin/Screens/ManifestScreen.php:335
 msgid "All tours"
 msgstr ""
 
 #: src/Admin/ListTables/BookingsListTable.php:187
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:585
+#: src/Admin/Screens/CouponsScreen.php:179
 #: templates/front/booking-widget.php:43
 #: templates/front/booking-widget.php:56
-#: templates/front/booking-widget.php:344
+#: templates/front/booking-widget.php:354
 msgid "From"
 msgstr ""
 
 #: src/Admin/ListTables/BookingsListTable.php:188
+#: src/Admin/Screens/ReportsScreen.php:86
 msgid "to"
 msgstr ""
 
@@ -210,7 +219,7 @@ msgstr[1] ""
 #: src/Admin/ListTables/BookingsListTable.php:272
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:165
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:460
-#: src/Frontend/Widget.php:307
+#: src/Frontend/Widget.php:309
 msgid "On request"
 msgstr ""
 
@@ -225,37 +234,40 @@ msgid "No bookings found."
 msgstr ""
 
 #. translators: 1: plugin name and version, 2: link to Digitum Marketing.
-#: src/Admin/Menus.php:98
+#: src/Admin/Menus.php:100
 #, php-format
 msgid "%1$s by %2$s"
 msgstr ""
 
-#: src/Admin/Menus.php:115
+#: src/Admin/Menus.php:117
 msgid "Admin guide"
 msgstr ""
 
-#: src/Admin/Menus.php:116
+#: src/Admin/Menus.php:118
 msgid "Support by Digitum"
 msgstr ""
 
-#: src/Admin/Menus.php:139
+#: src/Admin/Menus.php:141
 #: src/Admin/Screens/DashboardScreen.php:86
 msgid "Dashboard"
 msgstr ""
 
-#: src/Admin/Menus.php:140
+#: src/Admin/Menus.php:142
+#: src/Admin/Screens/CouponsScreen.php:90
+#: src/Admin/Screens/CouponsScreen.php:164
+#: src/Admin/Screens/CouponsScreen.php:165
 #: src/Admin/Screens/ToolsScreen.php:313
 #: src/PostTypes/ProductType.php:105
 #: src/PostTypes/ProductType.php:116
 msgid "Tours"
 msgstr ""
 
-#: src/Admin/Menus.php:141
+#: src/Admin/Menus.php:143
 #: src/Admin/Screens/ZonesScreen.php:71
 msgid "Pickup zones"
 msgstr ""
 
-#: src/Admin/Menus.php:142
+#: src/Admin/Menus.php:144
 #: src/Admin/Screens/SettingsScreen.php:122
 msgid "Settings"
 msgstr ""
@@ -451,6 +463,8 @@ msgstr ""
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:406
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:424
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:474
+#: src/Admin/Screens/CouponsScreen.php:188
+#: src/Admin/Screens/CouponsScreen.php:298
 msgid "Active"
 msgstr ""
 
@@ -634,6 +648,7 @@ msgid "Per booking"
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:469
+#: src/Admin/Screens/CouponsScreen.php:287
 msgid "Always"
 msgstr ""
 
@@ -855,6 +870,7 @@ msgstr ""
 #: src/Admin/Screens/BookingsScreen.php:88
 #: src/Admin/Screens/BookingsScreen.php:211
 #: src/Admin/Screens/DashboardScreen.php:158
+#: src/Admin/Screens/ReportsScreen.php:163
 #: src/Services/Privacy.php:85
 msgid "Bookings"
 msgstr ""
@@ -864,6 +880,7 @@ msgid "Website"
 msgstr ""
 
 #: src/Admin/Screens/BookingsScreen.php:126
+#: src/Admin/Screens/ReportsScreen.php:76
 msgid "Ads"
 msgstr ""
 
@@ -1140,6 +1157,7 @@ msgid "Sent"
 msgstr ""
 
 #: src/Admin/Screens/BookingsScreen.php:491
+#: src/Admin/Screens/CouponsScreen.php:94
 #: src/Admin/Screens/PaymentsScreen.php:157
 #: src/Admin/Screens/ZonesScreen.php:79
 #: src/Admin/Screens/ZonesScreen.php:104
@@ -1240,6 +1258,7 @@ msgstr ""
 
 #: src/Admin/Screens/CalendarScreen.php:181
 #: src/Admin/Screens/ManifestScreen.php:340
+#: src/Admin/Screens/ReportsScreen.php:88
 #: src/Admin/Screens/ToolsScreen.php:148
 msgid "Show"
 msgstr ""
@@ -1332,6 +1351,149 @@ msgstr ""
 #: src/Admin/Screens/CheckInScreen.php:163
 #, php-format
 msgid "Collect %s"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:48
+#: src/Admin/Screens/CouponsScreen.php:79
+#: src/Admin/Screens/ReportsScreen.php:159
+msgid "Coupons"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:65
+#: src/Admin/Screens/CouponsScreen.php:243
+msgid "You do not have permission to manage coupons."
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:81
+#: src/Admin/Screens/ZonesScreen.php:60
+msgid "Saved."
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:81
+#: src/Admin/Screens/ZonesScreen.php:61
+msgid "Deleted."
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:85
+msgid "Guests enter the code in the payment step of the booking widget; the field only appears while a coupon can be used. Each booking made with a code counts one use."
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:88
+#: src/Admin/Screens/CouponsScreen.php:143
+#: src/Admin/Screens/ReportsScreen.php:162
+msgid "Code"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:89
+#: src/Admin/Screens/CouponsScreen.php:148
+#: src/Frontend/Widget.php:300
+msgid "Discount"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:91
+msgid "Used"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:92
+#: src/Admin/Screens/CouponsScreen.php:177
+msgid "Valid"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:107
+#: src/Admin/Screens/ZonesScreen.php:89
+#: src/Admin/Screens/ZonesScreen.php:119
+msgid "Edit"
+msgstr ""
+
+#. translators: %s: zone or meeting point name.
+#: src/Admin/Screens/CouponsScreen.php:113
+#: src/Admin/Screens/ZonesScreen.php:213
+msgid "Delete"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:136
+msgid "Edit coupon"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:136
+msgid "Add a coupon"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:145
+msgid "Letters, numbers, - and _. Guests can type it in any case."
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:151
+msgid "Discount type"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:153
+msgid "% of the price before VAT"
+msgstr ""
+
+#. translators: %s: currency code.
+#: src/Admin/Screens/CouponsScreen.php:157
+#, php-format
+msgid "%s off the booking"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:166
+msgid "Leave all unticked for every tour."
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:173
+msgid "Usage limit"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:174
+msgid "bookings (empty = no limit)"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:181
+msgid "until"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:183
+msgid "The code works on bookings made on these days (site time zone). Empty = no limit."
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:191
+msgid "Save coupon"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:191
+msgid "Add coupon"
+msgstr ""
+
+#. translators: %s: date.
+#. translators: %s: list of areas.
+#: src/Admin/Screens/CouponsScreen.php:281
+#: src/Services/LlmsTxt.php:376
+#, php-format
+msgid "from %s"
+msgstr ""
+
+#. translators: %s: date.
+#: src/Admin/Screens/CouponsScreen.php:285
+#, php-format
+msgid "until %s"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:299
+#: src/Settings/Settings.php:514
+msgid "Off"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:300
+msgid "Scheduled"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:301
+msgid "Expired"
+msgstr ""
+
+#: src/Admin/Screens/CouponsScreen.php:302
+msgid "Used up"
 msgstr ""
 
 #. translators: %s: post type name, e.g. st_tours.
@@ -1431,10 +1593,12 @@ msgid "Revenue"
 msgstr ""
 
 #: src/Admin/Screens/DashboardScreen.php:220
+#: src/Admin/Screens/ReportsScreen.php:68
 msgid "Last 7 days"
 msgstr ""
 
 #: src/Admin/Screens/DashboardScreen.php:222
+#: src/Admin/Screens/ReportsScreen.php:69
 msgid "Last 30 days"
 msgstr ""
 
@@ -1443,6 +1607,8 @@ msgid "Money received (online and recorded by staff) minus refunds."
 msgstr ""
 
 #: src/Admin/Screens/DashboardScreen.php:228
+#: src/Admin/Screens/ReportsScreen.php:118
+#: src/Admin/Screens/ReportsScreen.php:208
 msgid "Quote requests"
 msgstr ""
 
@@ -1847,6 +2013,7 @@ msgid "Checked in"
 msgstr ""
 
 #: src/Admin/Screens/PaymentsScreen.php:519
+#: src/Admin/Screens/ReportsScreen.php:207
 msgid "Cancelled"
 msgstr ""
 
@@ -1871,14 +2038,104 @@ msgid "Processing"
 msgstr ""
 
 #: src/Admin/Screens/PaymentsScreen.php:528
-#: src/Frontend/Widget.php:301
-#: templates/front/booking-widget.php:317
+#: src/Frontend/Widget.php:303
+#: templates/front/booking-widget.php:327
 msgid "Full amount"
 msgstr ""
 
 #: src/Admin/Screens/PaymentsScreen.php:531
 #: templates/front/booking-widget.php:299
 msgid "Payment"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:43
+#: src/Admin/Screens/ReportsScreen.php:81
+msgid "Reports"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:51
+msgid "You do not have permission to see reports."
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:70
+msgid "This month"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:71
+msgid "Last month"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:72
+msgid "This year"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:75
+msgid "Organic"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:77
+msgid "Taken by staff"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:84
+msgid "Bookings made from"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:112
+#: src/Admin/Screens/ReportsScreen.php:202
+msgid "Bookings made"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:113
+#: src/Admin/Screens/ReportsScreen.php:203
+msgid "Sold"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:114
+#: src/Admin/Screens/ReportsScreen.php:165
+#: src/Admin/Screens/ReportsScreen.php:205
+msgid "Booked value"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:115
+msgid "Collected"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:116
+#: src/Admin/Screens/ReportsScreen.php:206
+msgid "Conversion"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:117
+msgid "Cancellation rate"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:128
+msgid "Sold: confirmed, checked in or no-show. Booked value: their total. Conversion: sold ÷ bookings made. Collected: payments received minus refunds in the period."
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:130
+msgid "By tour"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:134
+msgid "(no tour)"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:145
+msgid "By source"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:156
+msgid "Ads: the guest came from an ad (gclid or a paid UTM medium). Organic: everything else from the website."
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:164
+msgid "Discount given"
+msgstr ""
+
+#: src/Admin/Screens/ReportsScreen.php:195
+msgid "No bookings in this period."
 msgstr ""
 
 #: src/Admin/Screens/SettingsScreen.php:91
@@ -2050,7 +2307,7 @@ msgstr ""
 #: templates/front/booking-widget.php:45
 #: templates/front/booking-widget.php:58
 #: templates/front/booking-widget.php:223
-#: templates/front/booking-widget.php:346
+#: templates/front/booking-widget.php:356
 msgid "Price on request"
 msgstr ""
 
@@ -2067,7 +2324,7 @@ msgid "per vehicle (buggies, quads, bikes)"
 msgstr ""
 
 #: src/Admin/Screens/ToolsScreen.php:199
-#: src/Frontend/Widget.php:256
+#: src/Frontend/Widget.php:258
 #: src/Services/LlmsTxt.php:393
 #: templates/front/booking-widget.php:226
 msgid "per person"
@@ -2198,14 +2455,6 @@ msgstr ""
 msgid "You do not have permission to manage pickup zones."
 msgstr ""
 
-#: src/Admin/Screens/ZonesScreen.php:60
-msgid "Saved."
-msgstr ""
-
-#: src/Admin/Screens/ZonesScreen.php:61
-msgid "Deleted."
-msgstr ""
-
 #: src/Admin/Screens/ZonesScreen.php:62
 msgid "Please enter a name."
 msgstr ""
@@ -2229,11 +2478,6 @@ msgstr ""
 
 #: src/Admin/Screens/ZonesScreen.php:85
 msgid "Offered"
-msgstr ""
-
-#: src/Admin/Screens/ZonesScreen.php:89
-#: src/Admin/Screens/ZonesScreen.php:119
-msgid "Edit"
 msgstr ""
 
 #: src/Admin/Screens/ZonesScreen.php:98
@@ -2325,9 +2569,16 @@ msgstr ""
 msgid "Delete %s"
 msgstr ""
 
-#. translators: %s: zone or meeting point name.
-#: src/Admin/Screens/ZonesScreen.php:213
-msgid "Delete"
+#: src/Database/Repositories/CouponRepository.php:87
+msgid "Enter a code (letters, numbers, - and _)."
+msgstr ""
+
+#: src/Database/Repositories/CouponRepository.php:92
+msgid "Enter a discount above 0 (at most 100 for a percentage)."
+msgstr ""
+
+#: src/Database/Repositories/CouponRepository.php:127
+msgid "Another coupon already uses this code."
 msgstr ""
 
 #: src/Frontend/Confirmation.php:131
@@ -2451,211 +2702,214 @@ msgid_plural "adults"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Frontend/Widget.php:65
+#: src/Frontend/Widget.php:66
 msgid "Booking widget: switch on “Take bookings for this tour” in the tour’s Booking settings to show it here."
 msgstr ""
 
 #. translators: %s: "Digitum", linked to digitum.marketing.
-#: src/Frontend/Widget.php:239
+#: src/Frontend/Widget.php:241
 #, php-format
 msgid "Booking by %s"
 msgstr ""
 
-#: src/Frontend/Widget.php:252
+#: src/Frontend/Widget.php:254
 #: src/Services/LlmsTxt.php:395
 #: templates/front/booking-widget.php:227
 msgid "per vehicle"
 msgstr ""
 
-#: src/Frontend/Widget.php:254
+#: src/Frontend/Widget.php:256
 msgid "per car"
 msgstr ""
 
-#: src/Frontend/Widget.php:275
+#: src/Frontend/Widget.php:277
 #: templates/front/booking-widget.php:98
 msgid "Previous month"
 msgstr ""
 
-#: src/Frontend/Widget.php:276
+#: src/Frontend/Widget.php:278
 #: templates/front/booking-widget.php:100
 msgid "Next month"
 msgstr ""
 
-#: src/Frontend/Widget.php:278
+#: src/Frontend/Widget.php:280
 msgid "available"
 msgstr ""
 
-#: src/Frontend/Widget.php:279
+#: src/Frontend/Widget.php:281
 msgid "closed"
 msgstr ""
 
-#: src/Frontend/Widget.php:280
+#: src/Frontend/Widget.php:282
 msgid "past"
 msgstr ""
 
-#: src/Frontend/Widget.php:281
+#: src/Frontend/Widget.php:283
 msgid "not open yet"
 msgstr ""
 
-#: src/Frontend/Widget.php:282
+#: src/Frontend/Widget.php:284
 msgid "no tours"
 msgstr ""
 
-#: src/Frontend/Widget.php:283
+#: src/Frontend/Widget.php:285
 msgid "closed for today"
 msgstr ""
 
-#: src/Frontend/Widget.php:285
+#: src/Frontend/Widget.php:287
 #: templates/front/booking-widget.php:110
 msgid "Choose a date to see the times."
 msgstr ""
 
-#: src/Frontend/Widget.php:286
+#: src/Frontend/Widget.php:288
 msgid "No tours on this day. Please choose another date."
 msgstr ""
 
-#: src/Frontend/Widget.php:287
+#: src/Frontend/Widget.php:289
 msgid "Loading…"
 msgstr ""
 
 #. translators: %s: time.
-#: src/Frontend/Widget.php:289
+#: src/Frontend/Widget.php:291
 #, php-format
 msgid "Starts %s"
 msgstr ""
 
 #. translators: %s: time range.
-#: src/Frontend/Widget.php:291
+#: src/Frontend/Widget.php:293
 #, php-format
 msgid "Pickup %s"
 msgstr ""
 
-#: src/Frontend/Widget.php:292
+#: src/Frontend/Widget.php:294
 msgid "Not available"
-msgstr ""
-
-#. translators: %s: VAT amount.
-#: src/Frontend/Widget.php:295
-#, php-format
-msgid "Includes VAT %s"
 msgstr ""
 
 #. translators: %s: VAT amount.
 #: src/Frontend/Widget.php:297
 #, php-format
+msgid "Includes VAT %s"
+msgstr ""
+
+#. translators: %s: VAT amount.
+#: src/Frontend/Widget.php:299
+#, php-format
 msgid "VAT %s"
 msgstr ""
 
-#: src/Frontend/Widget.php:298
-msgid "Discount"
-msgstr ""
-
-#: src/Frontend/Widget.php:299
+#: src/Frontend/Widget.php:301
 msgid "Pay now"
 msgstr ""
 
-#: src/Frontend/Widget.php:300
+#: src/Frontend/Widget.php:302
 msgid "Due on arrival"
 msgstr ""
 
 #. translators: %s: deposit percentage.
-#: src/Frontend/Widget.php:303
+#: src/Frontend/Widget.php:305
 #, php-format
 msgid "%s%% deposit"
 msgstr ""
 
 #. translators: 1: amount now, 2: amount on arrival.
-#: src/Frontend/Widget.php:305
+#: src/Frontend/Widget.php:307
 #, php-format
 msgid "%1$s now, %2$s on arrival"
 msgstr ""
 
 #. translators: %s: meeting point.
-#: src/Frontend/Widget.php:306
+#: src/Frontend/Widget.php:308
 #: templates/front/booking-widget.php:19
 #: templates/front/booking-widget.php:160
 msgid "Free"
 msgstr ""
 
 #. translators: 1: current step, 2: number of steps.
-#: src/Frontend/Widget.php:309
+#: src/Frontend/Widget.php:311
 #, php-format
 msgid "Step %1$s of %2$s"
 msgstr ""
 
-#: src/Frontend/Widget.php:310
+#: src/Frontend/Widget.php:312
 msgid "Sending…"
 msgstr ""
 
-#: src/Frontend/Widget.php:311
+#: src/Frontend/Widget.php:313
 msgid "Something went wrong. Please check your connection and try again."
 msgstr ""
 
-#: src/Frontend/Widget.php:312
-#: src/Services/BookingService.php:136
+#: src/Frontend/Widget.php:314
+#: src/Services/BookingService.php:137
+#: src/Services/BookingService.php:156
 msgid "Please check the highlighted fields."
 msgstr ""
 
-#: src/Frontend/Widget.php:313
-#: src/Services/BookingService.php:130
+#: src/Frontend/Widget.php:315
+#: src/Services/BookingService.php:131
 #: src/Services/Pricing/ErrorMessages.php:26
 msgid "Please choose an option."
 msgstr ""
 
-#: src/Frontend/Widget.php:314
+#: src/Frontend/Widget.php:316
 msgid "Please choose a date and a session."
 msgstr ""
 
-#: src/Frontend/Widget.php:315
+#: src/Frontend/Widget.php:317
 #: src/Services/Pricing/ErrorMessages.php:28
 msgid "Please add at least one guest."
 msgstr ""
 
-#: src/Frontend/Widget.php:316
-#: src/Services/BookingService.php:102
+#: src/Frontend/Widget.php:318
+#: src/Services/BookingService.php:103
 #: src/Services/Pricing/ErrorMessages.php:39
 msgid "Please choose your pickup area."
 msgstr ""
 
-#: src/Frontend/Widget.php:317
+#: src/Frontend/Widget.php:319
 #: src/Services/BookingValidator.php:49
 msgid "Please tell us your hotel or pickup address."
 msgstr ""
 
-#: src/Frontend/Widget.php:318
+#: src/Frontend/Widget.php:320
 msgid "This field is required."
 msgstr ""
 
-#: src/Frontend/Widget.php:319
-#: src/Services/BookingService.php:116
+#: src/Frontend/Widget.php:321
+#: src/Services/BookingService.php:117
 msgid "Please choose how you want to pay."
 msgstr ""
 
-#: src/Frontend/Widget.php:320
+#: src/Frontend/Widget.php:322
 #: src/Services/BookingValidator.php:53
 msgid "Please accept the booking terms."
 msgstr ""
 
 #. translators: %s: amount.
-#: src/Frontend/Widget.php:322
+#: src/Frontend/Widget.php:324
 #, php-format
 msgid "Continue to payment · %s"
 msgstr ""
 
-#: src/Frontend/Widget.php:323
+#: src/Frontend/Widget.php:325
 msgid "Confirm booking · pay on arrival"
 msgstr ""
 
-#: src/Frontend/Widget.php:324
+#: src/Frontend/Widget.php:326
 #: templates/front/booking-widget.php:48
-#: templates/front/booking-widget.php:332
+#: templates/front/booking-widget.php:342
 msgid "Book now"
 msgstr ""
 
 #. translators: %s: amount.
-#: src/Frontend/Widget.php:326
+#: src/Frontend/Widget.php:328
 #, php-format
 msgid "Book now · %s by bank transfer"
+msgstr ""
+
+#. translators: %s: coupon code.
+#: src/Frontend/Widget.php:330
+#, php-format
+msgid "Coupon %s applied."
 msgstr ""
 
 #: src/Gateways/AbstractGateway.php:57
@@ -2883,7 +3137,7 @@ msgstr ""
 
 #: src/Rest/AdminController.php:387
 #: src/Rest/PublicController.php:457
-#: src/Services/BookingService.php:60
+#: src/Services/BookingService.php:61
 msgid "This tour could not be found."
 msgstr ""
 
@@ -3001,31 +3255,36 @@ msgstr ""
 msgid "Guest personal data erased."
 msgstr ""
 
-#: src/Services/BookingService.php:64
+#: src/Services/BookingService.php:65
 msgid "This tour is not taking bookings online."
 msgstr ""
 
-#: src/Services/BookingService.php:69
+#: src/Services/BookingService.php:70
 msgid "This tour can be booked directly."
 msgstr ""
 
-#: src/Services/BookingService.php:69
+#: src/Services/BookingService.php:70
 msgid "This tour is priced on request. Please send a quote request."
 msgstr ""
 
-#: src/Services/BookingService.php:81
+#: src/Services/BookingService.php:82
 msgid "Please choose a date."
 msgstr ""
 
-#: src/Services/BookingService.php:90
+#: src/Services/BookingService.php:91
 msgid "This session is not available any more. Please choose another date or session."
 msgstr ""
 
 #. translators: %s: pickup area, e.g. Abu Dhabi.
-#: src/Services/BookingService.php:101
+#: src/Services/BookingService.php:102
 #: src/Services/Pricing/ErrorMessages.php:43
 #, php-format
 msgid "Pickup is not available from %s. Please meet us at the meeting point."
+msgstr ""
+
+#: src/Services/BookingService.php:159
+#: src/Services/Pricing/ErrorMessages.php:47
+msgid "This coupon code cannot be used for this booking."
 msgstr ""
 
 #: src/Services/BookingValidator.php:31
@@ -3299,12 +3558,6 @@ msgstr ""
 
 #: src/Services/LlmsTxt.php:372
 msgid "hotel pickup included"
-msgstr ""
-
-#. translators: %s: list of areas.
-#: src/Services/LlmsTxt.php:376
-#, php-format
-msgid "from %s"
 msgstr ""
 
 #. translators: 1: list of areas, 2: "meet at …".
@@ -3778,10 +4031,6 @@ msgstr ""
 msgid "Hotel pickup is not offered for this tour. Please meet us at the meeting point."
 msgstr ""
 
-#: src/Services/Pricing/ErrorMessages.php:47
-msgid "This coupon code cannot be used for this booking."
-msgstr ""
-
 #: src/Services/Pricing/ErrorMessages.php:49
 msgid "This booking cannot be priced. Please contact us."
 msgstr ""
@@ -3871,8 +4120,8 @@ msgstr ""
 #: src/Services/Schema.php:128
 #: templates/front/booking-widget.php:48
 #: templates/front/booking-widget.php:53
-#: templates/front/booking-widget.php:332
-#: templates/front/booking-widget.php:349
+#: templates/front/booking-widget.php:342
+#: templates/front/booking-widget.php:359
 msgid "Request a quote"
 msgstr ""
 
@@ -4394,10 +4643,6 @@ msgstr ""
 msgid "Always on its own"
 msgstr ""
 
-#: src/Settings/Settings.php:514
-msgid "Off"
-msgstr ""
-
 #: src/Settings/Settings.php:516
 msgid "Tour pages get Product or TouristTrip JSON-LD with the same prices the page shows. In automatic mode it joins the SEO plugin’s graph and replaces any other Product node on the page."
 msgstr ""
@@ -4635,23 +4880,31 @@ msgstr ""
 msgid "Online booking is not available right now. Please contact us."
 msgstr ""
 
-#: templates/front/booking-widget.php:316
+#: templates/front/booking-widget.php:318
+msgid "Coupon code (optional)"
+msgstr ""
+
+#: templates/front/booking-widget.php:321
+msgid "Apply"
+msgstr ""
+
+#: templates/front/booking-widget.php:326
 msgid "How much to pay now"
 msgstr ""
 
-#: templates/front/booking-widget.php:330
+#: templates/front/booking-widget.php:340
 msgid "Back"
 msgstr ""
 
-#: templates/front/booking-widget.php:331
+#: templates/front/booking-widget.php:341
 msgid "Continue"
 msgstr ""
 
-#: templates/front/booking-widget.php:338
+#: templates/front/booking-widget.php:348
 msgid "Online booking needs JavaScript. Please enable it or contact us to book."
 msgstr ""
 
-#: templates/front/booking-widget.php:349
+#: templates/front/booking-widget.php:359
 msgid "Book"
 msgstr ""
 
