@@ -96,6 +96,7 @@ final class BookingSettingsBox {
 			return;
 		}
 		wp_enqueue_style( 'dgb-admin', DGB_PLUGIN_URL . 'assets/build/admin/admin.css', array(), DGB_VERSION );
+		wp_enqueue_media();
 		wp_enqueue_script( 'dgb-meta-box', DGB_PLUGIN_URL . 'assets/build/admin/meta-box.js', array(), DGB_VERSION, true );
 	}
 
@@ -649,7 +650,13 @@ final class BookingSettingsBox {
 				);
 				?>
 			</select>
-			<span class="description"><?php esc_html_e( 'Price in structured data always matches the price shown on the page.', 'digitum-bookings' ); ?></span>
+			<span class="description"><?php esc_html_e( 'Price in structured data always matches the price shown on the page. Tours with a price on request, or without any image, are marked up as TouristTrip.', 'digitum-bookings' ); ?></span>
+		</p>
+		<p class="dgb-field">
+			<label for="dgb-gallery"><?php esc_html_e( 'Gallery images', 'digitum-bookings' ); ?></label>
+			<input type="text" id="dgb-gallery" name="dgb[product][gallery]" value="<?php echo esc_attr( (string) $product->get( 'gallery' ) ); ?>" class="regular-text" inputmode="numeric" pattern="[0-9, ]*" aria-describedby="dgb-gallery-help">
+			<button type="button" class="button" data-dgb-gallery="dgb-gallery" data-title="<?php esc_attr_e( 'Gallery images', 'digitum-bookings' ); ?>" data-button="<?php esc_attr_e( 'Use these images', 'digitum-bookings' ); ?>"><?php esc_html_e( 'Choose images', 'digitum-bookings' ); ?></button>
+			<span class="description" id="dgb-gallery-help"><?php esc_html_e( 'Media Library image IDs, comma separated. Used with the featured image in structured data.', 'digitum-bookings' ); ?></span>
 		</p>
 		<?php
 	}

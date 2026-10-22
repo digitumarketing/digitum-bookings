@@ -113,3 +113,103 @@ function run_parallel( string $site, string $action, array $args, int $processes
 	return $results;
 }
 
+
+/**
+ * Router for PHP's built-in server: real files as they are, everything else through WordPress, gzipped like
+ * any real host would (Lighthouse otherwise measures the missing compression, not the plugin).
+ */
+function write_router( string $site ): void {
+	file_put_contents(
+		"{$site}/router.php",
+		<<<'PHP'
+<?php
+$path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+if ( '/' !== $path && is_file( __DIR__ . $path ) && preg_match( '/\.(js|css)$/', $path ) ) {
+	header( 'Content-Type: ' . ( str_ends_with( $path, '.js' ) ? 'text/javascript' : 'text/css' ) . '; charset=utf-8' );
+	header( 'Cache-Control: public, max-age=31536000' );
+	ob_start( 'ob_gzhandler' );
+	readfile( __DIR__ . $path );
+	return true;
+}
+if ( '/' !== $path && is_file( __DIR__ . $path ) && ! str_ends_with( $path, '.php' ) ) {
+	return false;
+}
+if ( str_ends_with( $path, '.php' ) && is_file( __DIR__ . $path ) ) {
+	$_SERVER['SCRIPT_NAME'] = $path;
+	require __DIR__ . $path;
+	return true;
+}
+$_SERVER['SCRIPT_NAME'] = '/index.php';
+ob_start( 'ob_gzhandler' );
+require __DIR__ . '/index.php';
+PHP
+	);
+}
+
+/**
+ * Serve a test site on 127.0.0.1:$port until stop_server(). Its home URL must be http://127.0.0.1:$port.
+ *
+ * @return resource
+ */
+function start_server( string $site, int $port ) {
+	write_router( $site );
+	$process = proc_open(
+		array( PHP_BINARY, '-S', "127.0.0.1:{$port}", '-t', $site, "{$site}/router.php" ),
+		array( 0 => array( 'file', '/dev/null', 'r' ), 1 => array( 'file', '/dev/null', 'w' ), 2 => array( 'file', '/dev/null', 'w' ) ),
+		$pipes,
+		null,
+		array( 'PHP_CLI_SERVER_WORKERS' => '2' ) + getenv()
+	);
+	for ( $i = 0; $i < 50; $i++ ) {
+		$socket = @fsockopen( '127.0.0.1', $port, $no, $error, 0.2 );
+		if ( $socket ) {
+			fclose( $socket );
+			break;
+		}
+		usleep( 100000 );
+	}
+	return $process;
+}
+
+/**
+ * Stop a server started with start_server().
+ *
+ * @param resource $process Server process.
+ */
+function stop_server( $process ): void {
+	$status = proc_get_status( $process );
+	if ( $status['running'] ) {
+		// The built-in server forks workers: stop the whole process group.
+		exec( 'pkill -P ' . (int) $status['pid'] );
+		proc_terminate( $process );
+	}
+	proc_close( $process );
+}
+
+/**
+ * GET a URL: [status, headers, body].
+ *
+ * @param array<int, string> $headers Request headers.
+ * @return array{0: int, 1: array<int, string>, 2: string}
+ */
+function http_get( string $url, array $headers = array() ): array {
+	$context = stream_context_create(
+		array(
+			'http' => array(
+				'method'        => 'GET',
+				'header'        => implode( "\r\n", $headers ),
+				'ignore_errors' => true,
+				'timeout'       => 30,
+			),
+		)
+	);
+	$body   = (string) @file_get_contents( $url, false, $context );
+	$status = 0;
+	$lines  = $http_response_header ?? array();
+	foreach ( $lines as $line ) {
+		if ( preg_match( '#^HTTP/\S+ (\d+)#', $line, $m ) ) {
+			$status = (int) $m[1];
+		}
+	}
+	return array( $status, $lines, $body );
+}

@@ -43,33 +43,7 @@ step(
 	)
 );
 
-// Router for PHP's built-in server: real files as they are, everything else through WordPress, gzipped like
-// any real host would (Lighthouse otherwise measures the missing compression, not the plugin).
-file_put_contents(
-	"{$site}/router.php",
-	<<<'PHP'
-<?php
-$path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
-if ( '/' !== $path && is_file( __DIR__ . $path ) && preg_match( '/\.(js|css)$/', $path ) ) {
-	header( 'Content-Type: ' . ( str_ends_with( $path, '.js' ) ? 'text/javascript' : 'text/css' ) . '; charset=utf-8' );
-	header( 'Cache-Control: public, max-age=31536000' );
-	ob_start( 'ob_gzhandler' );
-	readfile( __DIR__ . $path );
-	return true;
-}
-if ( '/' !== $path && is_file( __DIR__ . $path ) && ! str_ends_with( $path, '.php' ) ) {
-	return false;
-}
-if ( str_ends_with( $path, '.php' ) && is_file( __DIR__ . $path ) ) {
-	$_SERVER['SCRIPT_NAME'] = $path;
-	require __DIR__ . $path;
-	return true;
-}
-$_SERVER['SCRIPT_NAME'] = '/index.php';
-ob_start( 'ob_gzhandler' );
-require __DIR__ . '/index.php';
-PHP
-);
+write_router( $site );
 
 // 20 bookings in one session a week ahead (manifest, calendar, check-in) and a guide account.
 $manifest_date = ( new DateTimeImmutable( '+7 days', new DateTimeZone( 'Asia/Dubai' ) ) )->format( 'Y-m-d' );

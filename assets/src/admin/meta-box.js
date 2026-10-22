@@ -119,4 +119,35 @@
 			}
 		} );
 	} );
+
+	/* Gallery picker (the IDs field works without it). */
+	box.querySelectorAll( '[data-dgb-gallery]' ).forEach( ( button ) => {
+		const field = document.getElementById( button.getAttribute( 'data-dgb-gallery' ) );
+		if ( ! field || ! window.wp || ! window.wp.media ) {
+			button.hidden = true;
+			return;
+		}
+		button.addEventListener( 'click', () => {
+			const frame = window.wp.media( {
+				title: button.getAttribute( 'data-title' ),
+				button: { text: button.getAttribute( 'data-button' ) },
+				library: { type: 'image' },
+				multiple: 'add',
+			} );
+			frame.on( 'open', () => {
+				const selection = frame.state().get( 'selection' );
+				field.value.split( /[\s,]+/ ).filter( Boolean ).forEach( ( id ) => {
+					const attachment = window.wp.media.attachment( id );
+					attachment.fetch();
+					selection.add( attachment );
+				} );
+			} );
+			frame.on( 'select', () => {
+				field.value = frame.state().get( 'selection' ).map( ( a ) => a.id ).join( ',' );
+				field.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+				button.focus();
+			} );
+			frame.open();
+		} );
+	} );
 }() );

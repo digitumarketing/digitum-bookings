@@ -158,6 +158,10 @@ final class Product {
 				'type'    => 'text',
 				'default' => '',
 			),
+			'gallery'          => array(
+				'type'    => 'ids',
+				'default' => '',
+			),
 		);
 	}
 
@@ -217,6 +221,11 @@ final class Product {
 					return $field['default'];
 				}
 				return round( (float) max( $field['min'], min( $field['max'], (float) $value ) ), 2 );
+
+			case 'ids':
+				$ids = is_array( $value ) ? $value : preg_split( '/[\s,]+/', is_scalar( $value ) ? (string) $value : '' );
+				$ids = array_values( array_unique( array_filter( array_map( 'absint', (array) $ids ) ) ) );
+				return implode( ',', array_slice( $ids, 0, 50 ) );
 
 			default:
 				return is_string( $value ) ? sanitize_textarea_field( $value ) : $field['default'];

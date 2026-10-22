@@ -144,6 +144,17 @@ final class SettingsScreen {
 					<p><?php esc_html_e( 'PayPal:', 'digitum-bookings' ); ?> <code><?php echo esc_html( rest_url( 'dgb/v1/webhooks/paypal' ) ); ?></code></p>
 				</div>
 			<?php endif; ?>
+			<?php if ( 'seo' === $tab ) : ?>
+				<div class="dgb-callout">
+					<p><strong><?php esc_html_e( 'llms.txt', 'digitum-bookings' ); ?></strong> <a href="<?php echo esc_url( home_url( '/llms.txt' ) ); ?>"><?php echo esc_html( home_url( '/llms.txt' ) ); ?></a></p>
+					<?php if ( file_exists( ABSPATH . 'llms.txt' ) ) : ?>
+						<p><?php esc_html_e( 'A file named llms.txt exists in the WordPress folder. The web server sends that file instead of this one; delete or rename it (some SEO plugins create it) to use the tour list from Digitum Bookings.', 'digitum-bookings' ); ?></p>
+					<?php endif; ?>
+					<?php if ( '' === (string) get_option( 'permalink_structure' ) ) : ?>
+						<p><?php esc_html_e( 'llms.txt needs pretty permalinks (Settings › Permalinks).', 'digitum-bookings' ); ?></p>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
 			<form method="post" action="options.php">
 				<?php settings_fields( self::GROUP ); ?>
 				<input type="hidden" name="<?php echo esc_attr( Settings::OPTION ); ?>[_tab]" value="<?php echo esc_attr( $tab ); ?>">

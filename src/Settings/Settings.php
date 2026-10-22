@@ -35,6 +35,7 @@ final class Settings {
 			'payments'  => __( 'Payments', 'digitum-bookings' ),
 			'emails'    => __( 'Emails', 'digitum-bookings' ),
 			'analytics' => __( 'Analytics', 'digitum-bookings' ),
+			'seo'       => __( 'Schema & SEO', 'digitum-bookings' ),
 			'privacy'   => __( 'Privacy', 'digitum-bookings' ),
 			'branding'  => __( 'Branding', 'digitum-bookings' ),
 		);
@@ -499,6 +500,42 @@ final class Settings {
 				'turnstile_secret'     => array(
 					'type'    => 'text',
 					'label'   => __( 'Cloudflare Turnstile secret key', 'digitum-bookings' ),
+					'default' => '',
+				),
+			),
+			'seo'       => array(
+				'schema_output' => array(
+					'type'    => 'select',
+					'label'   => __( 'Structured data', 'digitum-bookings' ),
+					'options' => array(
+						'auto'       => __( 'Automatic: inside Rank Math or Yoast when active, otherwise on its own', 'digitum-bookings' ),
+						'standalone' => __( 'Always on its own', 'digitum-bookings' ),
+						'off'        => __( 'Off', 'digitum-bookings' ),
+					),
+					'help'    => __( 'Tour pages get Product or TouristTrip JSON-LD with the same prices the page shows. In automatic mode it joins the SEO plugin’s graph and replaces any other Product node on the page.', 'digitum-bookings' ),
+					'default' => 'auto',
+				),
+				'business_type' => array(
+					'type'    => 'select',
+					'label'   => __( 'Business type', 'digitum-bookings' ),
+					'options' => array(
+						'TravelAgency'  => __( 'Travel agency / tour operator', 'digitum-bookings' ),
+						'LocalBusiness' => __( 'Local business', 'digitum-bookings' ),
+						'Organization'  => __( 'Organization', 'digitum-bookings' ),
+					),
+					'help'    => __( 'Used when no SEO plugin describes the business. Name, phone, email and address come from General.', 'digitum-bookings' ),
+					'default' => 'TravelAgency',
+				),
+				'llms_enabled'  => array(
+					'type'    => 'checkbox',
+					'label'   => __( 'llms.txt', 'digitum-bookings' ),
+					'text'    => __( 'Serve /llms.txt with your tours, prices, sessions, pickup and contact details for AI assistants', 'digitum-bookings' ),
+					'default' => true,
+				),
+				'llms_intro'    => array(
+					'type'    => 'textarea',
+					'label'   => __( 'llms.txt introduction', 'digitum-bookings' ),
+					'help'    => __( 'One or two sentences about the business. Empty uses the site tagline.', 'digitum-bookings' ),
 					'default' => '',
 				),
 			),

@@ -22,19 +22,24 @@ use Digitum\Bookings\Database\Repositories\BookingRepository;
 use Digitum\Bookings\Frontend\Assets;
 use Digitum\Bookings\Frontend\Placement;
 use Digitum\Bookings\Frontend\ProofForm;
+use Digitum\Bookings\Frontend\SchemaOutput;
 use Digitum\Bookings\Frontend\Widget;
 use Digitum\Bookings\Integrations\Elementor\ElementorIntegration;
 use Digitum\Bookings\Integrations\Gutenberg\BookingBlock;
+use Digitum\Bookings\Integrations\RankMath\RankMathSchema;
+use Digitum\Bookings\Integrations\Yoast\YoastSchema;
 use Digitum\Bookings\Rest\AdminController;
 use Digitum\Bookings\Rest\PaymentsController;
 use Digitum\Bookings\Rest\PublicController;
 use Digitum\Bookings\Services\BookingService;
 use Digitum\Bookings\Services\Holds;
+use Digitum\Bookings\Services\LlmsTxt;
 use Digitum\Bookings\Services\Notifications\Listener;
 use Digitum\Bookings\Services\Notifications\Scheduler;
 use Digitum\Bookings\Services\Notifications\WebhookOut;
 use Digitum\Bookings\Services\PaymentService;
 use Digitum\Bookings\Services\QuoteService;
+use Digitum\Bookings\Services\Schema;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Roles\Capabilities;
 use Digitum\Bookings\Settings\Settings;
@@ -114,6 +119,13 @@ final class Plugin {
 	}
 
 	/**
+	 * Structured data builder.
+	 */
+	public function schema(): Schema {
+		return new Schema( $this->settings, $this->product_type, $this->quotes() );
+	}
+
+	/**
 	 * Register hooks (runs on plugins_loaded).
 	 */
 	public function boot(): void {
@@ -148,6 +160,12 @@ final class Plugin {
 		( new Scheduler( $this->settings ) )->register_hooks();
 		( new WebhookOut( $this->settings ) )->register_hooks();
 		( new ProofForm( $this->settings ) )->register_hooks();
+
+		$schema_output = new SchemaOutput( $this->settings, $this->schema() );
+		$schema_output->register_hooks();
+		( new RankMathSchema( $schema_output ) )->register_hooks();
+		( new YoastSchema( $schema_output ) )->register_hooks();
+		( new LlmsTxt( $this->settings, $this->product_type, $quotes ) )->register_hooks();
 
 		if ( is_admin() ) {
 			( new Menus( $this->settings, $this->product_type ) )->register_hooks();

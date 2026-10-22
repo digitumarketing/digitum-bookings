@@ -183,6 +183,45 @@ final class QuoteService {
 	}
 
 	/**
+	 * Prices of a tour's active options for structured data, llms.txt and REST, from the same calculator call
+	 * as the "From" price on the page.
+	 *
+	 * @param int $product_id Tour post ID.
+	 * @return array{mode: string, currency: string, vat_included: bool, from: ?string, high: ?string,
+	 *               options: array<int, array{id: int, label: string, duration: ?int, price: ?string}>}
+	 */
+	public function price_points( int $product_id ): array {
+		$config   = $this->config( Product::find( $product_id ) );
+		$decimals = $config->decimals();
+		$variants = array_map( array( Variant::class, 'from_row' ), ( new VariantRepository() )->for_product( $product_id ) );
+		$options  = array();
+		$high     = null;
+		foreach ( $variants as $variant ) {
+			if ( ! $variant->active ) {
+				continue;
+			}
+			$minor = 'on_request' === $config->mode ? null : Money::to_minor( $variant->price, $decimals );
+			$minor = null !== $minor && $minor > 0 ? $minor : null;
+			$high  = null !== $minor ? max( $high ?? 0, $minor ) : $high;
+
+			$options[] = array(
+				'id'       => $variant->id,
+				'label'    => $variant->label,
+				'duration' => $variant->duration_minutes,
+				'price'    => Money::to_decimal( $minor, $decimals ),
+			);
+		}
+		return array(
+			'mode'         => $config->mode,
+			'currency'     => $config->currency,
+			'vat_included' => $config->vat_inclusive,
+			'from'         => Money::to_decimal( $this->calculator->from_price( $config, $variants ), $decimals ),
+			'high'         => Money::to_decimal( $high, $decimals ),
+			'options'      => $options,
+		);
+	}
+
+	/**
 	 * A non-negative whole number from the input.
 	 *
 	 * @param array<string, mixed> $input Input.
