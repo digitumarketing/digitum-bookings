@@ -555,11 +555,15 @@
 }
 
 .dgb-credit {
-	margin: 0;
-	padding: 0 20px 14px;
-	color: var(--dgb-muted);
+	margin: 6px 0 0;
+	color: inherit;
 	font-size: 0.8rem;
 	text-align: center;
+}
+
+.dgb-credit a {
+	color: inherit;
+	text-decoration: underline;
 }
 
 /* Spam trap (visually hidden, not focusable) ----------------------------------------- */

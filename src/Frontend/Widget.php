@@ -81,11 +81,11 @@ final class Widget {
 				if ( str_contains( $html, 'data-dgb-pay=' ) || str_contains( $html, 'data-dgb-proof=' ) ) {
 					$this->assets->enqueue_payment();
 				}
-				return $this->assets->late_styles() . '<section class="dgb-w dgb-w-done" data-dgb-widget>' . $html . '</section>';
+				return $this->assets->late_styles() . '<section class="dgb-w dgb-w-done" data-dgb-widget>' . $html . '</section>' . self::credit();
 			}
 		}
 
-		return $this->assets->late_styles() . Template::render( 'front/booking-widget', $this->view( $product_id, $product ) );
+		return $this->assets->late_styles() . Template::render( 'front/booking-widget', $this->view( $product_id, $product ) ) . self::credit();
 	}
 
 	/**
@@ -223,11 +223,22 @@ final class Widget {
 			'cancellation' => (string) $all['general']['cancellation'],
 			'country_code' => (string) $all['general']['country_code'],
 			'sticky'       => ! empty( $all['general']['sticky_bar'] ) && is_singular( $this->product_type->key() ) && get_queried_object_id() === $product_id,
-			'credit'       => ! empty( $all['branding']['front_credit'] ),
 			'accent'       => (string) $all['branding']['accent_color'],
 			'turnstile'    => $script['turnstile'],
 			'script'       => $script,
 		);
+	}
+
+	/**
+	 * "Booking by Digitum" under every widget and booking page. Printed outside the (overridable) template and
+	 * not a setting: Digitum's credit is always shown. Nofollow, as Google expects for links in distributed widgets.
+	 */
+	public static function credit(): string {
+		return '<p class="dgb-credit">' . sprintf(
+			/* translators: %s: "Digitum", linked to digitum.marketing. */
+			esc_html__( 'Booking by %s', 'digitum-bookings' ),
+			'<a href="https://digitum.marketing/" rel="nofollow">Digitum</a>'
+		) . '</p>';
 	}
 
 	/**

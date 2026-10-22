@@ -343,6 +343,7 @@ if ( scenario( 'E' ) ) {
 
 	$c = step( $site, 'render_page', array( 'url' => $rzr['url'], 'get' => $qs ) );
 	check( $c['confirmation'] && ! $c['form'], 'confirmation link shows the booking instead of the form' );
+	check( 1 === $c['credit'], '“Booking by Digitum” under the booking page' );
 	$c = step( $site, 'render_page', array( 'url' => $rzr['url'], 'get' => array( 'dgb_booking' => $ref, 'dgb_key' => str_repeat( 'x', 32 ) ) ) );
 	check( ! $c['confirmation'] && $c['form'], 'a wrong key shows nothing about the booking' );
 	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'bookings/' . $ref . '/ics', 'query' => array( 'key' => $qs['dgb_key'] ) ) );
@@ -893,6 +894,7 @@ if ( scenario( 'I' ) ) {
 	$graph                   = $nodes( $scripts );
 	$tours                   = $product_nodes( $graph );
 	check( 200 === $status && 1 === count( $scripts ) && 'class="dgb-schema"' === $scripts[0][0], 'safari: one JSON-LD script of our own' );
+	check( 1 === substr_count( $html, '<p class="dgb-credit">Booking by <a href="https://digitum.marketing/" rel="nofollow">Digitum</a></p>' ), '“Booking by Digitum” under the widget (always on, nofollow link)' );
 	check( 1 === count( $tours ) && 'Product' === $tours[0]['@type'] && 'Offer' === $tours[0]['offers']['@type'], 'safari: Product with one Offer (it has an image)' );
 	check( '99.00' === $tours[0]['offers']['price'] && 'AED' === $tours[0]['offers']['priceCurrency'] && 99.0 === $visible_from( $html ), 'safari: schema price 99.00 = visible "From AED 99.00"' );
 	check( 'IE' === $tours[0]['offers']['priceSpecification']['referenceQuantity']['unitCode'] && true === $tours[0]['offers']['priceSpecification']['valueAddedTaxIncluded'], 'safari: price per person (unitCode IE), VAT included' );

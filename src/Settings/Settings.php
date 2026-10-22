@@ -549,11 +549,11 @@ final class Settings {
 				),
 			),
 			'branding'  => array(
-				'front_credit' => array(
-					'type'    => 'checkbox',
-					'label'   => __( 'Front-end credit', 'digitum-bookings' ),
-					'text'    => __( 'Show “Booking by Digitum” under the booking widget', 'digitum-bookings' ),
-					'default' => false,
+				'about'        => array(
+					'type'    => 'heading',
+					'label'   => __( 'Digitum Bookings by Digitum Marketing', 'digitum-bookings' ),
+					'help'    => __( '“Booking by Digitum” is shown under every booking widget and booking page.', 'digitum-bookings' ),
+					'default' => '',
 				),
 				'accent_color' => array(
 					'type'    => 'color',

@@ -191,7 +191,7 @@ Namespace `dgb/v1`. Public: products, availability, quote, create booking, creat
 ## 12. Branding, distribution and updates
 
 1. Admin menu "Digitum Bookings" with the Digitum mark and an "About Digitum" panel linking to digitum.marketing.
-2. Front-end credit "Booking by Digitum", off by default.
+2. Front-end credit "Booking by Digitum", ~~off by default~~ always on (decision 18).
 3. ~~White-label setting to rename the admin menu.~~ Dropped (decision 17): Digitum branding everywhere.
 4. **Releases live on GitHub** (`digitumarketing/digitum-bookings`). Pushing a tag `vX.Y.Z` runs a GitHub Action that builds `digitum-bookings.zip` (no dev files) and attaches it to the release. Sites download that zip.
 5. An update checker reads the latest GitHub release so WordPress shows "update available" and installs it. For a private repository each site stores a read-only token in Settings › Updates.
@@ -348,3 +348,4 @@ Document every filter and action in `docs/DEVELOPER-HOOKS.md`. At minimum: `dgb_
 15. The Traveler importer works in place: in attach mode posts stay `st_tours`; in own-CPT mode they move to the plugin's post type with the same row (ID and slug cannot change). Old prices from Traveler tables are logged, not imported (13.4). Seats are read from titles like "2-Seater".
 16. Rich Results are checked offline with `@adobe/structured-data-validator` (Google's Rich Results Test has no API); Rank Math and Yoast merge tests need WordPress 6.7+ and run in CI on the 7.x matrix entry.
 17. No white label (owner's decision, October 2026): the admin menu is always "Digitum Bookings" with the Digitum mark, and Digitum branding is used everywhere. The "Admin menu name" setting from M1 was removed; a stored value is ignored.
+18. "Booking by Digitum" (link to digitum.marketing, `rel="nofollow"` as Google expects for links in distributed widgets) is printed under every booking widget and booking page, outside the overridable template, and cannot be switched off (owner's decision, October 2026). Admin pages show "Digitum Bookings by Digitum Marketing" in the footer, and the Plugins screen links the admin guide and Digitum support.

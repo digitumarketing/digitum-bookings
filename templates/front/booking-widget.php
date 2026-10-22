@@ -332,9 +332,6 @@ $dgb_selectable = array_filter( $view['extras'], static fn( $e ) => ! $e['requir
 				<button type="submit" class="dgb-btn dgb-btn-primary dgb-submit" data-dgb-submit><?php echo $dgb_enquiry ? esc_html__( 'Request a quote', 'digitum-bookings' ) : esc_html__( 'Book now', 'digitum-bookings' ); ?></button>
 			</div>
 		</form>
-		<?php if ( $view['credit'] ) : ?>
-			<p class="dgb-credit"><?php esc_html_e( 'Booking by Digitum', 'digitum-bookings' ); ?></p>
-		<?php endif; ?>
 	</div>
 
 	<div class="dgb-result" data-dgb-result></div>

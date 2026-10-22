@@ -318,6 +318,7 @@ switch ( $dgb_action ) {
 		$dgb_out['widget']      = substr_count( $dgb_html, 'data-dgb-widget' );
 		$dgb_out['form']        = false !== strpos( $dgb_html, 'data-dgb-form' );
 		$dgb_out['confirmation'] = false !== strpos( $dgb_html, 'data-dgb-confirmation' );
+		$dgb_out['credit']      = substr_count( $dgb_html, '<p class="dgb-credit">Booking by <a href="https://digitum.marketing/" rel="nofollow">Digitum</a></p>' );
 		$dgb_out['sticky']      = false !== strpos( $dgb_html, 'data-dgb-sticky' );
 		$dgb_out['js']          = wp_script_is( 'dgb-booking', 'enqueued' );
 		$dgb_out['css']         = wp_style_is( 'dgb-booking', 'enqueued' );

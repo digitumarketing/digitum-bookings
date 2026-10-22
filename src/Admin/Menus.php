@@ -61,6 +61,60 @@ final class Menus {
 	public function register_hooks(): void {
 		add_action( 'admin_menu', array( $this, 'register' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
+		add_filter( 'admin_footer_text', array( $this, 'footer' ) );
+		add_filter( 'plugin_row_meta', array( self::class, 'row_meta' ), 10, 2 );
+	}
+
+	/**
+	 * Slugs of our admin pages.
+	 *
+	 * @return array<int, string>
+	 */
+	public static function pages(): array {
+		return array( self::SLUG, SettingsScreen::SLUG, ZonesScreen::SLUG, PaymentsScreen::SLUG, BookingsScreen::SLUG, CalendarScreen::SLUG, ManifestScreen::SLUG, CheckInScreen::SLUG, EmailsScreen::SLUG, ToolsScreen::SLUG );
+	}
+
+	/**
+	 * Whether the current admin page is one of ours.
+	 */
+	private static function on_our_page(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only decides what to show.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		return in_array( $page, self::pages(), true );
+	}
+
+	/**
+	 * "Digitum Bookings by Digitum Marketing" in the footer of our pages.
+	 *
+	 * @param mixed $text Footer text.
+	 * @return mixed
+	 */
+	public function footer( $text ) {
+		if ( ! self::on_our_page() ) {
+			return $text;
+		}
+		return sprintf(
+			/* translators: 1: plugin name and version, 2: link to Digitum Marketing. */
+			esc_html__( '%1$s by %2$s', 'digitum-bookings' ),
+			esc_html( 'Digitum Bookings ' . DGB_VERSION ),
+			'<a href="https://digitum.marketing/">Digitum Marketing</a>'
+		);
+	}
+
+	/**
+	 * Links under the plugin on the Plugins screen.
+	 *
+	 * @param mixed  $links Links.
+	 * @param string $file  Plugin file.
+	 * @return mixed
+	 */
+	public static function row_meta( $links, $file ) {
+		if ( plugin_basename( DGB_PLUGIN_FILE ) !== $file || ! is_array( $links ) ) {
+			return $links;
+		}
+		$links[] = '<a href="https://github.com/digitumarketing/digitum-bookings/blob/main/docs/ADMIN-GUIDE.md">' . esc_html__( 'Admin guide', 'digitum-bookings' ) . '</a>';
+		$links[] = '<a href="https://digitum.marketing/">' . esc_html__( 'Support by Digitum', 'digitum-bookings' ) . '</a>';
+		return $links;
 	}
 
 	/**
@@ -89,12 +143,10 @@ final class Menus {
 	}
 
 	/**
-	 * Admin styles on our own pages (matched by page slug, so a renamed menu still works).
+	 * Admin styles on our own pages.
 	 */
 	public function enqueue(): void {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only decides whether to load a stylesheet.
-		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
-		if ( ! in_array( $page, array( self::SLUG, SettingsScreen::SLUG, ZonesScreen::SLUG, PaymentsScreen::SLUG, BookingsScreen::SLUG, CalendarScreen::SLUG, ManifestScreen::SLUG, CheckInScreen::SLUG, EmailsScreen::SLUG, ToolsScreen::SLUG ), true ) ) {
+		if ( ! self::on_our_page() ) {
 			return;
 		}
 		wp_enqueue_style( 'dgb-admin', DGB_PLUGIN_URL . 'assets/build/admin/admin.css', array(), DGB_VERSION );

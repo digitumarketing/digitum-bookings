@@ -96,3 +96,13 @@ test( 'Tools: CSV export and the Traveler importer', async ( { browser, isMobile
 	await expect( page.getByLabel( 'Structured data' ) ).toHaveValue( 'auto' );
 	await expect( page.getByRole( 'link', { name: /\/llms\.txt$/ } ) ).toBeVisible();
 } );
+
+test( 'Booking by Digitum is shown under the widget', async ( { page } ) => {
+	await page.goto( path( tours.rzr.url ) );
+	const credit = page.locator( '.dgb-credit' );
+	await expect( credit ).toHaveCount( 1 );
+	await expect( credit ).toBeVisible();
+	await expect( credit.getByRole( 'link', { name: 'Digitum' } ) ).toHaveAttribute( 'href', 'https://digitum.marketing/' );
+	const result = await new AxeBuilder( { page } ).include( '.dgb-credit' ).withTags( [ 'wcag2a', 'wcag2aa' ] ).analyze();
+	expect( result.violations.map( ( v ) => v.id ) ).toEqual( [] );
+} );

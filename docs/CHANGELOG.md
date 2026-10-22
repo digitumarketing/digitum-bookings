@@ -3,6 +3,8 @@
 ## Unreleased (M7)
 
 - No white label: the admin menu is always “Digitum Bookings”, and the “Admin menu name” setting (Settings › Branding) is gone. Digitum branding is used everywhere.
+- “Booking by Digitum” (linked to digitum.marketing) is always shown under every booking widget and booking page; the on/off setting is gone, and theme template overrides cannot remove it.
+- Admin pages of the plugin show “Digitum Bookings by Digitum Marketing” in the footer; the Plugins screen links the admin guide and Digitum support.
 
 ## 0.6.0 (M6 Integrations)
 

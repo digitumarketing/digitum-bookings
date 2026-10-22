@@ -23,7 +23,7 @@ final class SettingsTest extends TestCase {
 		$this->assertFalse( $defaults['payments']['deposit_enabled'], 'Deposits are off until the owner turns them on.' );
 		$this->assertSame( 24, $defaults['payments']['bank_hold_hours'] );
 		$this->assertFalse( $defaults['privacy']['delete_on_uninstall'], 'Uninstall keeps data by default.' );
-		$this->assertFalse( $defaults['branding']['front_credit'], 'The Digitum credit is off by default.' );
+		$this->assertArrayNotHasKey( 'front_credit', $defaults['branding'], 'The Digitum credit is always on, not a setting.' );
 	}
 
 	public function test_all_merges_stored_values_over_defaults_and_drops_unknown_keys(): void {
