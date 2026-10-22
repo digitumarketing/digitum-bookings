@@ -29,6 +29,26 @@ if ( array() === $sandbox ) {
 }
 // Every browser test books from 127.0.0.1: lift the per-IP booking limit on this test site.
 file_put_contents( "{$site}/wp-content/mu-plugins/dgb-e2e.php", "<?php\nadd_filter( 'dgb_rate_limit', static fn( \$limit, \$action ) => 'create' === \$action ? 1000 : \$limit, 10, 2 );\n" );
+// Arabic for the RTL tests, chosen per browser with a cookie. The test site has no Arabic WordPress core files,
+// so the text direction WordPress would read from them is set here.
+file_put_contents(
+	"{$site}/wp-content/mu-plugins/dgb-e2e-arabic.php",
+	<<<'PHP'
+<?php
+if ( isset( $_COOKIE['dgb_test_locale'] ) && 'ar' === $_COOKIE['dgb_test_locale'] ) {
+	add_filter( 'locale', static fn() => 'ar' );
+	add_action(
+		'init',
+		static function () {
+			if ( isset( $GLOBALS['wp_locale'] ) ) {
+				$GLOBALS['wp_locale']->text_direction = 'rtl';
+			}
+		},
+		0
+	);
+}
+PHP
+);
 step( $site, 'install' );
 step( $site, 'activate' );
 $demo = step( $site, 'demo_setup' );

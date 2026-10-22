@@ -276,6 +276,7 @@
 
 .dgb-card-title {
 	font-weight: 600;
+	unicode-bidi: plaintext; /* labels typed in another script read in their own direction */
 }
 
 .dgb-card-meta {
@@ -786,3 +787,11 @@
 .dgb-proof-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .dgb-proof-row input[type="file"] { flex: 1 1 220px; min-width: 0; max-width: 100%; }
 .dgb-proof-files { color: var(--dgb-muted); }
+
+/* Right to left: calendar arrows point the way they move. */
+[dir="rtl"] .dgb-w [data-dgb-prev],
+[dir="rtl"] .dgb-w [data-dgb-next-month],
+.dgb-w[dir="rtl"] [data-dgb-prev],
+.dgb-w[dir="rtl"] [data-dgb-next-month] {
+	transform: scaleX(-1);
+}

@@ -74,7 +74,17 @@ The integration tests also check structured data with Google's rich result rules
 
 Lighthouse can be run against that site while it is up: `npx lighthouse http://127.0.0.1:8889/tour/rzr/`.
 
-Regenerate the translation template with WP-CLI: `wp i18n make-pot . languages/digitum-bookings.pot --exclude=vendor,node_modules,tests,build,.wp-test,assets/build`.
+Translations (WP-CLI): regenerate the template with `wp i18n make-pot . languages/digitum-bookings.pot --exclude=vendor,node_modules,tests,build,.wp-test,assets/build`, update `languages/digitum-bookings-ar.po` (e.g. `wp i18n update-po languages/digitum-bookings.pot languages/digitum-bookings-ar.po`, then translate the new strings), and compile:
+
+```bash
+wp i18n make-mo languages/digitum-bookings-ar.po languages
+wp i18n make-php languages/digitum-bookings-ar.po languages
+echo '{"assets/src/blocks/booking-block.js":"assets/build/blocks/booking-block.js"}' > /tmp/map.json
+wp i18n make-json languages/digitum-bookings-ar.po languages --use-map=/tmp/map.json   # block editor strings
+git checkout languages/digitum-bookings-ar.po   # make-json removes the editor strings from the .po; keep them there
+```
+
+`tests/e2e/rtl.spec.ts` checks the Arabic, right-to-left widget on desktop and phone.
 
 ## Licence
 
