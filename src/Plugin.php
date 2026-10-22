@@ -42,6 +42,7 @@ use Digitum\Bookings\Services\PaymentService;
 use Digitum\Bookings\Services\Privacy;
 use Digitum\Bookings\Services\QuoteService;
 use Digitum\Bookings\Services\Schema;
+use Digitum\Bookings\Services\Updater;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Roles\Capabilities;
 use Digitum\Bookings\Settings\Settings;
@@ -169,6 +170,7 @@ final class Plugin {
 		( new YoastSchema( $schema_output ) )->register_hooks();
 		( new LlmsTxt( $this->settings, $this->product_type, $quotes ) )->register_hooks();
 		( new Privacy( $this->settings ) )->register_hooks();
+		( new Updater( $this->settings ) )->register_hooks();
 
 		if ( is_admin() ) {
 			( new Menus( $this->settings, $this->product_type ) )->register_hooks();

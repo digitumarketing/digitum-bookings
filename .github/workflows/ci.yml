@@ -89,6 +89,14 @@ jobs:
           DGB_SQLITE_DIR: .wp-test/sqlite
           DGB_STRIPE_MOCK: http://localhost:12111
 
+      - name: Update from one release to the next (release build, fake GitHub API)
+        run: |
+          composer build
+          DGB_SCENARIOS=K DGB_PLUGIN_DIR="$GITHUB_WORKSPACE/build/digitum-bookings" composer test:integration
+        env:
+          DGB_WP_DIR: .wp-test/wordpress
+          DGB_SQLITE_DIR: .wp-test/sqlite
+
   e2e:
     runs-on: ubuntu-latest
     steps:

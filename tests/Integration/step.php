@@ -37,6 +37,13 @@ if ( 'install' === $dgb_action ) {
 if ( ! empty( $dgb_args['admin'] ) ) {
 	define( 'WP_ADMIN', true );
 }
+if ( 'upgrade_plugin' === $dgb_action ) {
+	define( 'FS_METHOD', 'direct' );
+	if ( ! empty( $dgb_args['cron'] ) ) {
+		// Background (automatic) update: WordPress keeps the plugin active.
+		define( 'DOING_CRON', true );
+	}
+}
 
 require $dgb_site . '/wp-load.php';
 
@@ -817,6 +824,48 @@ switch ( $dgb_action ) {
 		$dgb_pw = WP_Application_Passwords::create_new_application_password( (int) $dgb_args['user'], array( 'name' => 'Zapier' ) );
 		$dgb_out['password'] = is_wp_error( $dgb_pw ) ? '' : $dgb_pw[0];
 		$dgb_out['login']    = get_userdata( (int) $dgb_args['user'] )->user_login;
+		break;
+
+	case 'updates_check':
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+		\Digitum\Bookings\Services\Updater::flush();
+		delete_site_transient( 'update_plugins' );
+		wp_update_plugins();
+		$dgb_basename        = \Digitum\Bookings\Services\Updater::basename();
+		$dgb_transient       = get_site_transient( 'update_plugins' );
+		$dgb_out['response'] = isset( $dgb_transient->response[ $dgb_basename ] ) ? (array) $dgb_transient->response[ $dgb_basename ] : null;
+		$dgb_out['no_update'] = isset( $dgb_transient->no_update[ $dgb_basename ] );
+		$dgb_info            = plugins_api( 'plugin_information', array( 'slug' => 'digitum-bookings' ) );
+		$dgb_out['details']  = is_wp_error( $dgb_info ) ? $dgb_info->get_error_message() : (array) $dgb_info;
+		$dgb_out['status']   = ( new \Digitum\Bookings\Services\Updater( \Digitum\Bookings\Plugin::instance()->settings() ) )->status();
+		$dgb_out['log']      = get_option( 'dgb_fake_github_log', array() );
+		delete_option( 'dgb_fake_github_log' );
+		break;
+
+	case 'upgrade_plugin':
+		require_once ABSPATH . 'wp-admin/includes/admin.php';
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+		wp_set_current_user( 1 );
+		$dgb_skin           = new Automatic_Upgrader_Skin();
+		$dgb_result         = ( new Plugin_Upgrader( $dgb_skin ) )->upgrade( \Digitum\Bookings\Services\Updater::basename() );
+		$dgb_out['result']  = is_wp_error( $dgb_result ) ? $dgb_result->get_error_message() : $dgb_result;
+		$dgb_out['skin']    = $dgb_skin->get_upgrade_messages();
+		$dgb_out['log']     = get_option( 'dgb_fake_github_log', array() );
+		delete_option( 'dgb_fake_github_log' );
+		break;
+
+	case 'plugin_state':
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		$dgb_file              = WP_PLUGIN_DIR . '/digitum-bookings/digitum-bookings.php';
+		$dgb_out['header']     = get_plugin_data( $dgb_file, false, false )['Version'];
+		$dgb_out['constant']   = DGB_VERSION;
+		$dgb_out['option']     = get_option( 'dgb_version' );
+		$dgb_out['active']     = is_plugin_active( 'digitum-bookings/digitum-bookings.php' );
+		$dgb_out['marker']     = file_exists( WP_PLUGIN_DIR . '/digitum-bookings/NEXT-RELEASE.txt' ) ? trim( (string) file_get_contents( WP_PLUGIN_DIR . '/digitum-bookings/NEXT-RELEASE.txt' ) ) : '';
+		$dgb_out['is_link']    = is_link( WP_PLUGIN_DIR . '/digitum-bookings' );
+		global $wpdb;
+		$dgb_out['bookings']   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}dgb_bookings" );
 		break;
 
 	case 'install':

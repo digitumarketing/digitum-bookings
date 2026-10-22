@@ -38,6 +38,7 @@ final class Settings {
 			'seo'       => __( 'Schema & SEO', 'digitum-bookings' ),
 			'privacy'   => __( 'Privacy', 'digitum-bookings' ),
 			'branding'  => __( 'Branding', 'digitum-bookings' ),
+			'updates'   => __( 'Updates', 'digitum-bookings' ),
 		);
 	}
 
@@ -559,6 +560,14 @@ final class Settings {
 					'type'    => 'color',
 					'label'   => __( 'Widget accent colour', 'digitum-bookings' ),
 					'default' => '#B45309',
+				),
+			),
+			'updates'   => array(
+				'github_token' => array(
+					'type'    => 'secret',
+					'label'   => __( 'GitHub token', 'digitum-bookings' ),
+					'help'    => __( 'Only needed while the GitHub repository is private: a fine-grained token with read-only access to its contents. Updates come from the latest release on github.com/digitumarketing/digitum-bookings.', 'digitum-bookings' ),
+					'default' => '',
 				),
 			),
 		);

@@ -9,6 +9,7 @@ namespace Digitum\Bookings\Admin\Screens;
 
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Roles\Capabilities;
+use Digitum\Bookings\Services\Updater;
 use Digitum\Bookings\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
@@ -144,6 +145,9 @@ final class SettingsScreen {
 					<p><?php esc_html_e( 'PayPal:', 'digitum-bookings' ); ?> <code><?php echo esc_html( rest_url( 'dgb/v1/webhooks/paypal' ) ); ?></code></p>
 				</div>
 			<?php endif; ?>
+			<?php if ( 'updates' === $tab ) : ?>
+				<?php $this->updates_status(); ?>
+			<?php endif; ?>
 			<?php if ( 'seo' === $tab ) : ?>
 				<div class="dgb-callout">
 					<p><strong><?php esc_html_e( 'llms.txt', 'digitum-bookings' ); ?></strong> <a href="<?php echo esc_url( home_url( '/llms.txt' ) ); ?>"><?php echo esc_html( home_url( '/llms.txt' ) ); ?></a></p>
@@ -172,6 +176,52 @@ final class SettingsScreen {
 				</table>
 				<?php submit_button(); ?>
 			</form>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Installed and latest version, with "Check for updates now".
+	 */
+	private function updates_status(): void {
+		$status = ( new Updater( $this->settings ) )->status();
+		?>
+		<div class="dgb-callout">
+			<p>
+				<?php
+				/* translators: %s: version number. */
+				echo esc_html( sprintf( __( 'Installed version: %s', 'digitum-bookings' ), $status['installed'] ) );
+				?>
+				<br>
+				<?php
+				if ( '' !== $status['latest'] ) {
+					/* translators: %s: version number. */
+					echo esc_html( sprintf( __( 'Latest release on GitHub: %s', 'digitum-bookings' ), $status['latest'] ) );
+					echo version_compare( $status['latest'], $status['installed'], '>' )
+						? ' — <a href="' . esc_url( self_admin_url( 'plugins.php?plugin_status=upgrade' ) ) . '">' . esc_html__( 'update now', 'digitum-bookings' ) . '</a>'
+						: ' — ' . esc_html__( 'up to date', 'digitum-bookings' );
+				} elseif ( '' !== $status['error'] ) {
+					/* translators: %s: error message. */
+					echo esc_html( sprintf( __( 'Could not read the latest release: %s', 'digitum-bookings' ), $status['error'] ) );
+				} else {
+					esc_html_e( 'Not checked yet.', 'digitum-bookings' );
+				}
+				if ( '' !== $status['checked'] ) {
+					echo '<br><span class="description">';
+					/* translators: %s: date and time. */
+					echo esc_html( sprintf( __( 'Checked %s', 'digitum-bookings' ), wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $status['checked'] ) ) );
+					echo '</span>';
+				}
+				?>
+			</p>
+			<?php if ( current_user_can( 'update_plugins' ) ) : ?>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+					<input type="hidden" name="action" value="dgb_check_updates">
+					<?php wp_nonce_field( 'dgb_check_updates' ); ?>
+					<?php submit_button( __( 'Check for updates now', 'digitum-bookings' ), 'secondary', 'submit', false ); ?>
+				</form>
+			<?php endif; ?>
+			<p class="description"><?php esc_html_e( 'WordPress shows new releases under Dashboard › Updates and on the Plugins screen, where automatic updates can be switched on.', 'digitum-bookings' ); ?></p>
 		</div>
 		<?php
 	}

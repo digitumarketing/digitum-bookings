@@ -1230,6 +1230,94 @@ if ( array() !== $seo_plugins && scenario( 'J' ) ) {
 }
 
 /* -------------------------------------------------------------------- */
+if ( scenario( 'K' ) ) {
+	echo "\nScenario K: update from one GitHub release to the next (M7)\n";
+	$build = getenv( 'DGB_PLUGIN_DIR' ) ?: '';
+	if ( '' === $build || ! is_file( $build . '/vendor/autoload.php' ) || is_dir( $build . '/tests' ) ) {
+		echo "  (skipped: set DGB_PLUGIN_DIR to an unzipped release build, e.g. build/digitum-bookings after composer build)\n";
+	} else {
+		$port = (int) ( getenv( 'DGB_HTTP_PORT' ) ?: 8893 ) + 2;
+		$home = "http://127.0.0.1:{$port}";
+		$site = make_site( 'm7-update', null, $home );
+		copy( __DIR__ . '/fake-github.php', "{$site}/wp-content/mu-plugins/fake-github.php" );
+		// A real copy, not a link: the upgrader deletes the old folder.
+		unlink( "{$site}/wp-content/plugins/digitum-bookings" );
+		exec( 'cp -R ' . escapeshellarg( $build ) . ' ' . escapeshellarg( "{$site}/wp-content/plugins/digitum-bookings" ) );
+		preg_match( "/define\( 'DGB_VERSION', '([^']+)' \);/", (string) file_get_contents( "{$build}/digitum-bookings.php" ), $m );
+		$installed = $m[1];
+		$next      = static function ( string $version, int $step ): string {
+			$parts    = array_map( 'intval', explode( '.', preg_replace( '/[^0-9.].*$/', '', $version ) ) );
+			$parts[2] = ( $parts[2] ?? 0 ) + $step;
+			return implode( '.', array_slice( $parts, 0, 3 ) );
+		};
+		// Release zip with a higher version and a marker file, served by the test site like GitHub's download.
+		$release = static function ( string $version ) use ( $build, $site ): void {
+			$tmp = sys_get_temp_dir() . '/dgb-release-' . getmypid();
+			exec( 'rm -rf ' . escapeshellarg( $tmp ) . ' && mkdir -p ' . escapeshellarg( $tmp ) . ' && cp -R ' . escapeshellarg( $build ) . ' ' . escapeshellarg( $tmp . '/digitum-bookings' ) );
+			$main = $tmp . '/digitum-bookings/digitum-bookings.php';
+			$code = (string) file_get_contents( $main );
+			$code = preg_replace( '/^( \* Version:\s+).+$/m', '${1}' . $version, $code );
+			$code = preg_replace( "/define\( 'DGB_VERSION', '[^']+' \);/", "define( 'DGB_VERSION', '{$version}' );", $code );
+			file_put_contents( $main, $code );
+			file_put_contents( $tmp . '/digitum-bookings/NEXT-RELEASE.txt', $version );
+			@mkdir( "{$site}/release", 0777, true );
+			$zip = new ZipArchive();
+			$zip->open( "{$site}/release/digitum-bookings.zip", ZipArchive::CREATE | ZipArchive::OVERWRITE );
+			$files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $tmp, FilesystemIterator::SKIP_DOTS ) );
+			foreach ( $files as $file ) {
+				$zip->addFile( $file->getPathname(), substr( $file->getPathname(), strlen( $tmp ) + 1 ) );
+			}
+			$zip->close();
+			exec( 'rm -rf ' . escapeshellarg( $tmp ) );
+		};
+
+		step( $site, 'install' );
+		step( $site, 'activate' );
+		$demo = step( $site, 'demo_setup' );
+		step( $site, 'bulk_book', array( 'count' => 3, 'product' => $demo['tours']['rzr']['id'], 'input' => array( 'variant_id' => $demo['tours']['rzr']['variants']['1 hour'], 'date' => $demo['tomorrow'], 'session_id' => $demo['tours']['rzr']['sessions']['Evening'] ), 'zone' => $demo['zones']['Dubai'] ) );
+		$server = start_server( $site, $port );
+
+		$v1 = $next( $installed, 1 );
+		$release( $v1 );
+		step( $site, 'set_option', array( 'name' => 'dgb_fake_release', 'value' => $installed ) );
+		$u = step( $site, 'updates_check' );
+		check( null === $u['response'] && $u['no_update'] && $installed === $u['status']['latest'], 'same version on GitHub: no update offered (listed as up to date)' );
+		step( $site, 'set_option', array( 'name' => 'dgb_fake_release', 'value' => $v1 ) );
+		$u = step( $site, 'updates_check' );
+		check( $v1 === ( $u['response']['new_version'] ?? '' ) && $home . '/release/digitum-bookings.zip' === ( $u['response']['package'] ?? '' ), "GitHub release v{$v1}: WordPress shows the update with the release zip" );
+		check( '7.1' === ( $u['response']['tested'] ?? '' ) && '8.1' === ( $u['response']['requires_php'] ?? '' ), 'tested-up-to and PHP requirement read from the release readme' );
+		check( is_array( $u['details'] ) && str_contains( (string) ( $u['details']['sections']['changelog'] ?? '' ), "Test release {$v1}" ), '“View details” shows the release changelog' );
+		check( array() !== $u['log'] && str_starts_with( $u['log'][0]['ua'], 'Digitum-Bookings/' ) && '' === $u['log'][0]['auth'], 'GitHub API called with a User-Agent and no token (public repository)' );
+		$tab = step( $site, 'render_admin', array( 'screen' => 'settings', 'get' => array( 'tab' => 'updates' ), 'admin' => true ) );
+		check( str_contains( $tab['html'], "Latest release on GitHub: {$v1}" ) && str_contains( $tab['html'], 'update now' ) && str_contains( $tab['html'], 'Check for updates now' ) && str_contains( $tab['html'], 'dgb_settings[updates][github_token]' ), 'Settings › Updates shows installed and latest version, Check now and the token field' );
+		$up = step( $site, 'upgrade_plugin', array( 'cron' => true ) );
+		$st = step( $site, 'plugin_state' );
+		check( true === $up['result'], 'automatic (background) update installs the release' . ( true === $up['result'] ? '' : ' → ' . json_encode( $up ) ) );
+		check( $v1 === $st['header'] && $v1 === $st['constant'] && $v1 === $st['marker'] && $st['active'], "plugin now v{$v1} and still active" );
+		check( $v1 === $st['option'] && 3 === $st['bookings'], 'upgrade routine ran; bookings kept' );
+
+		// Private repository: the token is required and the zip comes through the API.
+		$v2 = $next( $installed, 2 );
+		$release( $v2 );
+		step( $site, 'set_option', array( 'name' => 'dgb_fake_release', 'value' => $v2 ) );
+		step( $site, 'set_option', array( 'name' => 'dgb_fake_private', 'value' => 1 ) );
+		$u = step( $site, 'updates_check' );
+		check( null === $u['response'] && str_contains( $u['status']['error'], 'private' ), 'private repository without a token: no update, and Settings › Updates says why' );
+		step( $site, 'settings_merge', array( 'values' => array( 'updates' => array( 'github_token' => 'secret-token' ) ) ) );
+		$u = step( $site, 'updates_check' );
+		check( $v2 === ( $u['response']['new_version'] ?? '' ) && 'https://api.github.com/repos/digitumarketing/digitum-bookings/releases/assets/42' === ( $u['response']['package'] ?? '' ) && 'Bearer secret-token' === ( $u['log'][0]['auth'] ?? '' ), 'with the token: update found, package is the API asset' );
+		// "Update now" in the admin: WordPress deactivates the plugin, installs, then reactivates it in a second request.
+		$up = step( $site, 'upgrade_plugin' );
+		step( $site, 'activate' );
+		$st   = step( $site, 'plugin_state' );
+		$hits = array_values( array_filter( $up['log'], static fn( $l ) => str_ends_with( $l['url'], '/releases/assets/42' ) ) );
+		check( true === $up['result'] && $v2 === $st['header'] && $v2 === $st['marker'] && $st['active'] && 3 === $st['bookings'], "private release v{$v2} installed" );
+		check( 1 === count( $hits ) && 'Bearer secret-token' === $hits[0]['auth'] && 'application/octet-stream' === $hits[0]['accept'] && 0 === $hits[0]['redirection'], 'zip asked from the API with the token; the signed link fetched without it' );
+		stop_server( $server );
+	}
+}
+
+/* -------------------------------------------------------------------- */
 $stripe_mock = getenv( 'DGB_STRIPE_MOCK' ) ?: '';
 if ( '' !== $stripe_mock && scenario( 'G' ) ) {
 	echo "\nScenario G: Stripe requests match Stripe's API (stripe-mock at {$stripe_mock})\n";
