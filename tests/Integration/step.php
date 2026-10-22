@@ -506,6 +506,8 @@ switch ( $dgb_action ) {
 			( new \Digitum\Bookings\Admin\Screens\EmailsScreen( $dgb_set ) )->render();
 		} elseif ( 'settings' === $dgb_args['screen'] ) {
 			( new \Digitum\Bookings\Admin\Screens\SettingsScreen( $dgb_set ) )->render();
+		} elseif ( 'tools' === $dgb_args['screen'] ) {
+			( new \Digitum\Bookings\Admin\Screens\ToolsScreen( $dgb_set, \Digitum\Bookings\Plugin::instance()->product_type() ) )->render();
 		} else {
 			( new \Digitum\Bookings\Admin\Screens\PaymentsScreen( $dgb_set ) )->render();
 		}
@@ -687,6 +689,135 @@ switch ( $dgb_action ) {
 		$dgb_out['id'] = wp_insert_user( array( 'user_login' => $dgb_args['login'], 'user_pass' => 'password', 'user_email' => $dgb_args['login'] . '@example.test', 'role' => $dgb_args['role'] ) );
 		break;
 
+	case 'activate_plugin':
+		// Another plugin (Rank Math, Yoast). Its own activation hooks run in the next process, as on a real site.
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		foreach ( (array) ( $dgb_args['deactivate'] ?? array() ) as $dgb_p ) {
+			deactivate_plugins( $dgb_p, true );
+		}
+		$dgb_r              = activate_plugin( $dgb_args['plugin'] );
+		$dgb_out['error']   = is_wp_error( $dgb_r ) ? $dgb_r->get_error_message() : '';
+		$dgb_out['active']  = get_option( 'active_plugins' );
+		break;
+
+	case 'rank_math_setup':
+		// What Rank Math's activation and setup wizard store ("skip registration").
+		( new \RankMath\Installer() )->activation();
+		update_option( 'rank_math_registration_skip', 1 );
+		if ( ! empty( $dgb_args['product_schema_post'] ) ) {
+			// A Product schema made in Rank Math's Schema Generator for this tour.
+			update_post_meta(
+				(int) $dgb_args['product_schema_post'],
+				'rank_math_schema_Product',
+				array(
+					'@type'    => 'Product',
+					'metadata' => array( 'title' => 'Product', 'type' => 'template', 'isPrimary' => true ),
+					'name'     => 'Old buggy schema',
+					'offers'   => array( '@type' => 'Offer', 'price' => '100', 'priceCurrency' => 'AED' ),
+				)
+			);
+		}
+		$dgb_out['modules'] = get_option( 'rank_math_modules' );
+		break;
+
+	case 'schema':
+		$dgb_plugin            = \Digitum\Bookings\Plugin::instance();
+		$dgb_id                = (int) $dgb_args['post'];
+		$dgb_out['applies']    = $dgb_plugin->schema()->applies( $dgb_id );
+		$dgb_out['node']       = $dgb_plugin->schema()->product_node( $dgb_id );
+		$dgb_out['points']     = $dgb_plugin->quotes()->price_points( $dgb_id );
+		$dgb_widget            = new \Digitum\Bookings\Frontend\Widget( $dgb_plugin->settings(), $dgb_plugin->product_type(), $dgb_plugin->quotes(), new \Digitum\Bookings\Frontend\Assets( $dgb_plugin->settings(), $dgb_plugin->product_type() ) );
+		$dgb_view              = $dgb_widget->view( $dgb_id, \Digitum\Bookings\Domain\Product::find( $dgb_id ) );
+		$dgb_out['visible']    = $dgb_view['from'];
+		$dgb_out['visible_options'] = array_column( $dgb_view['variants'], 'price', 'label' );
+		break;
+
+	case 'llms':
+		\Digitum\Bookings\Services\LlmsTxt::flush();
+		$dgb_plugin       = \Digitum\Bookings\Plugin::instance();
+		$dgb_out['text'] = ( new \Digitum\Bookings\Services\LlmsTxt( $dgb_plugin->settings(), $dgb_plugin->product_type(), $dgb_plugin->quotes() ) )->content();
+		break;
+
+	case 'set_meta':
+		foreach ( $dgb_args['meta'] as $dgb_key => $dgb_value ) {
+			update_post_meta( (int) $dgb_args['post'], $dgb_key, $dgb_value );
+		}
+		break;
+
+	case 'attach_image':
+		// A tiny PNG in the Media Library, set as the featured image.
+		$dgb_upload = wp_upload_bits( 'tour-' . (int) $dgb_args['post'] . '.png', null, base64_decode( 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=' ) );
+		$dgb_att    = wp_insert_attachment( array( 'post_mime_type' => 'image/png', 'post_title' => 'Tour', 'post_status' => 'inherit' ), $dgb_upload['file'], (int) $dgb_args['post'] );
+		set_post_thumbnail( (int) $dgb_args['post'], $dgb_att );
+		$dgb_out['id']  = $dgb_att;
+		$dgb_out['url'] = wp_get_attachment_image_url( $dgb_att, 'full' );
+		break;
+
+	case 'traveler_scan':
+		$dgb_out['sources'] = ( new \Digitum\Bookings\Integrations\Traveler\TravelerImporter( \Digitum\Bookings\Plugin::instance()->product_type() ) )->sources();
+		$dgb_out['tours']   = ( new \Digitum\Bookings\Integrations\Traveler\TravelerImporter( \Digitum\Bookings\Plugin::instance()->product_type() ) )->scan( $dgb_args['source'] ?? 'st_tours' );
+		break;
+
+	case 'traveler_import':
+		wp_set_current_user( 1 );
+		$dgb_out['log'] = ( new \Digitum\Bookings\Integrations\Traveler\TravelerImporter( \Digitum\Bookings\Plugin::instance()->product_type() ) )->import( $dgb_args['ids'], $dgb_args['options'] ?? array() );
+		break;
+
+	case 'tour_state':
+		$dgb_id               = (int) $dgb_args['post'];
+		$dgb_post             = get_post( $dgb_id );
+		$dgb_out['type']      = $dgb_post ? $dgb_post->post_type : '';
+		$dgb_out['slug']      = $dgb_post ? $dgb_post->post_name : '';
+		$dgb_out['title']     = $dgb_post ? $dgb_post->post_title : '';
+		$dgb_out['content']   = $dgb_post ? $dgb_post->post_content : '';
+		$dgb_out['thumbnail'] = (int) get_post_thumbnail_id( $dgb_id );
+		$dgb_out['permalink'] = get_permalink( $dgb_id );
+		$dgb_out['resolves']  = url_to_postid( (string) get_permalink( $dgb_id ) );
+		$dgb_out['product']   = \Digitum\Bookings\Domain\Product::find( $dgb_id )->to_array();
+		$dgb_out['variants']  = ( new \Digitum\Bookings\Database\Repositories\VariantRepository() )->for_product( $dgb_id );
+		$dgb_out['sessions']  = ( new \Digitum\Bookings\Database\Repositories\SessionRepository() )->for_product( $dgb_id );
+		$dgb_out['revisions'] = count( wp_get_post_revisions( $dgb_id ) );
+		break;
+
+	case 'csv_export':
+		$dgb_out['rows'] = ( new \Digitum\Bookings\Services\CsvExchange( \Digitum\Bookings\Plugin::instance()->product_type() ) )->export( $dgb_args['kind'] );
+		break;
+
+	case 'csv_import':
+		$dgb_file = tempnam( sys_get_temp_dir(), "dgb-csv" );
+		file_put_contents( $dgb_file, $dgb_args['csv'] );
+		$dgb_rows        = \Digitum\Bookings\Services\CsvExchange::read( $dgb_file );
+		$dgb_out['rows'] = is_wp_error( $dgb_rows ) ? $dgb_rows->get_error_message() : count( $dgb_rows );
+		$dgb_out['log']  = is_wp_error( $dgb_rows ) ? array() : ( new \Digitum\Bookings\Services\CsvExchange( \Digitum\Bookings\Plugin::instance()->product_type() ) )->import( $dgb_args['kind'], $dgb_rows, ! empty( $dgb_args['replace'] ) );
+		unlink( $dgb_file );
+		break;
+
+	case 'privacy':
+		wp_set_current_user( 1 );
+		$dgb_exporters = apply_filters( 'wp_privacy_personal_data_exporters', array() );
+		$dgb_erasers   = apply_filters( 'wp_privacy_personal_data_erasers', array() );
+		$dgb_out['registered'] = isset( $dgb_exporters['digitum-bookings'], $dgb_erasers['digitum-bookings'] );
+		$dgb_out['export']     = call_user_func( $dgb_exporters['digitum-bookings']['callback'], $dgb_args['email'], 1 );
+		if ( ! empty( $dgb_args['erase'] ) ) {
+			$dgb_out['erase'] = call_user_func( $dgb_erasers['digitum-bookings']['callback'], $dgb_args['email'], 1 );
+			$dgb_out['after'] = call_user_func( $dgb_exporters['digitum-bookings']['callback'], $dgb_args['email'], 1 );
+		}
+		require_once ABSPATH . 'wp-admin/includes/admin.php';
+		do_action( 'admin_init' );
+		$dgb_policy = '';
+		foreach ( (array) ( WP_Privacy_Policy_Content::get_suggested_policy_text() ) as $dgb_section ) {
+			$dgb_policy .= is_array( $dgb_section ) && 'Digitum Bookings' === ( $dgb_section['plugin_name'] ?? '' ) ? (string) $dgb_section['policy_text'] : '';
+		}
+		$dgb_out['policy'] = $dgb_policy;
+		break;
+
+	case 'app_password':
+		require_once ABSPATH . 'wp-includes/class-wp-application-passwords.php';
+		$dgb_pw = WP_Application_Passwords::create_new_application_password( (int) $dgb_args['user'], array( 'name' => 'Zapier' ) );
+		$dgb_out['password'] = is_wp_error( $dgb_pw ) ? '' : $dgb_pw[0];
+		$dgb_out['login']    = get_userdata( (int) $dgb_args['user'] )->user_login;
+		break;
+
 	case 'install':
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		wp_install( 'Test site', 'admin', 'admin@example.test', true, '', 'password' );
@@ -707,6 +838,7 @@ switch ( $dgb_action ) {
 				'post_title'  => $dgb_args['title'],
 				'post_name'   => $dgb_args['slug'],
 				'post_status' => 'publish',
+				'post_content' => $dgb_args['content'] ?? '',
 			),
 			true
 		);

@@ -22,6 +22,13 @@ function scenario( string $letter ): bool {
 	return ! $only || in_array( $letter, array_map( 'trim', explode( ',', $only ) ), true );
 }
 
+/**
+ * Path of a URL (for labels and requests).
+ */
+function wp_make_link_relative_test( string $url ): string {
+	return (string) preg_replace( '#^https?://[^/]+#', '', $url );
+}
+
 $all_tables = array( 'variants', 'sessions', 'addons', 'zones', 'locations', 'bookings', 'booking_items', 'booking_events', 'payments', 'payment_proofs', 'coupons', 'calendar_overrides', 'notifications' );
 
 /* -------------------------------------------------------------------- */
@@ -840,6 +847,384 @@ if ( scenario( 'H' ) ) {
 	$x  = step( $site, 'admin_action', array( 'op' => 'erase', 'reference' => $er ) );
 	$st = $state( $er );
 	check( true === ( $x['result'] ?? null ) && '' === $st['booking']['customer_name'] && '' === $st['booking']['customer_email'] && '' === $st['booking']['customer_phone'] && ! empty( $st['booking']['erased_at'] ) && 699 < (float) $st['booking']['total'], 'erase: name, email and phone gone; amounts kept' );
+}
+
+/* -------------------------------------------------------------------- */
+if ( scenario( 'I' ) ) {
+	echo "\nScenario I: schema, llms.txt, REST API, Traveler import, CSV, privacy (M6)\n";
+	$port = (int) ( getenv( 'DGB_HTTP_PORT' ) ?: 8893 );
+	$home = "http://127.0.0.1:{$port}";
+	$site = make_site( 'm6', null, $home );
+	copy( __DIR__ . '/fake-gateways.php', "{$site}/wp-content/mu-plugins/fake-gateways.php" );
+	// Application passwords over plain http on the test server.
+	file_put_contents( "{$site}/wp-content/mu-plugins/dgb-app-passwords.php", "<?php\nadd_filter( 'wp_is_application_passwords_available', '__return_true' );\n" );
+	step( $site, 'install' );
+	step( $site, 'activate' );
+	$demo   = step( $site, 'demo_setup' );
+	$rzr    = $demo['tours']['rzr'];
+	$safari = $demo['tours']['safari'];
+	$ny     = $demo['tours']['newyear'];
+	step( $site, 'attach_image', array( 'post' => $safari['id'] ) );
+	$server = start_server( $site, $port );
+
+	// JSON-LD scripts of a page: list of [class, decoded data].
+	$ld = static function ( string $html ): array {
+		preg_match_all( '#<script type="application/ld\+json"([^>]*)>(.*?)</script>#s', $html, $m, PREG_SET_ORDER );
+		return array_map( static fn( $x ) => array( trim( $x[1] ), json_decode( $x[2], true ) ), $m );
+	};
+	$nodes = static function ( array $scripts ): array {
+		$out = array();
+		foreach ( $scripts as $script ) {
+			foreach ( $script[1]['@graph'] ?? array( $script[1] ) as $node ) {
+				$out[] = $node;
+			}
+		}
+		return $out;
+	};
+	$product_nodes = static fn( array $nodes ): array => array_values( array_filter( $nodes, static fn( $n ) => array() !== array_intersect( (array) ( $n['@type'] ?? array() ), array( 'Product', 'TouristTrip', 'ProductGroup' ) ) ) );
+	$visible_from  = static function ( string $html ): ?float {
+		return preg_match( '#class="dgb-from">.*?<strong>(.*?)</strong>#s', $html, $m ) ? (float) preg_replace( '/[^0-9.]/', '', html_entity_decode( $m[1] ) ) : null;
+	};
+	$page = static fn( string $path ): array => http_get( $home . $path );
+
+	echo "  Schema (standalone)\n";
+	list( $status, , $html ) = $page( '/tour/safari/' );
+	$scripts                 = $ld( $html );
+	$graph                   = $nodes( $scripts );
+	$tours                   = $product_nodes( $graph );
+	check( 200 === $status && 1 === count( $scripts ) && 'class="dgb-schema"' === $scripts[0][0], 'safari: one JSON-LD script of our own' );
+	check( 1 === count( $tours ) && 'Product' === $tours[0]['@type'] && 'Offer' === $tours[0]['offers']['@type'], 'safari: Product with one Offer (it has an image)' );
+	check( '99.00' === $tours[0]['offers']['price'] && 'AED' === $tours[0]['offers']['priceCurrency'] && 99.0 === $visible_from( $html ), 'safari: schema price 99.00 = visible "From AED 99.00"' );
+	check( 'IE' === $tours[0]['offers']['priceSpecification']['referenceQuantity']['unitCode'] && true === $tours[0]['offers']['priceSpecification']['valueAddedTaxIncluded'], 'safari: price per person (unitCode IE), VAT included' );
+	check( 'TravelAgency' === $graph[0]['@type'] && 'Desert Bookings' === $graph[0]['name'] && '+971 55 526 0561' === $graph[0]['telephone'] && $graph[0]['@id'] === $tours[0]['offers']['seller']['@id'], 'business node with NAP is the seller' );
+	check( ! empty( $tours[0]['image'] ) && ! isset( $tours[0]['aggregateRating'] ) && ! isset( $tours[0]['review'] ), 'image present; no rating without a review source' );
+
+	list( , , $html ) = $page( '/tour/rzr/' );
+	$tours            = $product_nodes( $nodes( $ld( $html ) ) );
+	check( 'TouristTrip' === $tours[0]['@type'] && 'AggregateOffer' === $tours[0]['offers']['@type'], 'rzr without any image: TouristTrip (Google Product needs an image)' );
+	step( $site, 'attach_image', array( 'post' => $rzr['id'] ) );
+	list( , , $html ) = $page( '/tour/rzr/' );
+	$tours            = $product_nodes( $nodes( $ld( $html ) ) );
+	$offer            = $tours[0]['offers'];
+	check( 'Product' === $tours[0]['@type'] && '699.00' === $offer['lowPrice'] && '1299.00' === $offer['highPrice'] && 3 === $offer['offerCount'], 'rzr: Product, AggregateOffer 699.00–1299.00, 3 offers' );
+	check( 699.0 === $visible_from( $html ), 'rzr: lowPrice = visible "From AED 699.00"' );
+	check( array( '699.00', '899.00', '1299.00' ) === array_column( $offer['offers'], 'price' ) && 'C62' === $offer['offers'][0]['priceSpecification']['referenceQuantity']['unitCode'] && 'vehicle (2 seats)' === $offer['offers'][0]['priceSpecification']['referenceQuantity']['unitText'], 'rzr: one Offer per option, priced per vehicle (2 seats)' );
+	$sc = step( $site, 'schema', array( 'post' => $rzr['id'] ) );
+	$same = (float) $sc['node']['offers']['lowPrice'] === (float) preg_replace( '/[^0-9.]/', '', $sc['visible'] );
+	foreach ( $sc['node']['offers']['offers'] as $o ) {
+		$same = $same && (float) $o['price'] === (float) $sc['visible_options'][ $o['name'] ];
+	}
+	check( $same, 'schema prices = widget prices for every option (same PriceCalculator call)' );
+
+	list( , , $html ) = $page( '/tour/newyear/' );
+	$scripts          = $ld( $html );
+	$tours            = $product_nodes( $nodes( $scripts ) );
+	check( 'TouristTrip' === $tours[0]['@type'] && ! isset( $tours[0]['offers'] ) && 'QuoteAction' === $tours[0]['potentialAction']['@type'], 'price on request: TouristTrip with a "Request a quote" action' );
+	check( ! str_contains( json_encode( $scripts ), '"price' ) && ! str_contains( json_encode( $scripts ), 'lowPrice' ) && str_contains( $html, 'Price on request' ), 'price on request: no price anywhere in the schema; page says "Price on request"' );
+	list( , , $html ) = $page( wp_make_link_relative_test( $demo['blog'] ) );
+	check( array() === $ld( $html ), 'no tour schema on other pages' );
+
+	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'schema_output' => 'off' ) ) ) );
+	list( , , $html ) = $page( '/tour/rzr/' );
+	check( array() === $ld( $html ), 'Structured data off: nothing printed' );
+	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'schema_output' => 'auto' ) ) ) );
+
+	$validator = $root . '/node_modules/@adobe/structured-data-validator';
+	if ( is_dir( $validator ) ) {
+		exec( 'node ' . escapeshellarg( $root . '/tests/schema/rich-results.mjs' ) . ' ' . implode( ' ', array_map( static fn( $p ) => escapeshellarg( $home . $p ), array( '/tour/rzr/', '/tour/safari/', '/tour/newyear/' ) ) ) . ' 2>&1', $lines, $code );
+		$rich = json_decode( (string) end( $lines ), true );
+		check( 0 === $code && is_array( $rich ) && 3 === count( $rich ), 'Rich Results validator ran on three tour pages' );
+		foreach ( (array) $rich as $url => $result ) {
+			check( array() === $result['errors'], 'Rich Results: no errors on ' . wp_make_link_relative_test( $url ) . ( $result['errors'] ? ' → ' . implode( ' | ', $result['errors'] ) : '' ) );
+		}
+	} else {
+		echo "  (Rich Results validator not installed: run npm install)\n";
+	}
+
+	echo "  llms.txt\n";
+	list( $status, $headers, $text ) = $page( '/llms.txt' );
+	check( 200 === $status && in_array( 'Content-Type: text/plain; charset=utf-8', $headers, true ), '/llms.txt answers as plain text' );
+	check( str_starts_with( $text, "# Desert Bookings\n" ) && str_contains( $text, '- Phone: +971 55 526 0561' ) && str_contains( $text, '- Email: info@desertbookings.com' ), 'llms.txt: business name and contact (NAP)' );
+	check( str_contains( $text, '[2-Seater Polaris RZR 1000](' . $home . '/tour/rzr/): From AED 699.00 per vehicle' ) && str_contains( $text, 'Up to 2 people per vehicle' ), 'llms.txt: from price and price basis = schema' );
+	check( str_contains( $text, 'Options: 30 min AED 699.00; 1 hour AED 899.00; 2 hours AED 1,299.00' ), 'llms.txt: options with durations and prices' );
+	check( str_contains( $text, '[New Year Desert Safari](' . $home . '/tour/newyear/): Price on request' ) && ! preg_match( '/New Year.*AED/', $text ), 'llms.txt: price on request, no price' );
+	check( (bool) preg_match( '/Sessions: Morning: starts .*, pickup .*; Evening: starts .*, pickup /', $text ), 'llms.txt: sessions with pickup windows' );
+	check( str_contains( $text, 'hotel pickup costs AED 300.00 per booking from Dubai, Sharjah; no pickup from Abu Dhabi (meet at Al Aweer desert)' ) && str_contains( $text, 'hotel pickup included from Dubai, Sharjah' ), 'llms.txt: pickup policy per tour (add-on / included / excluded zone)' );
+	check( str_contains( $text, 'Meeting point: Al Aweer desert' ) && str_contains( $text, 'Age rules: minimum age 16' ), 'llms.txt: meeting point and age rules' );
+	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'llms_enabled' => false ) ) ) );
+	list( $status ) = $page( '/llms.txt' );
+	check( 404 === $status, 'llms.txt switched off: 404' );
+	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'llms_enabled' => true ) ) ) );
+
+	echo "  REST API\n";
+	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'products' ) );
+	$byname = array_column( $r['data'], null, 'name' );
+	check( 200 === $r['status'] && 3 === count( $r['data'] ), 'GET products lists the 3 tours' );
+	check( '699.00' === $byname['2-Seater Polaris RZR 1000']['from_price'] && 2 === $byname['2-Seater Polaris RZR 1000']['seats'] && 2 === count( $byname['2-Seater Polaris RZR 1000']['sessions'] ), 'products: from price = schema, seats and sessions' );
+	check( null === $byname['New Year Desert Safari']['from_price'] && true === $byname['New Year Desert Safari']['on_request'], 'products: no price for price on request' );
+	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'products/' . $ny['id'] ) );
+	check( 200 === $r['status'] && 'on_request' === $r['data']['mode'], 'GET products/{id}' );
+
+	$manager = step( $site, 'create_user', array( 'login' => 'manager1', 'role' => 'dgb_manager' ) )['id'];
+	$guide   = step( $site, 'create_user', array( 'login' => 'guide1', 'role' => 'dgb_guide' ) )['id'];
+	$staff_body = array( 'product' => $rzr['id'], 'variant_id' => $rzr['variants']['1 hour'], 'date' => $demo['tomorrow'], 'session_id' => $rzr['sessions']['Evening'], 'adults' => 2, 'units' => 1, 'payment_method' => 'bank_transfer', 'name' => 'Phone Guest', 'email' => 'phone.guest@example.com', 'phone_code' => '+971', 'phone' => '501112222' );
+	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/bookings', 'body' => $staff_body ) );
+	check( 401 === $r['status'], 'POST admin/bookings: anonymous refused (401)' );
+	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/bookings', 'body' => $staff_body, 'user' => $guide ) );
+	check( 403 === $r['status'], 'POST admin/bookings: guide refused (403)' );
+	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/bookings', 'body' => $staff_body, 'user' => $manager ) );
+	$staff = $r['data'];
+	check( 201 === $r['status'] && 'awaiting_transfer' === $staff['status'] && 'admin' === $staff['attribution']['source'] && str_contains( (string) $staff['payment_link'], 'dgb_pay=1' ), 'manager creates a booking: source admin, awaiting transfer, payment link returned' );
+	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'admin/bookings', 'query' => array( 'search' => 'Phone Guest', 'source' => 'admin' ), 'user' => $manager ) );
+	check( 200 === $r['status'] && 1 === count( $r['data'] ) && $staff['reference'] === $r['data'][0]['reference'], 'GET admin/bookings with search and source filters' );
+	$r = step( $site, 'rest', array( 'method' => 'PATCH', 'route' => 'admin/bookings/' . $staff['id'], 'user' => $manager, 'body' => array( 'customer' => array( 'name' => 'Phone Guest Jr', 'email' => 'jr@example.com' ), 'vehicle' => 'RZR 7', 'note' => 'Paid at the office', 'action' => 'confirm' ) ) );
+	check( 200 === $r['status'] && 'Phone Guest Jr' === $r['data']['customer']['name'] && 'jr@example.com' === $r['data']['customer']['email'] && 'confirmed' === $r['data']['status'], 'PATCH changes guest details and confirms' );
+	$r = step( $site, 'rest', array( 'method' => 'PATCH', 'route' => 'admin/bookings/' . $staff['id'], 'user' => $manager, 'body' => array( 'customer' => array( 'email' => 'not-an-email' ) ) ) );
+	check( 400 === $r['status'], 'PATCH rejects a bad email' );
+	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/bookings/' . $staff['id'] . '/checkin', 'user' => $guide, 'body' => array( 'arrived' => true ) ) );
+	check( 200 === $r['status'] && 'checked_in' === $r['data']['status'], 'guide checks the guest in' );
+	$r = step( $site, 'rest', array( 'method' => 'DELETE', 'route' => 'admin/bookings/' . $staff['id'], 'user' => $guide ) );
+	check( 403 === $r['status'], 'DELETE: guide refused' );
+	$r = step( $site, 'rest', array( 'method' => 'DELETE', 'route' => 'admin/bookings/' . $staff['id'], 'user' => $manager ) );
+	check( 409 === $r['status'], 'DELETE of a checked-in booking is refused (409)' );
+	$second = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/bookings', 'body' => $staff_body, 'user' => $manager ) )['data'];
+	$r      = step( $site, 'rest', array( 'method' => 'DELETE', 'route' => 'admin/bookings/' . $second['id'], 'user' => $manager ) );
+	$g      = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'admin/bookings/' . $second['id'], 'user' => $manager ) );
+	check( 200 === $r['status'] && 'cancelled' === $r['data']['status'] && 200 === $g['status'] && 'cancelled' === $g['data']['status'], 'DELETE cancels; the booking is kept' );
+
+	$app = step( $site, 'app_password', array( 'user' => $manager ) );
+	list( $status, $headers, $body ) = http_get( $home . '/wp-json/dgb/v1/admin/bookings?per_page=1', array( 'Authorization: Basic ' . base64_encode( $app['login'] . ':' . $app['password'] ) ) );
+	$total = 0;
+	foreach ( $headers as $h ) {
+		$total = preg_match( '/^X-WP-Total: (\d+)/i', $h, $m ) ? (int) $m[1] : $total;
+	}
+	check( 200 === $status && 1 === count( (array) json_decode( $body, true ) ) && $total >= 1, 'application password (external tool) reads bookings, with X-WP-Total' );
+	list( $status ) = http_get( $home . '/wp-json/dgb/v1/admin/bookings', array( 'Authorization: Basic ' . base64_encode( $app['login'] . ':wrong pass word' ) ) );
+	check( 401 === $status, 'wrong application password: 401' );
+
+	echo "  Privacy\n";
+	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'ip' => '10.6.0.1', 'body' => array( 'product' => $rzr['id'], 'variant_id' => $rzr['variants']['30 min'], 'date' => $demo['tomorrow'], 'session_id' => $rzr['sessions']['Evening'], 'adults' => 1, 'units' => 1, 'pickup' => true, 'zone_id' => $demo['zones']['Dubai'], 'hotel' => 'Hotel Privacy', 'room' => '501', 'payment_method' => 'bank_transfer', 'name' => 'Privacy Guest', 'email' => 'Privacy@Example.com', 'phone_code' => '+971', 'phone' => '509998888', 'marketing' => true, 'terms' => true ) ) );
+	$p = step( $site, 'privacy', array( 'email' => 'privacy@example.com', 'admin' => true ) );
+	$fields = array_column( $p['export']['data'][0]['data'] ?? array(), 'value', 'name' );
+	check( $p['registered'] && 1 === count( $p['export']['data'] ) && true === $p['export']['done'], 'exporter registered; one booking found (email matched without case)' );
+	check( 'Privacy Guest' === ( $fields['Name'] ?? '' ) && 'Privacy@Example.com' === ( $fields['Email'] ?? '' ) && str_contains( $fields['Hotel pickup'] ?? '', 'Hotel Privacy' ) && 'Yes' === ( $fields['Marketing consent'] ?? '' ) && $r['data']['reference'] === ( $fields['Reference'] ?? '' ), 'export: reference, name, email, hotel, marketing consent' );
+	check( str_contains( $p['policy'], 'payment screenshots' ) || str_contains( $p['policy'], 'Payment screenshots' ), 'suggested privacy policy text registered' );
+	$p = step( $site, 'privacy', array( 'email' => 'privacy@example.com', 'erase' => true, 'admin' => true ) );
+	$after = step( $site, 'booking_state', array( 'reference' => $r['data']['reference'] ) );
+	check( true === $p['erase']['items_removed'] && true === $p['erase']['items_retained'] && array() === $p['after']['data'], 'eraser removes the guest data; bookings retained' );
+	check( '' === $after['booking']['customer_name'] && '' === $after['booking']['customer_email'] && ! empty( $after['booking']['erased_at'] ) && (float) $after['booking']['total'] > 0, 'erased booking keeps its amounts' );
+
+	echo "  Traveler import (tours left by the Traveler theme, plugin owns /tour/)\n";
+	$amt = static fn( $v ) => null === $v ? null : number_format( (float) $v, 2, '.', '' );
+	$table = '<p>Ride the dunes.</p><figure class="wp-block-table"><table><thead><tr><th>Duration</th><th>Old Price</th><th>New Price</th></tr></thead><tbody><tr><td>30 Min</td><td><del>AED 899</del></td><td>AED 699</td></tr><tr><td>1 Hour</td><td>AED 1,099</td><td>AED 899</td></tr><tr><td>2 Hours</td><td>AED 1,599</td><td>AED 1,299</td></tr></tbody></table></figure><p>Safety briefing included.</p>';
+	$t_rzr   = step( $site, 'create_post', array( 'type' => 'st_tours', 'title' => '2-Seater Polaris RZR 1000 CC Buggy', 'slug' => '2-seater-polaris-rzr-1000-cc-buggy', 'content' => $table ) )['id'];
+	$t_camel = step( $site, 'create_post', array( 'type' => 'st_tours', 'title' => 'Camel Ride Dubai', 'slug' => 'camel-ride-dubai', 'content' => '<p>Camel ride.</p>' ) )['id'];
+	$t_photo = step( $site, 'create_post', array( 'type' => 'st_tours', 'title' => 'Desert Photoshoot Dubai', 'slug' => 'desert-photoshoot-dubai', 'content' => '<p>Photos.</p>' ) )['id'];
+	$t_clash = step( $site, 'create_post', array( 'type' => 'st_tours', 'title' => 'Old safari page', 'slug' => 'safari', 'content' => '<p>Old.</p>' ) )['id'];
+	$img     = step( $site, 'attach_image', array( 'post' => $t_rzr ) )['id'];
+	step( $site, 'set_meta', array( 'post' => $t_rzr, 'meta' => array( 'gallery' => $img . ',' . $img ) ) );
+	step( $site, 'set_meta', array( 'post' => $t_camel, 'meta' => array( 'adult_price' => '150', 'child_price' => '100' ) ) );
+	$scan = step( $site, 'traveler_scan' );
+	$plan = array_column( $scan['tours'], null, 'id' );
+	check( 4 === ( $scan['sources']['st_tours'] ?? 0 ) && 4 === count( $scan['tours'] ), 'scan finds the 4 Traveler tours' );
+	check( 3 === count( $plan[ $t_rzr ]['variants'] ) && 2 === $plan[ $t_rzr ]['seats'] && 'per_person' === $plan[ $t_camel ]['mode'] && 'on_request' === $plan[ $t_photo ]['mode'], 'scan: price table → 3 options, 2 seats; Traveler price → per person; none → on request' );
+	$before = array();
+	foreach ( array( $t_rzr, $t_camel, $t_photo, $t_clash ) as $id ) {
+		$before[ $id ] = step( $site, 'tour_state', array( 'post' => $id ) );
+	}
+	$log = array_column( step( $site, 'traveler_import', array( 'ids' => array( $t_rzr, $t_camel, $t_photo, $t_clash ), 'options' => array( 'table_mode' => 'per_vehicle', 'enable' => true, 'remove_tables' => true ) ) )['log'], null, 'id' );
+	check( 'imported' === $log[ $t_rzr ]['result'] && 'imported' === $log[ $t_camel ]['result'] && 'imported' === $log[ $t_photo ]['result'], '3 tours imported' );
+	check( 'failed' === $log[ $t_clash ]['result'] && str_contains( implode( ' ', $log[ $t_clash ]['messages'] ), 'already uses the slug' ), 'slug clash logged as failed, nothing changed' );
+	check( str_contains( implode( ' ', $log[ $t_rzr ]['messages'] ), 'old price 899.00 not imported' ), 'old prices logged, not imported' );
+	$after = array();
+	foreach ( array( $t_rzr, $t_camel, $t_photo, $t_clash ) as $id ) {
+		$after[ $id ] = step( $site, 'tour_state', array( 'post' => $id ) );
+	}
+	$kept = true;
+	foreach ( array( $t_rzr, $t_camel, $t_photo ) as $id ) {
+		$kept = $kept && 'dgb_tour' === $after[ $id ]['type'] && $before[ $id ]['slug'] === $after[ $id ]['slug'] && $before[ $id ]['title'] === $after[ $id ]['title'] && $id === $after[ $id ]['resolves'] && $home . '/tour/' . $before[ $id ]['slug'] . '/' === $after[ $id ]['permalink'];
+	}
+	check( $kept, 'every imported tour keeps its ID, slug, title and /tour/slug/ URL' );
+	check( 'st_tours' === $after[ $t_clash ]['type'] && 'safari' === $after[ $t_clash ]['slug'], 'clashing tour left as it was' );
+	$v = $after[ $t_rzr ]['variants'];
+	check( array( '30 Min', '1 Hour', '2 Hours' ) === array_column( $v, 'label' ) && array( '699.00', '899.00', '1299.00' ) === array_map( $amt, array_column( $v, 'price' ) ) && array( '30', '60', '120' ) === array_map( 'strval', array_column( $v, 'duration_minutes' ) ) && array( null, null, null ) === array_column( $v, 'compare_at_price' ), 'rzr: 3 options with durations and new prices, no compare-at price' );
+	check( 'per_vehicle' === $after[ $t_rzr ]['product']['pricing_mode'] && 2 === $after[ $t_rzr ]['product']['seats_per_unit'] && true === $after[ $t_rzr ]['product']['enabled'] && (string) $img === $after[ $t_rzr ]['product']['gallery'] && $img === $after[ $t_rzr ]['thumbnail'], 'rzr: per vehicle, 2 seats, bookings on, gallery and featured image kept' );
+	check( ! str_contains( $after[ $t_rzr ]['content'], '<table' ) && str_contains( $after[ $t_rzr ]['content'], 'Ride the dunes.' ) && str_contains( $after[ $t_rzr ]['content'], 'Safety briefing included.' ) && $after[ $t_rzr ]['revisions'] >= 1, 'price table removed from the text, rest kept, old text in a revision' );
+	check( 'per_person' === $after[ $t_camel ]['product']['pricing_mode'] && '150.00' === $amt( $after[ $t_camel ]['variants'][0]['price'] ) && '100.00' === $amt( $after[ $t_camel ]['variants'][0]['child_price'] ), 'camel: Traveler adult and child prices' );
+	check( 'on_request' === $after[ $t_photo ]['product']['pricing_mode'] && array() === $after[ $t_photo ]['variants'], 'photoshoot: price on request' );
+	list( $status, , $html ) = $page( '/tour/2-seater-polaris-rzr-1000-cc-buggy/' );
+	check( 200 === $status && str_contains( $html, 'data-dgb-widget' ) && 699.0 === $visible_from( $html ) && '699.00' === ( $product_nodes( $nodes( $ld( $html ) ) )[0]['offers']['lowPrice'] ?? '' ), 'imported tour URL serves the booking widget and matching schema' );
+	$tools = step( $site, 'render_admin', array( 'screen' => 'tools', 'get' => array( 'done' => 'traveler' ), 'admin' => true ) );
+	check( empty( $tools['died'] ) && str_contains( $tools['html'], 'Import finished' ) && str_contains( $tools['html'], 'name="ids[]"' ) && 3 === substr_count( $tools['html'], 'action=dgb_export_csv' ) && str_contains( $tools['html'], 'name="_wpnonce"' ), 'Tools screen: import log, Traveler list, 3 CSV exports, nonces' );
+	$tools = step( $site, 'render_admin', array( 'screen' => 'tools', 'user' => $manager, 'admin' => true ) );
+	check( ! empty( $tools['died'] ), 'Tools screen: booking manager refused' );
+	$seo = step( $site, 'render_admin', array( 'screen' => 'settings', 'get' => array( 'tab' => 'seo' ), 'admin' => true ) );
+	check( str_contains( $seo['html'], 'dgb_settings[seo][schema_output]' ) && str_contains( $seo['html'], '/llms.txt' ), 'Settings › Schema & SEO renders' );
+	$again = array_column( step( $site, 'traveler_import', array( 'ids' => array( $t_rzr ), 'options' => array( 'table_mode' => 'per_person' ) ) )['log'], null, 'id' );
+	$st    = step( $site, 'tour_state', array( 'post' => $t_rzr ) );
+	check( 'imported' === $again[ $t_rzr ]['result'] && str_contains( implode( ' ', $again[ $t_rzr ]['messages'] ), 'Kept the options' ) && 'per_vehicle' === $st['product']['pricing_mode'] && 3 === count( $st['variants'] ), 'importing again keeps the options unless “replace” is ticked' );
+
+	echo "  Traveler import (Traveler theme still active, plugin attached to st_tours)\n";
+	$site2 = make_site( 'm6-attach' );
+	file_put_contents( "{$site2}/wp-content/mu-plugins/traveler-stub.php", "<?php\nadd_action( 'init', static fn() => register_post_type( 'st_tours', array( 'public' => true, 'label' => 'Tours', 'rewrite' => array( 'slug' => 'tour', 'with_front' => false ), 'supports' => array( 'title', 'editor', 'thumbnail' ) ) ) );\n" );
+	step( $site2, 'install' );
+	step( $site2, 'activate' );
+	step( $site2, 'settings_merge', array( 'values' => array( 'general' => array( 'product_mode' => 'attach', 'attach_post_type' => 'st_tours', '_attach_slug' => 'tour' ) ) ) );
+	$a_rzr  = step( $site2, 'create_post', array( 'type' => 'st_tours', 'title' => '4-Seater Polaris RZR 1000', 'slug' => '4-seater-polaris-rzr-1000-cc', 'content' => str_replace( array( '699', '899', '1,299' ), array( '799', '999', '1,399' ), $table ) ) );
+	$before = step( $site2, 'tour_state', array( 'post' => $a_rzr['id'] ) );
+	$log    = step( $site2, 'traveler_import', array( 'ids' => array( $a_rzr['id'] ), 'options' => array( 'enable' => true ) ) )['log'];
+	$after  = step( $site2, 'tour_state', array( 'post' => $a_rzr['id'] ) );
+	check( 'http://example.test/tour/4-seater-polaris-rzr-1000-cc/' === $before['permalink'] && 'imported' === $log[0]['result'], 'attached: Traveler tour imported' );
+	check( 'st_tours' === $after['type'] && $before['permalink'] === $after['permalink'] && $a_rzr['id'] === $after['resolves'] && $before['content'] === $after['content'], 'attached: post type, slug, URL and text unchanged' );
+	check( 4 === $after['product']['seats_per_unit'] && array( '799.00', '999.00', '1399.00' ) === array_map( $amt, array_column( $after['variants'], 'price' ) ), 'attached: 4 seats, options 799 / 999 / 1,399' );
+
+	echo "  CSV\n";
+	$amt = static fn( $v ) => null === $v ? null : number_format( (float) $v, 2, '.', '' );
+	$csv = static function ( array $rows ): string {
+		$h = fopen( 'php://temp', 'r+' );
+		foreach ( $rows as $row ) {
+			fputcsv( $h, $row, ',', '"', '' );
+		}
+		rewind( $h );
+		return (string) stream_get_contents( $h );
+	};
+	$exp = step( $site, 'csv_export', array( 'kind' => 'products' ) )['rows'];
+	check( array( 'id', 'slug', 'title', 'status' ) === array_slice( $exp[0], 0, 4 ) && in_array( 'pricing_mode', $exp[0], true ) && in_array( 'gallery', $exp[0], true ) && 6 === count( $exp ) - 1, 'products export: header and one row per tour (6)' );
+	$before_products = array();
+	foreach ( array( $rzr['id'], $safari['id'] ) as $id ) {
+		$before_products[ $id ] = step( $site, 'tour_state', array( 'post' => $id ) )['product'];
+	}
+	$log = step( $site, 'csv_import', array( 'kind' => 'products', 'csv' => $csv( $exp ) ) )['log'];
+	$same = true;
+	foreach ( array( $rzr['id'], $safari['id'] ) as $id ) {
+		$same = $same && $before_products[ $id ] === step( $site, 'tour_state', array( 'post' => $id ) )['product'];
+	}
+	check( 6 === count( $log ) && array( 'updated' ) === array_values( array_unique( array_column( $log, 'result' ) ) ) && $same, 'products export → import round trip changes nothing' );
+
+	$vexp = step( $site, 'csv_export', array( 'kind' => 'variants' ) )['rows'];
+	$head = $vexp[0];
+	$rows = array( $head );
+	foreach ( array_slice( $vexp, 1 ) as $row ) {
+		$row = array_combine( $head, $row );
+		if ( (int) $row['product_id'] === $rzr['id'] && '30 min' === $row['label'] ) {
+			$row['price'] = '649';
+			$rows[]       = array_values( $row );
+		}
+	}
+	$rows[] = array_values( array_merge( array_fill_keys( $head, '' ), array( 'product_slug' => 'rzr', 'label' => '3 hours', 'duration_minutes' => '180', 'price' => '1,599', 'active' => 'yes' ) ) );
+	$rows[] = array_values( array_merge( array_fill_keys( $head, '' ), array( 'product_slug' => 'no-such-tour', 'label' => 'X', 'price' => '1' ) ) );
+	$rows[] = array_values( array_merge( array_fill_keys( $head, '' ), array( 'product_slug' => 'rzr', 'label' => '', 'price' => '5' ) ) );
+	$imp    = step( $site, 'csv_import', array( 'kind' => 'variants', 'csv' => $csv( $rows ) ) );
+	$res    = array_column( $imp['log'], 'result', 'line' );
+	$st     = step( $site, 'tour_state', array( 'post' => $rzr['id'] ) );
+	check( array( 2 => 'updated', 3 => 'added', 4 => 'failed', 5 => 'failed' ) === $res, 'variants import: update by id, add without id, unknown tour and missing label fail' );
+	check( array( '30 min' => '649.00', '1 hour' => '899.00', '2 hours' => '1299.00', '3 hours' => '1599.00' ) === array_map( $amt, array_column( $st['variants'], 'price', 'label' ) ), 'rows not in the file are kept in place (no replace); 3 hours added last, "1,599" read as 1599' );
+	$sc = step( $site, 'schema', array( 'post' => $rzr['id'] ) );
+	check( '649.00' === $sc['node']['offers']['lowPrice'] && 649.0 === (float) preg_replace( '/[^0-9.]/', '', $sc['visible'] ), 'new price shows in the widget and the schema alike' );
+
+	$sexp = step( $site, 'csv_export', array( 'kind' => 'sessions' ) )['rows'];
+	$sh   = $sexp[0];
+	$imp  = step( $site, 'csv_import', array( 'kind' => 'sessions', 'replace' => true, 'csv' => $csv( array( $sh, array_values( array_merge( array_fill_keys( $sh, '' ), array( 'product_id' => (string) $safari['id'], 'name' => 'Sunset', 'type' => 'evening', 'start_time' => '16:00', 'pickup_window_start' => '14:30', 'pickup_window_end' => '15:00', 'days_of_week' => 'Fri;Sat', 'active' => '1' ) ) ) ) ) ) );
+	$st   = step( $site, 'tour_state', array( 'post' => $safari['id'] ) );
+	check( 1 === count( $st['sessions'] ) && 'Sunset' === $st['sessions'][0]['name'] && '5,6' === $st['sessions'][0]['days_of_week'] && '14:30:00' === $st['sessions'][0]['pickup_window_start'], 'sessions import with replace: only the file’s session remains, weekdays by name' );
+
+	$imp = step( $site, 'csv_import', array( 'kind' => 'products', 'csv' => $csv( array( array( 'id', 'slug', 'title', 'pricing_mode', 'enabled', 'min_age', 'inclusions' ), array( '', 'csv-tour', 'CSV Tour', 'per_person', '1', '', "'=SUM(A1)" ), array( (string) $rzr['id'], 'renamed-slug', 'Renamed', '', '', '18', '' ) ) ) ) );
+	$res = array_column( $imp['log'], null, 'line' );
+	$st  = step( $site, 'tour_state', array( 'post' => $rzr['id'] ) );
+	check( 'added' === $res[2]['result'] && 'updated' === $res[3]['result'] && 'rzr' === $st['slug'] && '2-Seater Polaris RZR 1000' === $st['title'] && 18 === $st['product']['min_age'], 'products import: new draft tour added; existing tour updated, slug and title untouched' );
+	$exp2 = step( $site, 'csv_export', array( 'kind' => 'products' ) )['rows'];
+	$csvt = array_values( array_filter( $exp2, static fn( $r ) => 'csv-tour' === $r[1] ) )[0] ?? array();
+	check( in_array( "'=SUM(A1)", $csvt, true ), 'export guards cells that start with = (no spreadsheet formulas)' );
+
+	if ( $server ) {
+		stop_server( $server );
+	}
+}
+
+/* -------------------------------------------------------------------- */
+$seo_plugins = array_filter(
+	array(
+		'rank-math' => getenv( 'DGB_RANKMATH_DIR' ) ?: '',
+		'yoast'     => getenv( 'DGB_YOAST_DIR' ) ?: '',
+	)
+);
+include $wp . '/wp-includes/version.php';
+if ( array() !== $seo_plugins && scenario( 'J' ) ) {
+	echo "\nScenario J: schema merged into Rank Math and Yoast\n";
+	if ( version_compare( $wp_version, '6.7', '<' ) ) {
+		echo "  (skipped: current Rank Math and Yoast need WordPress 6.7+, this is {$wp_version})\n";
+	} else {
+		$port = (int) ( getenv( 'DGB_HTTP_PORT' ) ?: 8893 ) + 1;
+		$home = "http://127.0.0.1:{$port}";
+		$site = make_site( 'm6-seo', null, $home );
+		step( $site, 'install' );
+		step( $site, 'activate' );
+		$demo = step( $site, 'demo_setup' );
+		step( $site, 'attach_image', array( 'post' => $demo['tours']['rzr']['id'] ) );
+		$server = start_server( $site, $port );
+		$graph  = static function ( string $path ) use ( $home ): array {
+			list( , , $html ) = http_get( $home . $path );
+			preg_match_all( '#<script type="application/ld\+json"([^>]*)>(.*?)</script>#s', $html, $m, PREG_SET_ORDER );
+			$nodes = array();
+			foreach ( $m as $x ) {
+				$data = json_decode( $x[2], true );
+				foreach ( $data['@graph'] ?? array( $data ) as $node ) {
+					$nodes[] = $node;
+				}
+			}
+			return array( count( $m ), $m[0][1] ?? '', $nodes );
+		};
+		$products = static fn( array $nodes ): array => array_values( array_filter( $nodes, static fn( $n ) => array() !== array_intersect( (array) ( $n['@type'] ?? array() ), array( 'Product', 'TouristTrip', 'ProductGroup' ) ) ) );
+		$by_id    = static fn( array $nodes ): array => array_column( $nodes, null, '@id' );
+
+		if ( isset( $seo_plugins['rank-math'] ) ) {
+			symlink( realpath( $seo_plugins['rank-math'] ), "{$site}/wp-content/plugins/seo-by-rank-math" );
+			$a = step( $site, 'activate_plugin', array( 'plugin' => 'seo-by-rank-math/rank-math.php' ) );
+			step( $site, 'rank_math_setup' );
+			list( $count, $class, $nodes ) = $graph( '/tour/rzr/' );
+			$tour                          = $products( $nodes );
+			$ids                           = $by_id( $nodes );
+			check( '' === $a['error'] && 1 === $count && str_contains( $class, 'rank-math-schema' ), 'Rank Math: one JSON-LD graph (Rank Math’s)' );
+			check( 1 === count( $tour ) && $home . '/tour/rzr/#dgb-product' === $tour[0]['@id'] && '699.00' === $tour[0]['offers']['lowPrice'], 'Rank Math: our Product node with the page price' );
+			check( isset( $ids[ $home . '/tour/rzr/#webpage' ] ) && $home . '/tour/rzr/#webpage' === ( $tour[0]['mainEntityOfPage']['@id'] ?? '' ), 'Rank Math: Product is the main entity of Rank Math’s WebPage' );
+			$seller = $tour[0]['offers']['offers'][0]['seller']['@id'] ?? '';
+			check( isset( $ids[ $seller ] ) && ! isset( $ids[ $home . '/#dgb-business' ] ), 'Rank Math: seller is Rank Math’s organization node (no second business node)' );
+			step( $site, 'rank_math_setup', array( 'product_schema_post' => $demo['tours']['rzr']['id'] ) );
+			step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'schema_output' => 'off' ) ) ) );
+			list( , , $nodes ) = $graph( '/tour/rzr/' );
+			$theirs            = $products( $nodes );
+			step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'schema_output' => 'auto' ) ) ) );
+			list( $count, , $nodes ) = $graph( '/tour/rzr/' );
+			$tour                    = $products( $nodes );
+			check( 1 === count( $theirs ) && $home . '/tour/rzr/#dgb-product' !== ( $theirs[0]['@id'] ?? '' ), 'Rank Math Schema Generator Product on the tour (shown while ours is off)' );
+			check( 1 === $count && 1 === count( $tour ) && $home . '/tour/rzr/#dgb-product' === $tour[0]['@id'] && '699.00' === $tour[0]['offers']['lowPrice'], 'with ours on: still one Product node, ours, with the page price' );
+			list( $count, , $nodes ) = $graph( '/tour/newyear/' );
+			check( 1 === $count && 'TouristTrip' === ( $products( $nodes )[0]['@type'] ?? '' ) && ! str_contains( json_encode( $nodes ), '"price' ), 'Rank Math: price on request has no price' );
+			$r = step( $site, 'activate_plugin', array( 'plugin' => 'digitum-bookings/digitum-bookings.php', 'deactivate' => array( 'seo-by-rank-math/rank-math.php' ) ) );
+		}
+
+		if ( isset( $seo_plugins['yoast'] ) ) {
+			symlink( realpath( $seo_plugins['yoast'] ), "{$site}/wp-content/plugins/wordpress-seo" );
+			$a = step( $site, 'activate_plugin', array( 'plugin' => 'wordpress-seo/wp-seo.php' ) );
+			list( $count, $class, $nodes ) = $graph( '/tour/rzr/' );
+			$tour                          = $products( $nodes );
+			$ids                           = $by_id( $nodes );
+			check( '' === $a['error'] && 1 === $count && str_contains( $class, 'yoast-schema-graph' ), 'Yoast: one JSON-LD graph (Yoast’s)' );
+			check( 1 === count( $tour ) && $home . '/tour/rzr/#dgb-product' === $tour[0]['@id'] && '699.00' === $tour[0]['offers']['lowPrice'], 'Yoast: our Product node with the page price' );
+			check( isset( $ids[ $home . '/tour/rzr/' ] ) && $home . '/tour/rzr/' === ( $tour[0]['mainEntityOfPage']['@id'] ?? '' ), 'Yoast: Product is the main entity of Yoast’s WebPage' );
+			$seller = $tour[0]['offers']['offers'][0]['seller']['@id'] ?? '';
+			check( isset( $ids[ $seller ] ), 'Yoast: seller node is in the graph' );
+		}
+
+		if ( is_dir( $root . '/node_modules/@adobe/structured-data-validator' ) ) {
+			exec( 'node ' . escapeshellarg( $root . '/tests/schema/rich-results.mjs' ) . ' ' . escapeshellarg( $home . '/tour/rzr/' ) . ' 2>&1', $lines, $code );
+			$rich = json_decode( (string) end( $lines ), true );
+			// Errors on the SEO plugin's own nodes (e.g. image licence fields of its ImageObject) are not ours.
+			$ours = array_filter( (array) ( $rich[ $home . '/tour/rzr/' ]['errors'] ?? array( 'no result @ Product' ) ), static fn( $e ) => (bool) preg_match( '/@ (Product|TouristTrip|TravelAgency|Offer|AggregateOffer)/', $e ) );
+			check( 0 === $code && array() === $ours, 'Rich Results: no errors in our nodes of the merged graph' . ( $ours ? ' → ' . implode( ' | ', $ours ) : '' ) );
+		}
+		stop_server( $server );
+	}
 }
 
 /* -------------------------------------------------------------------- */

@@ -16,6 +16,7 @@ use Digitum\Bookings\Admin\Screens\EmailsScreen;
 use Digitum\Bookings\Admin\Screens\ManifestScreen;
 use Digitum\Bookings\Admin\Screens\PaymentsScreen;
 use Digitum\Bookings\Admin\Screens\SettingsScreen;
+use Digitum\Bookings\Admin\Screens\ToolsScreen;
 use Digitum\Bookings\Admin\Screens\ZonesScreen;
 use Digitum\Bookings\Database\Migrator;
 use Digitum\Bookings\Database\Repositories\BookingRepository;
@@ -179,6 +180,7 @@ final class Plugin {
 			( new ManifestScreen( $this->settings, $this->product_type ) )->register_hooks();
 			( new CheckInScreen( $this->settings ) )->register_hooks();
 			( new EmailsScreen( $this->settings ) )->register_hooks();
+			( new ToolsScreen( $this->settings, $this->product_type ) )->register_hooks();
 			( new BookingSettingsBox( $this->product_type, $this->quotes() ) )->register_hooks();
 		}
 	}

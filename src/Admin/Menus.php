@@ -15,6 +15,7 @@ use Digitum\Bookings\Admin\Screens\EmailsScreen;
 use Digitum\Bookings\Admin\Screens\ManifestScreen;
 use Digitum\Bookings\Admin\Screens\PaymentsScreen;
 use Digitum\Bookings\Admin\Screens\SettingsScreen;
+use Digitum\Bookings\Admin\Screens\ToolsScreen;
 use Digitum\Bookings\Admin\Screens\ZonesScreen;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Roles\Capabilities;
@@ -93,7 +94,7 @@ final class Menus {
 	public function enqueue(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only decides whether to load a stylesheet.
 		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
-		if ( ! in_array( $page, array( self::SLUG, SettingsScreen::SLUG, ZonesScreen::SLUG, PaymentsScreen::SLUG, BookingsScreen::SLUG, CalendarScreen::SLUG, ManifestScreen::SLUG, CheckInScreen::SLUG, EmailsScreen::SLUG ), true ) ) {
+		if ( ! in_array( $page, array( self::SLUG, SettingsScreen::SLUG, ZonesScreen::SLUG, PaymentsScreen::SLUG, BookingsScreen::SLUG, CalendarScreen::SLUG, ManifestScreen::SLUG, CheckInScreen::SLUG, EmailsScreen::SLUG, ToolsScreen::SLUG ), true ) ) {
 			return;
 		}
 		wp_enqueue_style( 'dgb-admin', DGB_PLUGIN_URL . 'assets/build/admin/admin.css', array(), DGB_VERSION );

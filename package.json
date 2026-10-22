@@ -10,7 +10,9 @@
     "test:e2e": "php tests/e2e/prepare.php && playwright test"
   },
   "devDependencies": {
+    "@adobe/structured-data-validator": "1.7.0",
     "@axe-core/playwright": "^4.11.0",
+    "@marbec/web-auto-extractor": "2.2.1",
     "@playwright/test": "^1.56.1",
     "esbuild": "0.24.2",
     "lighthouse": "^13.5.0"
