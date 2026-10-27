@@ -21,7 +21,7 @@ async function tourNode( page: Page ): Promise< Node > {
 const amount = ( text: string ) => Number( text.replace( /[^0-9.]/g, '' ) );
 
 test.describe( 'structured data', () => {
-	for ( const key of [ 'rzr', 'safari' ] ) {
+	for ( const key of [ 'buggy', 'safari' ] ) {
 		test( `${ key }: schema price is the price on the page`, async ( { page } ) => {
 			await page.goto( path( tours[ key ].url ) );
 			const node = await tourNode( page );
@@ -45,7 +45,7 @@ test.describe( 'structured data', () => {
 
 	test( 'Rich Results: no errors on tour pages', async ( { baseURL, isMobile } ) => {
 		test.skip( isMobile, 'same markup on mobile' );
-		const urls = [ tours.rzr.url, tours.safari.url, tours.newyear.url ].map( ( u ) => baseURL + path( u ) );
+		const urls = [ tours.buggy.url, tours.safari.url, tours.newyear.url ].map( ( u ) => baseURL + path( u ) );
 		const out = JSON.parse( execFileSync( 'node', [ 'tests/schema/rich-results.mjs', ...urls ], { encoding: 'utf8' } ) );
 		for ( const url of urls ) {
 			expect( out[ url ].errors, url ).toEqual( [] );
@@ -59,8 +59,8 @@ test( 'llms.txt lists the tours with the page prices', async ( { request, isMobi
 	expect( response.status() ).toBe( 200 );
 	expect( response.headers()[ 'content-type' ] ).toContain( 'text/plain' );
 	const text = await response.text();
-	expect( text ).toMatch( /^# Desert Bookings/ );
-	expect( text ).toContain( `(${ tours.rzr.url }): From AED 699.00 per vehicle` );
+	expect( text ).toMatch( /^# Sample Tours/ );
+	expect( text ).toContain( `(${ tours.buggy.url }): From AED 699.00 per vehicle` );
 	expect( text ).toContain( `(${ tours.newyear.url }): Price on request` );
 } );
 
@@ -90,7 +90,7 @@ test( 'Tools: CSV export and the Traveler importer', async ( { browser, isMobile
 	expect( download.suggestedFilename() ).toMatch( /^tours-variants-\d{4}-\d{2}-\d{2}\.csv$/ );
 	const csv = readFileSync( ( await download.path() ) as string, 'utf8' );
 	expect( csv ).toContain( 'id,product_id,product_slug,label' );
-	expect( csv ).toContain( 'rzr,"2 hours"' );
+	expect( csv ).toContain( 'buggy,"2 hours"' );
 
 	await page.goto( '/wp-admin/admin.php?page=dgb-settings&tab=seo' );
 	await expect( page.getByLabel( 'Structured data' ) ).toHaveValue( 'auto' );
@@ -98,7 +98,7 @@ test( 'Tools: CSV export and the Traveler importer', async ( { browser, isMobile
 } );
 
 test( 'Booking by Digitum is shown under the widget', async ( { page } ) => {
-	await page.goto( path( tours.rzr.url ) );
+	await page.goto( path( tours.buggy.url ) );
 	const credit = page.locator( '.dgb-credit' );
 	await expect( credit ).toHaveCount( 1 );
 	await expect( credit ).toBeVisible();

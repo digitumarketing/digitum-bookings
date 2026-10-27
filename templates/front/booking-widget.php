@@ -255,7 +255,7 @@ $dgb_selectable = array_filter( $view['extras'], static fn( $e ) => ! $e['requir
 				<div class="dgb-field">
 					<label for="<?php echo esc_attr( $dgb_id ); ?>-phone"><?php esc_html_e( 'Phone', 'digitum-bookings' ); ?></label>
 					<div class="dgb-phone">
-						<input type="text" name="phone_code" value="<?php echo esc_attr( $view['country_code'] ); ?>" aria-label="<?php esc_attr_e( 'Country code', 'digitum-bookings' ); ?>" autocomplete="tel-country-code" inputmode="tel" size="5">
+						<input type="text" name="phone_code" value="<?php echo esc_attr( $view['country_code'] ); ?>" aria-label="<?php esc_attr_e( 'Country code', 'digitum-bookings' ); ?>" autocomplete="tel-country-code" inputmode="tel" size="5" placeholder="+">
 						<input type="tel" id="<?php echo esc_attr( $dgb_id ); ?>-phone" name="phone" autocomplete="tel-national" required>
 					</div>
 					<p class="dgb-field-error" data-dgb-error="phone" hidden></p>

@@ -9,6 +9,7 @@ namespace Digitum\Bookings\Database\Repositories;
 
 use Digitum\Bookings\Domain\BookingStatus;
 use Digitum\Bookings\Services\ReferenceGenerator;
+use Digitum\Bookings\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -72,7 +73,7 @@ final class BookingRepository {
 		$data = array_merge(
 			array(
 				'status'     => BookingStatus::PENDING_PAYMENT,
-				'currency'   => 'AED',
+				'currency'   => (string) ( new Settings() )->get( 'currency', 'currency' ),
 				'created_at' => $utc,
 				'updated_at' => $utc,
 			),

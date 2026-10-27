@@ -53,7 +53,7 @@ $dgb_out    = array();
 
 switch ( $dgb_action ) {
 	case 'setup_zones':
-		update_option( 'timezone_string', 'Asia/Dubai' );
+		update_option( 'timezone_string', 'Asia/Tbilisi' );
 		$dgb_zones = new \Digitum\Bookings\Database\Repositories\ZoneRepository();
 		$dgb_ids   = array();
 		foreach ( $dgb_args['zones'] as $dgb_zone ) {
@@ -175,8 +175,8 @@ switch ( $dgb_action ) {
 		break;
 
 	case 'demo_setup':
-		// Desert-style test data used by the M3 scenario and the browser tests.
-		update_option( 'timezone_string', 'Asia/Dubai' );
+		// Test data used by the M3 scenario and the browser tests (AED, 5% VAT included).
+		update_option( 'timezone_string', 'Asia/Tbilisi' );
 		$dgb_settings = \Digitum\Bookings\Plugin::instance()->settings();
 		$dgb_all      = $dgb_settings->all();
 		$dgb_settings->update(
@@ -184,10 +184,18 @@ switch ( $dgb_action ) {
 				'general'  => array_merge(
 					$dgb_all['general'],
 					array(
-						'business_name' => 'Desert Bookings',
-						'phone'         => '+971 55 526 0561',
-						'email'         => 'info@desertbookings.com',
+						'business_name' => 'Sample Tours',
+						'phone'         => '+1 555 0100',
+						'email'         => 'info@example.com',
 						'cancellation'  => 'Free cancellation up to 24 hours before the session.',
+						'country_code'  => '+1',
+					)
+				),
+				'currency' => array_merge(
+					$dgb_all['currency'],
+					array(
+						'currency' => 'AED',
+						'vat_rate' => 5,
 					)
 				),
 				'payments' => array_merge(
@@ -198,7 +206,7 @@ switch ( $dgb_action ) {
 						'bank_account_name' => 'Test Account',
 						'bank_name'         => 'Test Bank',
 						'bank_iban'         => 'AE070331234567890123456',
-						'bank_whatsapp'     => '+971 55 526 0561',
+						'bank_whatsapp'     => '+1 555 0100',
 						'deposit_enabled'   => true,
 						'deposit_percent'   => 20,
 					)
@@ -207,7 +215,7 @@ switch ( $dgb_action ) {
 		);
 		$dgb_zones = new \Digitum\Bookings\Database\Repositories\ZoneRepository();
 		$dgb_zone  = array();
-		foreach ( array( array( 'Dubai', 1, '' ), array( 'Sharjah', 1, '' ), array( 'Abu Dhabi', 0, 'Pickup is not available from Abu Dhabi. Please meet us at Al Aweer desert.' ) ) as $dgb_i => $dgb_z ) {
+		foreach ( array( array( 'North Zone', 1, '' ), array( 'East Zone', 1, '' ), array( 'Far Zone', 0, 'Pickup is not available from Far Zone. Please meet us at Sample Meeting Point.' ) ) as $dgb_i => $dgb_z ) {
 			$dgb_zone[ $dgb_z[0] ] = $dgb_zones->save(
 				array(
 					'name'      => $dgb_z[0],
@@ -220,31 +228,31 @@ switch ( $dgb_action ) {
 		}
 		$dgb_point = ( new \Digitum\Bookings\Database\Repositories\LocationRepository() )->save(
 			array(
-				'name'         => 'Al Aweer desert',
-				'address'      => 'Al Aweer, Dubai',
+				'name'         => 'Sample Meeting Point',
+				'address'      => 'Sample Point, North Zone',
 				'lat'          => '25.1000000',
 				'lng'          => '55.5500000',
-				'map_url'      => 'https://maps.example/al-aweer',
+				'map_url'      => 'https://maps.example/meeting-point',
 				'instructions' => 'Park next to the camp gate.',
 			)
 		);
 		$dgb_type     = \Digitum\Bookings\Plugin::instance()->product_type()->key();
 		$dgb_all_days = array( '1', '2', '3', '4', '5', '6', '7' );
 		$dgb_tours    = array(
-			'rzr'      => array(
-				'title'    => '2-Seater Polaris RZR 1000',
+			'buggy'      => array(
+				'title'    => '2-Seater Sample Buggy',
 				'product'  => array( 'enabled' => '1', 'pricing_mode' => 'per_vehicle', 'seats_per_unit' => '2', 'pickup_policy' => 'addon', 'pickup_default' => 'meet', 'cutoff_hours' => '3', 'max_days_ahead' => '120', 'meeting_point_id' => (string) $dgb_point, 'min_age' => '16' ),
 				'variants' => array( array( '30 min', 30, '699' ), array( '1 hour', 60, '899' ), array( '2 hours', 120, '1299' ) ),
 				'addons'   => array( array( 'label' => 'Hotel pickup', 'price' => '300', 'price_type' => 'per_booking', 'condition_key' => 'pickup', 'active' => 1 ), array( 'label' => 'Ride photos', 'price' => '100', 'price_type' => 'per_booking', 'condition_key' => '', 'active' => 1 ) ),
 			),
 			'safari'   => array(
-				'title'    => 'Evening Desert Safari with BBQ Dinner',
+				'title'    => 'Evening Sample Tour with Dinner',
 				'product'  => array( 'enabled' => '1', 'pricing_mode' => 'per_person', 'pickup_policy' => 'included', 'pickup_default' => 'pickup', 'cutoff_hours' => '3', 'max_days_ahead' => '120', 'meeting_point_id' => (string) $dgb_point ),
 				'variants' => array( array( 'Standard', 180, '99', '79' ) ),
 				'addons'   => array(),
 			),
 			'newyear'  => array(
-				'title'    => 'New Year Desert Safari',
+				'title'    => 'New Year Sample Event',
 				'product'  => array( 'enabled' => '1', 'pricing_mode' => 'on_request', 'pickup_policy' => 'included', 'pickup_default' => 'pickup', 'max_days_ahead' => '400', 'meeting_point_id' => (string) $dgb_point ),
 				'variants' => array(),
 				'addons'   => array(),
@@ -616,7 +624,7 @@ switch ( $dgb_action ) {
 					array(
 						'name'           => 'Manifest Guest ' . $dgb_i,
 						'email'          => 'guest' . $dgb_i . '@example.com',
-						'phone_code'     => '+971',
+						'phone_code'     => '+1',
 						'phone'          => '50' . str_pad( (string) $dgb_i, 7, '0', STR_PAD_LEFT ),
 						'terms'          => true,
 						'adults'         => 2,

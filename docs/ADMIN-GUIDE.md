@@ -4,14 +4,19 @@ For the people who run bookings day to day. Menu: **Digitum Bookings**.
 
 ## Getting started
 
+A new install is empty: no tours, pickup zones, meeting points, offers or coupons, and no business details. Set the site up in this order (each step can be changed later):
+
 1. **Install**: Plugins › Add New › Upload Plugin with `digitum-bookings.zip` from the latest GitHub release, then activate. If the site already has tours under `/tour/` (for example the Traveler theme's), the plugin uses them and their URLs stay the same (Settings › General › “Tours come from”).
-2. **Settings › General**: business name, phone, email and address (used in emails, the confirmation page, structured data and llms.txt), booking terms link, cancellation summary, hold time for card payments.
-3. **Settings › Currency & VAT**: currency, VAT rate and whether prices include it, weekend days. Optionally a **second currency** shown next to prices for visitors from abroad, for example “AED 699 (about USD 190)”: choose the currency, enter the exchange rate (how much of your currency one unit of the second currency is worth; it is not updated automatically), whole units or two decimals, and the wording (empty uses “about {amount}” in the visitor's language). It appears in the booking widget, the mobile bar, price tables, the confirmation page and llms.txt. Guests always pay in your currency, and emails, receipts and structured data only show your currency.
+2. **Settings › General**: business name, phone, email and address (used in emails, the confirmation page, structured data and llms.txt), booking terms link, cancellation summary, hold time for card payments, and the phone country code filled in for guests (empty: guests type it).
+3. **Settings › Currency & VAT**: currency (it starts as WooCommerce's currency, or the one of the site language's country, else USD: check it), VAT rate (starts at 0%) and whether prices include it, weekend days. Optionally a **second currency** shown next to prices for visitors from abroad, for example “AED 699 (about USD 190)”: choose the currency, enter the exchange rate (how much of your currency one unit of the second currency is worth; it is not updated automatically), whole units or two decimals, and the wording (empty uses “about {amount}” in the visitor's language). It appears in the booking widget, the mobile bar, price tables, the confirmation page and llms.txt. Guests always pay in your currency, and emails, receipts and structured data only show your currency.
 4. **Pickup zones**: the areas you pick up from (and those you do not, with the message guests see), plus meeting points with address, map link and arrival instructions.
 5. **Tours**: open a tour, fill in **Booking settings** (Pricing, Options, Sessions, Add-ons, Pickup & location, Rules, Schema & SEO), then tick **Take bookings for this tour**. The booking widget appears on the tour page.
-6. **Settings › Payments**: switch on pay on arrival, bank transfer (with your account details), Stripe and PayPal (start in test mode), and deposits if you take them.
+6. **Settings › Payments**: switch on pay on arrival, bank transfer (with your account details), Stripe and PayPal (start in test mode), and deposits if you take them. If PayPal does not accept your currency, enter the exchange rate to the PayPal currency; until then PayPal is not offered.
 7. **Settings › Emails**: sender, staff recipients, reminder time; **Digitum Bookings › Emails › Send test email** checks that mail arrives (install an SMTP plugin if it does not).
-8. To try the plugin with sample content first, import a **demo pack** (Tools › Demo data) and remove it again in one click when you are done. A fresh install has no demo content.
+8. **Settings › Branding** and **Mobile sticky bar** (General) to match the theme, if needed.
+9. Check a tour page on a phone and make a test booking with pay on arrival, then cancel it (Bookings).
+
+To try the plugin with sample content first, import a **demo pack** (Tools › Demo data) and remove it again in one click when you are done. A fresh install has no demo content.
 
 ## Prices and tour details on any page
 

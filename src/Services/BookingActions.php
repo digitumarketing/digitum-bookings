@@ -215,7 +215,7 @@ final class BookingActions {
 	 * Vehicle, guide or car for the manifest.
 	 *
 	 * @param int    $booking_id Booking id.
-	 * @param string $vehicle    Free text, e.g. "RZR 4" or "Car 2 – Ahmed".
+	 * @param string $vehicle    Free text, e.g. "Buggy 4" or "Car 2 – Sam".
 	 */
 	public function set_vehicle( int $booking_id, string $vehicle ): void {
 		global $wpdb;

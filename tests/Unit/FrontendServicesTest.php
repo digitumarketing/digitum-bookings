@@ -29,7 +29,7 @@ final class FrontendServicesTest extends TestCase {
 			array(
 				'name'        => 'Aisha Khan',
 				'email'       => 'aisha@example.com',
-				'phone_code'  => '+971',
+				'phone_code'  => '+1',
 				'phone'       => '050 123 4567',
 				'nationality' => 'UAE',
 				'requests'    => 'Child seat please',
@@ -43,7 +43,7 @@ final class FrontendServicesTest extends TestCase {
 		$result = BookingValidator::details( self::details( array( 'marketing' => true, 'hotel' => 'Atlantis', 'room' => '1204' ) ), true );
 
 		$this->assertSame( array(), $result['errors'] );
-		$this->assertSame( '+971 501234567', $result['data']['customer_phone'], 'Country code kept, leading zero dropped.' );
+		$this->assertSame( '+1 501234567', $result['data']['customer_phone'], 'Country code kept, leading zero dropped.' );
 		$this->assertSame( 1, $result['data']['marketing_consent'] );
 		$this->assertSame( 'Atlantis', $result['data']['pickup_address'] );
 	}
@@ -89,9 +89,9 @@ final class FrontendServicesTest extends TestCase {
 			'vat_amount'     => '57.10',
 			'payment_method' => 'arrival',
 			'customer_email' => ' Aisha@Example.com ',
-			'customer_phone' => '+971 501234567',
+			'customer_phone' => '+1 501234567',
 		);
-		$event   = Analytics::booking_event( $booking, array( 'product_id' => 12, 'units' => 1 ), 'RZR 2-seat', '1 hour', true );
+		$event   = Analytics::booking_event( $booking, array( 'product_id' => 12, 'units' => 1 ), 'Buggy 2-seat', '1 hour', true );
 
 		$this->assertSame( 'purchase', $event['event'] );
 		$this->assertSame( 'DGB-261020-ABCD', $event['ecommerce']['transaction_id'] );
@@ -99,7 +99,7 @@ final class FrontendServicesTest extends TestCase {
 		$this->assertSame( 57.1, $event['ecommerce']['tax'] );
 		$this->assertSame( '1 hour', $event['ecommerce']['items'][0]['item_variant'] );
 		$this->assertSame( hash( 'sha256', 'aisha@example.com' ), $event['user_data']['sha256_email_address'] );
-		$this->assertSame( hash( 'sha256', '+971501234567' ), $event['user_data']['sha256_phone_number'] );
+		$this->assertSame( hash( 'sha256', '+1501234567' ), $event['user_data']['sha256_phone_number'] );
 
 		$lead = Analytics::booking_event( array_merge( $booking, array( 'status' => 'quote_requested' ) ), array( 'product_id' => 12 ), 'New Year', '', false );
 		$this->assertSame( 'generate_lead', $lead['event'] );
@@ -109,13 +109,13 @@ final class FrontendServicesTest extends TestCase {
 	}
 
 	public function test_calendar_file(): void {
-		$start = new \DateTimeImmutable( '2026-10-24 15:30:00', new \DateTimeZone( 'Asia/Dubai' ) );
-		$ics   = Ics::build( 'DGB-261020-ABCD', 'Evening; Safari, BBQ', $start, 60, 'Al Aweer desert', str_repeat( 'Long description ', 10 ), 'desertbookings.com' );
+		$start = new \DateTimeImmutable( '2026-10-24 15:30:00', new \DateTimeZone( 'Asia/Tbilisi' ) );
+		$ics   = Ics::build( 'DGB-261020-ABCD', 'Evening; Safari, BBQ', $start, 60, 'Sample Meeting Point', str_repeat( 'Long description ', 10 ), 'example.com' );
 
 		$this->assertStringContainsString( "DTSTART:20261024T113000Z\r\n", $ics );
 		$this->assertStringContainsString( "DTEND:20261024T123000Z\r\n", $ics );
 		$this->assertStringContainsString( 'SUMMARY:Evening\; Safari\, BBQ', $ics );
-		$this->assertStringContainsString( 'UID:dgb-261020-abcd@desertbookings.com', $ics );
+		$this->assertStringContainsString( 'UID:dgb-261020-abcd@example.com', $ics );
 		foreach ( explode( "\r\n", $ics ) as $line ) {
 			$this->assertLessThanOrEqual( 75, strlen( $line ), 'Lines are folded at 75 octets.' );
 		}

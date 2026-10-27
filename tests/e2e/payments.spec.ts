@@ -17,7 +17,7 @@ async function fakeSdks( page: Page ) {
 }
 
 async function book( page: Page, method: RegExp ): Promise< Locator > {
-	await page.goto( path( tours.rzr.url ) );
+	await page.goto( path( tours.buggy.url ) );
 	const w = page.locator( '[data-dgb-widget]' );
 	await chooseRide( w );
 	await fillDetails( w );
@@ -52,7 +52,7 @@ test.describe( 'payments', () => {
 	test.beforeEach( async ( { page } ) => fakeSdks( page ) );
 
 	test( 'card: a declined card, then a good one confirms the booking', async ( { page } ) => {
-		await page.goto( path( tours.rzr.url ) );
+		await page.goto( path( tours.buggy.url ) );
 		const w = page.locator( '[data-dgb-widget]' );
 		await chooseRide( w );
 		await fillDetails( w );
@@ -93,7 +93,7 @@ test.describe( 'payments', () => {
 	} );
 
 	test( 'card deposit: 20% now, the rest on arrival', async ( { page } ) => {
-		await page.goto( path( tours.rzr.url ) );
+		await page.goto( path( tours.buggy.url ) );
 		const w = page.locator( '[data-dgb-widget]' );
 		await chooseRide( w );
 		await fillDetails( w );
@@ -205,7 +205,7 @@ test.describe( 'phone', () => {
 	test.beforeEach( async ( { page } ) => fakeSdks( page ) );
 
 	test( 'card payment from the booking sheet', async ( { page } ) => {
-		await page.goto( path( tours.rzr.url ) );
+		await page.goto( path( tours.buggy.url ) );
 		await page.locator( '[data-dgb-sticky] [data-dgb-open]' ).click();
 		const w = page.locator( '[data-dgb-widget]' );
 		const next = w.locator( '[data-dgb-next]' );

@@ -43,6 +43,7 @@
   },
   "scripts": {
     "lint": "phpcs",
+    "check:generic": "php bin/check-generic.php",
     "lint:fix": "phpcbf",
     "test": "phpunit",
     "test:integration": "php tests/Integration/run.php",

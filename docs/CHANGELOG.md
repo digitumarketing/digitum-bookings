@@ -2,6 +2,9 @@
 
 ## 0.8.0 (generic gap fixes)
 
+Everything new is off by default.
+
+
 - **Demo packs** replace the built-in demo import: optional JSON files in `demo/` (format in docs/DEMO-PACKS.md; more can be registered with the `dgb_demo_packs` filter). Nothing is created on activation or upgrade. Tools lists the packs with what each creates; import asks for confirmation, is idempotent, and only one pack can be active. Every record is tagged with its pack; settings the pack changes are backed up first. **Remove demo data** deletes exactly what the pack created and restores the settings; demo tours that were edited or booked are listed with a keep-or-delete choice, and bookings are never deleted. An admin reminder shows while demo data is active.
 - The desert tours demo pack (`demo/desert-tours.json`) has the updated prices and session times, morning-only sessions for rentals, pay on arrival only, and an inactive “free hotel pickup on 2 or more vehicles” offer.
 - **Second display currency** (Settings › Currency & VAT, off by default): currency, exchange rate, rounding and wording (“about {amount}”). The widget (from price and live total), the mobile bar, price tables, the confirmation page and llms.txt show the approximate amount next to the price; charging, totals, emails, receipts and structured data stay in the site currency. More currencies to choose from (including ones without decimals such as JPY).
@@ -10,6 +13,7 @@
 - **Tour details for page builders**: `[dgb_from_price]`, `[dgb_price_table]`, `[dgb_tour_list]` and `[dgb_tour_facts]` shortcodes, the matching Gutenberg blocks (From price, Price table, Tour list, Tour facts), Elementor widgets (price table, tour list, tour facts) and Elementor dynamic tags (from price, minimum age, seats, pickup policy, meeting point, map link, next pickup window). Values come from `QuoteService` and the tour's settings (offers and the second currency included); `id` defaults to the current tour; BEM classes under `.dgb-`; one inline stylesheet under 1 KB per page.
 - **Mobile sticky bar modes** (Settings › General): Off, On, or On and hide the theme's own bar on tour pages (by CSS selector, inline CSS on tour pages only). `body.dgb-has-sticky-bar` while the plugin's bar shows, with bottom padding so the bar never covers the end of the page; `dgb_sticky_bar_enabled` filter. The old on/off setting is carried over.
 - **Widget theming** (Settings › Branding): text on the accent colour, text, muted text, border and panel colours, corner radius, button text transform and font (theme font or a custom font family; no web fonts are loaded). Empty fields keep the defaults; values become CSS variables also used by the tour detail outputs. A contrast warning (WCAG AA) on the Branding tab. Every CSS variable and class is documented in the admin guide.
+- **Generic by default**: no client content outside demo packs. A new install has empty business details, no tours, zones, meeting points, coupons or offers, VAT 0%, no default phone country code and no PayPal exchange rate; the currency starts as WooCommerce's, else the site language's country, else USD. Sites updating from 0.7 keep the currency, VAT rate and PayPal rate they ran with. `bin/check-generic.php` fails the build when client-specific strings appear outside `demo/`; tests use neutral names (“Sample Tour”). More currencies, including ones without decimals.
 - Database schema 1.6.0: `dgb_offers` table, `demo_pack` columns, offer columns on booking items.
 
 ## 0.7.0 (M7 Release)

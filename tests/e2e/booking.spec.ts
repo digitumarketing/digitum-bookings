@@ -5,13 +5,13 @@ test.describe( 'desktop', () => {
 	test.skip( ( { isMobile } ) => isMobile, 'desktop layout' );
 
 	test( 'per-vehicle booking with hotel pickup, paid on arrival', async ( { page } ) => {
-		await page.goto( path( tours.rzr.url ) );
+		await page.goto( path( tours.buggy.url ) );
 		const w = page.locator( '[data-dgb-widget]' );
 		await expect( w.locator( '.dgb-from' ) ).toContainText( '699' );
 
 		await chooseRide( w );
 		await w.getByRole( 'radio', { name: /^Hotel pickup/ } ).check();
-		await w.getByLabel( 'Pickup area' ).selectOption( { label: 'Dubai' } );
+		await w.getByLabel( 'Pickup area' ).selectOption( { label: 'North Zone' } );
 		await w.getByLabel( 'Hotel or address' ).fill( 'Test Hotel, Marina' );
 		await expect( w.locator( '[data-dgb-window]' ) ).toContainText( 'Pickup' );
 		await expect( w.locator( '[data-dgb-breakdown]' ) ).toContainText( '1,199.00' );
@@ -49,11 +49,11 @@ test.describe( 'desktop', () => {
 	} );
 
 	test( 'bank transfer with a 20% deposit', async ( { page } ) => {
-		await page.goto( path( tours.rzr.url ) );
+		await page.goto( path( tours.buggy.url ) );
 		const w = page.locator( '[data-dgb-widget]' );
 		await chooseRide( w );
 		await w.getByRole( 'radio', { name: /^Hotel pickup/ } ).check();
-		await w.getByLabel( 'Pickup area' ).selectOption( { label: 'Dubai' } );
+		await w.getByLabel( 'Pickup area' ).selectOption( { label: 'North Zone' } );
 		await w.getByLabel( 'Hotel or address' ).fill( 'Test Hotel' );
 		await fillDetails( w );
 		await w.getByRole( 'radio', { name: /^Bank transfer/ } ).check();
@@ -70,20 +70,20 @@ test.describe( 'desktop', () => {
 		await expect( confirmation ).toContainText( '239.80' );
 	} );
 
-	test( 'Abu Dhabi pickup is refused with the meeting point instead', async ( { page } ) => {
-		await page.goto( path( tours.rzr.url ) );
+	test( 'Far Zone pickup is refused with the meeting point instead', async ( { page } ) => {
+		await page.goto( path( tours.buggy.url ) );
 		const w = page.locator( '[data-dgb-widget]' );
 		await chooseRide( w );
 		await w.getByRole( 'radio', { name: /^Hotel pickup/ } ).check();
-		await w.getByLabel( 'Pickup area' ).selectOption( { label: 'Abu Dhabi' } );
-		await expect( w.locator( '[data-dgb-zone-note]' ) ).toContainText( 'not available from Abu Dhabi' );
+		await w.getByLabel( 'Pickup area' ).selectOption( { label: 'Far Zone' } );
+		await expect( w.locator( '[data-dgb-zone-note]' ) ).toContainText( 'not available from Far Zone' );
 		await expect( w.getByLabel( 'Hotel or address' ) ).toBeHidden();
-		await expect( w.locator( '[data-dgb-breakdown]' ) ).toContainText( 'Pickup is not available from Abu Dhabi' );
+		await expect( w.locator( '[data-dgb-breakdown]' ) ).toContainText( 'Pickup is not available from Far Zone' );
 		await expect( w.locator( '[data-dgb-breakdown]' ) ).toContainText( '899.00' );
 	} );
 
 	test( 'errors are shown, announced and focused', async ( { page } ) => {
-		await page.goto( path( tours.rzr.url ) );
+		await page.goto( path( tours.buggy.url ) );
 		const w = page.locator( '[data-dgb-widget]' );
 		await expect( w.locator( '.dgb-day' ).first() ).toBeVisible();
 		await w.locator( '[data-dgb-submit]' ).click();
@@ -100,7 +100,7 @@ test.describe( 'desktop', () => {
 	} );
 
 	test( 'calendar works with the keyboard', async ( { page } ) => {
-		await page.goto( path( tours.rzr.url ) );
+		await page.goto( path( tours.buggy.url ) );
 		const w = page.locator( '[data-dgb-widget]' );
 		const first = w.locator( '.dgb-day[tabindex="0"]' );
 		await first.focus();
@@ -120,7 +120,7 @@ test.describe( 'desktop', () => {
 		await expect( w.locator( '[data-step="pay"]' ) ).toHaveCount( 0 );
 		await pickTomorrow( w );
 		await w.getByRole( 'radio', { name: /^Evening/ } ).check();
-		await w.getByLabel( 'Pickup area' ).selectOption( { label: 'Dubai' } );
+		await w.getByLabel( 'Pickup area' ).selectOption( { label: 'North Zone' } );
 		await w.getByLabel( 'Hotel or address' ).fill( 'Test Hotel' );
 		await fillDetails( w );
 		await expect( w.locator( '[data-dgb-submit]' ) ).toHaveText( 'Request a quote' );
@@ -135,7 +135,7 @@ test.describe( 'phone', () => {
 	test.skip( ( { isMobile } ) => ! isMobile, 'phone layout' );
 
 	test( 'sticky bar never covers the end of the page; can replace the theme’s bar', async ( { page } ) => {
-		await page.goto( path( tours.rzr.url ) );
+		await page.goto( path( tours.buggy.url ) );
 		await expect( page.locator( 'body' ) ).toHaveClass( /dgb-has-sticky-bar/ );
 		const bar = page.locator( '[data-dgb-sticky]' );
 		await expect( bar ).toBeVisible();
@@ -155,7 +155,7 @@ test.describe( 'phone', () => {
 	} );
 
 	test( 'sticky bar opens a stepped booking sheet', async ( { page } ) => {
-		await page.goto( path( tours.rzr.url ) );
+		await page.goto( path( tours.buggy.url ) );
 		const w = page.locator( '[data-dgb-widget]' );
 		await expect( w.locator( '[data-dgb-panel]' ) ).toBeHidden();
 		const sticky = page.locator( '[data-dgb-sticky] [data-dgb-open]' );

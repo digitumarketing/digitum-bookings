@@ -18,18 +18,38 @@ final class SettingsTest extends TestCase {
 		$this->assertSame( 'own', $defaults['general']['product_mode'] );
 		$this->assertSame( 'dgb_tour', $defaults['general']['own_cpt_key'] );
 		$this->assertSame( 'tour', $defaults['general']['own_cpt_slug'] );
-		$this->assertSame( 'AED', $defaults['currency']['currency'] );
-		$this->assertSame( 5, $defaults['currency']['vat_rate'] );
+		$this->assertSame( 'USD', $defaults['currency']['currency'], 'No WooCommerce and no locale country: USD.' );
+		$this->assertSame( 0, $defaults['currency']['vat_rate'], 'No client defaults: no VAT until the owner sets it.' );
+		$this->assertSame( '', $defaults['general']['business_name'] );
+		$this->assertSame( '', $defaults['general']['country_code'] );
+		$this->assertSame( 0, $defaults['payments']['paypal_rate'] );
 		$this->assertFalse( $defaults['payments']['deposit_enabled'], 'Deposits are off until the owner turns them on.' );
 		$this->assertSame( 24, $defaults['payments']['bank_hold_hours'] );
 		$this->assertFalse( $defaults['privacy']['delete_on_uninstall'], 'Uninstall keeps data by default.' );
 		$this->assertArrayNotHasKey( 'front_credit', $defaults['branding'], 'The Digitum credit is always on, not a setting.' );
 	}
 
+	public function test_upgrade_from_an_older_version_keeps_the_old_defaults(): void {
+		$this->options[ Settings::OPTION ] = array( 'currency' => array( 'vat_mode' => 'inclusive' ) );
+		Settings::upgrade( '0.7.0' );
+		$this->assertSame( 'AED', $this->options[ Settings::OPTION ]['currency']['currency'] );
+		$this->assertSame( 5, $this->options[ Settings::OPTION ]['currency']['vat_rate'] );
+		$this->assertSame( 3.6725, $this->options[ Settings::OPTION ]['payments']['paypal_rate'] );
+		$this->options[ Settings::OPTION ] = array( 'currency' => array( 'currency' => 'EUR' ) );
+		Settings::upgrade( '0.7.0' );
+		$this->assertSame( 'EUR', $this->options[ Settings::OPTION ]['currency']['currency'], 'Saved values stay.' );
+		$this->options[ Settings::OPTION ] = array( 'currency' => array( 'vat_mode' => 'inclusive' ) );
+		Settings::upgrade( '0.8.0' );
+		$this->assertArrayNotHasKey( 'currency', $this->options[ Settings::OPTION ]['currency'], 'Not after 0.8.0.' );
+		unset( $this->options[ Settings::OPTION ] );
+		Settings::upgrade( '0.7.0' );
+		$this->assertArrayNotHasKey( Settings::OPTION, $this->options, 'A site without settings gets the new defaults.' );
+	}
+
 	public function test_all_merges_stored_values_over_defaults_and_drops_unknown_keys(): void {
 		$this->options[ Settings::OPTION ] = array(
 			'general' => array(
-				'business_name' => 'Desert Bookings',
+				'business_name' => 'Sample Tours',
 				'unknown'       => 'x',
 			),
 			'bogus'   => array( 'a' => 1 ),
@@ -37,7 +57,7 @@ final class SettingsTest extends TestCase {
 
 		$all = ( new Settings() )->all();
 
-		$this->assertSame( 'Desert Bookings', $all['general']['business_name'] );
+		$this->assertSame( 'Sample Tours', $all['general']['business_name'] );
 		$this->assertSame( 'tour', $all['general']['own_cpt_slug'] );
 		$this->assertArrayNotHasKey( 'unknown', $all['general'] );
 		$this->assertArrayNotHasKey( 'bogus', $all );
@@ -96,7 +116,7 @@ final class SettingsTest extends TestCase {
 			'number below min'                => array( array( 'type' => 'number', 'min' => 5, 'max' => 120, 'step' => 1, 'default' => 15 ), '1', 5 ),
 			'number with decimals'            => array( array( 'type' => 'number', 'min' => 0, 'max' => 50, 'step' => 0.01, 'default' => 5 ), '5.555', 5.56 ),
 			'number not numeric'              => array( array( 'type' => 'number', 'default' => 15 ), 'abc', 15 ),
-			'tel strips letters'              => array( array( 'type' => 'tel', 'default' => '' ), '+971 55 526 0561 call me', '+971 55 526 0561' ),
+			'tel strips letters'              => array( array( 'type' => 'tel', 'default' => '' ), '+1 555 0100 call me', '+1 555 0100' ),
 			'colour invalid uses default'     => array( array( 'type' => 'color', 'default' => '#B45309' ), 'red', '#B45309' ),
 			'key is shortened to 20 chars'    => array( array( 'type' => 'key', 'default' => 'dgb_tour' ), 'My_Very_Long_Post_Type_Name', 'my_very_long_post_ty' ),
 			'empty slug uses default'         => array( array( 'type' => 'slug', 'default' => 'tour' ), '', 'tour' ),

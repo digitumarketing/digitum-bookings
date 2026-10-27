@@ -30,7 +30,7 @@ final class DomainTest extends TestCase {
 		$this->assertSame( 'pickup', $addon->condition_key );
 		$this->assertNull( Addon::from_row( array( 'price' => '' ) )->price );
 
-		$zone = Zone::from_row( array( 'id' => '2', 'name' => 'Abu Dhabi', 'allowed' => '0', 'surcharge' => null ) );
+		$zone = Zone::from_row( array( 'id' => '2', 'name' => 'Far Zone', 'allowed' => '0', 'surcharge' => null ) );
 		$this->assertFalse( $zone->allowed );
 		$this->assertNull( $zone->surcharge );
 	}

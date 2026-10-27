@@ -18,7 +18,7 @@ final class Zone {
 	 * Constructor.
 	 *
 	 * @param int         $id        Row id.
-	 * @param string      $name      Name, e.g. "Dubai".
+	 * @param string      $name      Name, e.g. "North Zone".
 	 * @param bool        $allowed   Whether pickup is offered from this zone.
 	 * @param string|null $surcharge Extra charge per booking (decimal string).
 	 * @param string      $notes     Notes shown to guests (e.g. why pickup is not offered).

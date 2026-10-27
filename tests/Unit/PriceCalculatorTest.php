@@ -202,7 +202,7 @@ final class PriceCalculatorTest extends TestCase {
 				self::variant( '899.00' ),
 				array(
 					'pickup' => true,
-					'zone'   => new Zone( 1, 'Dubai', true ),
+					'zone'   => new Zone( 1, 'North Zone', true ),
 					'addons' => array( self::pickup_addon() ),
 				)
 			)
@@ -226,7 +226,7 @@ final class PriceCalculatorTest extends TestCase {
 				self::variant( '99.00' ),
 				array(
 					'pickup' => true,
-					'zone'   => new Zone( 3, 'Sharjah', true, '25.00' ),
+					'zone'   => new Zone( 3, 'East Zone', true, '25.00' ),
 					'addons' => array( self::pickup_addon() ),
 				)
 			)
@@ -252,13 +252,13 @@ final class PriceCalculatorTest extends TestCase {
 				$v,
 				array(
 					'pickup' => true,
-					'zone'   => new Zone( 9, 'Abu Dhabi', false, '50.00' ),
+					'zone'   => new Zone( 9, 'Far Zone', false, '50.00' ),
 					'addons' => array( self::pickup_addon() ),
 				)
 			)
 		);
 		$this->assertSame( array( 'zone_not_allowed' ), $abu_dhabi->error_codes() );
-		$this->assertSame( array( 'zone' => 'Abu Dhabi' ), $abu_dhabi->errors[0]['params'] );
+		$this->assertSame( array( 'zone' => 'Far Zone' ), $abu_dhabi->errors[0]['params'] );
 		$this->assertSame( 89900, $abu_dhabi->total, 'No pickup charge or surcharge for a zone without pickup.' );
 	}
 

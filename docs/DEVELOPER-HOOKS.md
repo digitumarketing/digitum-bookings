@@ -359,7 +359,7 @@ Set a URL and a signing secret in Settings › Emails. Events: `booking.created`
   "event": "booking.status_changed",
   "sent_at": "2026-10-21T16:15:25+00:00",
   "data": { "from": "pending_payment", "to": "confirmed", "reason": "payment_received" },
-  "booking": { "id": 12, "reference": "DGB-261021-AB12", "status": "confirmed", "total": 899, "discount": 0, "coupon": "", "offer": null, "customer": { "name": "…", "email": "…", "phone": "…" }, "tour": { "name": "…", "date": "2026-10-24", "session": "Evening" }, "pickup": { "zone": "Dubai", "hotel": "…", "window": "2:15 pm – 2:45 pm" }, "attribution": { "source": "ads", "gclid": "…" }, "booking_link": "…", "admin_link": "…" }
+  "booking": { "id": 12, "reference": "DGB-261021-AB12", "status": "confirmed", "total": 899, "discount": 0, "coupon": "", "offer": null, "customer": { "name": "…", "email": "…", "phone": "…" }, "tour": { "name": "…", "date": "2026-10-24", "session": "Evening" }, "pickup": { "zone": "North Zone", "hotel": "…", "window": "2:15 pm – 2:45 pm" }, "attribution": { "source": "ads", "gclid": "…" }, "booking_link": "…", "admin_link": "…" }
 }
 ```
 

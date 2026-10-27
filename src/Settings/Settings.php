@@ -157,7 +157,8 @@ final class Settings {
 				'country_code'     => array(
 					'type'    => 'tel',
 					'label'   => __( 'Default phone country code', 'digitum-bookings' ),
-					'default' => '+971',
+					'help'    => __( 'Filled in for guests, for example +44. Empty: guests type it.', 'digitum-bookings' ),
+					'default' => '',
 				),
 			),
 			'currency'  => array(
@@ -165,7 +166,7 @@ final class Settings {
 					'type'    => 'select',
 					'label'   => __( 'Currency', 'digitum-bookings' ),
 					'options' => array( self::class, 'currencies' ),
-					'default' => 'AED',
+					'default' => self::default_currency(),
 				),
 				'vat_mode'        => array(
 					'type'    => 'select',
@@ -183,7 +184,7 @@ final class Settings {
 					'min'     => 0,
 					'max'     => 50,
 					'step'    => 0.01,
-					'default' => 5,
+					'default' => 0,
 				),
 				'trn'             => array(
 					'type'    => 'text',
@@ -360,11 +361,11 @@ final class Settings {
 					'type'    => 'number',
 					'label'   => __( 'Exchange rate', 'digitum-bookings' ),
 					'suffix'  => __( 'of your currency = 1 unit of the PayPal currency', 'digitum-bookings' ),
-					'help'    => __( 'For AED and USD the official rate is 3.6725. Only used when your currency is not accepted by PayPal.', 'digitum-bookings' ),
-					'min'     => 0.0001,
+					'help'    => __( 'Only used when your currency is not accepted by PayPal; PayPal stays unavailable for it until a rate is set.', 'digitum-bookings' ),
+					'min'     => 0,
 					'max'     => 100000,
 					'step'    => 0.0001,
-					'default' => 3.6725,
+					'default' => 0,
 				),
 				'deposit_heading'            => array(
 					'type'    => 'heading',
@@ -748,6 +749,28 @@ final class Settings {
 	}
 
 	/**
+	 * Default currency: WooCommerce's when it is installed, else the one of the site language's country
+	 * (en_GB → GBP, de_DE → EUR), else USD.
+	 */
+	public static function default_currency(): string {
+		static $code = null;
+		if ( null !== $code ) {
+			return $code;
+		}
+		$known = self::currencies();
+		$woo   = strtoupper( (string) get_option( 'woocommerce_currency', '' ) );
+		if ( isset( $known[ $woo ] ) ) {
+			return $code = $woo; // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found -- cache and return.
+		}
+		$code = 'USD';
+		if ( class_exists( '\NumberFormatter' ) && function_exists( 'get_locale' ) ) {
+			$local = ( new \NumberFormatter( (string) get_locale(), \NumberFormatter::CURRENCY ) )->getTextAttribute( \NumberFormatter::CURRENCY_CODE );
+			$code  = isset( $known[ (string) $local ] ) ? (string) $local : $code;
+		}
+		return $code;
+	}
+
+	/**
 	 * Second currency choices (none first).
 	 *
 	 * @return array<string, string>
@@ -831,16 +854,37 @@ final class Settings {
 
 	/**
 	 * Carry settings of older versions over to their new form (runs once after an update).
+	 *
+	 * @param string $from Version that ran before ('' when unknown).
 	 */
-	public static function upgrade(): void {
+	public static function upgrade( string $from = '' ): void {
 		$stored = get_option( self::OPTION );
-		if ( ! is_array( $stored ) || ! isset( $stored['general'] ) || ! is_array( $stored['general'] ) ) {
+		if ( ! is_array( $stored ) ) {
 			return;
 		}
+		$before = $stored;
 		// 0.8.0: the "Mobile sticky bar" checkbox became a mode.
-		if ( array_key_exists( 'sticky_bar', $stored['general'] ) && ! isset( $stored['general']['sticky_mode'] ) ) {
+		if ( isset( $stored['general'] ) && is_array( $stored['general'] ) && array_key_exists( 'sticky_bar', $stored['general'] ) && ! isset( $stored['general']['sticky_mode'] ) ) {
 			$stored['general']['sticky_mode'] = empty( $stored['general']['sticky_bar'] ) ? 'off' : 'plugin';
 			unset( $stored['general']['sticky_bar'] );
+		}
+		// 0.8.0: generic defaults. A site set up before keeps the values it ran with, even if never saved.
+		if ( '' !== $from && version_compare( $from, '0.8.0', '<' ) ) {
+			foreach ( array(
+				'currency' => array(
+					'currency' => 'AED',
+					'vat_rate' => 5,
+				),
+				'payments' => array( 'paypal_rate' => 3.6725 ),
+			) as $tab => $values ) {
+				foreach ( $values as $key => $old ) {
+					if ( ! isset( $stored[ $tab ][ $key ] ) ) {
+						$stored[ $tab ][ $key ] = $old;
+					}
+				}
+			}
+		}
+		if ( $stored !== $before ) {
 			update_option( self::OPTION, $stored );
 		}
 	}

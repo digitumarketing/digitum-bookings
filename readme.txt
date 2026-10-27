@@ -4,7 +4,7 @@ Tags: bookings, tours, activities, reservations, deposits
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.7.0
+Stable tag: 0.8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ Tour and activity bookings: live prices, sessions with pickup times, deposits, c
 
 == Description ==
 
-Digitum Bookings adds online booking to tour and activity sites: desert safaris, buggy and quad rentals, city tours, boat trips, anything sold by the person, the vehicle or the group. It is built and supported by [Digitum Marketing Ltd](https://digitum.marketing/).
+Digitum Bookings adds online booking to tour and activity sites: safaris, buggy and quad rentals, city tours, boat trips, anything sold by the person, the vehicle or the group. It is built and supported by [Digitum Marketing Ltd](https://digitum.marketing/).
 
 = Tours and prices =
 
@@ -61,7 +61,7 @@ Guest data stays on your site and is never deleted automatically. WordPress's Ex
 3. If your site already has tours under /tour/ (for example from the Traveler theme), the plugin attaches to them on activation; check Settings › General › “Tours come from”. Otherwise it uses its own Tours post type.
 4. Fill in Digitum Bookings › Settings: business details, currency and VAT, payments, emails.
 5. Add pickup zones and meeting points, then open a tour, fill in its Booking settings and tick “Take bookings for this tour”.
-6. Optional: Digitum Bookings › Tools imports Traveler theme tours, CSV files or the Desert Bookings demo data.
+6. Optional: Digitum Bookings › Tools imports Traveler theme tours, CSV files or an optional demo pack (sample data you can remove again).
 
 New versions appear under Dashboard › Updates like any other plugin.
 
@@ -128,12 +128,13 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 * Automatic offers (discounts without a code) with conditions, priorities and an optional “add one more” hint.
 * From price, price table, tour lists and key facts as shortcodes, blocks, Elementor widgets and dynamic tags.
 * Mobile sticky bar can replace the theme's own bar; more widget colours, corner radius and font in Settings › Branding.
+* Generic defaults: a new install has no client content, no VAT and the site's own currency.
 
 = 0.7.0 =
 * Updates from GitHub releases (Dashboard › Updates, automatic updates, private repository token).
 * Arabic translation and right-to-left fixes.
 * Coupons screen and coupon field in the booking widget; Reports by tour and source with conversion and cancellation rate.
-* Import Desert Bookings demo data (Tools).
+* Demo data import (Tools).
 * Digitum branding everywhere: “Booking by Digitum” under every widget, no white label.
 
 = 0.6.0 =
@@ -172,6 +173,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 * Foundation: settings, tour post type (attach or own), booking settings box, database tables, roles.
 
 == Upgrade Notice ==
+
+= 0.8.0 =
+Demo packs, automatic offers, a second display currency, rating source, page-builder outputs and theming. The database is updated automatically (schema 1.6.0). If you used the dgb_schema_rating filter, set Settings › Schema & SEO › Rating source to Custom.
 
 = 0.7.0 =
 Adds GitHub updates, Arabic, coupons and reports. The database is updated automatically (schema 1.5.0).

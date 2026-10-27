@@ -95,19 +95,19 @@ step(
 write_router( $site );
 
 // 20 bookings in one session a week ahead (manifest, calendar, check-in) and a guide account.
-$manifest_date = ( new DateTimeImmutable( '+7 days', new DateTimeZone( 'Asia/Dubai' ) ) )->format( 'Y-m-d' );
+$manifest_date = ( new DateTimeImmutable( '+7 days', new DateTimeZone( 'Asia/Tbilisi' ) ) )->format( 'Y-m-d' );
 $manifest      = step(
 	$site,
 	'bulk_book',
 	array(
 		'count'   => 20,
-		'product' => $demo['tours']['rzr']['id'],
+		'product' => $demo['tours']['buggy']['id'],
 		'input'   => array(
-			'variant_id' => $demo['tours']['rzr']['variants']['2 hours'],
+			'variant_id' => $demo['tours']['buggy']['variants']['2 hours'],
 			'date'       => $manifest_date,
-			'session_id' => $demo['tours']['rzr']['sessions']['Evening'],
+			'session_id' => $demo['tours']['buggy']['sessions']['Evening'],
 		),
-		'zone'    => $demo['zones']['Dubai'],
+		'zone'    => $demo['zones']['North Zone'],
 	)
 );
 step( $site, 'create_user', array( 'login' => 'guide1', 'role' => 'dgb_guide' ) );

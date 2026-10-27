@@ -55,8 +55,8 @@ if ( scenario( 'A' ) ) {
 	check( $r['admin_settings'], 'administrator can manage settings' );
 	check( array( 'read', 'dgb_view_manifest', 'dgb_check_in' ) === $r['guide_caps'], 'guide only sees manifest and check-in' );
 
-	$post = step( $site, 'create_post', array( 'type' => 'dgb_tour', 'title' => '2-Seater Polaris RZR', 'slug' => '2-seater-polaris-rzr-1000-cc-buggy' ) );
-	check( 'http://example.test/tour/2-seater-polaris-rzr-1000-cc-buggy/' === $post['permalink'], 'tour URL is /tour/slug/' );
+	$post = step( $site, 'create_post', array( 'type' => 'dgb_tour', 'title' => '2-Seater Sample Buggy', 'slug' => '2-seater-sample-buggy' ) );
+	check( 'http://example.test/tour/2-seater-sample-buggy/' === $post['permalink'], 'tour URL is /tour/slug/' );
 	$r = step( $site, 'inspect', array( 'post' => $post['id'] ) );
 	check( $r['resolves_to'] === $post['id'], 'tour URL resolves to the tour' );
 
@@ -99,10 +99,10 @@ if ( scenario( 'A' ) ) {
 	$r = step( $site, 'render_settings', array( 'tab' => 'payments', 'admin' => true ) );
 	check( $r['fields'] >= 14, 'Payments settings tab renders its fields' );
 
-	$r = step( $site, 'save_settings', array( 'input' => array( '_tab' => 'general', 'general' => array( 'product_mode' => 'own', 'own_cpt_key' => 'dgb_tour', 'own_cpt_slug' => 'experiences', 'business_name' => 'Desert Bookings' ) ) ) );
+	$r = step( $site, 'save_settings', array( 'input' => array( '_tab' => 'general', 'general' => array( 'product_mode' => 'own', 'own_cpt_key' => 'dgb_tour', 'own_cpt_slug' => 'experiences', 'business_name' => 'Sample Tours' ) ) ) );
 	check( 'experiences' === $r['general']['own_cpt_slug'] && $r['flush_pending'], 'slug change asks for one rewrite flush' );
 	$r = step( $site, 'inspect', array( 'post' => $post['id'] ) );
-	check( 'http://example.test/experiences/2-seater-polaris-rzr-1000-cc-buggy/' === $r['permalink'] && $r['resolves_to'] === $post['id'], 'new slug works after the flush' );
+	check( 'http://example.test/experiences/2-seater-sample-buggy/' === $r['permalink'] && $r['resolves_to'] === $post['id'], 'new slug works after the flush' );
 	check( false === $r['flush_pending'], 'flush flag cleared' );
 
 	$r = step( $site, 'uninstall' );
@@ -121,9 +121,9 @@ if ( scenario( 'B' ) ) {
 	$mu = "{$site}/wp-content/mu-plugins/st-tours.php";
 	file_put_contents( $mu, "<?php\nadd_action( 'init', function () { register_post_type( 'st_tours', array( 'public' => true, 'label' => 'Tours', 'rewrite' => array( 'slug' => 'tour' ) ) ); } );\n" );
 	step( $site, 'flush' );
-	$post   = step( $site, 'create_post', array( 'type' => 'st_tours', 'title' => 'Evening Desert Safari', 'slug' => 'evening-desert-safari-dubai' ) );
+	$post   = step( $site, 'create_post', array( 'type' => 'st_tours', 'title' => 'Evening Sample Tour', 'slug' => 'evening-sample-tour-north-zone' ) );
 	$before = $post['permalink'];
-	check( 'http://example.test/tour/evening-desert-safari-dubai/' === $before, 'existing tour URL before activation' );
+	check( 'http://example.test/tour/evening-sample-tour-north-zone/' === $before, 'existing tour URL before activation' );
 
 	$r = step( $site, 'activate' );
 	check( $r['active'], 'plugin activates' );
@@ -146,26 +146,27 @@ if ( scenario( 'C' ) ) {
 	$site = make_site( 'm2' );
 	step( $site, 'install' );
 	step( $site, 'activate' );
+	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'currency' => 'AED', 'vat_rate' => 5 ) ) ) );
 
 	$z = step(
 		$site,
 		'setup_zones',
 		array(
 			'zones'    => array(
-				array( 'name' => 'Dubai', 'allowed' => '1', 'sort' => '1' ),
-				array( 'name' => 'Sharjah', 'allowed' => '1', 'sort' => '2' ),
-				array( 'name' => 'Abu Dhabi', 'allowed' => '', 'notes' => 'Meet us at Al Aweer', 'sort' => '3' ),
+				array( 'name' => 'North Zone', 'allowed' => '1', 'sort' => '1' ),
+				array( 'name' => 'East Zone', 'allowed' => '1', 'sort' => '2' ),
+				array( 'name' => 'Far Zone', 'allowed' => '', 'notes' => 'Meet us at Sample Point', 'sort' => '3' ),
 			),
-			'location' => array( 'name' => 'Al Aweer desert', 'lat' => '25.1', 'lng' => '55.55', 'map_url' => 'https://maps.example/al-aweer', 'map_bad' => 'x' ),
+			'location' => array( 'name' => 'Sample Meeting Point', 'lat' => '25.1', 'lng' => '55.55', 'map_url' => 'https://maps.example/meeting-point', 'map_bad' => 'x' ),
 		)
 	);
-	check( array( 'Dubai', 'Sharjah', 'Abu Dhabi' ) === array_column( $z['zones'], 'name' ), 'zones saved in order' );
-	check( 0 === (int) $z['zones'][2]['allowed'], 'Abu Dhabi saved without pickup' );
-	check( 25.1 === (float) $z['location']['lat'] && 'https://maps.example/al-aweer' === $z['location']['map_url'], 'meeting point saved' );
+	check( array( 'North Zone', 'East Zone', 'Far Zone' ) === array_column( $z['zones'], 'name' ), 'zones saved in order' );
+	check( 0 === (int) $z['zones'][2]['allowed'], 'Far Zone saved without pickup' );
+	check( 25.1 === (float) $z['location']['lat'] && 'https://maps.example/meeting-point' === $z['location']['map_url'], 'meeting point saved' );
 	$r = step( $site, 'render_zones', array( 'admin' => true ) );
 	check( 4 === $r['rows'] && 2 === $r['forms'] && $r['nonces'] >= 6, 'Pickup zones page lists zones and meeting points with protected forms' );
 
-	$post = step( $site, 'create_post', array( 'type' => 'dgb_tour', 'title' => '2-Seater Polaris RZR 1000', 'slug' => 'rzr-2' ) );
+	$post = step( $site, 'create_post', array( 'type' => 'dgb_tour', 'title' => '2-Seater Sample Buggy', 'slug' => 'buggy-2' ) );
 	$dgb  = array(
 		'product'  => array( 'enabled' => '1', 'pricing_mode' => 'per_vehicle', 'seats_per_unit' => '2', 'pickup_policy' => 'addon', 'cutoff_hours' => '3', 'max_days_ahead' => '120', 'meeting_point_id' => (string) $z['location_id'] ),
 		'variants' => array(
@@ -198,12 +199,12 @@ if ( scenario( 'C' ) ) {
 
 	$now  = '2026-10-20 13:00:00';
 	$base = array( 'variant_id' => $hour_id, 'adults' => 2, 'units' => 1, 'date' => '2026-10-24', 'session_id' => $evening, 'payment_method' => 'stripe' );
-	$q    = step( $site, 'quote', array( 'post' => $post['id'], 'now' => $now, 'input' => $base + array( 'pickup' => true, 'zone_id' => $z['zone_ids']['Dubai'] ) ) );
-	check( '1199.00' === $q['quote']['total'] && '57.10' === $q['quote']['vat'] && $q['quote']['valid'], 'RZR 1 h + Dubai pickup = AED 1,199 incl. AED 57.10 VAT' );
+	$q    = step( $site, 'quote', array( 'post' => $post['id'], 'now' => $now, 'input' => $base + array( 'pickup' => true, 'zone_id' => $z['zone_ids']['North Zone'] ) ) );
+	check( '1199.00' === $q['quote']['total'] && '57.10' === $q['quote']['vat'] && $q['quote']['valid'], 'Buggy 1 h + North Zone pickup = AED 1,199 incl. AED 57.10 VAT' );
 	check( '699.00' === $q['from'], 'From price is the lowest option (AED 699)' );
 
-	$q = step( $site, 'quote', array( 'post' => $post['id'], 'now' => $now, 'input' => $base + array( 'pickup' => true, 'zone_id' => $z['zone_ids']['Abu Dhabi'] ) ) );
-	check( array( 'zone_not_allowed' ) === array_column( $q['quote']['errors'], 'code' ) && '899.00' === $q['quote']['total'], 'Abu Dhabi pickup refused, no pickup charge' );
+	$q = step( $site, 'quote', array( 'post' => $post['id'], 'now' => $now, 'input' => $base + array( 'pickup' => true, 'zone_id' => $z['zone_ids']['Far Zone'] ) ) );
+	check( array( 'zone_not_allowed' ) === array_column( $q['quote']['errors'], 'code' ) && '899.00' === $q['quote']['total'], 'Far Zone pickup refused, no pickup charge' );
 
 	$q = step( $site, 'quote', array( 'post' => $post['id'], 'now' => $now, 'input' => array_merge( $base, array( 'adults' => 3 ) ) ) );
 	check( array( 'too_many_guests' ) === array_column( $q['quote']['errors'], 'code' ), '3 guests in one 2-seater refused' );
@@ -219,7 +220,7 @@ if ( scenario( 'C' ) ) {
 	$q = step( $site, 'quote', array( 'post' => $post['id'], 'now' => $now, 'input' => $base + array( 'pay_deposit' => true ) ) );
 	check( false === $q['quote']['deposit_available'] && '899.00' === $q['quote']['pay_now'], 'no deposit while deposits are off' );
 	step( $site, 'save_settings', array( 'input' => array( '_tab' => 'payments', 'payments' => array( 'deposit_enabled' => '1', 'deposit_percent' => '20', 'deposit_methods' => array( 'stripe', 'paypal', 'bank_transfer' ) ) ) ) );
-	$q = step( $site, 'quote', array( 'post' => $post['id'], 'now' => $now, 'input' => $base + array( 'pickup' => true, 'zone_id' => $z['zone_ids']['Dubai'], 'pay_deposit' => true ) ) );
+	$q = step( $site, 'quote', array( 'post' => $post['id'], 'now' => $now, 'input' => $base + array( 'pickup' => true, 'zone_id' => $z['zone_ids']['North Zone'], 'pay_deposit' => true ) ) );
 	check( '239.80' === $q['quote']['pay_now'] && '959.20' === $q['quote']['due_on_arrival'], '20% deposit: AED 239.80 now, AED 959.20 on arrival' );
 
 	$a = step( $site, 'availability', array( 'post' => $post['id'], 'now' => $now, 'date' => '2026-10-20' ) );
@@ -282,11 +283,11 @@ if ( scenario( 'E' ) ) {
 	step( $site, 'install' );
 	step( $site, 'activate' );
 	$demo = step( $site, 'demo_setup' );
-	$rzr  = $demo['tours']['rzr'];
+	$buggy  = $demo['tours']['buggy'];
 	$ny   = $demo['tours']['newyear'];
 	$day  = $demo['tomorrow'];
 
-	$page = step( $site, 'render_page', array( 'url' => $rzr['url'] ) );
+	$page = step( $site, 'render_page', array( 'url' => $buggy['url'] ) );
 	check( 1 === $page['widget'] && $page['form'] && $page['js'] && $page['css'], 'tour page gets the widget (auto-insert) and its assets' );
 	check( array( 'choose', 'guests', 'pickup', 'extras', 'details', 'pay' ) === $page['steps'], 'widget has the six steps for a per-vehicle tour with pickup and extras' );
 	check( $page['sticky'], 'mobile sticky bar on the tour page' );
@@ -295,47 +296,47 @@ if ( scenario( 'E' ) ) {
 
 	$plain = step( $site, 'render_page', array( 'url' => $demo['blog'], 'shortcode_product' => 0, 'block_product' => 0 ) );
 	check( 0 === $plain['widget'] && ! $plain['js'] && ! $plain['css'], 'pages without a widget load no booking assets' );
-	$plain = step( $site, 'render_page', array( 'url' => $demo['blog'], 'shortcode_product' => 0, 'block_product' => $rzr['id'] ) );
+	$plain = step( $site, 'render_page', array( 'url' => $demo['blog'], 'shortcode_product' => 0, 'block_product' => $buggy['id'] ) );
 	check( false !== strpos( $plain['block'], 'data-dgb-widget' ), 'Booking widget block renders the chosen tour' );
-	$plain = step( $site, 'render_page', array( 'url' => $demo['blog'], 'shortcode_product' => $rzr['id'] ) );
+	$plain = step( $site, 'render_page', array( 'url' => $demo['blog'], 'shortcode_product' => $buggy['id'] ) );
 	check( false !== strpos( $plain['shortcode'], 'data-dgb-widget' ) && $plain['js_after'], '[dgb_booking product="…"] renders the widget and loads its assets on any page' );
 
-	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'availability', 'query' => array( 'product' => $rzr['id'], 'month' => substr( $day, 0, 7 ) ) ) );
+	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'availability', 'query' => array( 'product' => $buggy['id'], 'month' => substr( $day, 0, 7 ) ) ) );
 	check( 200 === $r['status'] && 'open' === $r['data']['days'][ $day ], 'month calendar: tomorrow is open' );
-	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'availability/sessions', 'query' => array( 'product' => $rzr['id'], 'date' => $day ) ) );
+	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'availability/sessions', 'query' => array( 'product' => $buggy['id'], 'date' => $day ) ) );
 	check( array( 'Morning', 'Evening' ) === array_column( $r['data']['sessions'], 'name' ) && $r['data']['sessions'][1]['bookable'], 'sessions for tomorrow' );
-	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'products/' . $rzr['id'] ) );
+	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'products/' . $buggy['id'] ) );
 	check( 200 === $r['status'] && '699.00' === $r['data']['from_price'], 'tour data with From price' );
-	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'products/' . $demo['zones']['Dubai'] ) );
+	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'products/' . $demo['zones']['North Zone'] ) );
 	check( 404 === $r['status'], 'non-tour ids are not exposed' );
 
 	$base = array(
-		'product'        => $rzr['id'],
-		'variant_id'     => $rzr['variants']['1 hour'],
+		'product'        => $buggy['id'],
+		'variant_id'     => $buggy['variants']['1 hour'],
 		'date'           => $day,
-		'session_id'     => $rzr['sessions']['Evening'],
+		'session_id'     => $buggy['sessions']['Evening'],
 		'adults'         => 2,
 		'units'          => 1,
 		'pickup'         => true,
-		'zone_id'        => $demo['zones']['Dubai'],
+		'zone_id'        => $demo['zones']['North Zone'],
 		'hotel'          => 'Test Hotel',
 		'payment_method' => 'arrival',
 		'name'           => 'Test Guest',
 		'email'          => 'guest@example.com',
-		'phone_code'     => '+971',
+		'phone_code'     => '+1',
 		'phone'          => '501234567',
 		'terms'          => true,
 	);
 	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'quote', 'body' => $base ) );
-	check( '1199.00' === $r['data']['total'] && $r['data']['valid'], 'quote: AED 1,199 with Dubai pickup' );
-	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'quote', 'body' => array_merge( $base, array( 'zone_id' => $demo['zones']['Abu Dhabi'] ) ) ) );
-	check( 'zone_not_allowed' === ( $r['data']['errors'][0]['code'] ?? '' ) && false !== strpos( $r['data']['errors'][0]['message'], 'Abu Dhabi' ), 'quote errors come with a guest-facing message' );
+	check( '1199.00' === $r['data']['total'] && $r['data']['valid'], 'quote: AED 1,199 with North Zone pickup' );
+	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'quote', 'body' => array_merge( $base, array( 'zone_id' => $demo['zones']['Far Zone'] ) ) ) );
+	check( 'zone_not_allowed' === ( $r['data']['errors'][0]['code'] ?? '' ) && false !== strpos( $r['data']['errors'][0]['message'], 'Far Zone' ), 'quote errors come with a guest-facing message' );
 
 	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'body' => $base, 'ip' => '10.0.0.1' ) );
 	check( 403 === $r['status'] && 'dgb_nonce' === $r['data']['code'], 'booking without a nonce is refused' );
 	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'body' => array_merge( $base, array( 'dgb_website' => 'http://spam' ) ), 'nonce' => true, 'ip' => '10.0.0.1' ) );
 	check( 400 === $r['status'] && 'dgb_spam' === $r['data']['code'], 'honeypot filled: refused' );
-	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'body' => array( 'product' => $rzr['id'], 'variant_id' => $rzr['variants']['1 hour'], 'adults' => 3, 'units' => 1, 'date' => $day, 'session_id' => $rzr['sessions']['Evening'], 'pickup' => true, 'zone_id' => $demo['zones']['Abu Dhabi'] ), 'nonce' => true, 'ip' => '10.0.0.2' ) );
+	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'body' => array( 'product' => $buggy['id'], 'variant_id' => $buggy['variants']['1 hour'], 'adults' => 3, 'units' => 1, 'date' => $day, 'session_id' => $buggy['sessions']['Evening'], 'pickup' => true, 'zone_id' => $demo['zones']['Far Zone'] ), 'nonce' => true, 'ip' => '10.0.0.2' ) );
 	$fields = array_keys( $r['data']['data']['fields'] ?? array() );
 	sort( $fields );
 	check( 400 === $r['status'] && array( 'email', 'name', 'payment_method', 'phone', 'price_too_many_guests', 'terms', 'zone' ) === $fields, 'invalid booking: every problem reported by field (' . implode( ', ', $fields ) . ')' );
@@ -348,10 +349,10 @@ if ( scenario( 'E' ) ) {
 	parse_str( (string) parse_url( $url, PHP_URL_QUERY ), $qs );
 	$ref = $r['data']['reference'];
 
-	$c = step( $site, 'render_page', array( 'url' => $rzr['url'], 'get' => $qs ) );
+	$c = step( $site, 'render_page', array( 'url' => $buggy['url'], 'get' => $qs ) );
 	check( $c['confirmation'] && ! $c['form'], 'confirmation link shows the booking instead of the form' );
 	check( 1 === $c['credit'], '“Booking by Digitum” under the booking page' );
-	$c = step( $site, 'render_page', array( 'url' => $rzr['url'], 'get' => array( 'dgb_booking' => $ref, 'dgb_key' => str_repeat( 'x', 32 ) ) ) );
+	$c = step( $site, 'render_page', array( 'url' => $buggy['url'], 'get' => array( 'dgb_booking' => $ref, 'dgb_key' => str_repeat( 'x', 32 ) ) ) );
 	check( ! $c['confirmation'] && $c['form'], 'a wrong key shows nothing about the booking' );
 	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'bookings/' . $ref . '/ics', 'query' => array( 'key' => $qs['dgb_key'] ) ) );
 	check( 200 === $r['status'], 'calendar file available with the key' );
@@ -360,11 +361,11 @@ if ( scenario( 'E' ) ) {
 
 	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'body' => array_merge( $base, array( 'payment_method' => 'bank_transfer', 'pay_deposit' => true ) ), 'nonce' => true, 'ip' => '10.0.0.4' ) );
 	check( 'awaiting_transfer' === $r['data']['status'] && false !== strpos( $r['data']['html'], 'AE070331234567890123456' ) && false !== strpos( $r['data']['html'], 'AED 239.80' ), 'bank transfer: held booking, bank details and 20% deposit amount shown' );
-	check( false !== strpos( $r['data']['html'], 'wa.me/971555260561' ), 'WhatsApp link for the transfer screenshot' );
+	check( false !== strpos( $r['data']['html'], 'wa.me/15550100' ), 'WhatsApp link for the transfer screenshot' );
 
 	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'body' => array( 'product' => $ny['id'] ) + $base, 'nonce' => true, 'ip' => '10.0.0.5' ) );
 	check( 400 === $r['status'] && 'dgb_wrong_flow' === $r['data']['code'], 'price-on-request tour cannot be booked directly' );
-	$enquiry = array( 'product' => $ny['id'], 'date' => $day, 'session_id' => $ny['sessions']['Evening'], 'adults' => 6, 'pickup' => true, 'zone_id' => $demo['zones']['Dubai'], 'hotel' => 'Test Hotel', 'name' => 'Lead Guest', 'email' => 'lead@example.com', 'phone' => '501234567', 'phone_code' => '+971', 'terms' => true, 'requests' => 'Group of 6' );
+	$enquiry = array( 'product' => $ny['id'], 'date' => $day, 'session_id' => $ny['sessions']['Evening'], 'adults' => 6, 'pickup' => true, 'zone_id' => $demo['zones']['North Zone'], 'hotel' => 'Test Hotel', 'name' => 'Lead Guest', 'email' => 'lead@example.com', 'phone' => '501234567', 'phone_code' => '+1', 'terms' => true, 'requests' => 'Group of 6' );
 	$r       = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'enquiries', 'body' => $enquiry, 'nonce' => true, 'ip' => '10.0.0.5' ) );
 	check( 201 === $r['status'] && 'quote_requested' === $r['data']['status'] && 'generate_lead' === $r['data']['event']['event'], 'enquiry: quote requested, generate_lead event' );
 	check( false === strpos( $r['data']['html'], 'dgb-money' ), 'enquiry confirmation shows no price' );
@@ -386,7 +387,7 @@ if ( scenario( 'F' ) ) {
 	step( $site, 'install' );
 	step( $site, 'activate' );
 	$demo = step( $site, 'demo_setup' );
-	$rzr  = $demo['tours']['rzr'];
+	$buggy  = $demo['tours']['buggy'];
 	$day  = $demo['tomorrow'];
 	$r    = step( $site, 'payments_setup' );
 	check( array( 'stripe', 'paypal', 'bank_transfer', 'arrival' ) === $r['methods'], 'checkout offers card, PayPal, bank transfer and pay on arrival, in that order' );
@@ -394,21 +395,21 @@ if ( scenario( 'F' ) ) {
 	// SQLite returns decimals without trailing zeros; compare amounts as money.
 	$amt  = static fn( $v ) => number_format( (float) $v, 2, '.', '' );
 	$ip   = 0;
-	$book = static function ( string $method, array $extra = array() ) use ( $site, $rzr, $day, &$ip ) {
+	$book = static function ( string $method, array $extra = array() ) use ( $site, $buggy, $day, &$ip ) {
 		++$ip;
 		$body = array_merge(
 			array(
-				'product'        => $rzr['id'],
-				'variant_id'     => $rzr['variants']['30 min'],
+				'product'        => $buggy['id'],
+				'variant_id'     => $buggy['variants']['30 min'],
 				'date'           => $day,
-				'session_id'     => $rzr['sessions']['Evening'],
+				'session_id'     => $buggy['sessions']['Evening'],
 				'adults'         => 2,
 				'units'          => 1,
 				'pickup'         => false,
 				'payment_method' => $method,
 				'name'           => 'Pay Guest',
 				'email'          => 'pay@example.com',
-				'phone_code'     => '+971',
+				'phone_code'     => '+1',
 				'phone'          => '501234567',
 				'terms'          => true,
 			),
@@ -629,18 +630,18 @@ if ( scenario( 'H' ) ) {
 	step( $site, 'payments_setup' );
 	step( $site, 'settings_merge', array( 'values' => array( 'emails' => array( 'admin_recipients' => 'ops@example.com, boss@example.com', 'webhook_url' => 'https://hooks.example.test/dgb', 'webhook_secret' => 'whsec_out_test', 'summary_time' => '18:00', 'reminder_hours' => 24 ) ) ) );
 	step( $site, 'mails', array( 'clear' => true ) );
-	$rzr  = $demo['tours']['rzr'];
+	$buggy  = $demo['tours']['buggy'];
 	$ny   = $demo['tours']['newyear'];
-	$day  = static fn( int $n ) => ( new DateTimeImmutable( '+' . $n . ' days', new DateTimeZone( 'Asia/Dubai' ) ) )->format( 'Y-m-d' );
+	$day  = static fn( int $n ) => ( new DateTimeImmutable( '+' . $n . ' days', new DateTimeZone( 'Asia/Tbilisi' ) ) )->format( 'Y-m-d' );
 	$ip   = 0;
-	$book = static function ( string $method, array $extra = array(), ?int $product = null ) use ( $site, $rzr, $day, &$ip ) {
+	$book = static function ( string $method, array $extra = array(), ?int $product = null ) use ( $site, $buggy, $day, &$ip ) {
 		++$ip;
 		$body = array_merge(
 			array(
-				'product'        => $product ?? $rzr['id'],
-				'variant_id'     => $rzr['variants']['1 hour'],
+				'product'        => $product ?? $buggy['id'],
+				'variant_id'     => $buggy['variants']['1 hour'],
 				'date'           => $day( 3 ),
-				'session_id'     => $rzr['sessions']['Evening'],
+				'session_id'     => $buggy['sessions']['Evening'],
 				'adults'         => 2,
 				'units'          => 1,
 				'pickup'         => true,
@@ -650,7 +651,7 @@ if ( scenario( 'H' ) ) {
 				'payment_method' => $method,
 				'name'           => 'Mail Guest',
 				'email'          => 'guest@example.com',
-				'phone_code'     => '+971',
+				'phone_code'     => '+1',
 				'phone'          => '501234567',
 				'terms'          => true,
 			),
@@ -658,7 +659,7 @@ if ( scenario( 'H' ) ) {
 		);
 		return step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'body' => $body, 'nonce' => true, 'ip' => '10.5.0.' . $ip ) );
 	};
-	$GLOBALS['dgb_demo_zone'] = $demo['zones']['Dubai'];
+	$GLOBALS['dgb_demo_zone'] = $demo['zones']['North Zone'];
 	$mails = static fn() => step( $site, 'mails', array( 'clear' => true ) )['mails'];
 	$find  = static fn( array $list, string $to, string $needle ) => current( array_filter( $list, static fn( $m ) => in_array( $to, $m['to'], true ) && false !== stripos( $m['subject'], $needle ) ) );
 	$state = static fn( string $ref ) => step( $site, 'booking_state', array( 'reference' => $ref ) );
@@ -673,7 +674,7 @@ if ( scenario( 'H' ) ) {
 	check( $g && str_contains( $g['subject'], $ref ) && str_contains( $g['html'], 'Atlantis The Palm' ) && preg_match( '/2:15\s*pm\s*–\s*2:45\s*pm/', $g['html'] ), 'guest email: reference, hotel and the session’s pickup window' );
 	check( $g && 'booking-' . $ref . '.ics' === ( $g['attachments'][0]['name'] ?? '' ) && str_contains( $g['attachments'][0]['body'], 'BEGIN:VEVENT' ), 'calendar file attached to the guest confirmation' );
 	check( $g && str_contains( $g['text'], $ref ) && ! str_contains( $g['text'], '<table' ) && str_contains( $g['text'], 'dgb_key=' ), 'plain-text part with the reference and the booking link' );
-	check( $a && in_array( 'boss@example.com', $a['to'], true ) && (bool) preg_grep( '/^Reply-To: Mail Guest <guest@example.com>$/', $a['headers'] ) && (bool) preg_grep( '/^From: Desert Bookings <info@desertbookings.com>$/', $a['headers'] ), 'staff email to every staff address, From the business, Reply-To the guest' );
+	check( $a && in_array( 'boss@example.com', $a['to'], true ) && (bool) preg_grep( '/^Reply-To: Mail Guest <guest@example.com>$/', $a['headers'] ) && (bool) preg_grep( '/^From: Sample Tours <info@example.com>$/', $a['headers'] ), 'staff email to every staff address, From the business, Reply-To the guest' );
 	$sch = step( $site, 'scheduled', array( 'hook' => 'dgb_send_reminder', 'args' => array( (int) $state( $ref )['booking']['id'] ), 'booking' => $ref ) );
 	check( is_int( $sch['next'] ) && $sch['next'] === $sch['start'] - 86400, 'reminder scheduled in Action Scheduler 24 hours before the pickup' );
 
@@ -683,7 +684,7 @@ if ( scenario( 'H' ) ) {
 	check( 1 === $run['ran'] && 1 === count( $m ) && str_starts_with( $m[0]['subject'], 'See you soon' ) && 'guest@example.com' === $m[0]['to'][0], 'reminder action runs and emails the guest' );
 
 	// Staff move the booking: changed email, reminder moves with it.
-	$x   = step( $site, 'admin_action', array( 'op' => 'reschedule', 'reference' => $ref, 'date' => $day( 5 ), 'session' => $rzr['sessions']['Morning'] ) );
+	$x   = step( $site, 'admin_action', array( 'op' => 'reschedule', 'reference' => $ref, 'date' => $day( 5 ), 'session' => $buggy['sessions']['Morning'] ) );
 	$m   = $mails();
 	$sch2 = step( $site, 'scheduled', array( 'hook' => 'dgb_send_reminder', 'args' => array( $sch['booking_id'] ), 'booking' => $ref ) );
 	check( true === ( $x['result'] ?? null ) && $find( $m, 'guest@example.com', 'has changed' ) && $find( $m, 'ops@example.com', 'changed' ) && str_contains( $find( $m, 'guest@example.com', 'has changed' )['html'], 'Morning' ), 'booking moved to another day and session: guest and staff told what changed' );
@@ -735,7 +736,7 @@ if ( scenario( 'H' ) ) {
 	check( 2 === count( $m ) && $find( $m, 'guest@example.com', 'Booking confirmed' ), 'card payment: one confirmation to the guest, one to staff' );
 
 	// Quote request → quote sent with the payment link.
-	$r   = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'enquiries', 'nonce' => true, 'ip' => '10.5.9.1', 'body' => array( 'product' => $ny['id'], 'date' => $day( 10 ), 'session_id' => $ny['sessions']['Evening'], 'adults' => 6, 'pickup' => true, 'zone_id' => $demo['zones']['Dubai'], 'hotel' => 'Test Hotel', 'name' => 'Lead Guest', 'email' => 'lead@example.com', 'phone' => '501234567', 'phone_code' => '+971', 'terms' => true, 'requests' => 'Group of 6' ) ) );
+	$r   = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'enquiries', 'nonce' => true, 'ip' => '10.5.9.1', 'body' => array( 'product' => $ny['id'], 'date' => $day( 10 ), 'session_id' => $ny['sessions']['Evening'], 'adults' => 6, 'pickup' => true, 'zone_id' => $demo['zones']['North Zone'], 'hotel' => 'Test Hotel', 'name' => 'Lead Guest', 'email' => 'lead@example.com', 'phone' => '501234567', 'phone_code' => '+1', 'terms' => true, 'requests' => 'Group of 6' ) ) );
 	$q   = $r['data']['reference'];
 	$m   = $mails();
 	check( $find( $m, 'lead@example.com', 'We received your request' ) && $find( $m, 'ops@example.com', 'Quote request ' . $q ) && str_contains( $find( $m, 'ops@example.com', 'Quote request' )['html'], 'Group of 6' ), 'quote request: guest and staff emailed (staff see the requests)' );
@@ -751,8 +752,8 @@ if ( scenario( 'H' ) ) {
 	// Daily summary through Action Scheduler.
 	$step = step( $site, 'scheduled', array( 'hook' => 'dgb_daily_summary', 'args' => array() ) );
 	$at   = new DateTimeImmutable( '@' . (int) $step['next'] );
-	check( is_int( $step['next'] ) && '18:00' === $at->setTimezone( new DateTimeZone( 'Asia/Dubai' ) )->format( 'H:i' ), 'daily summary scheduled at 18:00 site time' );
-	step( $site, 'bulk_book', array( 'count' => 2, 'product' => $rzr['id'], 'input' => array( 'variant_id' => $rzr['variants']['30 min'], 'date' => $day( 1 ), 'session_id' => $rzr['sessions']['Evening'] ), 'zone' => $demo['zones']['Dubai'] ) );
+	check( is_int( $step['next'] ) && '18:00' === $at->setTimezone( new DateTimeZone( 'Asia/Tbilisi' ) )->format( 'H:i' ), 'daily summary scheduled at 18:00 site time' );
+	step( $site, 'bulk_book', array( 'count' => 2, 'product' => $buggy['id'], 'input' => array( 'variant_id' => $buggy['variants']['30 min'], 'date' => $day( 1 ), 'session_id' => $buggy['sessions']['Evening'] ), 'zone' => $demo['zones']['North Zone'] ) );
 	$mails();
 	$run = step( $site, 'run_action', array( 'hook' => 'dgb_daily_summary', 'args' => array() ) );
 	$m   = $mails();
@@ -802,8 +803,8 @@ if ( scenario( 'H' ) ) {
 
 	// Manifest with 20 bookings for one session.
 	$mdate = $day( 7 );
-	$bulk  = step( $site, 'bulk_book', array( 'count' => 20, 'product' => $rzr['id'], 'input' => array( 'variant_id' => $rzr['variants']['2 hours'], 'date' => $mdate, 'session_id' => $rzr['sessions']['Evening'] ), 'zone' => $demo['zones']['Dubai'] ) );
-	$mf    = step( $site, 'manifest', array( 'date' => $mdate, 'product' => $rzr['id'], 'session' => $rzr['sessions']['Evening'] ) );
+	$bulk  = step( $site, 'bulk_book', array( 'count' => 20, 'product' => $buggy['id'], 'input' => array( 'variant_id' => $buggy['variants']['2 hours'], 'date' => $mdate, 'session_id' => $buggy['sessions']['Evening'] ), 'zone' => $demo['zones']['North Zone'] ) );
+	$mf    = step( $site, 'manifest', array( 'date' => $mdate, 'product' => $buggy['id'], 'session' => $buggy['sessions']['Evening'] ) );
 	$rows  = substr_count( $mf['print'], '<tr>' ) - 1;
 	check( 20 === count( array_filter( $bulk['refs'], static fn( $r ) => str_starts_with( $r, 'DGB-' ) ) ) && 1 === count( $mf['sessions'] ) && 20 === $mf['sessions'][0]['rows'] && 40 === $mf['sessions'][0]['pax'], 'manifest: one session with 20 bookings and 40 guests' );
 	check( 20 === $rows && str_contains( $mf['print'], 'Manifest Guest 20' ) && str_contains( $mf['print'], 'Hotel 3' ) && str_contains( $mf['print'], '@page { size: A4 landscape' ) && str_contains( $mf['print'], 'thead { display: table-header-group; }' ), 'print view: 20 rows, pickups, A4 landscape, header repeated on each page' );
@@ -811,16 +812,16 @@ if ( scenario( 'H' ) ) {
 
 	// Staff REST API: calendar, closures, check-in by a guide.
 	$guide = step( $site, 'create_user', array( 'login' => 'guide1', 'role' => 'dgb_guide' ) )['id'];
-	$cal   = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'admin/calendar', 'query' => array( 'from' => $mdate, 'to' => $mdate, 'product' => $rzr['id'] ), 'user' => 1 ) );
+	$cal   = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'admin/calendar', 'query' => array( 'from' => $mdate, 'to' => $mdate, 'product' => $buggy['id'] ), 'user' => 1 ) );
 	$eve   = current( array_filter( $cal['data']['days'][ $mdate ] ?? array(), static fn( $sess ) => 'Evening' === $sess['name'] ) );
 	check( 200 === $cal['status'] && $eve && 20 === $eve['bookings'] && 40 === $eve['guests'] && 2 === count( $cal['data']['days'][ $mdate ] ), 'calendar: both sessions, 20 bookings in the evening' );
 	$no = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'admin/calendar', 'query' => array( 'from' => $mdate, 'to' => $mdate ), 'user' => $guide ) );
 	check( 403 === $no['status'], 'guides cannot open the calendar' );
-	$c1 = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/closures', 'body' => array( 'product' => $rzr['id'], 'date' => $mdate, 'session' => $rzr['sessions']['Morning'], 'closed' => true ), 'user' => 1 ) );
-	$av = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'availability/sessions', 'query' => array( 'product' => $rzr['id'], 'date' => $mdate ) ) );
+	$c1 = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/closures', 'body' => array( 'product' => $buggy['id'], 'date' => $mdate, 'session' => $buggy['sessions']['Morning'], 'closed' => true ), 'user' => 1 ) );
+	$av = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'availability/sessions', 'query' => array( 'product' => $buggy['id'], 'date' => $mdate ) ) );
 	check( 200 === $c1['status'] && 'closed' === $av['data']['sessions'][0]['status'] && $av['data']['sessions'][1]['bookable'], 'closing the morning session from the calendar stops online bookings for it' );
-	step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/closures', 'body' => array( 'product' => $rzr['id'], 'date' => $mdate, 'session' => $rzr['sessions']['Morning'], 'closed' => false ), 'user' => 1 ) );
-	$av = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'availability/sessions', 'query' => array( 'product' => $rzr['id'], 'date' => $mdate ) ) );
+	step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/closures', 'body' => array( 'product' => $buggy['id'], 'date' => $mdate, 'session' => $buggy['sessions']['Morning'], 'closed' => false ), 'user' => 1 ) );
+	$av = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'availability/sessions', 'query' => array( 'product' => $buggy['id'], 'date' => $mdate ) ) );
 	check( $av['data']['sessions'][0]['bookable'], 'and opening it again works' );
 	$id = $state( $bulk['refs'][0] )['booking']['id'];
 	$ci = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/bookings/' . $id . '/status', 'body' => array( 'action' => 'check_in' ), 'user' => $guide ) );
@@ -839,7 +840,7 @@ if ( scenario( 'H' ) ) {
 	check( 1 === substr_count( $a['html'], 'name="bookings[]"' ) && str_contains( $a['html'], $q ), 'bookings list: status tab' );
 	$a = step( $site, 'render_admin', array( 'screen' => 'bookings', 'get' => array( 'booking' => $state( $q )['booking']['id'] ) ) );
 	check( str_contains( $a['html'], 'value="dgb_booking_quote"' ) && str_contains( $a['html'], 'Your quote' ) && str_contains( $a['html'], 'value="dgb_booking_resend"' ) && str_contains( $a['html'], 'Erase guest data' ), 'booking page: quote form, email log with Resend, erase' );
-	$a = step( $site, 'render_admin', array( 'screen' => 'calendar', 'get' => array( 'view' => 'week', 'date' => $mdate, 'product' => $rzr['id'] ) ) );
+	$a = step( $site, 'render_admin', array( 'screen' => 'calendar', 'get' => array( 'view' => 'week', 'date' => $mdate, 'product' => $buggy['id'] ) ) );
 	check( substr_count( $a['html'], 'data-dgb-booking=' ) >= 19 && str_contains( $a['html'], 'data-dgb-close' ), 'calendar week view: draggable bookings and close buttons' );
 	$a = step( $site, 'render_admin', array( 'screen' => 'checkin', 'get' => array( 'date' => $mdate ), 'user' => $guide ) );
 	check( 19 === substr_count( $a['html'], 'class="dgb-checkin-card' ) && str_contains( $a['html'], '1 of 19 arrived' ), 'check-in screen for the guide' );
@@ -869,7 +870,7 @@ if ( scenario( 'I' ) ) {
 	step( $site, 'install' );
 	step( $site, 'activate' );
 	$demo   = step( $site, 'demo_setup' );
-	$rzr    = $demo['tours']['rzr'];
+	$buggy    = $demo['tours']['buggy'];
 	$safari = $demo['tours']['safari'];
 	$ny     = $demo['tours']['newyear'];
 	step( $site, 'attach_image', array( 'post' => $safari['id'] ) );
@@ -905,20 +906,20 @@ if ( scenario( 'I' ) ) {
 	check( 1 === count( $tours ) && 'Product' === $tours[0]['@type'] && 'Offer' === $tours[0]['offers']['@type'], 'safari: Product with one Offer (it has an image)' );
 	check( '99.00' === $tours[0]['offers']['price'] && 'AED' === $tours[0]['offers']['priceCurrency'] && 99.0 === $visible_from( $html ), 'safari: schema price 99.00 = visible "From AED 99.00"' );
 	check( 'IE' === $tours[0]['offers']['priceSpecification']['referenceQuantity']['unitCode'] && true === $tours[0]['offers']['priceSpecification']['valueAddedTaxIncluded'], 'safari: price per person (unitCode IE), VAT included' );
-	check( 'TravelAgency' === $graph[0]['@type'] && 'Desert Bookings' === $graph[0]['name'] && '+971 55 526 0561' === $graph[0]['telephone'] && $graph[0]['@id'] === $tours[0]['offers']['seller']['@id'], 'business node with NAP is the seller' );
+	check( 'TravelAgency' === $graph[0]['@type'] && 'Sample Tours' === $graph[0]['name'] && '+1 555 0100' === $graph[0]['telephone'] && $graph[0]['@id'] === $tours[0]['offers']['seller']['@id'], 'business node with NAP is the seller' );
 	check( ! empty( $tours[0]['image'] ) && ! isset( $tours[0]['aggregateRating'] ) && ! isset( $tours[0]['review'] ), 'image present; no rating without a review source' );
 
-	list( , , $html ) = $page( '/tour/rzr/' );
+	list( , , $html ) = $page( '/tour/buggy/' );
 	$tours            = $product_nodes( $nodes( $ld( $html ) ) );
-	check( 'TouristTrip' === $tours[0]['@type'] && 'AggregateOffer' === $tours[0]['offers']['@type'], 'rzr without any image: TouristTrip (Google Product needs an image)' );
-	step( $site, 'attach_image', array( 'post' => $rzr['id'] ) );
-	list( , , $html ) = $page( '/tour/rzr/' );
+	check( 'TouristTrip' === $tours[0]['@type'] && 'AggregateOffer' === $tours[0]['offers']['@type'], 'buggy without any image: TouristTrip (Google Product needs an image)' );
+	step( $site, 'attach_image', array( 'post' => $buggy['id'] ) );
+	list( , , $html ) = $page( '/tour/buggy/' );
 	$tours            = $product_nodes( $nodes( $ld( $html ) ) );
 	$offer            = $tours[0]['offers'];
-	check( 'Product' === $tours[0]['@type'] && '699.00' === $offer['lowPrice'] && '1299.00' === $offer['highPrice'] && 3 === $offer['offerCount'], 'rzr: Product, AggregateOffer 699.00–1299.00, 3 offers' );
-	check( 699.0 === $visible_from( $html ), 'rzr: lowPrice = visible "From AED 699.00"' );
-	check( array( '699.00', '899.00', '1299.00' ) === array_column( $offer['offers'], 'price' ) && 'C62' === $offer['offers'][0]['priceSpecification']['referenceQuantity']['unitCode'] && 'vehicle (2 seats)' === $offer['offers'][0]['priceSpecification']['referenceQuantity']['unitText'], 'rzr: one Offer per option, priced per vehicle (2 seats)' );
-	$sc = step( $site, 'schema', array( 'post' => $rzr['id'] ) );
+	check( 'Product' === $tours[0]['@type'] && '699.00' === $offer['lowPrice'] && '1299.00' === $offer['highPrice'] && 3 === $offer['offerCount'], 'buggy: Product, AggregateOffer 699.00–1299.00, 3 offers' );
+	check( 699.0 === $visible_from( $html ), 'buggy: lowPrice = visible "From AED 699.00"' );
+	check( array( '699.00', '899.00', '1299.00' ) === array_column( $offer['offers'], 'price' ) && 'C62' === $offer['offers'][0]['priceSpecification']['referenceQuantity']['unitCode'] && 'vehicle (2 seats)' === $offer['offers'][0]['priceSpecification']['referenceQuantity']['unitText'], 'buggy: one Offer per option, priced per vehicle (2 seats)' );
+	$sc = step( $site, 'schema', array( 'post' => $buggy['id'] ) );
 	$same = (float) $sc['node']['offers']['lowPrice'] === (float) preg_replace( '/[^0-9.]/', '', $sc['visible'] );
 	foreach ( $sc['node']['offers']['offers'] as $o ) {
 		$same = $same && (float) $o['price'] === (float) $sc['visible_options'][ $o['name'] ];
@@ -934,13 +935,13 @@ if ( scenario( 'I' ) ) {
 	check( array() === $ld( $html ), 'no tour schema on other pages' );
 
 	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'schema_output' => 'off' ) ) ) );
-	list( , , $html ) = $page( '/tour/rzr/' );
+	list( , , $html ) = $page( '/tour/buggy/' );
 	check( array() === $ld( $html ), 'Structured data off: nothing printed' );
 	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'schema_output' => 'auto' ) ) ) );
 
 	$validator = $root . '/node_modules/@adobe/structured-data-validator';
 	if ( is_dir( $validator ) ) {
-		exec( 'node ' . escapeshellarg( $root . '/tests/schema/rich-results.mjs' ) . ' ' . implode( ' ', array_map( static fn( $p ) => escapeshellarg( $home . $p ), array( '/tour/rzr/', '/tour/safari/', '/tour/newyear/' ) ) ) . ' 2>&1', $lines, $code );
+		exec( 'node ' . escapeshellarg( $root . '/tests/schema/rich-results.mjs' ) . ' ' . implode( ' ', array_map( static fn( $p ) => escapeshellarg( $home . $p ), array( '/tour/buggy/', '/tour/safari/', '/tour/newyear/' ) ) ) . ' 2>&1', $lines, $code );
 		$rich = json_decode( (string) end( $lines ), true );
 		check( 0 === $code && is_array( $rich ) && 3 === count( $rich ), 'Rich Results validator ran on three tour pages' );
 		foreach ( (array) $rich as $url => $result ) {
@@ -953,13 +954,13 @@ if ( scenario( 'I' ) ) {
 	echo "  llms.txt\n";
 	list( $status, $headers, $text ) = $page( '/llms.txt' );
 	check( 200 === $status && in_array( 'Content-Type: text/plain; charset=utf-8', $headers, true ), '/llms.txt answers as plain text' );
-	check( str_starts_with( $text, "# Desert Bookings\n" ) && str_contains( $text, '- Phone: +971 55 526 0561' ) && str_contains( $text, '- Email: info@desertbookings.com' ), 'llms.txt: business name and contact (NAP)' );
-	check( str_contains( $text, '[2-Seater Polaris RZR 1000](' . $home . '/tour/rzr/): From AED 699.00 per vehicle' ) && str_contains( $text, 'Up to 2 people per vehicle' ), 'llms.txt: from price and price basis = schema' );
+	check( str_starts_with( $text, "# Sample Tours\n" ) && str_contains( $text, '- Phone: +1 555 0100' ) && str_contains( $text, '- Email: info@example.com' ), 'llms.txt: business name and contact (NAP)' );
+	check( str_contains( $text, '[2-Seater Sample Buggy](' . $home . '/tour/buggy/): From AED 699.00 per vehicle' ) && str_contains( $text, 'Up to 2 people per vehicle' ), 'llms.txt: from price and price basis = schema' );
 	check( str_contains( $text, 'Options: 30 min AED 699.00; 1 hour AED 899.00; 2 hours AED 1,299.00' ), 'llms.txt: options with durations and prices' );
-	check( str_contains( $text, '[New Year Desert Safari](' . $home . '/tour/newyear/): Price on request' ) && ! preg_match( '/New Year.*AED/', $text ), 'llms.txt: price on request, no price' );
+	check( str_contains( $text, '[New Year Sample Event](' . $home . '/tour/newyear/): Price on request' ) && ! preg_match( '/New Year.*AED/', $text ), 'llms.txt: price on request, no price' );
 	check( (bool) preg_match( '/Sessions: Morning: starts .*, pickup .*; Evening: starts .*, pickup /', $text ), 'llms.txt: sessions with pickup windows' );
-	check( str_contains( $text, 'hotel pickup costs AED 300.00 per booking from Dubai, Sharjah; no pickup from Abu Dhabi (meet at Al Aweer desert)' ) && str_contains( $text, 'hotel pickup included from Dubai, Sharjah' ), 'llms.txt: pickup policy per tour (add-on / included / excluded zone)' );
-	check( str_contains( $text, 'Meeting point: Al Aweer desert' ) && str_contains( $text, 'Age rules: minimum age 16' ), 'llms.txt: meeting point and age rules' );
+	check( str_contains( $text, 'hotel pickup costs AED 300.00 per booking from North Zone, East Zone; no pickup from Far Zone (meet at Sample Meeting Point)' ) && str_contains( $text, 'hotel pickup included from North Zone, East Zone' ), 'llms.txt: pickup policy per tour (add-on / included / excluded zone)' );
+	check( str_contains( $text, 'Meeting point: Sample Meeting Point' ) && str_contains( $text, 'Age rules: minimum age 16' ), 'llms.txt: meeting point and age rules' );
 	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'llms_enabled' => false ) ) ) );
 	list( $status ) = $page( '/llms.txt' );
 	check( 404 === $status, 'llms.txt switched off: 404' );
@@ -969,14 +970,14 @@ if ( scenario( 'I' ) ) {
 	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'products' ) );
 	$byname = array_column( $r['data'], null, 'name' );
 	check( 200 === $r['status'] && 3 === count( $r['data'] ), 'GET products lists the 3 tours' );
-	check( '699.00' === $byname['2-Seater Polaris RZR 1000']['from_price'] && 2 === $byname['2-Seater Polaris RZR 1000']['seats'] && 2 === count( $byname['2-Seater Polaris RZR 1000']['sessions'] ), 'products: from price = schema, seats and sessions' );
-	check( null === $byname['New Year Desert Safari']['from_price'] && true === $byname['New Year Desert Safari']['on_request'], 'products: no price for price on request' );
+	check( '699.00' === $byname['2-Seater Sample Buggy']['from_price'] && 2 === $byname['2-Seater Sample Buggy']['seats'] && 2 === count( $byname['2-Seater Sample Buggy']['sessions'] ), 'products: from price = schema, seats and sessions' );
+	check( null === $byname['New Year Sample Event']['from_price'] && true === $byname['New Year Sample Event']['on_request'], 'products: no price for price on request' );
 	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'products/' . $ny['id'] ) );
 	check( 200 === $r['status'] && 'on_request' === $r['data']['mode'], 'GET products/{id}' );
 
 	$manager = step( $site, 'create_user', array( 'login' => 'manager1', 'role' => 'dgb_manager' ) )['id'];
 	$guide   = step( $site, 'create_user', array( 'login' => 'guide1', 'role' => 'dgb_guide' ) )['id'];
-	$staff_body = array( 'product' => $rzr['id'], 'variant_id' => $rzr['variants']['1 hour'], 'date' => $demo['tomorrow'], 'session_id' => $rzr['sessions']['Evening'], 'adults' => 2, 'units' => 1, 'payment_method' => 'bank_transfer', 'name' => 'Phone Guest', 'email' => 'phone.guest@example.com', 'phone_code' => '+971', 'phone' => '501112222' );
+	$staff_body = array( 'product' => $buggy['id'], 'variant_id' => $buggy['variants']['1 hour'], 'date' => $demo['tomorrow'], 'session_id' => $buggy['sessions']['Evening'], 'adults' => 2, 'units' => 1, 'payment_method' => 'bank_transfer', 'name' => 'Phone Guest', 'email' => 'phone.guest@example.com', 'phone_code' => '+1', 'phone' => '501112222' );
 	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/bookings', 'body' => $staff_body ) );
 	check( 401 === $r['status'], 'POST admin/bookings: anonymous refused (401)' );
 	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'admin/bookings', 'body' => $staff_body, 'user' => $guide ) );
@@ -986,7 +987,7 @@ if ( scenario( 'I' ) ) {
 	check( 201 === $r['status'] && 'awaiting_transfer' === $staff['status'] && 'admin' === $staff['attribution']['source'] && str_contains( (string) $staff['payment_link'], 'dgb_pay=1' ), 'manager creates a booking: source admin, awaiting transfer, payment link returned' );
 	$r = step( $site, 'rest', array( 'method' => 'GET', 'route' => 'admin/bookings', 'query' => array( 'search' => 'Phone Guest', 'source' => 'admin' ), 'user' => $manager ) );
 	check( 200 === $r['status'] && 1 === count( $r['data'] ) && $staff['reference'] === $r['data'][0]['reference'], 'GET admin/bookings with search and source filters' );
-	$r = step( $site, 'rest', array( 'method' => 'PATCH', 'route' => 'admin/bookings/' . $staff['id'], 'user' => $manager, 'body' => array( 'customer' => array( 'name' => 'Phone Guest Jr', 'email' => 'jr@example.com' ), 'vehicle' => 'RZR 7', 'note' => 'Paid at the office', 'action' => 'confirm' ) ) );
+	$r = step( $site, 'rest', array( 'method' => 'PATCH', 'route' => 'admin/bookings/' . $staff['id'], 'user' => $manager, 'body' => array( 'customer' => array( 'name' => 'Phone Guest Jr', 'email' => 'jr@example.com' ), 'vehicle' => 'Buggy 7', 'note' => 'Paid at the office', 'action' => 'confirm' ) ) );
 	check( 200 === $r['status'] && 'Phone Guest Jr' === $r['data']['customer']['name'] && 'jr@example.com' === $r['data']['customer']['email'] && 'confirmed' === $r['data']['status'], 'PATCH changes guest details and confirms' );
 	$r = step( $site, 'rest', array( 'method' => 'PATCH', 'route' => 'admin/bookings/' . $staff['id'], 'user' => $manager, 'body' => array( 'customer' => array( 'email' => 'not-an-email' ) ) ) );
 	check( 400 === $r['status'], 'PATCH rejects a bad email' );
@@ -1012,7 +1013,7 @@ if ( scenario( 'I' ) ) {
 	check( 401 === $status, 'wrong application password: 401' );
 
 	echo "  Privacy\n";
-	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'ip' => '10.6.0.1', 'body' => array( 'product' => $rzr['id'], 'variant_id' => $rzr['variants']['30 min'], 'date' => $demo['tomorrow'], 'session_id' => $rzr['sessions']['Evening'], 'adults' => 1, 'units' => 1, 'pickup' => true, 'zone_id' => $demo['zones']['Dubai'], 'hotel' => 'Hotel Privacy', 'room' => '501', 'payment_method' => 'bank_transfer', 'name' => 'Privacy Guest', 'email' => 'Privacy@Example.com', 'phone_code' => '+971', 'phone' => '509998888', 'marketing' => true, 'terms' => true ) ) );
+	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'ip' => '10.6.0.1', 'body' => array( 'product' => $buggy['id'], 'variant_id' => $buggy['variants']['30 min'], 'date' => $demo['tomorrow'], 'session_id' => $buggy['sessions']['Evening'], 'adults' => 1, 'units' => 1, 'pickup' => true, 'zone_id' => $demo['zones']['North Zone'], 'hotel' => 'Hotel Privacy', 'room' => '501', 'payment_method' => 'bank_transfer', 'name' => 'Privacy Guest', 'email' => 'Privacy@Example.com', 'phone_code' => '+1', 'phone' => '509998888', 'marketing' => true, 'terms' => true ) ) );
 	$p = step( $site, 'privacy', array( 'email' => 'privacy@example.com', 'admin' => true ) );
 	$fields = array_column( $p['export']['data'][0]['data'] ?? array(), 'value', 'name' );
 	check( $p['registered'] && 1 === count( $p['export']['data'] ) && true === $p['export']['done'], 'exporter registered; one booking found (email matched without case)' );
@@ -1026,9 +1027,9 @@ if ( scenario( 'I' ) ) {
 	echo "  Traveler import (tours left by the Traveler theme, plugin owns /tour/)\n";
 	$amt = static fn( $v ) => null === $v ? null : number_format( (float) $v, 2, '.', '' );
 	$table = '<p>Ride the dunes.</p><figure class="wp-block-table"><table><thead><tr><th>Duration</th><th>Old Price</th><th>New Price</th></tr></thead><tbody><tr><td>30 Min</td><td><del>AED 899</del></td><td>AED 699</td></tr><tr><td>1 Hour</td><td>AED 1,099</td><td>AED 899</td></tr><tr><td>2 Hours</td><td>AED 1,599</td><td>AED 1,299</td></tr></tbody></table></figure><p>Safety briefing included.</p>';
-	$t_rzr   = step( $site, 'create_post', array( 'type' => 'st_tours', 'title' => '2-Seater Polaris RZR 1000 CC Buggy', 'slug' => '2-seater-polaris-rzr-1000-cc-buggy', 'content' => $table ) )['id'];
-	$t_camel = step( $site, 'create_post', array( 'type' => 'st_tours', 'title' => 'Camel Ride Dubai', 'slug' => 'camel-ride-dubai', 'content' => '<p>Camel ride.</p>' ) )['id'];
-	$t_photo = step( $site, 'create_post', array( 'type' => 'st_tours', 'title' => 'Desert Photoshoot Dubai', 'slug' => 'desert-photoshoot-dubai', 'content' => '<p>Photos.</p>' ) )['id'];
+	$t_rzr   = step( $site, 'create_post', array( 'type' => 'st_tours', 'title' => '2-Seater Sample Buggy CC Buggy', 'slug' => '2-seater-sample-buggy', 'content' => $table ) )['id'];
+	$t_camel = step( $site, 'create_post', array( 'type' => 'st_tours', 'title' => 'Camel Ride North Zone', 'slug' => 'camel-ride-north-zone', 'content' => '<p>Camel ride.</p>' ) )['id'];
+	$t_photo = step( $site, 'create_post', array( 'type' => 'st_tours', 'title' => 'Desert Photoshoot North Zone', 'slug' => 'desert-photoshoot-north-zone', 'content' => '<p>Photos.</p>' ) )['id'];
 	$t_clash = step( $site, 'create_post', array( 'type' => 'st_tours', 'title' => 'Old safari page', 'slug' => 'safari', 'content' => '<p>Old.</p>' ) )['id'];
 	$img     = step( $site, 'attach_image', array( 'post' => $t_rzr ) )['id'];
 	step( $site, 'set_meta', array( 'post' => $t_rzr, 'meta' => array( 'gallery' => $img . ',' . $img ) ) );
@@ -1056,12 +1057,12 @@ if ( scenario( 'I' ) ) {
 	check( $kept, 'every imported tour keeps its ID, slug, title and /tour/slug/ URL' );
 	check( 'st_tours' === $after[ $t_clash ]['type'] && 'safari' === $after[ $t_clash ]['slug'], 'clashing tour left as it was' );
 	$v = $after[ $t_rzr ]['variants'];
-	check( array( '30 Min', '1 Hour', '2 Hours' ) === array_column( $v, 'label' ) && array( '699.00', '899.00', '1299.00' ) === array_map( $amt, array_column( $v, 'price' ) ) && array( '30', '60', '120' ) === array_map( 'strval', array_column( $v, 'duration_minutes' ) ) && array( null, null, null ) === array_column( $v, 'compare_at_price' ), 'rzr: 3 options with durations and new prices, no compare-at price' );
-	check( 'per_vehicle' === $after[ $t_rzr ]['product']['pricing_mode'] && 2 === $after[ $t_rzr ]['product']['seats_per_unit'] && true === $after[ $t_rzr ]['product']['enabled'] && (string) $img === $after[ $t_rzr ]['product']['gallery'] && $img === $after[ $t_rzr ]['thumbnail'], 'rzr: per vehicle, 2 seats, bookings on, gallery and featured image kept' );
+	check( array( '30 Min', '1 Hour', '2 Hours' ) === array_column( $v, 'label' ) && array( '699.00', '899.00', '1299.00' ) === array_map( $amt, array_column( $v, 'price' ) ) && array( '30', '60', '120' ) === array_map( 'strval', array_column( $v, 'duration_minutes' ) ) && array( null, null, null ) === array_column( $v, 'compare_at_price' ), 'buggy: 3 options with durations and new prices, no compare-at price' );
+	check( 'per_vehicle' === $after[ $t_rzr ]['product']['pricing_mode'] && 2 === $after[ $t_rzr ]['product']['seats_per_unit'] && true === $after[ $t_rzr ]['product']['enabled'] && (string) $img === $after[ $t_rzr ]['product']['gallery'] && $img === $after[ $t_rzr ]['thumbnail'], 'buggy: per vehicle, 2 seats, bookings on, gallery and featured image kept' );
 	check( ! str_contains( $after[ $t_rzr ]['content'], '<table' ) && str_contains( $after[ $t_rzr ]['content'], 'Ride the dunes.' ) && str_contains( $after[ $t_rzr ]['content'], 'Safety briefing included.' ) && $after[ $t_rzr ]['revisions'] >= 1, 'price table removed from the text, rest kept, old text in a revision' );
 	check( 'per_person' === $after[ $t_camel ]['product']['pricing_mode'] && '150.00' === $amt( $after[ $t_camel ]['variants'][0]['price'] ) && '100.00' === $amt( $after[ $t_camel ]['variants'][0]['child_price'] ), 'camel: Traveler adult and child prices' );
 	check( 'on_request' === $after[ $t_photo ]['product']['pricing_mode'] && array() === $after[ $t_photo ]['variants'], 'photoshoot: price on request' );
-	list( $status, , $html ) = $page( '/tour/2-seater-polaris-rzr-1000-cc-buggy/' );
+	list( $status, , $html ) = $page( '/tour/2-seater-sample-buggy/' );
 	check( 200 === $status && str_contains( $html, 'data-dgb-widget' ) && 699.0 === $visible_from( $html ) && '699.00' === ( $product_nodes( $nodes( $ld( $html ) ) )[0]['offers']['lowPrice'] ?? '' ), 'imported tour URL serves the booking widget and matching schema' );
 	$tools = step( $site, 'render_admin', array( 'screen' => 'tools', 'get' => array( 'done' => 'traveler' ), 'admin' => true ) );
 	check( empty( $tools['died'] ) && str_contains( $tools['html'], 'Import finished' ) && str_contains( $tools['html'], 'name="ids[]"' ) && 3 === substr_count( $tools['html'], 'action=dgb_export_csv' ) && str_contains( $tools['html'], 'name="_wpnonce"' ), 'Tools screen: import log, Traveler list, 3 CSV exports, nonces' );
@@ -1079,11 +1080,11 @@ if ( scenario( 'I' ) ) {
 	step( $site2, 'install' );
 	step( $site2, 'activate' );
 	step( $site2, 'settings_merge', array( 'values' => array( 'general' => array( 'product_mode' => 'attach', 'attach_post_type' => 'st_tours', '_attach_slug' => 'tour' ) ) ) );
-	$a_rzr  = step( $site2, 'create_post', array( 'type' => 'st_tours', 'title' => '4-Seater Polaris RZR 1000', 'slug' => '4-seater-polaris-rzr-1000-cc', 'content' => str_replace( array( '699', '899', '1,299' ), array( '799', '999', '1,399' ), $table ) ) );
+	$a_rzr  = step( $site2, 'create_post', array( 'type' => 'st_tours', 'title' => '4-Seater Sample Buggy 1000', 'slug' => '4-seater-sample-buggy-1000-cc', 'content' => str_replace( array( '699', '899', '1,299' ), array( '799', '999', '1,399' ), $table ) ) );
 	$before = step( $site2, 'tour_state', array( 'post' => $a_rzr['id'] ) );
 	$log    = step( $site2, 'traveler_import', array( 'ids' => array( $a_rzr['id'] ), 'options' => array( 'enable' => true ) ) )['log'];
 	$after  = step( $site2, 'tour_state', array( 'post' => $a_rzr['id'] ) );
-	check( 'http://example.test/tour/4-seater-polaris-rzr-1000-cc/' === $before['permalink'] && 'imported' === $log[0]['result'], 'attached: Traveler tour imported' );
+	check( 'http://example.test/tour/4-seater-sample-buggy-1000-cc/' === $before['permalink'] && 'imported' === $log[0]['result'], 'attached: Traveler tour imported' );
 	check( 'st_tours' === $after['type'] && $before['permalink'] === $after['permalink'] && $a_rzr['id'] === $after['resolves'] && $before['content'] === $after['content'], 'attached: post type, slug, URL and text unchanged' );
 	check( 4 === $after['product']['seats_per_unit'] && array( '799.00', '999.00', '1399.00' ) === array_map( $amt, array_column( $after['variants'], 'price' ) ), 'attached: 4 seats, options 799 / 999 / 1,399' );
 
@@ -1100,12 +1101,12 @@ if ( scenario( 'I' ) ) {
 	$exp = step( $site, 'csv_export', array( 'kind' => 'products' ) )['rows'];
 	check( array( 'id', 'slug', 'title', 'status' ) === array_slice( $exp[0], 0, 4 ) && in_array( 'pricing_mode', $exp[0], true ) && in_array( 'gallery', $exp[0], true ) && 6 === count( $exp ) - 1, 'products export: header and one row per tour (6)' );
 	$before_products = array();
-	foreach ( array( $rzr['id'], $safari['id'] ) as $id ) {
+	foreach ( array( $buggy['id'], $safari['id'] ) as $id ) {
 		$before_products[ $id ] = step( $site, 'tour_state', array( 'post' => $id ) )['product'];
 	}
 	$log = step( $site, 'csv_import', array( 'kind' => 'products', 'csv' => $csv( $exp ) ) )['log'];
 	$same = true;
-	foreach ( array( $rzr['id'], $safari['id'] ) as $id ) {
+	foreach ( array( $buggy['id'], $safari['id'] ) as $id ) {
 		$same = $same && $before_products[ $id ] === step( $site, 'tour_state', array( 'post' => $id ) )['product'];
 	}
 	check( 6 === count( $log ) && array( 'updated' ) === array_values( array_unique( array_column( $log, 'result' ) ) ) && $same, 'products export → import round trip changes nothing' );
@@ -1115,20 +1116,20 @@ if ( scenario( 'I' ) ) {
 	$rows = array( $head );
 	foreach ( array_slice( $vexp, 1 ) as $row ) {
 		$row = array_combine( $head, $row );
-		if ( (int) $row['product_id'] === $rzr['id'] && '30 min' === $row['label'] ) {
+		if ( (int) $row['product_id'] === $buggy['id'] && '30 min' === $row['label'] ) {
 			$row['price'] = '649';
 			$rows[]       = array_values( $row );
 		}
 	}
-	$rows[] = array_values( array_merge( array_fill_keys( $head, '' ), array( 'product_slug' => 'rzr', 'label' => '3 hours', 'duration_minutes' => '180', 'price' => '1,599', 'active' => 'yes' ) ) );
+	$rows[] = array_values( array_merge( array_fill_keys( $head, '' ), array( 'product_slug' => 'buggy', 'label' => '3 hours', 'duration_minutes' => '180', 'price' => '1,599', 'active' => 'yes' ) ) );
 	$rows[] = array_values( array_merge( array_fill_keys( $head, '' ), array( 'product_slug' => 'no-such-tour', 'label' => 'X', 'price' => '1' ) ) );
-	$rows[] = array_values( array_merge( array_fill_keys( $head, '' ), array( 'product_slug' => 'rzr', 'label' => '', 'price' => '5' ) ) );
+	$rows[] = array_values( array_merge( array_fill_keys( $head, '' ), array( 'product_slug' => 'buggy', 'label' => '', 'price' => '5' ) ) );
 	$imp    = step( $site, 'csv_import', array( 'kind' => 'variants', 'csv' => $csv( $rows ) ) );
 	$res    = array_column( $imp['log'], 'result', 'line' );
-	$st     = step( $site, 'tour_state', array( 'post' => $rzr['id'] ) );
+	$st     = step( $site, 'tour_state', array( 'post' => $buggy['id'] ) );
 	check( array( 2 => 'updated', 3 => 'added', 4 => 'failed', 5 => 'failed' ) === $res, 'variants import: update by id, add without id, unknown tour and missing label fail' );
 	check( array( '30 min' => '649.00', '1 hour' => '899.00', '2 hours' => '1299.00', '3 hours' => '1599.00' ) === array_map( $amt, array_column( $st['variants'], 'price', 'label' ) ), 'rows not in the file are kept in place (no replace); 3 hours added last, "1,599" read as 1599' );
-	$sc = step( $site, 'schema', array( 'post' => $rzr['id'] ) );
+	$sc = step( $site, 'schema', array( 'post' => $buggy['id'] ) );
 	check( '649.00' === $sc['node']['offers']['lowPrice'] && 649.0 === (float) preg_replace( '/[^0-9.]/', '', $sc['visible'] ), 'new price shows in the widget and the schema alike' );
 
 	$sexp = step( $site, 'csv_export', array( 'kind' => 'sessions' ) )['rows'];
@@ -1137,10 +1138,10 @@ if ( scenario( 'I' ) ) {
 	$st   = step( $site, 'tour_state', array( 'post' => $safari['id'] ) );
 	check( 1 === count( $st['sessions'] ) && 'Sunset' === $st['sessions'][0]['name'] && '5,6' === $st['sessions'][0]['days_of_week'] && '14:30:00' === $st['sessions'][0]['pickup_window_start'], 'sessions import with replace: only the file’s session remains, weekdays by name' );
 
-	$imp = step( $site, 'csv_import', array( 'kind' => 'products', 'csv' => $csv( array( array( 'id', 'slug', 'title', 'pricing_mode', 'enabled', 'min_age', 'inclusions' ), array( '', 'csv-tour', 'CSV Tour', 'per_person', '1', '', "'=SUM(A1)" ), array( (string) $rzr['id'], 'renamed-slug', 'Renamed', '', '', '18', '' ) ) ) ) );
+	$imp = step( $site, 'csv_import', array( 'kind' => 'products', 'csv' => $csv( array( array( 'id', 'slug', 'title', 'pricing_mode', 'enabled', 'min_age', 'inclusions' ), array( '', 'csv-tour', 'CSV Tour', 'per_person', '1', '', "'=SUM(A1)" ), array( (string) $buggy['id'], 'renamed-slug', 'Renamed', '', '', '18', '' ) ) ) ) );
 	$res = array_column( $imp['log'], null, 'line' );
-	$st  = step( $site, 'tour_state', array( 'post' => $rzr['id'] ) );
-	check( 'added' === $res[2]['result'] && 'updated' === $res[3]['result'] && 'rzr' === $st['slug'] && '2-Seater Polaris RZR 1000' === $st['title'] && 18 === $st['product']['min_age'], 'products import: new draft tour added; existing tour updated, slug and title untouched' );
+	$st  = step( $site, 'tour_state', array( 'post' => $buggy['id'] ) );
+	check( 'added' === $res[2]['result'] && 'updated' === $res[3]['result'] && 'buggy' === $st['slug'] && '2-Seater Sample Buggy' === $st['title'] && 18 === $st['product']['min_age'], 'products import: new draft tour added; existing tour updated, slug and title untouched' );
 	$exp2 = step( $site, 'csv_export', array( 'kind' => 'products' ) )['rows'];
 	$csvt = array_values( array_filter( $exp2, static fn( $r ) => 'csv-tour' === $r[1] ) )[0] ?? array();
 	check( in_array( "'=SUM(A1)", $csvt, true ), 'export guards cells that start with = (no spreadsheet formulas)' );
@@ -1169,7 +1170,7 @@ if ( array() !== $seo_plugins && scenario( 'J' ) ) {
 		step( $site, 'install' );
 		step( $site, 'activate' );
 		$demo = step( $site, 'demo_setup' );
-		step( $site, 'attach_image', array( 'post' => $demo['tours']['rzr']['id'] ) );
+		step( $site, 'attach_image', array( 'post' => $demo['tours']['buggy']['id'] ) );
 		$server = start_server( $site, $port );
 		$graph  = static function ( string $path ) use ( $home ): array {
 			list( , , $html ) = http_get( $home . $path );
@@ -1190,23 +1191,23 @@ if ( array() !== $seo_plugins && scenario( 'J' ) ) {
 			symlink( realpath( $seo_plugins['rank-math'] ), "{$site}/wp-content/plugins/seo-by-rank-math" );
 			$a = step( $site, 'activate_plugin', array( 'plugin' => 'seo-by-rank-math/rank-math.php' ) );
 			step( $site, 'rank_math_setup' );
-			list( $count, $class, $nodes ) = $graph( '/tour/rzr/' );
+			list( $count, $class, $nodes ) = $graph( '/tour/buggy/' );
 			$tour                          = $products( $nodes );
 			$ids                           = $by_id( $nodes );
 			check( '' === $a['error'] && 1 === $count && str_contains( $class, 'rank-math-schema' ), 'Rank Math: one JSON-LD graph (Rank Math’s)' );
-			check( 1 === count( $tour ) && $home . '/tour/rzr/#dgb-product' === $tour[0]['@id'] && '699.00' === $tour[0]['offers']['lowPrice'], 'Rank Math: our Product node with the page price' );
-			check( isset( $ids[ $home . '/tour/rzr/#webpage' ] ) && $home . '/tour/rzr/#webpage' === ( $tour[0]['mainEntityOfPage']['@id'] ?? '' ), 'Rank Math: Product is the main entity of Rank Math’s WebPage' );
+			check( 1 === count( $tour ) && $home . '/tour/buggy/#dgb-product' === $tour[0]['@id'] && '699.00' === $tour[0]['offers']['lowPrice'], 'Rank Math: our Product node with the page price' );
+			check( isset( $ids[ $home . '/tour/buggy/#webpage' ] ) && $home . '/tour/buggy/#webpage' === ( $tour[0]['mainEntityOfPage']['@id'] ?? '' ), 'Rank Math: Product is the main entity of Rank Math’s WebPage' );
 			$seller = $tour[0]['offers']['offers'][0]['seller']['@id'] ?? '';
 			check( isset( $ids[ $seller ] ) && ! isset( $ids[ $home . '/#dgb-business' ] ), 'Rank Math: seller is Rank Math’s organization node (no second business node)' );
-			step( $site, 'rank_math_setup', array( 'product_schema_post' => $demo['tours']['rzr']['id'] ) );
+			step( $site, 'rank_math_setup', array( 'product_schema_post' => $demo['tours']['buggy']['id'] ) );
 			step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'schema_output' => 'off' ) ) ) );
-			list( , , $nodes ) = $graph( '/tour/rzr/' );
+			list( , , $nodes ) = $graph( '/tour/buggy/' );
 			$theirs            = $products( $nodes );
 			step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'schema_output' => 'auto' ) ) ) );
-			list( $count, , $nodes ) = $graph( '/tour/rzr/' );
+			list( $count, , $nodes ) = $graph( '/tour/buggy/' );
 			$tour                    = $products( $nodes );
-			check( 1 === count( $theirs ) && $home . '/tour/rzr/#dgb-product' !== ( $theirs[0]['@id'] ?? '' ), 'Rank Math Schema Generator Product on the tour (shown while ours is off)' );
-			check( 1 === $count && 1 === count( $tour ) && $home . '/tour/rzr/#dgb-product' === $tour[0]['@id'] && '699.00' === $tour[0]['offers']['lowPrice'], 'with ours on: still one Product node, ours, with the page price' );
+			check( 1 === count( $theirs ) && $home . '/tour/buggy/#dgb-product' !== ( $theirs[0]['@id'] ?? '' ), 'Rank Math Schema Generator Product on the tour (shown while ours is off)' );
+			check( 1 === $count && 1 === count( $tour ) && $home . '/tour/buggy/#dgb-product' === $tour[0]['@id'] && '699.00' === $tour[0]['offers']['lowPrice'], 'with ours on: still one Product node, ours, with the page price' );
 			list( $count, , $nodes ) = $graph( '/tour/newyear/' );
 			check( 1 === $count && 'TouristTrip' === ( $products( $nodes )[0]['@type'] ?? '' ) && ! str_contains( json_encode( $nodes ), '"price' ), 'Rank Math: price on request has no price' );
 			$r = step( $site, 'activate_plugin', array( 'plugin' => 'digitum-bookings/digitum-bookings.php', 'deactivate' => array( 'seo-by-rank-math/rank-math.php' ) ) );
@@ -1215,21 +1216,21 @@ if ( array() !== $seo_plugins && scenario( 'J' ) ) {
 		if ( isset( $seo_plugins['yoast'] ) ) {
 			symlink( realpath( $seo_plugins['yoast'] ), "{$site}/wp-content/plugins/wordpress-seo" );
 			$a = step( $site, 'activate_plugin', array( 'plugin' => 'wordpress-seo/wp-seo.php' ) );
-			list( $count, $class, $nodes ) = $graph( '/tour/rzr/' );
+			list( $count, $class, $nodes ) = $graph( '/tour/buggy/' );
 			$tour                          = $products( $nodes );
 			$ids                           = $by_id( $nodes );
 			check( '' === $a['error'] && 1 === $count && str_contains( $class, 'yoast-schema-graph' ), 'Yoast: one JSON-LD graph (Yoast’s)' );
-			check( 1 === count( $tour ) && $home . '/tour/rzr/#dgb-product' === $tour[0]['@id'] && '699.00' === $tour[0]['offers']['lowPrice'], 'Yoast: our Product node with the page price' );
-			check( isset( $ids[ $home . '/tour/rzr/' ] ) && $home . '/tour/rzr/' === ( $tour[0]['mainEntityOfPage']['@id'] ?? '' ), 'Yoast: Product is the main entity of Yoast’s WebPage' );
+			check( 1 === count( $tour ) && $home . '/tour/buggy/#dgb-product' === $tour[0]['@id'] && '699.00' === $tour[0]['offers']['lowPrice'], 'Yoast: our Product node with the page price' );
+			check( isset( $ids[ $home . '/tour/buggy/' ] ) && $home . '/tour/buggy/' === ( $tour[0]['mainEntityOfPage']['@id'] ?? '' ), 'Yoast: Product is the main entity of Yoast’s WebPage' );
 			$seller = $tour[0]['offers']['offers'][0]['seller']['@id'] ?? '';
 			check( isset( $ids[ $seller ] ), 'Yoast: seller node is in the graph' );
 		}
 
 		if ( is_dir( $root . '/node_modules/@adobe/structured-data-validator' ) ) {
-			exec( 'node ' . escapeshellarg( $root . '/tests/schema/rich-results.mjs' ) . ' ' . escapeshellarg( $home . '/tour/rzr/' ) . ' 2>&1', $lines, $code );
+			exec( 'node ' . escapeshellarg( $root . '/tests/schema/rich-results.mjs' ) . ' ' . escapeshellarg( $home . '/tour/buggy/' ) . ' 2>&1', $lines, $code );
 			$rich = json_decode( (string) end( $lines ), true );
 			// Errors on the SEO plugin's own nodes (e.g. image licence fields of its ImageObject) are not ours.
-			$ours = array_filter( (array) ( $rich[ $home . '/tour/rzr/' ]['errors'] ?? array( 'no result @ Product' ) ), static fn( $e ) => (bool) preg_match( '/@ (Product|TouristTrip|TravelAgency|Offer|AggregateOffer)/', $e ) );
+			$ours = array_filter( (array) ( $rich[ $home . '/tour/buggy/' ]['errors'] ?? array( 'no result @ Product' ) ), static fn( $e ) => (bool) preg_match( '/@ (Product|TouristTrip|TravelAgency|Offer|AggregateOffer)/', $e ) );
 			check( 0 === $code && array() === $ours, 'Rich Results: no errors in our nodes of the merged graph' . ( $ours ? ' → ' . implode( ' | ', $ours ) : '' ) );
 		}
 		stop_server( $server );
@@ -1281,7 +1282,7 @@ if ( scenario( 'K' ) ) {
 		step( $site, 'install' );
 		step( $site, 'activate' );
 		$demo = step( $site, 'demo_setup' );
-		step( $site, 'bulk_book', array( 'count' => 3, 'product' => $demo['tours']['rzr']['id'], 'input' => array( 'variant_id' => $demo['tours']['rzr']['variants']['1 hour'], 'date' => $demo['tomorrow'], 'session_id' => $demo['tours']['rzr']['sessions']['Evening'] ), 'zone' => $demo['zones']['Dubai'] ) );
+		step( $site, 'bulk_book', array( 'count' => 3, 'product' => $demo['tours']['buggy']['id'], 'input' => array( 'variant_id' => $demo['tours']['buggy']['variants']['1 hour'], 'date' => $demo['tomorrow'], 'session_id' => $demo['tours']['buggy']['sessions']['Evening'] ), 'zone' => $demo['zones']['North Zone'] ) );
 		$server = start_server( $site, $port );
 
 		$v1 = $next( $installed, 1 );
@@ -1451,34 +1452,34 @@ if ( scenario( 'M' ) ) {
 	step( $site, 'install' );
 	step( $site, 'activate' );
 	$demo = step( $site, 'demo_setup' );
-	$rzr  = $demo['tours']['rzr'];
+	$buggy  = $demo['tours']['buggy'];
 	$saf  = $demo['tours']['safari'];
-	$day  = static fn( int $n ) => ( new DateTimeImmutable( ( $n >= 0 ? '+' : '' ) . $n . ' days', new DateTimeZone( 'Asia/Dubai' ) ) )->format( 'Y-m-d' );
+	$day  = static fn( int $n ) => ( new DateTimeImmutable( ( $n >= 0 ? '+' : '' ) . $n . ' days', new DateTimeZone( 'Asia/Tbilisi' ) ) )->format( 'Y-m-d' );
 
-	$r = step( $site, 'render_page', array( 'url' => $rzr['url'] ) );
+	$r = step( $site, 'render_page', array( 'url' => $buggy['url'] ) );
 	check( 1 === $r['widget'] && ! $r['coupon'], 'no coupon field while there is no coupon' );
 	check( 'dgb_coupon_amount' === step( $site, 'coupon_save', array( 'coupon' => array( 'code' => 'BAD', 'type' => 'percent', 'amount' => '150' ) ) )['error'], 'a percentage above 100 is refused' );
-	$c10 = step( $site, 'coupon_save', array( 'coupon' => array( 'code' => ' desert-10 ', 'type' => 'percent', 'amount' => '10', 'product_ids' => array( $rzr['id'] ), 'usage_limit' => 2, 'active' => 1 ) ) );
+	$c10 = step( $site, 'coupon_save', array( 'coupon' => array( 'code' => ' desert-10 ', 'type' => 'percent', 'amount' => '10', 'product_ids' => array( $buggy['id'] ), 'usage_limit' => 2, 'active' => 1 ) ) );
 	check( 'DESERT-10' === $c10['row']['code'] && 2 === (int) $c10['row']['usage_limit'], 'coupon saved, code in capitals' );
 	check( 'dgb_coupon_taken' === step( $site, 'coupon_save', array( 'coupon' => array( 'code' => 'Desert-10', 'type' => 'fixed', 'amount' => '5', 'active' => 1 ) ) )['error'], 'a code can only exist once' );
 	step( $site, 'coupon_save', array( 'coupon' => array( 'code' => 'OLD50', 'type' => 'fixed', 'amount' => '50', 'ends_at' => $day( -1 ), 'active' => 1 ) ) );
-	$r = step( $site, 'render_page', array( 'url' => $rzr['url'] ) );
+	$r = step( $site, 'render_page', array( 'url' => $buggy['url'] ) );
 	check( $r['coupon'], 'coupon field shown in the payment step while a coupon can be used' );
 
 	$quote = static fn( string $code, array $tour, string $variant ) => step( $site, 'rest', array( 'method' => 'POST', 'route' => 'quote', 'body' => array( 'product' => $tour['id'], 'variant_id' => $tour['variants'][ $variant ], 'date' => $day( 3 ), 'session_id' => $tour['sessions']['Evening'], 'adults' => 2, 'units' => 1, 'coupon' => $code ) ) )['data'];
-	$q = $quote( 'desert-10', $rzr, '1 hour' );
+	$q = $quote( 'desert-10', $buggy, '1 hour' );
 	$d = array_values( array_filter( $q['lines'], static fn( $l ) => 'coupon' === $l['key'] ) );
 	check( 1 === count( $d ) && '-89.90' === $amt( $d[0]['amount'] ) && '809.10' === $amt( $q['total'] ), 'quote: 10% off AED 899 = 809.10 (code typed in lower case)' );
 	$q = $quote( 'DESERT-10', $saf, 'Standard' );
 	check( in_array( 'coupon_invalid', array_column( $q['errors'], 'code' ), true ) && '198.00' === $amt( $q['total'] ), 'coupon for another tour: refused, full price' );
-	$q = $quote( 'OLD50', $rzr, '1 hour' );
+	$q = $quote( 'OLD50', $buggy, '1 hour' );
 	check( in_array( 'coupon_invalid', array_column( $q['errors'], 'code' ), true ), 'expired coupon refused' );
 
 	$ip   = 0;
-	$book = static function ( string $code, string $method = 'arrival', ?array $tour = null ) use ( $site, $rzr, $day, $demo, &$ip ) {
+	$book = static function ( string $code, string $method = 'arrival', ?array $tour = null ) use ( $site, $buggy, $day, $demo, &$ip ) {
 		++$ip;
-		$tour = $tour ?? $rzr;
-		$body = array( 'product' => $tour['id'], 'variant_id' => reset( $tour['variants'] ), 'date' => $day( 3 ), 'session_id' => $tour['sessions']['Evening'], 'adults' => 2, 'units' => 1, 'payment_method' => $method, 'name' => 'Coupon Guest', 'email' => 'coupon@example.com', 'phone_code' => '+971', 'phone' => '501234567', 'terms' => true );
+		$tour = $tour ?? $buggy;
+		$body = array( 'product' => $tour['id'], 'variant_id' => reset( $tour['variants'] ), 'date' => $day( 3 ), 'session_id' => $tour['sessions']['Evening'], 'adults' => 2, 'units' => 1, 'payment_method' => $method, 'name' => 'Coupon Guest', 'email' => 'coupon@example.com', 'phone_code' => '+1', 'phone' => '501234567', 'terms' => true );
 		if ( '' !== $code ) {
 			$body['coupon'] = $code;
 		}
@@ -1489,20 +1490,20 @@ if ( scenario( 'M' ) ) {
 	check( 201 === $b1['status'] && 'DESERT-10' === $s1['booking']['coupon_code'] && '69.90' === $amt( $s1['booking']['discount'] ) && '629.10' === $amt( $s1['booking']['total'] ), 'booking with the coupon: discount saved and code recorded' );
 	$b2 = $book( 'DESERT-10', 'bank_transfer' );
 	$b3 = $book( 'DESERT-10' );
-	$c  = step( $site, 'coupon_save', array( 'id' => $c10['id'], 'coupon' => array( 'code' => 'DESERT-10', 'type' => 'percent', 'amount' => '10', 'product_ids' => array( $rzr['id'] ), 'usage_limit' => 2, 'active' => 1 ) ) );
+	$c  = step( $site, 'coupon_save', array( 'id' => $c10['id'], 'coupon' => array( 'code' => 'DESERT-10', 'type' => 'percent', 'amount' => '10', 'product_ids' => array( $buggy['id'] ), 'usage_limit' => 2, 'active' => 1 ) ) );
 	check( 201 === $b2['status'] && 400 === $b3['status'] && isset( $b3['data']['data']['fields']['price_coupon_invalid'] ) && 2 === (int) $c['row']['used_count'], 'usage limit 2: the third booking with the code is refused' );
 
 	// Reports: one sold with coupon, one waiting for transfer, one sold without coupon, one cancelled, one quote request.
 	$b4 = $book( '' );
 	$b5 = $book( '', 'arrival', $saf );
 	step( $site, 'admin_action', array( 'op' => 'status', 'reference' => $b5['data']['reference'], 'do' => 'cancel' ) );
-	step( $site, 'rest', array( 'method' => 'POST', 'route' => 'enquiries', 'nonce' => true, 'ip' => '10.7.1.1', 'body' => array( 'product' => $demo['tours']['newyear']['id'], 'date' => $day( 5 ), 'session_id' => $demo['tours']['newyear']['sessions']['Evening'], 'adults' => 4, 'name' => 'Quote Guest', 'email' => 'q@example.com', 'phone_code' => '+971', 'phone' => '501234567', 'terms' => true ) ) );
+	step( $site, 'rest', array( 'method' => 'POST', 'route' => 'enquiries', 'nonce' => true, 'ip' => '10.7.1.1', 'body' => array( 'product' => $demo['tours']['newyear']['id'], 'date' => $day( 5 ), 'session_id' => $demo['tours']['newyear']['sessions']['Evening'], 'adults' => 4, 'name' => 'Quote Guest', 'email' => 'q@example.com', 'phone_code' => '+1', 'phone' => '501234567', 'terms' => true ) ) );
 	$rep = step( $site, 'reports', array( 'from' => $day( -1 ), 'to' => $day( 0 ) ) )['report'];
 	$t   = $rep['totals'];
 	check( 4 === $t['made'] && 2 === $t['sold'] && 1 === $t['cancelled'] && 1 === $t['open'] && 1 === $t['quotes'], 'report: 4 bookings made, 2 sold, 1 cancelled, 1 waiting, 1 quote request' );
 	check( '1328.10' === $amt( $t['value'] ) && 4 === $t['guests'], 'booked value 629.10 + 699 = 1,328.10 for 4 guests' );
 	check( 50.0 === round( 100 * $t['sold'] / $t['made'], 1 ) && 25.0 === round( 100 * $t['cancelled'] / $t['made'], 1 ), 'conversion 50%, cancellation rate 25%' );
-	check( 3 === $rep['tours'][ $rzr['id'] ]['made'] && 1 === $rep['tours'][ $saf['id'] ]['cancelled'] && 2 === $rep['sources']['organic']['sold'], 'by tour and by source' );
+	check( 3 === $rep['tours'][ $buggy['id'] ]['made'] && 1 === $rep['tours'][ $saf['id'] ]['cancelled'] && 2 === $rep['sources']['organic']['sold'], 'by tour and by source' );
 	check( 2 === $rep['coupons']['DESERT-10']['uses'] && '139.80' === $amt( $rep['coupons']['DESERT-10']['discount'] ), 'coupon report: 2 bookings, AED 139.80 discount given' );
 
 	$cs = step( $site, 'render_admin', array( 'screen' => 'coupons', 'admin' => true ) );
@@ -1529,57 +1530,57 @@ if ( scenario( 'N' ) ) {
 	step( $site, 'install' );
 	step( $site, 'activate' );
 	$demo = step( $site, 'demo_setup' );
-	$rzr  = $demo['tours']['rzr'];
-	$day  = static fn( int $n ) => ( new DateTimeImmutable( ( $n >= 0 ? '+' : '' ) . $n . ' days', new DateTimeZone( 'Asia/Dubai' ) ) )->format( 'Y-m-d' );
+	$buggy  = $demo['tours']['buggy'];
+	$day  = static fn( int $n ) => ( new DateTimeImmutable( ( $n >= 0 ? '+' : '' ) . $n . ' days', new DateTimeZone( 'Asia/Tbilisi' ) ) )->format( 'Y-m-d' );
 
 	// Second display currency (section 2).
-	$off = step( $site, 'render_page', array( 'url' => $rzr['url'] ) );
+	$off = step( $site, 'render_page', array( 'url' => $buggy['url'] ) );
 	check( ! str_contains( $off['html'], 'dgb-second' ) && null === $off['config']['second'], 'second currency off by default: nothing shown' );
 	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_enabled' => true, 'second_currency' => 'USD', 'second_rate' => 0 ) ) ) );
-	check( ! str_contains( step( $site, 'render_page', array( 'url' => $rzr['url'] ) )['html'], 'dgb-second' ), 'switched on without a rate: still hidden' );
+	check( ! str_contains( step( $site, 'render_page', array( 'url' => $buggy['url'] ) )['html'], 'dgb-second' ), 'switched on without a rate: still hidden' );
 	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_rate' => 3.6725 ) ) ) );
-	$on = step( $site, 'render_page', array( 'url' => $rzr['url'] ) );
+	$on = step( $site, 'render_page', array( 'url' => $buggy['url'] ) );
 	check( str_contains( $on['html'], '<strong>AED 699.00</strong> <span class="dgb-second">(about USD 190)</span>' ), 'from price shows “AED 699.00 (about USD 190)” (whole units)' );
 	check( array( 'code' => 'USD', 'rate' => 3.6725, 'decimals' => 0, 'template' => 'about {amount}' ) === $on['config']['second'], 'widget script gets the rate for the live total' );
 	$llms = step( $site, 'llms' )['text'];
 	check( str_contains( $llms, 'From AED 699.00 (about USD 190)' ), 'llms.txt shows the second amount' );
 	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_rounding' => 'decimals', 'second_template' => '≈ {amount}' ) ) ) );
-	check( str_contains( step( $site, 'render_page', array( 'url' => $rzr['url'] ) )['html'], '(≈ USD 190.33)' ), 'two decimals and custom wording' );
-	$q = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'quote', 'body' => array( 'product' => $rzr['id'], 'variant_id' => $rzr['variants']['1 hour'], 'date' => $day( 3 ), 'session_id' => $rzr['sessions']['Evening'], 'adults' => 2, 'units' => 1 ) ) )['data'];
+	check( str_contains( step( $site, 'render_page', array( 'url' => $buggy['url'] ) )['html'], '(≈ USD 190.33)' ), 'two decimals and custom wording' );
+	$q = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'quote', 'body' => array( 'product' => $buggy['id'], 'variant_id' => $buggy['variants']['1 hour'], 'date' => $day( 3 ), 'session_id' => $buggy['sessions']['Evening'], 'adults' => 2, 'units' => 1 ) ) )['data'];
 	check( 'AED' === $q['currency'] && '899.00' === $amt( $q['total'] ) && ! isset( $q['second'] ), 'quotes and charges stay in the site currency' );
-	$b = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'ip' => '10.8.0.1', 'body' => array( 'product' => $rzr['id'], 'variant_id' => $rzr['variants']['1 hour'], 'date' => $day( 3 ), 'session_id' => $rzr['sessions']['Evening'], 'adults' => 2, 'units' => 1, 'payment_method' => 'arrival', 'name' => 'Second Guest', 'email' => 'second@example.com', 'phone_code' => '+1', 'phone' => '5550100', 'terms' => true ) ) );
+	$b = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'ip' => '10.8.0.1', 'body' => array( 'product' => $buggy['id'], 'variant_id' => $buggy['variants']['1 hour'], 'date' => $day( 3 ), 'session_id' => $buggy['sessions']['Evening'], 'adults' => 2, 'units' => 1, 'payment_method' => 'arrival', 'name' => 'Second Guest', 'email' => 'second@example.com', 'phone_code' => '+1', 'phone' => '5550100', 'terms' => true ) ) );
 	$v = step( $site, 'view', array( 'reference' => $b['data']['reference'], 'link' => true ) );
 	check( 201 === $b['status'] && str_contains( $v['html'], 'AED 899.00</strong> <span class="dgb-second">(≈ USD 244.79)</span>' ), 'confirmation page shows the second amount next to the total' );
 	$m = step( $site, 'mails' );
 	check( ! empty( $m['mails'] ) && ! str_contains( (string) wp_json_encode_n( $m ), 'USD' ), 'emails stay in the site currency only' );
 	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_enabled' => false ) ) ) );
-	check( ! str_contains( step( $site, 'render_page', array( 'url' => $rzr['url'] ) )['html'], 'dgb-second' ) && ! str_contains( step( $site, 'llms' )['text'], 'USD' ), 'switched off again: gone everywhere' );
+	check( ! str_contains( step( $site, 'render_page', array( 'url' => $buggy['url'] ) )['html'], 'dgb-second' ) && ! str_contains( step( $site, 'llms' )['text'], 'USD' ), 'switched off again: gone everywhere' );
 
 	// Rating source (section 3).
 	$saf     = $demo['tours']['safari'];
 	$rating  = static fn( int $id ) => step( $site, 'schema', array( 'post' => $id ) )['node']['aggregateRating'] ?? null;
 	$seo     = step( $site, 'render_settings', array( 'tab' => 'seo' ) )['html'];
-	check( null === $rating( $rzr['id'] ) && str_contains( $seo, 'name="dgb_settings[seo][rating_source]"' ) && ! str_contains( $seo, '>Site Reviews<' ), 'no source by default: no rating; Site Reviews inactive, so not offered' );
+	check( null === $rating( $buggy['id'] ) && str_contains( $seo, 'name="dgb_settings[seo][rating_source]"' ) && ! str_contains( $seo, '>Site Reviews<' ), 'no source by default: no rating; Site Reviews inactive, so not offered' );
 	file_put_contents( "{$site}/wp-content/mu-plugins/custom-rating.php", "<?php\nadd_filter( 'dgb_schema_rating', static fn( \$r, \$id ) => \$r ?? ( get_option( 'dgb_test_custom_rating' ) ? array( 'value' => 4.2, 'count' => 12 ) : null ), 10, 2 );\n" );
 	step( $site, 'set_option', array( 'name' => 'dgb_test_custom_rating', 'value' => 1 ) );
-	check( null === $rating( $rzr['id'] ), 'source None: a developer filter cannot add a rating' );
+	check( null === $rating( $buggy['id'] ), 'source None: a developer filter cannot add a rating' );
 	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'rating_source' => 'custom' ) ) ) );
-	check( array( 4.2, 12 ) === array( $rating( $rzr['id'] )['ratingValue'] ?? null, $rating( $rzr['id'] )['ratingCount'] ?? null ), 'source Custom: the dgb_schema_rating filter gives the rating' );
+	check( array( 4.2, 12 ) === array( $rating( $buggy['id'] )['ratingValue'] ?? null, $rating( $buggy['id'] )['ratingCount'] ?? null ), 'source Custom: the dgb_schema_rating filter gives the rating' );
 	step( $site, 'set_option', array( 'name' => 'dgb_test_custom_rating', 'value' => 0 ) );
-	check( null === $rating( $rzr['id'] ), 'Custom with nothing returned: no rating' );
+	check( null === $rating( $buggy['id'] ), 'Custom with nothing returned: no rating' );
 
 	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'rating_source' => 'site_reviews' ) ) ) );
-	check( null === $rating( $rzr['id'] ), 'Site Reviews chosen but not active: nothing output' );
+	check( null === $rating( $buggy['id'] ), 'Site Reviews chosen but not active: nothing output' );
 	$reviews = array(
-		array( 'post' => $rzr['id'], 'rating' => 5, 'author' => 'Guest One', 'content' => '<b>Great</b> ride', 'date' => '2026-10-01 10:00:00', 'status' => 'approved' ),
-		array( 'post' => $rzr['id'], 'rating' => 4, 'author' => 'Guest Two', 'content' => 'Good', 'date' => '2026-10-05 10:00:00', 'status' => 'approved' ),
-		array( 'post' => $rzr['id'], 'rating' => 1, 'author' => 'Not approved', 'content' => 'Spam', 'date' => '2026-10-06 10:00:00', 'status' => 'pending' ),
+		array( 'post' => $buggy['id'], 'rating' => 5, 'author' => 'Guest One', 'content' => '<b>Great</b> ride', 'date' => '2026-10-01 10:00:00', 'status' => 'approved' ),
+		array( 'post' => $buggy['id'], 'rating' => 4, 'author' => 'Guest Two', 'content' => 'Good', 'date' => '2026-10-05 10:00:00', 'status' => 'approved' ),
+		array( 'post' => $buggy['id'], 'rating' => 1, 'author' => 'Not approved', 'content' => 'Spam', 'date' => '2026-10-06 10:00:00', 'status' => 'pending' ),
 		array( 'post' => 999999, 'rating' => 2, 'author' => 'Other tour', 'content' => 'Meh', 'date' => '2026-10-07 10:00:00', 'status' => 'approved' ),
 	);
 	step( $site, 'set_option', array( 'name' => 'dgb_fake_site_reviews', 'value' => $reviews ) );
 	$seo = step( $site, 'render_settings', array( 'tab' => 'seo' ) )['html'];
 	check( str_contains( $seo, '>Site Reviews<' ), 'Site Reviews active: offered as a rating source' );
-	$node = step( $site, 'schema', array( 'post' => $rzr['id'] ) )['node'];
+	$node = step( $site, 'schema', array( 'post' => $buggy['id'] ) )['node'];
 	check( 4.5 === (float) $node['aggregateRating']['ratingValue'] && 2 === $node['aggregateRating']['ratingCount'] && 5.0 === (float) $node['aggregateRating']['bestRating'], 'tour average from its own approved reviews only (4.5 from 2)' );
 	check( array( 'Guest Two', 'Guest One' ) === array_column( array_column( $node['review'], 'author' ), 'name' ) && 'Great ride' === $node['review'][1]['reviewBody'], 'latest reviews listed, text without HTML' );
 	check( null === $rating( $saf['id'] ), 'a tour without reviews has no rating by default' );
@@ -1590,14 +1591,14 @@ if ( scenario( 'N' ) ) {
 	$validator = dirname( __DIR__, 2 ) . '/node_modules/@adobe/structured-data-validator';
 	if ( is_dir( $validator ) ) {
 		$server = start_server( $site, $port );
-		exec( 'node ' . escapeshellarg( dirname( __DIR__, 2 ) . '/tests/schema/rich-results.mjs' ) . ' ' . escapeshellarg( $home . wp_make_link_relative_test( $rzr['url'] ) ) . ' 2>&1', $lines, $code );
+		exec( 'node ' . escapeshellarg( dirname( __DIR__, 2 ) . '/tests/schema/rich-results.mjs' ) . ' ' . escapeshellarg( $home . wp_make_link_relative_test( $buggy['url'] ) ) . ' 2>&1', $lines, $code );
 		stop_server( $server );
 		$rich = json_decode( (string) end( $lines ), true );
 		$res  = is_array( $rich ) ? reset( $rich ) : null;
 		check( 0 === $code && is_array( $res ) && array() === $res['errors'], 'Rich Results: a tour with a Site Reviews rating has no errors' . ( ! empty( $res['errors'] ) ? ' → ' . implode( ' | ', $res['errors'] ) : '' ) );
 	}
 	step( $site, 'set_option', array( 'name' => 'dgb_fake_site_reviews', 'value' => 0 ) );
-	check( null === $rating( $rzr['id'] ), 'Site Reviews deactivated: rating gone' );
+	check( null === $rating( $buggy['id'] ), 'Site Reviews deactivated: rating gone' );
 	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'rating_source' => 'none' ) ) ) );
 
 	// Automatic offers (section 4).
@@ -1610,46 +1611,46 @@ if ( scenario( 'N' ) ) {
 
 	$ref  = static fn( array $tour, string $option, array $extra = array() ) => array_merge( array( 'product' => $tour['id'], 'variant_id' => $tour['variants'][ $option ], 'date' => $day( 3 ), 'session_id' => $tour['sessions']['Evening'], 'adults' => 2, 'units' => 1 ), $extra );
 	$quote = static fn( array $body ) => step( $site, 'rest', array( 'method' => 'POST', 'route' => 'quote', 'body' => $body ) )['data'];
-	$pickup = array( 'pickup' => true, 'zone_id' => $demo['zones']['Dubai'] );
-	$free = step( $site, 'offer_save', array( 'offer' => array( 'name' => 'Pickup deal', 'label' => 'Free hotel pickup on 2 or more vehicles', 'active' => 1, 'priority' => 5, 'product_ids' => array( $rzr['id'] ), 'min_units' => 2, 'effect' => 'waive_addon', 'addon_key' => 'pickup', 'show_hint' => 1, 'starts_on' => $day( 0 ), 'ends_on' => $day( 30 ) ) ) );
-	$q    = $quote( $ref( $rzr, '1 hour', $pickup ) );
+	$pickup = array( 'pickup' => true, 'zone_id' => $demo['zones']['North Zone'] );
+	$free = step( $site, 'offer_save', array( 'offer' => array( 'name' => 'Pickup deal', 'label' => 'Free hotel pickup on 2 or more vehicles', 'active' => 1, 'priority' => 5, 'product_ids' => array( $buggy['id'] ), 'min_units' => 2, 'effect' => 'waive_addon', 'addon_key' => 'pickup', 'show_hint' => 1, 'starts_on' => $day( 0 ), 'ends_on' => $day( 30 ) ) ) );
+	$q    = $quote( $ref( $buggy, '1 hour', $pickup ) );
 	check( null === $q['offer'] && array( 'Add 1 more vehicle to get: Free hotel pickup on 2 or more vehicles' ) === $q['hint_texts'] && '1199.00' === $amt( $q['total'] ), 'one vehicle: no offer, a hint to add one more' );
-	$q    = $quote( $ref( $rzr, '1 hour', $pickup + array( 'units' => 2 ) ) );
+	$q    = $quote( $ref( $buggy, '1 hour', $pickup + array( 'units' => 2 ) ) );
 	$line = array_values( array_filter( $q['lines'], static fn( $l ) => 'offer' === $l['key'] ) );
 	check( '300.00' === $amt( $q['offer']['discount'] ) && 'Free hotel pickup on 2 or more vehicles' === $line[0]['label'] && '-300.00' === $amt( $line[0]['amount'] ) && '1798.00' === $amt( $q['total'] ) && array() === $q['hint_texts'], 'two vehicles with pickup: pickup free (−300), shown with the public label' );
-	check( null === $quote( $ref( $rzr, '1 hour', array( 'units' => 2 ) ) )['offer'], 'two vehicles without pickup: nothing to waive, no offer' );
+	check( null === $quote( $ref( $buggy, '1 hour', array( 'units' => 2 ) ) )['offer'], 'two vehicles without pickup: nothing to waive, no offer' );
 	check( null === $quote( $ref( $saf, 'Standard', $pickup + array( 'units' => 2 ) ) )['offer'], 'another tour: no offer' );
-	check( null === $quote( $ref( $rzr, '1 hour', $pickup + array( 'units' => 2, 'date' => $day( 40 ) ) ) )['offer'], 'tour date after the offer ends: no offer' );
+	check( null === $quote( $ref( $buggy, '1 hour', $pickup + array( 'units' => 2, 'date' => $day( 40 ) ) ) )['offer'], 'tour date after the offer ends: no offer' );
 
-	$book = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'ip' => '10.8.1.1', 'body' => $ref( $rzr, '1 hour', $pickup + array( 'units' => 2, 'hotel' => 'Sample Hotel', 'payment_method' => 'arrival', 'name' => 'Offer Guest', 'email' => 'offer@example.com', 'phone_code' => '+1', 'phone' => '5550101', 'terms' => true ) ) ) );
+	$book = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'ip' => '10.8.1.1', 'body' => $ref( $buggy, '1 hour', $pickup + array( 'units' => 2, 'hotel' => 'Sample Hotel', 'payment_method' => 'arrival', 'name' => 'Offer Guest', 'email' => 'offer@example.com', 'phone_code' => '+1', 'phone' => '5550101', 'terms' => true ) ) ) );
 	$st   = step( $site, 'booking_state', array( 'reference' => $book['data']['reference'] ) );
 	check( 201 === $book['status'] && '1798.00' === $amt( $st['booking']['total'] ) && (int) $free['id'] === (int) $st['items'][0]['offer_id'] && 'Free hotel pickup on 2 or more vehicles' === $st['items'][0]['offer_label'] && '300.00' === $amt( $st['items'][0]['offer_discount'] ), 'the booking is charged the quoted price and stores the offer and its saving' );
 
 	// Coupons and offers.
 	step( $site, 'coupon_save', array( 'coupon' => array( 'code' => 'SMALL', 'type' => 'fixed', 'amount' => '50', 'active' => 1 ) ) );
 	step( $site, 'coupon_save', array( 'coupon' => array( 'code' => 'HUGE', 'type' => 'percent', 'amount' => '50', 'active' => 1 ) ) );
-	$q = $quote( $ref( $rzr, '1 hour', $pickup + array( 'units' => 2, 'coupon' => 'SMALL' ) ) );
+	$q = $quote( $ref( $buggy, '1 hour', $pickup + array( 'units' => 2, 'coupon' => 'SMALL' ) ) );
 	check( in_array( 'coupon_not_combinable', array_column( $q['errors'], 'code' ), true ) && '1798.00' === $amt( $q['total'] ), 'no stacking: a smaller coupon is refused with a message; the offer stays' );
-	$q = $quote( $ref( $rzr, '1 hour', $pickup + array( 'units' => 2, 'coupon' => 'HUGE' ) ) );
+	$q = $quote( $ref( $buggy, '1 hour', $pickup + array( 'units' => 2, 'coupon' => 'HUGE' ) ) );
 	check( null === $q['offer'] && '1049.00' === $amt( $q['total'] ) && $q['valid'], 'no stacking: a bigger coupon wins and the offer steps aside' );
 	step( $site, 'settings_merge', array( 'values' => array( 'payments' => array( 'offers_stack' => true ) ) ) );
-	$q = $quote( $ref( $rzr, '1 hour', $pickup + array( 'units' => 2, 'coupon' => 'SMALL' ) ) );
+	$q = $quote( $ref( $buggy, '1 hour', $pickup + array( 'units' => 2, 'coupon' => 'SMALL' ) ) );
 	check( '300.00' === $amt( $q['offer']['discount'] ) && '50.00' === $amt( $q['discount'] ) && '1748.00' === $amt( $q['total'] ) && $q['valid'], 'stacking allowed: offer and coupon together' );
 	step( $site, 'settings_merge', array( 'values' => array( 'payments' => array( 'offers_stack' => false ) ) ) );
 
 	// An offer without conditions changes the shown prices, with priceValidUntil in the schema.
 	$all = step( $site, 'offer_save', array( 'offer' => array( 'name' => 'Season', 'label' => 'Season sale', 'active' => 1, 'priority' => 1, 'effect' => 'percent', 'amount' => '10', 'starts_on' => $day( -1 ), 'ends_on' => $day( 20 ) ) ) );
-	$sc  = step( $site, 'schema', array( 'post' => $rzr['id'] ) );
+	$sc  = step( $site, 'schema', array( 'post' => $buggy['id'] ) );
 	$off = $sc['node']['offers'];
 	check( '629.10' === $amt( $sc['points']['from'] ) && '629.10' === $amt( $off['lowPrice'] ) && $day( 20 ) === $off['offers'][0]['priceValidUntil'] && '629.10' === $amt( $off['offers'][0]['price'] ), 'unconditional offer: from price and schema prices lowered, with priceValidUntil' );
 	check( 'AED 629.10' === $sc['visible'], 'visible from price = schema price' );
-	$page = step( $site, 'render_page', array( 'url' => $rzr['url'] ) )['html'];
+	$page = step( $site, 'render_page', array( 'url' => $buggy['url'] ) )['html'];
 	check( str_contains( $page, '<s>AED 699.00</s>' ) && str_contains( $page, 'AED 629.10' ), 'option shows the old price crossed out only while the offer runs' );
-	$q = $quote( $ref( $rzr, '30 min' ) );
+	$q = $quote( $ref( $buggy, '30 min' ) );
 	check( '629.10' === $amt( $q['total'] ) && 'Season sale' === $q['offer']['label'], 'the quote charges the shown price' );
 	step( $site, 'offer_save', array( 'id' => $all['id'], 'offer' => array( 'name' => 'Season', 'label' => 'Season sale', 'active' => 0, 'effect' => 'percent', 'amount' => '10' ) ) );
-	$page = step( $site, 'render_page', array( 'url' => $rzr['url'] ) )['html'];
-	check( ! str_contains( $page, '<s>' ) && '699.00' === $amt( step( $site, 'schema', array( 'post' => $rzr['id'] ) )['points']['from'] ) && ! isset( step( $site, 'schema', array( 'post' => $rzr['id'] ) )['node']['offers']['offers'][0]['priceValidUntil'] ), 'offer off: regular prices, no strike-through, no priceValidUntil' );
+	$page = step( $site, 'render_page', array( 'url' => $buggy['url'] ) )['html'];
+	check( ! str_contains( $page, '<s>' ) && '699.00' === $amt( step( $site, 'schema', array( 'post' => $buggy['id'] ) )['points']['from'] ) && ! isset( step( $site, 'schema', array( 'post' => $buggy['id'] ) )['node']['offers']['offers'][0]['priceValidUntil'] ), 'offer off: regular prices, no strike-through, no priceValidUntil' );
 
 	$rep = step( $site, 'reports', array( 'from' => $day( -1 ), 'to' => $day( 0 ) ) )['report'];
 	check( 1 === ( $rep['offers']['Free hotel pickup on 2 or more vehicles']['uses'] ?? 0 ) && '300.00' === $amt( $rep['offers']['Free hotel pickup on 2 or more vehicles']['discount'] ?? 0 ), 'Reports: offers with bookings and discount given' );
@@ -1675,11 +1676,11 @@ if ( scenario( 'N' ) ) {
 		'some'       => '[dgb_tour_facts fields="pickup, duration"]',
 	);
 	$o = static fn( int $post, array $extra = array() ) => step( $site, 'outputs', array( 'post' => $post, 'shortcodes' => $codes + $extra ) )['shortcodes'];
-	$r = $o( $rzr['id'] );
+	$r = $o( $buggy['id'] );
 	check( 1 === substr_count( implode( '', $r ), '<style id="dgb-outputs-css">' ) && strlen( (string) preg_replace( '#^.*?<style id="dgb-outputs-css">(.*?)</style>.*$#s', '$1', $r['from'] ) ) < 1024, 'inline stylesheet printed once per page, under 1 KB' );
 	check( str_contains( $r['from'], 'From <strong class="dgb-from-price__amount">AED 699.00</strong> <span class="dgb-from-price__basis">per vehicle</span>' ) && str_contains( $r['from_plain'], '<strong class="dgb-from-price__amount">AED 699.00</strong></span>' ), 'from price per vehicle, with or without its basis' );
 	check( str_contains( $r['table'], '<th scope="row" class="dgb-price-table__option">30 min</th><td class="dgb-price-table__duration">30 min</td>' ) && str_contains( $r['table'], 'AED 349.50 (2 people)' ) && 3 === substr_count( $r['table'], '<tr><th scope="row"' ), 'price table: every option, duration, per-person share of a 2-seater' );
-	check( str_contains( $r['facts'], 'Up to 2 people per vehicle' ) && str_contains( $r['facts'], '16 years' ) && str_contains( $r['facts'], 'Hotel pickup on request (+AED 300.00 per booking)' ) && str_contains( $r['facts'], 'href="https://maps.example/al-aweer"' ) && str_contains( $r['facts'], '30 min – 2 h<' ) && str_contains( $r['facts'], 'Evening: starts 3:30 pm, pickup 2:15 pm – 2:45 pm' ), 'tour facts: group size, age, pickup with price, map link, durations, sessions with pickup windows' );
+	check( str_contains( $r['facts'], 'Up to 2 people per vehicle' ) && str_contains( $r['facts'], '16 years' ) && str_contains( $r['facts'], 'Hotel pickup on request (+AED 300.00 per booking)' ) && str_contains( $r['facts'], 'href="https://maps.example/meeting-point"' ) && str_contains( $r['facts'], '30 min – 2 h<' ) && str_contains( $r['facts'], 'Evening: starts 3:30 pm, pickup 2:15 pm – 2:45 pm' ), 'tour facts: group size, age, pickup with price, map link, durations, sessions with pickup windows' );
 	check( 2 === substr_count( $r['some'], '<dt>' ) && strpos( $r['some'], 'Pickup' ) < strpos( $r['some'], 'Duration' ), 'facts limited to chosen fields, in their order' );
 	check( '' === $r['incl'] && '' === $r['excl'], 'empty lists print nothing' );
 	$g = $o( $group['id'] );
@@ -1692,21 +1693,21 @@ if ( scenario( 'N' ) ) {
 	check( str_contains( $n['from'], 'Price on request' ) && ! preg_match( '/AED|\d+\.\d\d/', $n['from'] . $n['table'] ) && str_contains( $n['table'], 'Price on request' ) && str_contains( $n['facts'], 'Price on request' ), 'price on request: never a price' );
 	$e = $o( $empty['id'] );
 	check( '' === $e['table'] && str_contains( $e['from'], 'Price on request' ), 'tour without options: no table, no price' );
-	$x = $o( 0, array( 'by_id' => '[dgb_price_table id="' . $rzr['id'] . '"]' ) );
+	$x = $o( 0, array( 'by_id' => '[dgb_price_table id="' . $buggy['id'] . '"]' ) );
 	check( '' === $x['from'] && '' === $x['table'] && str_contains( $x['by_id'], '30 min' ), 'outside a tour nothing is printed, unless id is given' );
 	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_enabled' => true, 'second_currency' => 'USD', 'second_rate' => 3.6725, 'second_rounding' => 'whole', 'second_template' => '' ) ) ) );
-	$r2 = $o( $rzr['id'] );
+	$r2 = $o( $buggy['id'] );
 	check( str_contains( $r2['from'], '<span class="dgb-second">(about USD 190)</span>' ) && ! str_contains( $r2['from_plain'], 'USD' ) && str_contains( $r2['table'], '(about USD 245)' ), 'second currency on: from price and table; second_currency="no" hides it' );
 	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_enabled' => false ) ) ) );
 
-	$b = step( $site, 'outputs', array( 'post' => $rzr['id'], 'blocks' => array( 'from' => array( 'digitum-bookings/from-price', array( 'showBasis' => true, 'secondCurrency' => true ) ), 'table' => array( 'digitum-bookings/price-table', array() ), 'list' => array( 'digitum-bookings/tour-list', array( 'productId' => $group['id'], 'field' => 'exclusions' ) ), 'facts' => array( 'digitum-bookings/tour-facts', array( 'fields' => 'capacity' ) ) ) ) );
+	$b = step( $site, 'outputs', array( 'post' => $buggy['id'], 'blocks' => array( 'from' => array( 'digitum-bookings/from-price', array( 'showBasis' => true, 'secondCurrency' => true ) ), 'table' => array( 'digitum-bookings/price-table', array() ), 'list' => array( 'digitum-bookings/tour-list', array( 'productId' => $group['id'], 'field' => 'exclusions' ) ), 'facts' => array( 'digitum-bookings/tour-facts', array( 'fields' => 'capacity' ) ) ) ) );
 	check( array( 'digitum-bookings/booking', 'digitum-bookings/from-price', 'digitum-bookings/price-table', 'digitum-bookings/tour-list', 'digitum-bookings/tour-facts' ) === $b['registered'], 'blocks registered: from price, price table, tour list, tour facts' );
 	check( str_contains( $b['blocks']['from'], 'AED 699.00' ) && str_contains( $b['blocks']['table'], '2 hours' ) && str_contains( $b['blocks']['list'], '>Tips</li>' ) && str_contains( $b['blocks']['facts'], 'Up to 2 people per vehicle' ), 'blocks render the same output as the shortcodes' );
 
-	$el = step( $site, 'elementor', array( 'post' => $rzr['id'] ) );
+	$el = step( $site, 'elementor', array( 'post' => $buggy['id'] ) );
 	check( array() === $el['widgets'] && array() === $el['tags'], 'without Elementor nothing is registered' );
 	step( $site, 'set_option', array( 'name' => 'dgb_fake_elementor', 'value' => 1 ) );
-	$el = step( $site, 'elementor', array( 'post' => $rzr['id'], 'render' => array(
+	$el = step( $site, 'elementor', array( 'post' => $buggy['id'], 'render' => array(
 		'table' => array( 'dgb_price_table', array() ),
 		'list'  => array( 'dgb_tour_list', array( 'product_id' => $group['id'], 'field' => 'inclusions' ) ),
 		'facts' => array( 'dgb_tour_facts', array( 'fields' => 'age' ) ),
@@ -1722,8 +1723,8 @@ if ( scenario( 'N' ) ) {
 	check( array( 'dgb_booking', 'dgb_price_table', 'dgb_tour_list', 'dgb_tour_facts' ) === array_keys( $el['widgets'] ) && 7 === count( $el['tags'] ) && isset( $el['groups']['digitum-bookings'] ), 'with Elementor: 4 widgets and 7 dynamic tags in a “Digitum Bookings” group' );
 	$h = $el['html'];
 	check( str_contains( $h['table'], '1 hour' ) && str_contains( $h['list'], '>Guide</li>' ) && str_contains( $h['facts'], '16 years' ), 'Elementor widgets: price table, tour list, tour facts' );
-	check( 'From AED 699.00 per vehicle' === $h['from'] && '16' === $h['age'] && '2' === $h['seats'] && 'Hotel pickup on request (+AED 300.00 per booking)' === $h['pick'] && 'Al Aweer desert' === $h['point'] && in_array( $h['next'], array( '6:45 am – 7:15 am', '2:15 pm – 2:45 pm' ), true ), 'dynamic tags: from price, minimum age, seats, pickup, meeting point, next pickup window' );
-	check( 'https://maps.example/al-aweer' === $h['map'] && 'Price on request' === $h['nyf'], 'dynamic tags: map link (URL); price on request' );
+	check( 'From AED 699.00 per vehicle' === $h['from'] && '16' === $h['age'] && '2' === $h['seats'] && 'Hotel pickup on request (+AED 300.00 per booking)' === $h['pick'] && 'Sample Meeting Point' === $h['point'] && in_array( $h['next'], array( '6:45 am – 7:15 am', '2:15 pm – 2:45 pm' ), true ), 'dynamic tags: from price, minimum age, seats, pickup, meeting point, next pickup window' );
+	check( 'https://maps.example/meeting-point' === $h['map'] && 'Price on request' === $h['nyf'], 'dynamic tags: map link (URL); price on request' );
 	step( $site, 'set_option', array( 'name' => 'dgb_fake_elementor', 'value' => 0 ) );
 
 	// Sticky bar modes and widget theming (sections 6 and 7), on real page loads.
@@ -1731,27 +1732,27 @@ if ( scenario( 'N' ) ) {
 	$server = start_server( $site, $port );
 	$page   = static fn( string $url ): string => http_get( $home . wp_make_link_relative_test( $url ) )[2];
 	$body   = static fn( string $html ): string => preg_match( '#<body[^>]*class="([^"]*)"#', $html, $m ) ? $m[1] : '';
-	$html   = $page( $rzr['url'] );
+	$html   = $page( $buggy['url'] );
 	check( str_contains( $body( $html ), 'dgb-has-sticky-bar' ) && str_contains( $html, 'data-dgb-sticky' ) && ! str_contains( $body( $page( $demo['blog'] ) ), 'dgb-has-sticky-bar' ), 'default: plugin bar on tour pages with the body class dgb-has-sticky-bar; not on other pages' );
 	check( str_contains( $html, 'body.dgb-has-sticky-bar{padding-bottom:calc(72px + env(safe-area-inset-bottom))}' ), 'space reserved at the bottom of the page while the bar shows (phones)' );
 	check( ! str_contains( $html, '.dgb-w,.dgb-o{' ) && ! str_contains( $html, 'dgb-sticky-replace' ), 'no branding variables and nothing hidden by default' );
 	step( $site, 'set_option', array( 'name' => 'dgb_test_no_sticky', 'value' => 1 ) );
-	$html = $page( $rzr['url'] );
+	$html = $page( $buggy['url'] );
 	check( ! str_contains( $body( $html ), 'dgb-has-sticky-bar' ) && ! str_contains( $html, 'data-dgb-sticky' ), 'dgb_sticky_bar_enabled filter turns the bar off' );
 	step( $site, 'set_option', array( 'name' => 'dgb_test_no_sticky', 'value' => 0 ) );
 	step( $site, 'settings_merge', array( 'values' => array( 'general' => array( 'sticky_mode' => 'off' ) ) ) );
-	$html = $page( $rzr['url'] );
+	$html = $page( $buggy['url'] );
 	check( ! str_contains( $body( $html ), 'dgb-has-sticky-bar' ) && ! str_contains( $html, 'data-dgb-sticky' ), 'mode Off: no bar, no body class' );
 	step( $site, 'settings_merge', array( 'values' => array( 'general' => array( 'sticky_mode' => 'replace', 'sticky_hide' => '.theme-bar > a' ) ) ) );
-	$html = $page( $rzr['url'] );
+	$html = $page( $buggy['url'] );
 	check( str_contains( $html, '.theme-bar > a{display:none!important}' ) && str_contains( $html, 'data-dgb-sticky' ) && ! str_contains( $page( $demo['blog'] ), '.theme-bar > a{display:none' ), 'mode “hide the theme’s bar”: the selector is hidden on tour pages only, and the plugin bar shows' );
 	step( $site, 'settings_merge', array( 'values' => array( 'general' => array( 'sticky_mode' => 'plugin', 'sticky_hide' => '' ) ) ) );
 
 	step( $site, 'settings_merge', array( 'values' => array( 'branding' => array( 'accent_color' => '#0f766e', 'text_color' => '#111111', 'radius' => 4, 'button_transform' => 'uppercase', 'font_mode' => 'custom', 'font_family' => 'Georgia, serif' ) ) ) );
-	$html = $page( $rzr['url'] );
+	$html = $page( $buggy['url'] );
 	check( str_contains( $html, '.dgb-w,.dgb-o{--dgb-accent:#0f766e;--dgb-ink:#111111;--dgb-radius:4px;--dgb-btn-transform:uppercase;--dgb-font:Georgia, serif}' ), 'branding settings become the widget’s CSS variables' );
 	check( ! preg_match( '#<link[^>]+fonts\.(googleapis|gstatic)#', $html ), 'no web fonts loaded by the plugin' );
-	$x = step( $site, 'outputs', array( 'post' => $rzr['id'], 'shortcodes' => array( 'from' => '[dgb_from_price]' ) ) )['shortcodes']['from'];
+	$x = step( $site, 'outputs', array( 'post' => $buggy['id'], 'shortcodes' => array( 'from' => '[dgb_from_price]' ) ) )['shortcodes']['from'];
 	check( str_contains( $x, '--dgb-accent:#0f766e' ), 'tour detail outputs use the same variables' );
 	check( ! str_contains( step( $site, 'render_settings', array( 'tab' => 'branding' ) )['html'], 'data-dgb-contrast' ), 'good contrast: no warning' );
 	step( $site, 'settings_merge', array( 'values' => array( 'branding' => array( 'accent_color' => '#fbbf24' ) ) ) );
@@ -1772,7 +1773,7 @@ if ( '' !== $site_reviews && scenario( 'O' ) ) {
 	$r = step( $site, 'activate_plugin', array( 'plugin' => 'site-reviews/site-reviews.php' ) );
 	check( '' === $r['error'], 'Site Reviews activates' );
 	$demo = step( $site, 'demo_setup' );
-	$tour = $demo['tours']['rzr'];
+	$tour = $demo['tours']['buggy'];
 	$made = step( $site, 'site_reviews_create', array( 'reviews' => array(
 		array( 'assigned_posts' => $tour['id'], 'rating' => 5, 'name' => 'Guest One', 'email' => 'one@example.com', 'title' => 'Great', 'content' => 'Great ride' ),
 		array( 'assigned_posts' => $tour['id'], 'rating' => 4, 'name' => 'Guest Two', 'email' => 'two@example.com', 'title' => 'Good', 'content' => 'Good ride' ),
@@ -1796,8 +1797,8 @@ if ( '' !== $stripe_mock && scenario( 'G' ) ) {
 	step( $site, 'activate' );
 	$demo = step( $site, 'demo_setup' );
 	step( $site, 'payments_setup' );
-	$rzr = $demo['tours']['rzr'];
-	$r   = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'body' => array( 'product' => $rzr['id'], 'variant_id' => $rzr['variants']['30 min'], 'date' => $demo['tomorrow'], 'session_id' => $rzr['sessions']['Evening'], 'adults' => 2, 'units' => 1, 'payment_method' => 'stripe', 'name' => 'Contract Guest', 'email' => 'contract@example.com', 'phone_code' => '+971', 'phone' => '501234567', 'terms' => true ) ) );
+	$buggy = $demo['tours']['buggy'];
+	$r   = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'body' => array( 'product' => $buggy['id'], 'variant_id' => $buggy['variants']['30 min'], 'date' => $demo['tomorrow'], 'session_id' => $buggy['sessions']['Evening'], 'adults' => 2, 'units' => 1, 'payment_method' => 'stripe', 'name' => 'Contract Guest', 'email' => 'contract@example.com', 'phone_code' => '+1', 'phone' => '501234567', 'terms' => true ) ) );
 	$c   = step( $site, 'stripe_contract', array( 'url' => $stripe_mock, 'reference' => $r['data']['reference'] ) );
 	check( 'ok' === $c['pay_box'] && in_array( 'automatic_payment_methods', $c['args'] ?? array(), true ), 'PaymentIntent create accepted by the Stripe API schema' );
 	check( 'ok' === $c['retrieve'] && 'ok' === $c['list'], 'PaymentIntent retrieve and refund list accepted' );

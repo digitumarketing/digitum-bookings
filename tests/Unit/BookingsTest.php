@@ -29,7 +29,7 @@ final class BookingsTest extends TestCase {
 
 	public function test_reference_format_uses_the_creation_date_and_unambiguous_characters(): void {
 		$generator = new ReferenceGenerator();
-		$reference = $generator->generate( new \DateTimeImmutable( '2026-10-20 13:00', new \DateTimeZone( 'Asia/Dubai' ) ) );
+		$reference = $generator->generate( new \DateTimeImmutable( '2026-10-20 13:00', new \DateTimeZone( 'Asia/Tbilisi' ) ) );
 
 		$this->assertMatchesRegularExpression( '/^DGB-261020-[A-HJ-NP-Z2-9]{4}$/', $reference );
 	}
@@ -58,7 +58,7 @@ final class BookingsTest extends TestCase {
 					'date'       => '2026-10-24',
 				),
 			),
-			new \DateTimeImmutable( '2026-10-20 13:00:00', new \DateTimeZone( 'Asia/Dubai' ) )
+			new \DateTimeImmutable( '2026-10-20 13:00:00', new \DateTimeZone( 'Asia/Tbilisi' ) )
 		);
 
 		$this->assertSame( 'DGB-261020-BBBB', $result['reference'] );
@@ -110,7 +110,7 @@ final class BookingsTest extends TestCase {
 			'payments' => array( 'bank_hold_hours' => 24 ),
 		);
 		$holds = new Holds( new Settings() );
-		$now   = new \DateTimeImmutable( '2026-10-20 13:00:00', new \DateTimeZone( 'Asia/Dubai' ) );
+		$now   = new \DateTimeImmutable( '2026-10-20 13:00:00', new \DateTimeZone( 'Asia/Tbilisi' ) );
 
 		$this->assertSame( '2026-10-20 09:15:00', $holds->expires_at( 'pending_payment', $now ) );
 		$this->assertSame( '2026-10-21 09:00:00', $holds->expires_at( 'awaiting_transfer', $now ) );

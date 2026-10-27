@@ -98,7 +98,7 @@ final class BookingService {
 		$zone    = $zone_id ? ( new ZoneRepository() )->find( $zone_id ) : null;
 		if ( $pickup && ( ! $zone || empty( $zone['allowed'] ) ) ) {
 			$errors['zone'] = $zone
-				/* translators: %s: pickup area, e.g. Abu Dhabi. */
+				/* translators: %s: pickup area, e.g. North Zone. */
 				? sprintf( __( 'Pickup is not available from %s. Please meet us at the meeting point.', 'digitum-bookings' ), (string) $zone['name'] )
 				: __( 'Please choose your pickup area.', 'digitum-bookings' );
 		}

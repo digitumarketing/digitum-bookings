@@ -14,7 +14,7 @@ async function arabicPage( page: Page, url: string ) {
 
 test.describe( 'Arabic (RTL)', () => {
 	test( 'tour page is right to left, translated and fits the screen', async ( { page, isMobile }, info ) => {
-		await arabicPage( page, path( tours.rzr.url ) );
+		await arabicPage( page, path( tours.buggy.url ) );
 		await expect( page.locator( 'html' ) ).toHaveAttribute( 'dir', 'rtl' );
 		const w = page.locator( '[data-dgb-widget]' );
 		expect( await w.evaluate( ( el ) => getComputedStyle( el ).direction ) ).toBe( 'rtl' );
@@ -36,7 +36,7 @@ test.describe( 'Arabic (RTL)', () => {
 
 	test( 'second currency next to the price, isolated in right-to-left text', async ( { page } ) => {
 		await page.context().addCookies( [ { name: 'dgb_test_second', value: 'USD:3.6725', url: `http://127.0.0.1:${ e2e.port }` } ] );
-		await arabicPage( page, path( tours.rzr.url ) );
+		await arabicPage( page, path( tours.buggy.url ) );
 		const second = page.locator( '[data-dgb-widget] .dgb-from .dgb-second' );
 		await expect( second ).toHaveText( /^\(.*USD [0-9٠-٩,٬]+\)$/ );
 		await expect( second ).toContainText( arabic );
@@ -48,7 +48,7 @@ test.describe( 'Arabic (RTL)', () => {
 
 	test( 'booking in Arabic, paid on arrival', async ( { page, isMobile } ) => {
 		test.skip( isMobile, 'flow covered on desktop; the phone layout is checked above' );
-		await arabicPage( page, path( tours.rzr.url ) );
+		await arabicPage( page, path( tours.buggy.url ) );
 		const w = page.locator( '[data-dgb-widget]' );
 		await w.locator( 'input[name="variant_id"]' ).nth( 1 ).check();
 		await pickTomorrow( w );

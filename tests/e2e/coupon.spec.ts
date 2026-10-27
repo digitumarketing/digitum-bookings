@@ -7,7 +7,7 @@ import { tours, path, axe, chooseRide, fillDetails } from './helpers';
 
 test( 'coupon code in the payment step', async ( { page, isMobile } ) => {
 	test.skip( isMobile, 'same form on phones' );
-	await page.goto( path( tours.rzr.url ) );
+	await page.goto( path( tours.buggy.url ) );
 	const w = page.locator( '[data-dgb-widget]' );
 	await chooseRide( w );
 	await fillDetails( w );

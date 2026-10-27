@@ -37,9 +37,9 @@ final class ErrorMessagesTest extends TestCase {
 			array(
 				array(
 					'code'   => 'zone_not_allowed',
-					'params' => array( 'zone' => 'Abu Dhabi' ),
+					'params' => array( 'zone' => 'Far Zone' ),
 				),
-				'Pickup is not available from Abu Dhabi. Please meet us at the meeting point.',
+				'Pickup is not available from Far Zone. Please meet us at the meeting point.',
 			),
 			array( array( 'code' => 'coupon_invalid' ), 'This coupon code cannot be used for this booking.' ),
 			array(

@@ -216,7 +216,7 @@ final class Plugin {
 			return;
 		}
 		$migrator->migrate();
-		Settings::upgrade();
+		Settings::upgrade( (string) get_option( 'dgb_version', '' ) );
 		$this->settings->flush();
 		Capabilities::maybe_upgrade();
 		update_option( 'dgb_version', DGB_VERSION, true );

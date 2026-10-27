@@ -22,8 +22,8 @@ final class AvailabilityTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 		$this->availability = new Availability();
-		// Tuesday 20 Oct 2026, 13:00 in Dubai.
-		$this->now = new \DateTimeImmutable( '2026-10-20 13:00:00', new \DateTimeZone( 'Asia/Dubai' ) );
+		// Tuesday 20 Oct 2026, 13:00 in North Zone.
+		$this->now = new \DateTimeImmutable( '2026-10-20 13:00:00', new \DateTimeZone( 'Asia/Tbilisi' ) );
 	}
 
 	private static function sessions(): array {

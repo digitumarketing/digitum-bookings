@@ -32,7 +32,7 @@ final class PricingConfig {
 	 */
 	public function __construct(
 		public readonly string $mode,
-		public readonly string $currency = 'AED',
+		public readonly string $currency = 'USD',
 		public readonly bool $vat_inclusive = true,
 		public readonly float $vat_rate = 0.0,
 		public readonly ?float $deposit_percent = null,

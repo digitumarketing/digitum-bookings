@@ -39,7 +39,7 @@ final class ErrorMessages {
 				return __( 'Please choose your pickup area.', 'digitum-bookings' );
 			case 'zone_not_allowed':
 				return sprintf(
-					/* translators: %s: pickup area, e.g. Abu Dhabi. */
+					/* translators: %s: pickup area, e.g. North Zone. */
 					__( 'Pickup is not available from %s. Please meet us at the meeting point.', 'digitum-bookings' ),
 					(string) ( $p['zone'] ?? '' )
 				);

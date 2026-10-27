@@ -18,7 +18,7 @@ test.skip( ( { isMobile } ) => isMobile, 'desktop' );
 test.setTimeout( 120_000 );
 
 async function book( page: Page, method: RegExp ) {
-	await page.goto( path( tours.rzr.url ) );
+	await page.goto( path( tours.buggy.url ) );
 	const w = page.locator( '[data-dgb-widget]' );
 	await chooseRide( w );
 	await fillDetails( w );

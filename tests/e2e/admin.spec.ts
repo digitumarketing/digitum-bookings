@@ -32,7 +32,7 @@ test.describe( 'staff', () => {
 
 	test( 'manifest of a session with 20 bookings prints', async ( { browser } ) => {
 		const page = await login( browser );
-		await page.goto( `/wp-admin/admin.php?page=dgb-manifest&date=${ date }&product=${ tours.rzr.id }` );
+		await page.goto( `/wp-admin/admin.php?page=dgb-manifest&date=${ date }&product=${ tours.buggy.id }` );
 		await expect( page.locator( 'table.dgb-manifest tbody tr' ) ).toHaveCount( 20 );
 		await axe( page, '.dgb-wrap' );
 
@@ -52,7 +52,7 @@ test.describe( 'staff', () => {
 
 	test( 'calendar: drag a booking to the next day', async ( { browser } ) => {
 		const page = await login( browser );
-		await page.goto( `/wp-admin/admin.php?page=dgb-calendar&view=week&date=${ date }&product=${ tours.rzr.id }` );
+		await page.goto( `/wp-admin/admin.php?page=dgb-calendar&view=week&date=${ date }&product=${ tours.buggy.id }` );
 		const chip = page.locator( '[data-dgb-booking]', { hasText: refs[ 19 ] } );
 		await expect( chip ).toBeVisible();
 		const next = new Date( date + 'T12:00:00Z' );
@@ -68,11 +68,11 @@ test.describe( 'staff', () => {
 
 	test( 'calendar: close a session, then open it again', async ( { browser } ) => {
 		const page = await login( browser );
-		await page.goto( `/wp-admin/admin.php?page=dgb-calendar&view=day&date=${ date }&product=${ tours.rzr.id }` );
+		await page.goto( `/wp-admin/admin.php?page=dgb-calendar&view=day&date=${ date }&product=${ tours.buggy.id }` );
 		const morning = page.locator( '.dgb-cal-session', { hasText: 'Morning' } );
 		await morning.getByRole( 'button', { name: 'Close' } ).click();
 		await expect( page.locator( '.dgb-cal-session', { hasText: 'Morning' } ).locator( '.dgb-status' ) ).toHaveText( 'Closed' );
-		const sessions = await page.request.get( `/?rest_route=/dgb/v1/availability/sessions&product=${ tours.rzr.id }&date=${ date }` ).then( ( r ) => r.json() );
+		const sessions = await page.request.get( `/?rest_route=/dgb/v1/availability/sessions&product=${ tours.buggy.id }&date=${ date }` ).then( ( r ) => r.json() );
 		expect( sessions.sessions[ 0 ].status ).toBe( 'closed' );
 		await page.locator( '.dgb-cal-session', { hasText: 'Morning' } ).getByRole( 'button', { name: 'Open' } ).click();
 		await expect( page.locator( '.dgb-cal-session', { hasText: 'Morning' } ).locator( '.dgb-status' ) ).toHaveCount( 0 );
