@@ -110,6 +110,16 @@ switch ( $dgb_action ) {
 		$dgb_out  = $dgb_repo->create( array( 'customer_name' => 'Raw guest', 'status' => 'confirmed', 'currency' => 'EUR' ), array( array( 'product_id' => (int) $dgb_args['product'], 'date' => gmdate( 'Y-m-d' ), 'adults' => 1, 'zone_id' => $dgb_args['zone'] ?? null ) ), new DateTimeImmutable( 'now', wp_timezone() ) );
 		break;
 
+	case 'site_reviews_create':
+		// Reviews in the real Site Reviews plugin (CI), assigned to a post.
+		wp_set_current_user( 1 );
+		$dgb_out['ids'] = array();
+		foreach ( $dgb_args['reviews'] as $dgb_r ) {
+			$dgb_review       = glsr_create_review( $dgb_r );
+			$dgb_out['ids'][] = $dgb_review ? (int) $dgb_review->ID : 0;
+		}
+		break;
+
 	case 'count_bookings':
 		global $wpdb;
 		$dgb_out['rows']     = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}dgb_bookings" );
@@ -1102,6 +1112,7 @@ switch ( $dgb_action ) {
 		$html          = ob_get_clean();
 		$dgb_out['length'] = strlen( $html );
 		$dgb_out['fields'] = substr_count( $html, 'name="dgb_settings[' );
+		$dgb_out['html']   = $html;
 		break;
 }
 

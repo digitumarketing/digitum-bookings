@@ -7,6 +7,8 @@
 
 namespace Digitum\Bookings\Settings;
 
+use Digitum\Bookings\Services\Ratings\RatingSources;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -537,7 +539,7 @@ final class Settings {
 				),
 			),
 			'seo'       => array(
-				'schema_output' => array(
+				'schema_output'   => array(
 					'type'    => 'select',
 					'label'   => __( 'Structured data', 'digitum-bookings' ),
 					'options' => array(
@@ -548,7 +550,7 @@ final class Settings {
 					'help'    => __( 'Tour pages get Product or TouristTrip JSON-LD with the same prices the page shows. In automatic mode it joins the SEO plugin’s graph and replaces any other Product node on the page.', 'digitum-bookings' ),
 					'default' => 'auto',
 				),
-				'business_type' => array(
+				'business_type'   => array(
 					'type'    => 'select',
 					'label'   => __( 'Business type', 'digitum-bookings' ),
 					'options' => array(
@@ -559,13 +561,29 @@ final class Settings {
 					'help'    => __( 'Used when no SEO plugin describes the business. Name, phone, email and address come from General.', 'digitum-bookings' ),
 					'default' => 'TravelAgency',
 				),
-				'llms_enabled'  => array(
+				'rating_source'   => array(
+					'type'    => 'select',
+					'label'   => __( 'Rating source', 'digitum-bookings' ),
+					'options' => array( RatingSources::class, 'options' ),
+					'help'    => __( 'Star ratings in search results come only from real reviews. Review plugins appear here when they are active (Site Reviews: assign each review to its tour).', 'digitum-bookings' ),
+					'default' => 'none',
+				),
+				'rating_fallback' => array(
+					'type'    => 'select',
+					'label'   => __( 'Tours without reviews', 'digitum-bookings' ),
+					'options' => array(
+						'none' => __( 'No rating', 'digitum-bookings' ),
+						'site' => __( 'Use the average of all reviews on the site', 'digitum-bookings' ),
+					),
+					'default' => 'none',
+				),
+				'llms_enabled'    => array(
 					'type'    => 'checkbox',
 					'label'   => __( 'llms.txt', 'digitum-bookings' ),
 					'text'    => __( 'Serve /llms.txt with your tours, prices, sessions, pickup and contact details for AI assistants', 'digitum-bookings' ),
 					'default' => true,
 				),
-				'llms_intro'    => array(
+				'llms_intro'      => array(
 					'type'    => 'textarea',
 					'label'   => __( 'llms.txt introduction', 'digitum-bookings' ),
 					'help'    => __( 'One or two sentences about the business. Empty uses the site tagline.', 'digitum-bookings' ),

@@ -43,6 +43,7 @@ Settings › **Emails**: sender name and address, staff recipients (comma-separa
 ## Search engines and AI assistants
 
 - Every tour that takes bookings tells search engines what it is and what it costs (structured data). The price is always the one the page shows. Tours with a price on request never show a price. If Rank Math or Yoast SEO is active, the tour joins their data automatically; you do not need a Product schema in Rank Math for tours (if one exists, Digitum Bookings replaces it on tour pages).
+- **Star ratings** (Settings › Schema & SEO › **Rating source**) only come from real reviews. With **None** (the default) no rating is shown to search engines. If the **Site Reviews** plugin is active it appears in the list: assign each review to its tour in Site Reviews, and the tour gets the average and count of its approved reviews plus the ten latest. **Tours without reviews** decides whether such a tour shows no rating (default) or the average of all reviews on the site. **Custom** is for a developer who connects another review platform.
 - Give each tour a **featured image**; Google only shows product results with an image. More pictures can go in Booking settings › Schema & SEO › **Gallery images**.
 - **/llms.txt** (link in Settings › Schema & SEO) lists your tours, prices, sessions with pickup times, pickup areas, meeting point and contact details for AI assistants such as ChatGPT. It updates within the hour when you change a tour. Write one or two sentences about the business in **llms.txt introduction**.
 

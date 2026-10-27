@@ -1518,8 +1518,11 @@ if ( scenario( 'M' ) ) {
 if ( scenario( 'N' ) ) {
 	echo "\nScenario N: v0.8 display and pricing features\n";
 	$amt  = static fn( $v ) => null === $v ? null : number_format( (float) $v, 2, '.', '' );
-	$site = make_site( 'v08-features' );
+	$port = (int) ( getenv( 'DGB_HTTP_PORT_N' ) ?: 8894 );
+	$home = "http://127.0.0.1:{$port}";
+	$site = make_site( 'v08-features', null, $home );
 	copy( __DIR__ . '/fake-gateways.php', "{$site}/wp-content/mu-plugins/fake-gateways.php" );
+	copy( __DIR__ . '/fake-site-reviews.php', "{$site}/wp-content/mu-plugins/fake-site-reviews.php" );
 	step( $site, 'install' );
 	step( $site, 'activate' );
 	$demo = step( $site, 'demo_setup' );
@@ -1548,6 +1551,76 @@ if ( scenario( 'N' ) ) {
 	check( ! empty( $m['mails'] ) && ! str_contains( (string) wp_json_encode_n( $m ), 'USD' ), 'emails stay in the site currency only' );
 	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_enabled' => false ) ) ) );
 	check( ! str_contains( step( $site, 'render_page', array( 'url' => $rzr['url'] ) )['html'], 'dgb-second' ) && ! str_contains( step( $site, 'llms' )['text'], 'USD' ), 'switched off again: gone everywhere' );
+
+	// Rating source (section 3).
+	$saf     = $demo['tours']['safari'];
+	$rating  = static fn( int $id ) => step( $site, 'schema', array( 'post' => $id ) )['node']['aggregateRating'] ?? null;
+	$seo     = step( $site, 'render_settings', array( 'tab' => 'seo' ) )['html'];
+	check( null === $rating( $rzr['id'] ) && str_contains( $seo, 'name="dgb_settings[seo][rating_source]"' ) && ! str_contains( $seo, '>Site Reviews<' ), 'no source by default: no rating; Site Reviews inactive, so not offered' );
+	file_put_contents( "{$site}/wp-content/mu-plugins/custom-rating.php", "<?php\nadd_filter( 'dgb_schema_rating', static fn( \$r, \$id ) => \$r ?? ( get_option( 'dgb_test_custom_rating' ) ? array( 'value' => 4.2, 'count' => 12 ) : null ), 10, 2 );\n" );
+	step( $site, 'set_option', array( 'name' => 'dgb_test_custom_rating', 'value' => 1 ) );
+	check( null === $rating( $rzr['id'] ), 'source None: a developer filter cannot add a rating' );
+	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'rating_source' => 'custom' ) ) ) );
+	check( array( 4.2, 12 ) === array( $rating( $rzr['id'] )['ratingValue'] ?? null, $rating( $rzr['id'] )['ratingCount'] ?? null ), 'source Custom: the dgb_schema_rating filter gives the rating' );
+	step( $site, 'set_option', array( 'name' => 'dgb_test_custom_rating', 'value' => 0 ) );
+	check( null === $rating( $rzr['id'] ), 'Custom with nothing returned: no rating' );
+
+	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'rating_source' => 'site_reviews' ) ) ) );
+	check( null === $rating( $rzr['id'] ), 'Site Reviews chosen but not active: nothing output' );
+	$reviews = array(
+		array( 'post' => $rzr['id'], 'rating' => 5, 'author' => 'Guest One', 'content' => '<b>Great</b> ride', 'date' => '2026-10-01 10:00:00', 'status' => 'approved' ),
+		array( 'post' => $rzr['id'], 'rating' => 4, 'author' => 'Guest Two', 'content' => 'Good', 'date' => '2026-10-05 10:00:00', 'status' => 'approved' ),
+		array( 'post' => $rzr['id'], 'rating' => 1, 'author' => 'Not approved', 'content' => 'Spam', 'date' => '2026-10-06 10:00:00', 'status' => 'pending' ),
+		array( 'post' => 999999, 'rating' => 2, 'author' => 'Other tour', 'content' => 'Meh', 'date' => '2026-10-07 10:00:00', 'status' => 'approved' ),
+	);
+	step( $site, 'set_option', array( 'name' => 'dgb_fake_site_reviews', 'value' => $reviews ) );
+	$seo = step( $site, 'render_settings', array( 'tab' => 'seo' ) )['html'];
+	check( str_contains( $seo, '>Site Reviews<' ), 'Site Reviews active: offered as a rating source' );
+	$node = step( $site, 'schema', array( 'post' => $rzr['id'] ) )['node'];
+	check( 4.5 === (float) $node['aggregateRating']['ratingValue'] && 2 === $node['aggregateRating']['ratingCount'] && 5.0 === (float) $node['aggregateRating']['bestRating'], 'tour average from its own approved reviews only (4.5 from 2)' );
+	check( array( 'Guest Two', 'Guest One' ) === array_column( array_column( $node['review'], 'author' ), 'name' ) && 'Great ride' === $node['review'][1]['reviewBody'], 'latest reviews listed, text without HTML' );
+	check( null === $rating( $saf['id'] ), 'a tour without reviews has no rating by default' );
+	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'rating_fallback' => 'site' ) ) ) );
+	check( 3 === ( $rating( $saf['id'] )['ratingCount'] ?? null ) && 3.7 === (float) ( $rating( $saf['id'] )['ratingValue'] ?? 0 ), 'fallback on: site-wide average of approved reviews (3.7 from 3)' );
+	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'rating_fallback' => 'none' ) ) ) );
+
+	$validator = dirname( __DIR__, 2 ) . '/node_modules/@adobe/structured-data-validator';
+	if ( is_dir( $validator ) ) {
+		$server = start_server( $site, $port );
+		exec( 'node ' . escapeshellarg( dirname( __DIR__, 2 ) . '/tests/schema/rich-results.mjs' ) . ' ' . escapeshellarg( $home . wp_make_link_relative_test( $rzr['url'] ) ) . ' 2>&1', $lines, $code );
+		stop_server( $server );
+		$rich = json_decode( (string) end( $lines ), true );
+		$res  = is_array( $rich ) ? reset( $rich ) : null;
+		check( 0 === $code && is_array( $res ) && array() === $res['errors'], 'Rich Results: a tour with a Site Reviews rating has no errors' . ( ! empty( $res['errors'] ) ? ' → ' . implode( ' | ', $res['errors'] ) : '' ) );
+	}
+	step( $site, 'set_option', array( 'name' => 'dgb_fake_site_reviews', 'value' => 0 ) );
+	check( null === $rating( $rzr['id'] ), 'Site Reviews deactivated: rating gone' );
+	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'rating_source' => 'none' ) ) ) );
+}
+
+/* -------------------------------------------------------------------- */
+$site_reviews = getenv( 'DGB_SITE_REVIEWS_DIR' ) ?: '';
+if ( '' !== $site_reviews && scenario( 'O' ) ) {
+	echo "\nScenario O: ratings from the real Site Reviews plugin (v0.8)\n";
+	$site = make_site( 'v08-site-reviews' );
+	symlink( realpath( $site_reviews ), "{$site}/wp-content/plugins/site-reviews" );
+	step( $site, 'install' );
+	step( $site, 'activate' );
+	$r = step( $site, 'activate_plugin', array( 'plugin' => 'site-reviews/site-reviews.php' ) );
+	check( '' === $r['error'], 'Site Reviews activates' );
+	$demo = step( $site, 'demo_setup' );
+	$tour = $demo['tours']['rzr'];
+	$made = step( $site, 'site_reviews_create', array( 'reviews' => array(
+		array( 'assigned_posts' => $tour['id'], 'rating' => 5, 'name' => 'Guest One', 'email' => 'one@example.com', 'title' => 'Great', 'content' => 'Great ride' ),
+		array( 'assigned_posts' => $tour['id'], 'rating' => 4, 'name' => 'Guest Two', 'email' => 'two@example.com', 'title' => 'Good', 'content' => 'Good ride' ),
+	) ) );
+	check( 2 === count( array_filter( $made['ids'] ) ), 'two reviews created and assigned to the tour' );
+	$seo = step( $site, 'render_settings', array( 'tab' => 'seo' ) )['html'];
+	check( str_contains( $seo, '>Site Reviews<' ), 'Site Reviews offered as a rating source' );
+	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'rating_source' => 'site_reviews' ) ) ) );
+	$node = step( $site, 'schema', array( 'post' => $tour['id'] ) )['node'];
+	check( 2 === ( $node['aggregateRating']['ratingCount'] ?? null ) && 4.5 === (float) ( $node['aggregateRating']['ratingValue'] ?? 0 ) && 2 === count( $node['review'] ?? array() ), 'tour rating from Site Reviews: 4.5 from 2, two reviews' );
+	check( ! isset( step( $site, 'schema', array( 'post' => $demo['tours']['safari']['id'] ) )['node']['aggregateRating'] ), 'a tour without reviews has no rating' );
 }
 
 /* -------------------------------------------------------------------- */

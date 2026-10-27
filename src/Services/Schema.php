@@ -9,6 +9,7 @@ namespace Digitum\Bookings\Services;
 
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\PostTypes\ProductType;
+use Digitum\Bookings\Services\Ratings\RatingSources;
 use Digitum\Bookings\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
@@ -134,17 +135,9 @@ final class Schema {
 			);
 		}
 
-		/**
-		 * Rating from a connected review source. Nothing is output without one.
-		 *
-		 * Return null, or an array: value (average), count (number of ratings), best (default 5), worst (default 1),
-		 * reviews (optional list of: author, rating, body, date Y-m-d).
-		 *
-		 * @param array|null $rating  Rating data.
-		 * @param int        $post_id Tour post ID.
-		 */
-		$rating = apply_filters( 'dgb_schema_rating', null, $post_id );
-		if ( is_array( $rating ) && ! empty( $rating['count'] ) && isset( $rating['value'] ) ) {
+		// Rating from the source chosen in Settings › Schema & SEO (real reviews only); nothing without one.
+		$rating = ( new RatingSources( $this->settings ) )->for_tour( $post_id );
+		if ( null !== $rating ) {
 			$node = array_merge( $node, self::rating( $rating ) );
 		}
 

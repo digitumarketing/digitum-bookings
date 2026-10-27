@@ -164,9 +164,11 @@ add_filter( 'dgb_schema_product', function ( array $node, int $post_id ) {
 }, 10, 2 );
 ```
 
-### `dgb_schema_rating` (0.6.0)
+### `dgb_schema_rating` (0.6.0, changed in 0.8.0)
 
-The connection point for a review source. Nothing about ratings is output unless this returns data. Return `null` or an array: `value` (average), `count`, optional `best` (5) and `worst` (1), and optional `reviews` (each: `author`, `rating`, `body`, `date` as Y-m-d).
+A tour's rating. Return `null` or an array: `value` (average), `count`, optional `best` (5) and `worst` (1), and optional `reviews` (each: `author`, `rating`, `body`, `date` as Y-m-d). Nothing is output when the result is empty or has no count.
+
+Since 0.8.0 it only runs when Settings › Schema & SEO › **Rating source** is not None: with **Custom** this filter is the source (it receives `null`); with a connected source such as Site Reviews it receives that source's rating and may adjust it. Sites that used this filter with 0.6 or 0.7 choose **Custom**.
 
 ```php
 add_filter( 'dgb_schema_rating', function ( $rating, int $post_id ) {
@@ -185,6 +187,17 @@ add_filter( 'dgb_llms_txt_lines', function ( array $lines ) {
 	$lines[] = '## Opening hours';
 	$lines[] = '- Every day 7:00 to 22:00';
 	return $lines;
+} );
+```
+
+### `dgb_rating_sources` (0.8.0)
+
+Review plugins a site can pick as its rating source. Each item implements `Digitum\Bookings\Services\Ratings\RatingSourceInterface`: `id()` (stored setting value), `label()`, `available()` (its plugin is active; unavailable sources are not offered and give nothing) and `rating( $post_id, $site_fallback )` (from real reviews only; `null` when there are none). The built-in source is Site Reviews (`site_reviews`).
+
+```php
+add_filter( 'dgb_rating_sources', function ( array $sources ) {
+	$sources[] = new My_Reviews_Source(); // implements RatingSourceInterface
+	return $sources;
 } );
 ```
 

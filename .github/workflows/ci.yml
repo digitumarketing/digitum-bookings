@@ -89,6 +89,15 @@ jobs:
           DGB_SQLITE_DIR: .wp-test/sqlite
           DGB_STRIPE_MOCK: http://localhost:12111
 
+      - name: Site Reviews (rating source test)
+        continue-on-error: true
+        run: |
+          git clone --quiet --depth 1 --branch v8.3.5 https://github.com/pryley/site-reviews.git .wp-test/site-reviews
+          DGB_SCENARIOS=O DGB_SITE_REVIEWS_DIR="$GITHUB_WORKSPACE/.wp-test/site-reviews" composer test:integration
+        env:
+          DGB_WP_DIR: .wp-test/wordpress
+          DGB_SQLITE_DIR: .wp-test/sqlite
+
       - name: Update from one release to the next (release build, fake GitHub API)
         run: |
           composer build
