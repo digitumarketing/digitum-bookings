@@ -36,6 +36,10 @@ final class PriceBreakdown {
 	 * @param int|null                                                      $compare_at        Old unit price while a promotion runs.
 	 * @param bool                                                          $has_quote_items   Whether some add-on is priced on request.
 	 * @param array<int, array{code: string, params: array<string, mixed>}> $errors Problems that stop the booking.
+	 * @param int                                                           $offer_discount    Saving from the automatic offer.
+	 * @param int|null                                                      $offer_id          Offer applied, if any.
+	 * @param string                                                        $offer_label       Its public label.
+	 * @param array<int, array<string, mixed>>                              $hints             Offers the guest nearly qualifies for: offer, label, units, guests (how many more).
 	 */
 	public function __construct(
 		public readonly string $currency,
@@ -56,7 +60,11 @@ final class PriceBreakdown {
 		public readonly int $due_on_arrival = 0,
 		public readonly ?int $compare_at = null,
 		public readonly bool $has_quote_items = false,
-		public readonly array $errors = array()
+		public readonly array $errors = array(),
+		public readonly int $offer_discount = 0,
+		public readonly ?int $offer_id = null,
+		public readonly string $offer_label = '',
+		public readonly array $hints = array()
 	) {}
 
 	/**
@@ -119,6 +127,13 @@ final class PriceBreakdown {
 			'has_quote_items'   => $this->has_quote_items,
 			'errors'            => $this->errors,
 			'valid'             => $this->is_valid(),
+			'offer'             => null === $this->offer_id ? null : array(
+				'id'       => $this->offer_id,
+				'label'    => $this->offer_label,
+				'discount' => Money::to_decimal( $this->offer_discount, $d ),
+			),
+			'offer_discount'    => Money::to_decimal( $this->offer_discount, $d ),
+			'hints'             => $this->hints,
 		);
 	}
 }

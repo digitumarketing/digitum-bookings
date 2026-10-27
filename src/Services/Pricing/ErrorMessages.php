@@ -45,6 +45,12 @@ final class ErrorMessages {
 				);
 			case 'coupon_invalid':
 				return __( 'This coupon code cannot be used for this booking.', 'digitum-bookings' );
+			case 'coupon_not_combinable':
+				return sprintf(
+					/* translators: %s: offer name shown to guests. */
+					__( 'This code cannot be combined with the offer “%s”, which already gives you a better price.', 'digitum-bookings' ),
+					(string) ( $p['offer'] ?? '' )
+				);
 			default:
 				return __( 'This booking cannot be priced. Please contact us.', 'digitum-bookings' );
 		}

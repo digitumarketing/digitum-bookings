@@ -322,6 +322,14 @@ final class BookingsScreen {
 						<dt><?php esc_html_e( 'Extras', 'digitum-bookings' ); ?></dt>
 						<dd><?php echo esc_html( implode( ', ', array_map( static fn( $a ) => (string) ( $a['label'] ?? '' ), $addons ) ) ); ?></dd>
 					<?php endif; ?>
+					<?php if ( '' !== (string) ( $d['item']['offer_label'] ?? '' ) ) : ?>
+						<dt><?php esc_html_e( 'Offer', 'digitum-bookings' ); ?></dt>
+						<dd><?php echo esc_html( $d['item']['offer_label'] . ' (−' . Format::money( $d['item']['offer_discount'], (string) $booking['currency'] ) . ')' ); ?></dd>
+					<?php endif; ?>
+					<?php if ( '' !== (string) ( $booking['coupon_code'] ?? '' ) ) : ?>
+						<dt><?php esc_html_e( 'Coupon', 'digitum-bookings' ); ?></dt>
+						<dd><code><?php echo esc_html( (string) $booking['coupon_code'] ); ?></code> (−<?php echo esc_html( Format::money( $booking['discount'], (string) $booking['currency'] ) ); ?>)</dd>
+					<?php endif; ?>
 					<?php if ( $reminder ) : ?>
 						<dt><?php esc_html_e( 'Reminder', 'digitum-bookings' ); ?></dt>
 						<dd><?php echo esc_html( (string) wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $reminder ) ); ?></dd>
@@ -623,14 +631,14 @@ final class BookingsScreen {
 	 */
 	public static function write_csv( $out, array $rows ): void {
 		fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- UTF-8 BOM for Excel.
-		fputcsv( $out, array( 'reference', 'status', 'payment_status', 'booked_at', 'tour', 'option', 'date', 'session', 'start', 'adults', 'children', 'infants', 'vehicles', 'guest', 'email', 'phone', 'nationality', 'pickup', 'zone', 'hotel', 'room', 'pickup_window', 'vehicle', 'currency', 'total', 'paid', 'balance', 'payment_method', 'coupon', 'source', 'utm_source', 'utm_medium', 'utm_campaign', 'gclid' ) );
+		fputcsv( $out, array( 'reference', 'status', 'payment_status', 'booked_at', 'tour', 'option', 'date', 'session', 'start', 'adults', 'children', 'infants', 'vehicles', 'guest', 'email', 'phone', 'nationality', 'pickup', 'zone', 'hotel', 'room', 'pickup_window', 'vehicle', 'currency', 'total', 'paid', 'balance', 'payment_method', 'coupon', 'offer', 'source', 'utm_source', 'utm_medium', 'utm_campaign', 'gclid' ) );
 		foreach ( $rows as $row ) {
 			$d = BookingDetails::of( $row );
 			fputcsv(
 				$out,
 				array_map(
 					array( self::class, 'csv_cell' ),
-					array( $row['reference'], $row['status'], $row['payment_status'], $row['created_at'], $d['tour'], $d['option'], $d['date_raw'], $d['session'], (string) ( $d['item']['start_time'] ?? '' ), $d['adults'], $d['children'], $d['infants'], $d['units'], $row['customer_name'], $row['customer_email'], $row['customer_phone'], $row['nationality'], $d['pickup'] ? 'pickup' : 'meet', $d['zone'], $d['hotel'], $d['room'], $d['window'], $d['vehicle'], $row['currency'], $row['total'], $row['amount_paid'], $row['balance_due'], $row['payment_method'], $row['coupon_code'] ?? '', $row['source'], $row['utm_source'], $row['utm_medium'], $row['utm_campaign'], $row['gclid'] )
+					array( $row['reference'], $row['status'], $row['payment_status'], $row['created_at'], $d['tour'], $d['option'], $d['date_raw'], $d['session'], (string) ( $d['item']['start_time'] ?? '' ), $d['adults'], $d['children'], $d['infants'], $d['units'], $row['customer_name'], $row['customer_email'], $row['customer_phone'], $row['nationality'], $d['pickup'] ? 'pickup' : 'meet', $d['zone'], $d['hotel'], $d['room'], $d['window'], $d['vehicle'], $row['currency'], $row['total'], $row['amount_paid'], $row['balance_due'], $row['payment_method'], $row['coupon_code'] ?? '', (string) ( $d['item']['offer_label'] ?? '' ), $row['source'], $row['utm_source'], $row['utm_medium'], $row['utm_campaign'], $row['gclid'] )
 				)
 			);
 		}

@@ -250,7 +250,7 @@ final class Schema {
 				'url'                => $url,
 				'seller'             => $business,
 				'priceSpecification' => $this->price_specification( $option['price'], $points, $product ),
-			);
+			) + ( null !== $option['regular'] && ! empty( $points['offer']['until'] ) ? array( 'priceValidUntil' => $points['offer']['until'] ) : array() );
 		}
 
 		if ( 1 === count( $offers ) ) {

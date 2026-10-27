@@ -9,6 +9,7 @@ namespace Digitum\Bookings\Services\Pricing;
 
 use Digitum\Bookings\Domain\Addon;
 use Digitum\Bookings\Domain\Coupon;
+use Digitum\Bookings\Domain\Offer;
 use Digitum\Bookings\Domain\Variant;
 use Digitum\Bookings\Domain\Zone;
 
@@ -36,7 +37,10 @@ final class PriceRequest {
 	 * @param Coupon|null             $coupon             Coupon already checked for this tour and date.
 	 * @param string                  $payment_method     stripe, paypal, bank_transfer or arrival ('' = not chosen).
 	 * @param bool                    $pay_deposit        Whether the guest chose to pay a deposit.
-	 * @param \DateTimeImmutable|null $now                Current time (for promotions).
+	 * @param \DateTimeImmutable|null $now                Current time (for promotions and offers by booking date).
+	 * @param Offer[]                 $offers             Switched-on automatic offers (conditions are checked here).
+	 * @param int                     $product_id         Tour post ID (for offer conditions).
+	 * @param int                     $session_id         Chosen session (for offer conditions).
 	 */
 	public function __construct(
 		public readonly ?Variant $variant,
@@ -53,7 +57,10 @@ final class PriceRequest {
 		public readonly ?Coupon $coupon = null,
 		public readonly string $payment_method = '',
 		public readonly bool $pay_deposit = false,
-		public readonly ?\DateTimeImmutable $now = null
+		public readonly ?\DateTimeImmutable $now = null,
+		public readonly array $offers = array(),
+		public readonly int $product_id = 0,
+		public readonly int $session_id = 0
 	) {}
 
 	/**

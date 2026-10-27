@@ -143,7 +143,7 @@ final class BookingService {
 		}
 
 		$status = $enquiry ? BookingStatus::QUOTE_REQUESTED : (string) $methods[ $method ]['status'];
-		$money  = $breakdown ? $breakdown->to_array() : null;
+		$money  = $breakdown ? QuoteService::describe_offers( $breakdown->to_array(), (string) Product::find( $product_id )->get( 'pricing_mode' ) ) : null;
 
 		// A coupon counts one use when the booking is saved; it may have been used up since the price was shown.
 		$coupon = '';
@@ -209,6 +209,9 @@ final class BookingService {
 			'pickup_window_start' => $pickup ? ( $session['pickup_window_start'] ?? null ) : null,
 			'pickup_window_end'   => $pickup ? ( $session['pickup_window_end'] ?? null ) : null,
 			'addons'              => wp_json_encode( $money ? array_values( array_filter( $money['lines'], static fn( $line ) => in_array( $line['type'], array( 'addon', 'quote', 'surcharge' ), true ) ) ) : array() ),
+			'offer_id'            => isset( $money['offer']['id'] ) ? (int) $money['offer']['id'] : null,
+			'offer_label'         => (string) ( $money['offer']['label'] ?? '' ),
+			'offer_discount'      => $money['offer_discount'] ?? '0.00',
 		);
 
 		$created = $this->bookings->create( $booking, array( $item ), $now );
@@ -220,6 +223,17 @@ final class BookingService {
 		 * @param array $booking    Booking row.
 		 */
 		do_action( 'dgb_booking_created', $created['id'], $this->bookings->find( $created['id'] ) );
+
+		if ( null !== $item['offer_id'] ) {
+			/**
+			 * Fires when a booking is saved with an automatic offer.
+			 *
+			 * @param int    $offer_id   Offer id.
+			 * @param int    $booking_id Booking id.
+			 * @param string $discount   Saving (decimal string, booking currency).
+			 */
+			do_action( 'dgb_offer_applied', $item['offer_id'], $created['id'], $item['offer_discount'] );
+		}
 
 		return array(
 			'id'         => $created['id'],

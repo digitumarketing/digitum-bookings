@@ -386,6 +386,13 @@ final class Settings {
 					),
 					'default' => array( 'stripe', 'paypal', 'bank_transfer' ),
 				),
+				'offers_stack'               => array(
+					'type'    => 'checkbox',
+					'label'   => __( 'Coupons and offers', 'digitum-bookings' ),
+					'text'    => __( 'Let guests use a coupon on top of an automatic offer', 'digitum-bookings' ),
+					'help'    => __( 'Off: a booking gets either the offer or the coupon, whichever saves the guest more.', 'digitum-bookings' ),
+					'default' => false,
+				),
 				'bank_heading'               => array(
 					'type'    => 'heading',
 					'label'   => __( 'Bank transfer', 'digitum-bookings' ),

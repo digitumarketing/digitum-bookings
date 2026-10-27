@@ -28,6 +28,7 @@ final class PricingConfig {
 	 * @param float      $weekend_uplift   Weekend uplift in percent.
 	 * @param int[]      $weekend_days     ISO weekdays (1 = Monday … 7 = Sunday) that count as weekend.
 	 * @param string     $pickup_policy    included, addon or none.
+	 * @param bool       $offers_stack     Whether a coupon can be used on top of an automatic offer.
 	 */
 	public function __construct(
 		public readonly string $mode,
@@ -40,7 +41,8 @@ final class PricingConfig {
 		public readonly int $max_pax_per_unit = 1,
 		public readonly float $weekend_uplift = 0.0,
 		public readonly array $weekend_days = array(),
-		public readonly string $pickup_policy = 'none'
+		public readonly string $pickup_policy = 'none',
+		public readonly bool $offers_stack = false
 	) {}
 
 	/**

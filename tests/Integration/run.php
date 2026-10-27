@@ -107,7 +107,7 @@ if ( scenario( 'A' ) ) {
 
 	$r = step( $site, 'uninstall' );
 	$t = step( $site, 'inspect' );
-	check( $r['settings_left'] && count( $t['tables'] ) === 13, 'uninstall keeps data by default' );
+	check( $r['settings_left'] && count( $t['tables'] ) === 14, 'uninstall keeps data by default' );
 	$r = step( $site, 'uninstall', array( 'delete' => true ) );
 	$t = step( $site, 'inspect' );
 	check( ! $r['settings_left'] && array() === $t['tables'] && ! $r['manager_role'], 'uninstall with “delete data” removes tables, settings and roles' );
@@ -1527,7 +1527,7 @@ if ( scenario( 'N' ) ) {
 	step( $site, 'activate' );
 	$demo = step( $site, 'demo_setup' );
 	$rzr  = $demo['tours']['rzr'];
-	$day  = static fn( int $n ) => ( new DateTimeImmutable( '+' . $n . ' days', new DateTimeZone( 'Asia/Dubai' ) ) )->format( 'Y-m-d' );
+	$day  = static fn( int $n ) => ( new DateTimeImmutable( ( $n >= 0 ? '+' : '' ) . $n . ' days', new DateTimeZone( 'Asia/Dubai' ) ) )->format( 'Y-m-d' );
 
 	// Second display currency (section 2).
 	$off = step( $site, 'render_page', array( 'url' => $rzr['url'] ) );
@@ -1596,6 +1596,64 @@ if ( scenario( 'N' ) ) {
 	step( $site, 'set_option', array( 'name' => 'dgb_fake_site_reviews', 'value' => 0 ) );
 	check( null === $rating( $rzr['id'] ), 'Site Reviews deactivated: rating gone' );
 	step( $site, 'settings_merge', array( 'values' => array( 'seo' => array( 'rating_source' => 'none' ) ) ) );
+
+	// Automatic offers (section 4).
+	$screen = step( $site, 'render_admin', array( 'screen' => 'offers', 'admin' => true ) );
+	check( empty( $screen['died'] ) && str_contains( $screen['html'], 'No offers yet.' ) && str_contains( $screen['html'], 'value="dgb_save_offer"' ), 'Offers screen: empty by default, with the add form' );
+	$guide  = step( $site, 'create_user', array( 'login' => 'guide-n', 'role' => 'dgb_guide' ) )['id'];
+	$manager = step( $site, 'create_user', array( 'login' => 'manager-n', 'role' => 'dgb_manager' ) )['id'];
+	check( ! empty( step( $site, 'render_admin', array( 'screen' => 'offers', 'user' => $guide, 'admin' => true ) )['died'] ) && empty( step( $site, 'render_admin', array( 'screen' => 'offers', 'user' => $manager, 'admin' => true ) )['died'] ), 'booking managers can manage offers; guides cannot' );
+	check( 'dgb_offer_addon' === step( $site, 'offer_save', array( 'offer' => array( 'name' => 'X', 'effect' => 'waive_addon' ) ) )['error'] && 'dgb_offer_amount' === step( $site, 'offer_save', array( 'offer' => array( 'name' => 'X', 'effect' => 'percent', 'amount' => 120 ) ) )['error'] && 'dgb_offer_dates' === step( $site, 'offer_save', array( 'offer' => array( 'name' => 'X', 'amount' => 5, 'starts_on' => '2026-12-01', 'ends_on' => '2026-11-01' ) ) )['error'], 'offer form refuses incomplete or impossible offers' );
+
+	$ref  = static fn( array $tour, string $option, array $extra = array() ) => array_merge( array( 'product' => $tour['id'], 'variant_id' => $tour['variants'][ $option ], 'date' => $day( 3 ), 'session_id' => $tour['sessions']['Evening'], 'adults' => 2, 'units' => 1 ), $extra );
+	$quote = static fn( array $body ) => step( $site, 'rest', array( 'method' => 'POST', 'route' => 'quote', 'body' => $body ) )['data'];
+	$pickup = array( 'pickup' => true, 'zone_id' => $demo['zones']['Dubai'] );
+	$free = step( $site, 'offer_save', array( 'offer' => array( 'name' => 'Pickup deal', 'label' => 'Free hotel pickup on 2 or more vehicles', 'active' => 1, 'priority' => 5, 'product_ids' => array( $rzr['id'] ), 'min_units' => 2, 'effect' => 'waive_addon', 'addon_key' => 'pickup', 'show_hint' => 1, 'starts_on' => $day( 0 ), 'ends_on' => $day( 30 ) ) ) );
+	$q    = $quote( $ref( $rzr, '1 hour', $pickup ) );
+	check( null === $q['offer'] && array( 'Add 1 more vehicle to get: Free hotel pickup on 2 or more vehicles' ) === $q['hint_texts'] && '1199.00' === $amt( $q['total'] ), 'one vehicle: no offer, a hint to add one more' );
+	$q    = $quote( $ref( $rzr, '1 hour', $pickup + array( 'units' => 2 ) ) );
+	$line = array_values( array_filter( $q['lines'], static fn( $l ) => 'offer' === $l['key'] ) );
+	check( '300.00' === $amt( $q['offer']['discount'] ) && 'Free hotel pickup on 2 or more vehicles' === $line[0]['label'] && '-300.00' === $amt( $line[0]['amount'] ) && '1798.00' === $amt( $q['total'] ) && array() === $q['hint_texts'], 'two vehicles with pickup: pickup free (−300), shown with the public label' );
+	check( null === $quote( $ref( $rzr, '1 hour', array( 'units' => 2 ) ) )['offer'], 'two vehicles without pickup: nothing to waive, no offer' );
+	check( null === $quote( $ref( $saf, 'Standard', $pickup + array( 'units' => 2 ) ) )['offer'], 'another tour: no offer' );
+	check( null === $quote( $ref( $rzr, '1 hour', $pickup + array( 'units' => 2, 'date' => $day( 40 ) ) ) )['offer'], 'tour date after the offer ends: no offer' );
+
+	$book = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'ip' => '10.8.1.1', 'body' => $ref( $rzr, '1 hour', $pickup + array( 'units' => 2, 'hotel' => 'Sample Hotel', 'payment_method' => 'arrival', 'name' => 'Offer Guest', 'email' => 'offer@example.com', 'phone_code' => '+1', 'phone' => '5550101', 'terms' => true ) ) ) );
+	$st   = step( $site, 'booking_state', array( 'reference' => $book['data']['reference'] ) );
+	check( 201 === $book['status'] && '1798.00' === $amt( $st['booking']['total'] ) && (int) $free['id'] === (int) $st['items'][0]['offer_id'] && 'Free hotel pickup on 2 or more vehicles' === $st['items'][0]['offer_label'] && '300.00' === $amt( $st['items'][0]['offer_discount'] ), 'the booking is charged the quoted price and stores the offer and its saving' );
+
+	// Coupons and offers.
+	step( $site, 'coupon_save', array( 'coupon' => array( 'code' => 'SMALL', 'type' => 'fixed', 'amount' => '50', 'active' => 1 ) ) );
+	step( $site, 'coupon_save', array( 'coupon' => array( 'code' => 'HUGE', 'type' => 'percent', 'amount' => '50', 'active' => 1 ) ) );
+	$q = $quote( $ref( $rzr, '1 hour', $pickup + array( 'units' => 2, 'coupon' => 'SMALL' ) ) );
+	check( in_array( 'coupon_not_combinable', array_column( $q['errors'], 'code' ), true ) && '1798.00' === $amt( $q['total'] ), 'no stacking: a smaller coupon is refused with a message; the offer stays' );
+	$q = $quote( $ref( $rzr, '1 hour', $pickup + array( 'units' => 2, 'coupon' => 'HUGE' ) ) );
+	check( null === $q['offer'] && '1049.00' === $amt( $q['total'] ) && $q['valid'], 'no stacking: a bigger coupon wins and the offer steps aside' );
+	step( $site, 'settings_merge', array( 'values' => array( 'payments' => array( 'offers_stack' => true ) ) ) );
+	$q = $quote( $ref( $rzr, '1 hour', $pickup + array( 'units' => 2, 'coupon' => 'SMALL' ) ) );
+	check( '300.00' === $amt( $q['offer']['discount'] ) && '50.00' === $amt( $q['discount'] ) && '1748.00' === $amt( $q['total'] ) && $q['valid'], 'stacking allowed: offer and coupon together' );
+	step( $site, 'settings_merge', array( 'values' => array( 'payments' => array( 'offers_stack' => false ) ) ) );
+
+	// An offer without conditions changes the shown prices, with priceValidUntil in the schema.
+	$all = step( $site, 'offer_save', array( 'offer' => array( 'name' => 'Season', 'label' => 'Season sale', 'active' => 1, 'priority' => 1, 'effect' => 'percent', 'amount' => '10', 'starts_on' => $day( -1 ), 'ends_on' => $day( 20 ) ) ) );
+	$sc  = step( $site, 'schema', array( 'post' => $rzr['id'] ) );
+	$off = $sc['node']['offers'];
+	check( '629.10' === $amt( $sc['points']['from'] ) && '629.10' === $amt( $off['lowPrice'] ) && $day( 20 ) === $off['offers'][0]['priceValidUntil'] && '629.10' === $amt( $off['offers'][0]['price'] ), 'unconditional offer: from price and schema prices lowered, with priceValidUntil' );
+	check( 'AED 629.10' === $sc['visible'], 'visible from price = schema price' );
+	$page = step( $site, 'render_page', array( 'url' => $rzr['url'] ) )['html'];
+	check( str_contains( $page, '<s>AED 699.00</s>' ) && str_contains( $page, 'AED 629.10' ), 'option shows the old price crossed out only while the offer runs' );
+	$q = $quote( $ref( $rzr, '30 min' ) );
+	check( '629.10' === $amt( $q['total'] ) && 'Season sale' === $q['offer']['label'], 'the quote charges the shown price' );
+	step( $site, 'offer_save', array( 'id' => $all['id'], 'offer' => array( 'name' => 'Season', 'label' => 'Season sale', 'active' => 0, 'effect' => 'percent', 'amount' => '10' ) ) );
+	$page = step( $site, 'render_page', array( 'url' => $rzr['url'] ) )['html'];
+	check( ! str_contains( $page, '<s>' ) && '699.00' === $amt( step( $site, 'schema', array( 'post' => $rzr['id'] ) )['points']['from'] ) && ! isset( step( $site, 'schema', array( 'post' => $rzr['id'] ) )['node']['offers']['offers'][0]['priceValidUntil'] ), 'offer off: regular prices, no strike-through, no priceValidUntil' );
+
+	$rep = step( $site, 'reports', array( 'from' => $day( -1 ), 'to' => $day( 0 ) ) )['report'];
+	check( 1 === ( $rep['offers']['Free hotel pickup on 2 or more vehicles']['uses'] ?? 0 ) && '300.00' === $amt( $rep['offers']['Free hotel pickup on 2 or more vehicles']['discount'] ?? 0 ), 'Reports: offers with bookings and discount given' );
+	$rs = step( $site, 'render_admin', array( 'screen' => 'reports', 'get' => array( 'from' => $day( -1 ), 'to' => $day( 0 ) ), 'admin' => true ) );
+	check( str_contains( $rs['html'], 'data-dgb-report="offers"' ), 'Reports screen shows the offers table' );
+	$screen = step( $site, 'render_admin', array( 'screen' => 'offers', 'admin' => true ) );
+	check( str_contains( $screen['html'], 'Pickup deal' ) && str_contains( $screen['html'], 'Hotel pickup free' ) && str_contains( $screen['html'], '2+ vehicles or cars' ), 'Offers screen lists the offer with its effect and conditions' );
 }
 
 /* -------------------------------------------------------------------- */

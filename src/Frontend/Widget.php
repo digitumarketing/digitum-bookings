@@ -102,17 +102,21 @@ final class Widget {
 		$currency = $config->currency;
 		$now      = current_datetime();
 
+		// Option prices from the same call as structured data: an offer without conditions lowers them, and only
+		// then (or during a dated promotion) is the old price shown crossed out.
+		$points   = array_column( $this->quotes->price_points( $product_id )['options'], null, 'id' );
 		$variants = array();
 		foreach ( ( new VariantRepository() )->for_product( $product_id ) as $row ) {
 			$variant = Variant::from_row( $row );
 			if ( ! $variant->active ) {
 				continue;
 			}
+			$point      = $points[ $variant->id ] ?? array();
 			$variants[] = array(
 				'id'        => $variant->id,
 				'label'     => $variant->label,
-				'price'     => $variant->price,
-				'compareAt' => $variant->promotion_running( $now ) ? $variant->compare_at_price : null,
+				'price'     => null !== ( $point['regular'] ?? null ) ? $point['price'] : $variant->price,
+				'compareAt' => $point['regular'] ?? ( $variant->promotion_running( $now ) ? $variant->compare_at_price : null ),
 			);
 		}
 

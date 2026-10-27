@@ -16,6 +16,8 @@ add_filter( 'dgb_price_breakdown', function ( array $breakdown, int $product_id,
 }, 10, 3 );
 ```
 
+Since 0.8.0 the breakdown also has `offer` (`id`, `label`, `discount`, or null), `offer_discount`, `hints` (offers the guest nearly qualifies for: `offer`, `label`, `units`, `guests` still missing) and `hint_texts` (the same as sentences). An offer is a `discount` line with the key `offer`; `discount` itself stays the coupon's.
+
 ### `dgb_available_sessions` (0.2.0)
 
 Filters the sessions offered on a date. Each session has `id`, `name`, `type`, `start_time`, `end_time`, `pickup_window_start`, `pickup_window_end`, `status` (`open`, `past`, `too_far`, `closed`, `cutoff`) and `bookable`.
@@ -190,6 +192,24 @@ add_filter( 'dgb_llms_txt_lines', function ( array $lines ) {
 } );
 ```
 
+### `dgb_offer_applies` (0.8.0)
+
+Whether an automatic offer applies to a booking item, after its own conditions passed. Context: `product_id`, `mode`, `units`, `guests`, `variant_id`, `session_id`, `date` (tour date), `booked_on`, `subtotal` (minor units), `decimals`.
+
+```php
+add_filter( 'dgb_offer_applies', function ( bool $applies, \Digitum\Bookings\Domain\Offer $offer, array $context ) {
+	return $applies && $context['guests'] <= 10; // Not for large groups.
+}, 10, 3 );
+```
+
+### `dgb_offer_effect` (0.8.0)
+
+The saving an offer gives, in minor units (cents). Capped at the subtotal afterwards.
+
+```php
+add_filter( 'dgb_offer_effect', fn( int $saving, $offer, array $context ) => min( $saving, 10000 ), 10, 3 ); // At most 100.00.
+```
+
 ### `dgb_rating_sources` (0.8.0)
 
 Review plugins a site can pick as its rating source. Each item implements `Digitum\Bookings\Services\Ratings\RatingSourceInterface`: `id()` (stored setting value), `label()`, `available()` (its plugin is active; unavailable sources are not offered and give nothing) and `rating( $post_id, $site_fallback )` (from real reviews only; `null` when there are none). The built-in source is Site Reviews (`site_reviews`).
@@ -286,6 +306,16 @@ Fires after staff sent a price for a quote request (the guest gets the payment l
 add_action( 'dgb_quote_sent', function ( int $booking_id, string $note ) {}, 10, 2 );
 ```
 
+### `dgb_offer_applied` (0.8.0)
+
+Fires when a booking is saved with an automatic offer: offer id, booking id, saving (decimal string in the booking currency).
+
+```php
+add_action( 'dgb_offer_applied', function ( int $offer_id, int $booking_id, string $discount ) {
+	error_log( "Offer {$offer_id} saved {$discount} on booking {$booking_id}" );
+}, 10, 3 );
+```
+
 ### `dgb_booking_erased` (0.5.0)
 
 Fires after a booking's guest data was erased.
@@ -321,7 +351,7 @@ Set a URL and a signing secret in Settings › Emails. Events: `booking.created`
   "event": "booking.status_changed",
   "sent_at": "2026-10-21T16:15:25+00:00",
   "data": { "from": "pending_payment", "to": "confirmed", "reason": "payment_received" },
-  "booking": { "id": 12, "reference": "DGB-261021-AB12", "status": "confirmed", "total": 899, "discount": 0, "coupon": "", "customer": { "name": "…", "email": "…", "phone": "…" }, "tour": { "name": "…", "date": "2026-10-24", "session": "Evening" }, "pickup": { "zone": "Dubai", "hotel": "…", "window": "2:15 pm – 2:45 pm" }, "attribution": { "source": "ads", "gclid": "…" }, "booking_link": "…", "admin_link": "…" }
+  "booking": { "id": 12, "reference": "DGB-261021-AB12", "status": "confirmed", "total": 899, "discount": 0, "coupon": "", "offer": null, "customer": { "name": "…", "email": "…", "phone": "…" }, "tour": { "name": "…", "date": "2026-10-24", "session": "Evening" }, "pickup": { "zone": "Dubai", "hotel": "…", "window": "2:15 pm – 2:45 pm" }, "attribution": { "source": "ads", "gclid": "…" }, "booking_link": "…", "admin_link": "…" }
 }
 ```
 

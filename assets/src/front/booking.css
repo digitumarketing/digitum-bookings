@@ -77,6 +77,13 @@
 	font-size: 1.15rem;
 }
 
+.dgb-offer-hint {
+	margin: 0.5rem 0 0;
+	padding: 0.4rem 0.6rem;
+	border-inline-start: 3px solid var(--dgb-accent);
+	font-size: 0.9rem;
+}
+
 .dgb-second {
 	unicode-bidi: isolate;
 	white-space: nowrap;

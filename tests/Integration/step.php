@@ -391,6 +391,7 @@ switch ( $dgb_action ) {
 		$dgb_out['booking']  = $dgb_booking;
 		$dgb_out['payments'] = $dgb_booking ? ( new \Digitum\Bookings\Database\Repositories\PaymentRepository() )->for_booking( (int) $dgb_booking['id'] ) : array();
 		$dgb_out['events']   = $dgb_booking ? array_column( $dgb_repo->events( (int) $dgb_booking['id'] ), 'type' ) : array();
+		$dgb_out['items']    = $dgb_booking ? $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}dgb_booking_items WHERE booking_id = %d", $dgb_booking['id'] ), ARRAY_A ) : array();
 		$dgb_out['proofs']   = $dgb_booking ? ( new \Digitum\Bookings\Database\Repositories\ProofRepository() )->for_booking( (int) $dgb_booking['id'] ) : array();
 		$dgb_out['fake']     = dgb_fake_state();
 		$dgb_out['fake']['log'] = array_slice( $dgb_out['fake']['log'], -6 );
@@ -534,6 +535,8 @@ switch ( $dgb_action ) {
 			( new \Digitum\Bookings\Admin\Screens\SettingsScreen( $dgb_set ) )->render();
 		} elseif ( 'coupons' === $dgb_args['screen'] ) {
 			( new \Digitum\Bookings\Admin\Screens\CouponsScreen( $dgb_set, \Digitum\Bookings\Plugin::instance()->product_type() ) )->render();
+		} elseif ( 'offers' === $dgb_args['screen'] ) {
+			( new \Digitum\Bookings\Admin\Screens\OffersScreen( $dgb_set, \Digitum\Bookings\Plugin::instance()->product_type() ) )->render();
 		} elseif ( 'reports' === $dgb_args['screen'] ) {
 			( new \Digitum\Bookings\Admin\Screens\ReportsScreen( $dgb_set ) )->render();
 		} elseif ( 'tools' === $dgb_args['screen'] ) {
@@ -963,6 +966,16 @@ switch ( $dgb_action ) {
 		ob_start();
 		( new \Digitum\Bookings\Admin\Screens\ToolsScreen( \Digitum\Bookings\Plugin::instance()->settings(), \Digitum\Bookings\Plugin::instance()->product_type() ) )->demo_notice();
 		$dgb_out['html'] = ob_get_clean();
+		break;
+
+	case 'offer_save':
+		$dgb_data = \Digitum\Bookings\Database\Repositories\OfferRepository::sanitize( $dgb_args['offer'] );
+		if ( is_wp_error( $dgb_data ) ) {
+			$dgb_out['error'] = $dgb_data->get_error_code();
+			break;
+		}
+		$dgb_out['id']  = ( new \Digitum\Bookings\Database\Repositories\OfferRepository() )->save( $dgb_data, (int) ( $dgb_args['id'] ?? 0 ) );
+		$dgb_out['row'] = ( new \Digitum\Bookings\Database\Repositories\OfferRepository() )->find( $dgb_out['id'] );
 		break;
 
 	case 'coupon_save':

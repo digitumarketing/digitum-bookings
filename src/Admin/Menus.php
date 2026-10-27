@@ -11,6 +11,7 @@ use Digitum\Bookings\Admin\Screens\BookingsScreen;
 use Digitum\Bookings\Admin\Screens\CalendarScreen;
 use Digitum\Bookings\Admin\Screens\CheckInScreen;
 use Digitum\Bookings\Admin\Screens\CouponsScreen;
+use Digitum\Bookings\Admin\Screens\OffersScreen;
 use Digitum\Bookings\Admin\Screens\DashboardScreen;
 use Digitum\Bookings\Admin\Screens\EmailsScreen;
 use Digitum\Bookings\Admin\Screens\ManifestScreen;
@@ -73,7 +74,7 @@ final class Menus {
 	 * @return array<int, string>
 	 */
 	public static function pages(): array {
-		return array( self::SLUG, SettingsScreen::SLUG, ZonesScreen::SLUG, PaymentsScreen::SLUG, BookingsScreen::SLUG, CalendarScreen::SLUG, ManifestScreen::SLUG, CheckInScreen::SLUG, EmailsScreen::SLUG, ToolsScreen::SLUG, CouponsScreen::SLUG, ReportsScreen::SLUG );
+		return array( self::SLUG, SettingsScreen::SLUG, ZonesScreen::SLUG, PaymentsScreen::SLUG, BookingsScreen::SLUG, CalendarScreen::SLUG, ManifestScreen::SLUG, CheckInScreen::SLUG, EmailsScreen::SLUG, ToolsScreen::SLUG, CouponsScreen::SLUG, OffersScreen::SLUG, ReportsScreen::SLUG );
 	}
 
 	/**

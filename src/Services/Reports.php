@@ -15,7 +15,7 @@ use Digitum\Bookings\Settings\Settings;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Bookings made in a period (by the day they were made, site time zone), grouped by tour, source and coupon.
+ * Bookings made in a period (by the day they were made, site time zone), grouped by tour, source, coupon and offer.
  *
  * - Sold: confirmed, checked in or no-show. Booked value is their total.
  * - Conversion: sold ÷ bookings made (quote requests count when they were turned into a booking).
@@ -38,7 +38,7 @@ final class Reports {
 	 *
 	 * @param string $from First day, Y-m-d.
 	 * @param string $to   Last day, Y-m-d.
-	 * @return array<string, mixed> totals, tours, sources, coupons, collected (currency => amount).
+	 * @return array<string, mixed> totals, tours, sources, coupons, offers, collected (currency => amount).
 	 */
 	public function period( string $from, string $to ): array {
 		global $wpdb;
@@ -49,7 +49,7 @@ final class Reports {
 		$bookings = Schema::table( 'bookings' );
 		$items    = Schema::table( 'booking_items' );
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery -- table names from constants.
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT b.id, b.status, b.source, b.total, b.discount, b.coupon_code, b.currency, i.product_id, i.adults, i.children, i.infants FROM {$bookings} b LEFT JOIN {$items} i ON i.id = (SELECT MIN(i2.id) FROM {$items} i2 WHERE i2.booking_id = b.id) WHERE b.created_at BETWEEN %s AND %s", $start, $end ), ARRAY_A );
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT b.id, b.status, b.source, b.total, b.discount, b.coupon_code, b.currency, i.product_id, i.adults, i.children, i.infants, i.offer_label, i.offer_discount FROM {$bookings} b LEFT JOIN {$items} i ON i.id = (SELECT MIN(i2.id) FROM {$items} i2 WHERE i2.booking_id = b.id) WHERE b.created_at BETWEEN %s AND %s", $start, $end ), ARRAY_A );
 
 		$blank    = array(
 			'made'      => 0,
@@ -64,6 +64,7 @@ final class Reports {
 		$tours    = array();
 		$sources  = array();
 		$coupons  = array();
+		$offers   = array();
 		$currency = '';
 		foreach ( (array) $rows as $row ) {
 			$currency                   = '' !== $currency ? $currency : (string) $row['currency'];
@@ -88,11 +89,23 @@ final class Reports {
 				$coupons[ $code ]['discount'] += (float) $row['discount'];
 				$coupons[ $code ]['value']    += in_array( $row['status'], self::SOLD, true ) ? (float) $row['total'] : 0.0;
 			}
+			if ( '' !== (string) $row['offer_label'] ) {
+				$label            = (string) $row['offer_label'];
+				$offers[ $label ] = $offers[ $label ] ?? array(
+					'uses'     => 0,
+					'discount' => 0.0,
+					'value'    => 0.0,
+				);
+				++$offers[ $label ]['uses'];
+				$offers[ $label ]['discount'] += (float) $row['offer_discount'];
+				$offers[ $label ]['value']    += in_array( $row['status'], self::SOLD, true ) ? (float) $row['total'] : 0.0;
+			}
 		}
 
 		uasort( $tours, static fn( $a, $b ) => array( $b['value'], $b['made'] ) <=> array( $a['value'], $a['made'] ) );
 		uasort( $sources, static fn( $a, $b ) => $b['made'] <=> $a['made'] );
 		ksort( $coupons );
+		ksort( $offers );
 
 		return array(
 			'from'      => $from,
@@ -102,6 +115,7 @@ final class Reports {
 			'tours'     => $tours,
 			'sources'   => $sources,
 			'coupons'   => $coupons,
+			'offers'    => $offers,
 			'collected' => $this->collected( $start, $end ),
 		);
 	}

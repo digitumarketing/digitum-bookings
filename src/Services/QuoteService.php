@@ -9,6 +9,7 @@ namespace Digitum\Bookings\Services;
 
 use Digitum\Bookings\Database\Repositories\AddonRepository;
 use Digitum\Bookings\Database\Repositories\CouponRepository;
+use Digitum\Bookings\Database\Repositories\OfferRepository;
 use Digitum\Bookings\Database\Repositories\OverrideRepository;
 use Digitum\Bookings\Database\Repositories\VariantRepository;
 use Digitum\Bookings\Database\Repositories\ZoneRepository;
@@ -86,7 +87,8 @@ final class QuoteService {
 			(int) $product->get( 'max_pax_per_unit' ),
 			(float) $product->get( 'weekend_uplift' ),
 			array_map( 'intval', (array) $all['currency']['weekend_days'] ),
-			(string) $product->get( 'pickup_policy' )
+			(string) $product->get( 'pickup_policy' ),
+			! empty( $all['payments']['offers_stack'] )
 		);
 	}
 
@@ -143,7 +145,10 @@ final class QuoteService {
 			$coupon,
 			isset( $input['payment_method'] ) ? sanitize_key( (string) $input['payment_method'] ) : '',
 			! empty( $input['pay_deposit'] ),
-			$now
+			$now,
+			( new OfferRepository() )->active(),
+			$product_id,
+			(int) ( $input['session_id'] ?? 0 )
 		);
 
 		$breakdown = $this->calculator->calculate( $config, $request );
@@ -160,6 +165,7 @@ final class QuoteService {
 	 */
 	public function quote_array( int $product_id, array $input, ?\DateTimeImmutable $now = null ): array {
 		$breakdown = $this->quote( $product_id, $input, $now )->to_array();
+		$breakdown = self::describe_offers( $breakdown, (string) Product::find( $product_id )->get( 'pricing_mode' ) );
 
 		/**
 		 * Filters a price breakdown before it is shown or stored.
@@ -172,6 +178,38 @@ final class QuoteService {
 	}
 
 	/**
+	 * Words for the offer line and the "nearly there" hints of a breakdown.
+	 *
+	 * @param array<string, mixed> $breakdown Breakdown array.
+	 * @param string               $mode      Pricing mode.
+	 * @return array<string, mixed>
+	 */
+	public static function describe_offers( array $breakdown, string $mode ): array {
+		foreach ( (array) ( $breakdown['lines'] ?? array() ) as $i => $line ) {
+			if ( 'offer' === $line['key'] && '' === (string) $line['label'] ) {
+				$breakdown['lines'][ $i ]['label'] = __( 'Offer', 'digitum-bookings' );
+			}
+		}
+		$texts = array();
+		foreach ( (array) ( $breakdown['hints'] ?? array() ) as $hint ) {
+			$units  = (int) $hint['units'];
+			$guests = (int) $hint['guests'];
+			if ( $units > 0 ) {
+				$texts[] = 'per_group' === $mode
+					/* translators: 1: number of cars, 2: offer name. */
+					? sprintf( _n( 'Add %1$d more car to get: %2$s', 'Add %1$d more cars to get: %2$s', $units, 'digitum-bookings' ), $units, $hint['label'] )
+					/* translators: 1: number of vehicles, 2: offer name. */
+					: sprintf( _n( 'Add %1$d more vehicle to get: %2$s', 'Add %1$d more vehicles to get: %2$s', $units, 'digitum-bookings' ), $units, $hint['label'] );
+			} elseif ( $guests > 0 ) {
+				/* translators: 1: number of guests, 2: offer name. */
+				$texts[] = sprintf( _n( 'Add %1$d more guest to get: %2$s', 'Add %1$d more guests to get: %2$s', $guests, 'digitum-bookings' ), $guests, $hint['label'] );
+			}
+		}
+		$breakdown['hint_texts'] = $texts;
+		return $breakdown;
+	}
+
+	/**
 	 * "From" price of a tour as a decimal string, or null for "Price on request".
 	 *
 	 * @param int $product_id Tour post ID.
@@ -179,7 +217,14 @@ final class QuoteService {
 	public function from_price( int $product_id ): ?string {
 		$config   = $this->config( Product::find( $product_id ) );
 		$variants = array_map( array( Variant::class, 'from_row' ), ( new VariantRepository() )->for_product( $product_id ) );
-		return Money::to_decimal( $this->calculator->from_price( $config, $variants ), $config->decimals() );
+		return Money::to_decimal( $this->calculator->from_price( $config, $variants, ( new OfferRepository() )->active(), self::today() ), $config->decimals() );
+	}
+
+	/**
+	 * Today in the site time zone, Y-m-d.
+	 */
+	private static function today(): string {
+		return current_datetime()->format( 'Y-m-d' );
 	}
 
 	/**
@@ -187,36 +232,48 @@ final class QuoteService {
 	 * as the "From" price on the page.
 	 *
 	 * @param int $product_id Tour post ID.
+	 * An offer without conditions that runs today lowers every price (see PriceCalculator::unconditional_offer()):
+	 * `regular` keeps the price before it, and `offer` names it with its last day.
+	 *
 	 * @return array{mode: string, currency: string, vat_included: bool, from: ?string, high: ?string,
-	 *               options: array<int, array{id: int, label: string, duration: ?int, price: ?string}>}
+	 *               offer: array{label: string, until: ?string}|null,
+	 *               options: array<int, array{id: int, label: string, duration: ?int, price: ?string, regular: ?string}>}
 	 */
 	public function price_points( int $product_id ): array {
 		$config   = $this->config( Product::find( $product_id ) );
 		$decimals = $config->decimals();
 		$variants = array_map( array( Variant::class, 'from_row' ), ( new VariantRepository() )->for_product( $product_id ) );
+		$offers   = ( new OfferRepository() )->active();
+		$offer    = 'on_request' === $config->mode ? null : PriceCalculator::unconditional_offer( $offers, self::today() );
 		$options  = array();
 		$high     = null;
 		foreach ( $variants as $variant ) {
 			if ( ! $variant->active ) {
 				continue;
 			}
-			$minor = 'on_request' === $config->mode ? null : Money::to_minor( $variant->price, $decimals );
-			$minor = null !== $minor && $minor > 0 ? $minor : null;
-			$high  = null !== $minor ? max( $high ?? 0, $minor ) : $high;
+			$regular = 'on_request' === $config->mode ? null : Money::to_minor( $variant->price, $decimals );
+			$regular = null !== $regular && $regular > 0 ? $regular : null;
+			$minor   = null !== $regular && $offer ? PriceCalculator::discounted( $regular, $offer, $decimals ) : $regular;
+			$high    = null !== $minor ? max( $high ?? 0, $minor ) : $high;
 
 			$options[] = array(
 				'id'       => $variant->id,
 				'label'    => $variant->label,
 				'duration' => $variant->duration_minutes,
 				'price'    => Money::to_decimal( $minor, $decimals ),
+				'regular'  => $offer && null !== $regular && $regular !== $minor ? Money::to_decimal( $regular, $decimals ) : null,
 			);
 		}
 		return array(
 			'mode'         => $config->mode,
 			'currency'     => $config->currency,
 			'vat_included' => $config->vat_inclusive,
-			'from'         => Money::to_decimal( $this->calculator->from_price( $config, $variants ), $decimals ),
+			'from'         => Money::to_decimal( $this->calculator->from_price( $config, $variants, $offers, self::today() ), $decimals ),
 			'high'         => Money::to_decimal( $high, $decimals ),
+			'offer'        => $offer ? array(
+				'label' => $offer->label,
+				'until' => $offer->ends_on,
+			) : null,
 			'options'      => $options,
 		);
 	}

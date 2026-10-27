@@ -141,6 +141,7 @@
 			maximumFractionDigits: cfg.decimals,
 		} );
 		const fmt = ( v ) => ( null === v || undefined === v ? '' : money.format( Number( v ) ) );
+		const couponCodes = [ 'coupon_invalid', 'coupon_not_combinable' ];
 		// Optional second currency, for display only: " (about USD 190)".
 		const sc = cfg.second;
 		const scNum = sc && new Intl.NumberFormat( cfg.locale, { minimumFractionDigits: sc.decimals, maximumFractionDigits: sc.decimals } );
@@ -486,10 +487,11 @@
 				list.appendChild( el( 'div', { class: 'dgb-line' }, [ el( 'dt', { text: t.dueOnArrival } ), el( 'dd', { text: fmt( r.due_on_arrival ) } ) ] ) );
 			}
 			box.appendChild( list );
+			( r.hint_texts || [] ).forEach( ( text ) => box.appendChild( el( 'p', { class: 'dgb-offer-hint', text } ) ) );
 
 			const couponStatus = q( '[data-dgb-coupon-status]' );
 			if ( couponStatus && state.coupon ) {
-				const bad = ( r.errors || [] ).find( ( e ) => 'coupon_invalid' === e.code );
+				const bad = ( r.errors || [] ).find( ( e ) => couponCodes.includes( e.code ) );
 				couponStatus.textContent = bad ? bad.message : sprintf( t.couponApplied, state.coupon );
 				couponStatus.classList.toggle( 'is-error', !! bad );
 				if ( bad ) {
@@ -498,7 +500,7 @@
 					update();
 				}
 			}
-			const problems = ( r.errors || [] ).filter( ( e ) => e.message && 'coupon_invalid' !== e.code );
+			const problems = ( r.errors || [] ).filter( ( e ) => e.message && ! couponCodes.includes( e.code ) );
 			if ( problems.length ) {
 				box.appendChild( el( 'ul', { class: 'dgb-price-errors' }, problems.map( ( e ) => el( 'li', { text: e.message } ) ) ) );
 			}

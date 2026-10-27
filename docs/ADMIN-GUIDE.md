@@ -64,6 +64,20 @@ When a guest asks for their data, use WordPress's **Tools › Export Personal Da
 
 Digitum Bookings › **Coupons**: add a code (letters and numbers), a discount (a percentage of the price before VAT, or a fixed amount off the booking), the tours it is for (none ticked = all), how many bookings may use it and the days it works. Guests type the code in the payment step of the booking widget; the field only shows while at least one coupon can be used. A wrong or expired code is explained to the guest and ignored. The list shows how often each code was used; the code is also on the booking, in the CSV export and in webhooks.
 
+## Offers
+
+Digitum Bookings › **Offers** (booking managers): discounts that apply on their own, without a code. There are none until you add one.
+
+- **Name** is for you; the **public label** is what guests see in the price breakdown (for example “Free hotel pickup on 2 or more vehicles”).
+- **Effect**: a percentage off the booking, an amount off, a free add-on (choose “Hotel pickup” to make every tour's pickup add-on free), or a fixed price per person, vehicle or car.
+- **Dates** with **tour dates** or **days the booking is made**; empty means no limit.
+- **Conditions**, all optional and all must be met: tours, pricing type, number of vehicles or cars (at least / at most), number of guests, weekdays of the tour date, a minimum booking value, and specific options or sessions.
+- **Priority**: one offer per booking; the highest priority wins, then the bigger saving.
+- **Tell guests who nearly qualify** shows “Add 1 more vehicle to get: …” in the widget when one or two more vehicles, cars or guests are missing (it needs a public label).
+- A coupon is not added on top of an offer unless Settings › Payments › **Coupons and offers** allows it; otherwise the guest gets whichever saves more, and is told when a code cannot be combined.
+- An offer without any condition lowers the prices shown on the tour page (the old price is crossed out while it runs) and in search results, with the offer's last day as the price's end date. Other offers never change the shown “From” price.
+- The booking keeps the offer and the saving; Reports has an **Offers** table.
+
 ## Reports
 
 Digitum Bookings › **Reports** for any period (or Last 7 days, Last 30 days, This month, Last month, This year): bookings made, sold (confirmed, checked in or no-show), booked value, money collected (payments minus refunds), conversion (sold ÷ bookings made), cancellation rate and quote requests; then the same figures **by tour** and **by source** (from ads, organic, or taken by staff), and what each coupon brought in.

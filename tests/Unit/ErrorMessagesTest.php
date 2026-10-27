@@ -42,6 +42,13 @@ final class ErrorMessagesTest extends TestCase {
 				'Pickup is not available from Abu Dhabi. Please meet us at the meeting point.',
 			),
 			array( array( 'code' => 'coupon_invalid' ), 'This coupon code cannot be used for this booking.' ),
+			array(
+				array(
+					'code'   => 'coupon_not_combinable',
+					'params' => array( 'offer' => 'Sample offer' ),
+				),
+				'This code cannot be combined with the offer “Sample offer”, which already gives you a better price.',
+			),
 			array( array( 'code' => 'unknown_mode' ), 'This booking cannot be priced. Please contact us.' ),
 		);
 	}

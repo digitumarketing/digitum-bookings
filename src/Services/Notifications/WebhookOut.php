@@ -173,6 +173,11 @@ final class WebhookOut {
 				'balance_due'    => (float) $booking['balance_due'],
 				'discount'       => (float) $booking['discount'],
 				'coupon'         => (string) ( $booking['coupon_code'] ?? '' ),
+				'offer'          => '' !== (string) ( $d['item']['offer_label'] ?? '' ) ? array(
+					'id'       => (int) $d['item']['offer_id'],
+					'label'    => (string) $d['item']['offer_label'],
+					'discount' => (float) $d['item']['offer_discount'],
+				) : null,
 				'created_at'     => (string) $booking['created_at'],
 				'customer'       => array(
 					'name'              => (string) $booking['customer_name'],

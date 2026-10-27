@@ -176,6 +176,28 @@ final class ReportsScreen {
 					</tbody>
 				</table>
 			<?php endif; ?>
+
+			<?php if ( array() !== $r['offers'] ) : ?>
+				<h2><?php esc_html_e( 'Offers', 'digitum-bookings' ); ?></h2>
+				<table class="widefat striped dgb-list" data-dgb-report="offers">
+					<thead><tr>
+						<th scope="col"><?php esc_html_e( 'Offer', 'digitum-bookings' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Bookings', 'digitum-bookings' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Discount given', 'digitum-bookings' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Booked value', 'digitum-bookings' ); ?></th>
+					</tr></thead>
+					<tbody>
+						<?php foreach ( $r['offers'] as $label => $row ) : ?>
+							<tr>
+								<td><?php echo esc_html( (string) $label ); ?></td>
+								<td><?php echo esc_html( number_format_i18n( $row['uses'] ) ); ?></td>
+								<td><?php echo esc_html( $money( $row['discount'] ) ); ?></td>
+								<td><?php echo esc_html( $money( $row['value'] ) ); ?></td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+			<?php endif; ?>
 		</div>
 		<?php
 	}

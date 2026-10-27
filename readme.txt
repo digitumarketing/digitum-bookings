@@ -121,6 +121,7 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 * Demo packs: optional sample data imported from Tools and removed again in one click; a fresh install has no demo content.
 * Optional second display currency next to prices.
 * Rating source for structured data: Site Reviews, or a developer filter; no rating without real reviews.
+* Automatic offers (discounts without a code) with conditions, priorities and an optional “add one more” hint.
 
 = 0.7.0 =
 * Updates from GitHub releases (Dashboard › Updates, automatic updates, private repository token).
