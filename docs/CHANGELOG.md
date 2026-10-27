@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.0 (generic gap fixes)
+
+- **Demo packs** replace the built-in demo import: optional JSON files in `demo/` (format in docs/DEMO-PACKS.md; more can be registered with the `dgb_demo_packs` filter). Nothing is created on activation or upgrade. Tools lists the packs with what each creates; import asks for confirmation, is idempotent, and only one pack can be active. Every record is tagged with its pack; settings the pack changes are backed up first. **Remove demo data** deletes exactly what the pack created and restores the settings; demo tours that were edited or booked are listed with a keep-or-delete choice, and bookings are never deleted. An admin reminder shows while demo data is active.
+- The desert tours demo pack (`demo/desert-tours.json`) has the updated prices and session times, morning-only sessions for rentals, pay on arrival only, and an inactive “free hotel pickup on 2 or more vehicles” offer.
+- Database schema 1.6.0: `dgb_offers` table, `demo_pack` columns, offer columns on booking items.
+
 ## 0.7.0 (M7 Release)
 
 - **Updates from GitHub**: the plugin reads the latest release of github.com/digitumarketing/digitum-bookings; WordPress shows “update available” under Dashboard › Updates and on the Plugins screen, installs `digitum-bookings.zip` from the release, and automatic updates can be switched on. “View details” shows the release changelog and requirements. Settings › **Updates** shows the installed and latest version, has “Check for updates now”, and takes a read-only token if the repository is ever private (the zip is then fetched through the GitHub API).

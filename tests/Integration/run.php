@@ -29,7 +29,7 @@ function wp_make_link_relative_test( string $url ): string {
 	return (string) preg_replace( '#^https?://[^/]+#', '', $url );
 }
 
-$all_tables = array( 'variants', 'sessions', 'addons', 'zones', 'locations', 'bookings', 'booking_items', 'booking_events', 'payments', 'payment_proofs', 'coupons', 'calendar_overrides', 'notifications' );
+$all_tables = array( 'variants', 'sessions', 'addons', 'zones', 'locations', 'bookings', 'booking_items', 'booking_events', 'payments', 'payment_proofs', 'coupons', 'offers', 'calendar_overrides', 'notifications' );
 
 /* -------------------------------------------------------------------- */
 if ( scenario( 'A' ) ) {
@@ -40,7 +40,7 @@ if ( scenario( 'A' ) ) {
 	check( $r['active'] && '' === $r['error'], 'plugin activates' );
 
 	$r = step( $site, 'inspect' );
-	check( $r['tables'] === $all_tables, 'all 13 tables exist' );
+	check( $r['tables'] === $all_tables, 'all 14 tables exist' );
 	check( '' !== $r['db_latest'] && $r['db_latest'] === $r['db_version'], 'schema version stored (' . $r['db_version'] . ')' );
 	check( 'own' === $r['mode'] && 'dgb_tour' === $r['product_type'] && $r['type_exists'], 'own Tours post type registered' );
 	check( false === $r['flush_pending'], 'rewrite flush ran once after activation' );
@@ -1319,54 +1319,120 @@ if ( scenario( 'K' ) ) {
 
 /* -------------------------------------------------------------------- */
 if ( scenario( 'L' ) ) {
-	echo "\nScenario L: Import Desert Bookings demo data (M7)\n";
-	$amt  = static fn( $v ) => null === $v ? null : number_format( (float) $v, 2, '.', '' );
-	$site = make_site( 'm7-demo' );
+	echo "\nScenario L: demo packs: opt-in import and one-click removal (v0.8)\n";
+	$amt     = static fn( $v ) => null === $v ? null : number_format( (float) $v, 2, '.', '' );
+	$packs   = static function ( string $site ): void {
+		$fixtures = __DIR__ . '/fixtures';
+		file_put_contents( "{$site}/wp-content/mu-plugins/demo-packs.php", "<?php\nadd_filter( 'dgb_demo_packs', static fn( \$p ) => \$p + array( 'sample-pack' => '{$fixtures}/sample-pack.json', 'broken' => '{$fixtures}/broken-pack.json' ) );\n" );
+	};
+	$site = make_site( 'v08-demo' );
+	$packs( $site );
 	step( $site, 'install' );
 	step( $site, 'activate' );
-	$d    = step( $site, 'demo_import' );
-	$t    = $d['tours'];
-	$g    = $d['settings'];
-	check( 27 === count( $t ) && 27 === count( array_filter( $d['report']['tours'], static fn( $x ) => 'added' === $x['result'] ) ), 'all 27 tours of section 13.2 added' );
-	check( array() === array_filter( $t, static fn( $x, $slug ) => $slug !== $x['slug'] || 'draft' !== $x['status'], ARRAY_FILTER_USE_BOTH ), 'every tour has the slug of the live site’s /tour/ URL; new ones are drafts' );
-	check( array() === array_filter( $t, static fn( $x ) => $x['product']['enabled'] ), 'bookings stay off on every tour until checked' );
-	check( 'Desert Bookings' === $g['general']['business_name'] && '+971 55 526 0561' === $g['general']['phone'] && 'info@desertbookings.com' === $g['general']['email'] && 'AED' === $g['currency']['currency'] && 'inclusive' === $g['currency']['vat_mode'] && 5.0 === (float) $g['currency']['vat_rate'] && false === $g['payments']['deposit_enabled'] && '+971 55 526 0561' === $g['payments']['bank_whatsapp'], 'business details, AED, 5% VAT inclusive, deposit off, WhatsApp number' );
-	$zones = array_column( $d['zones'], 'allowed', 'name' );
-	check( array( 'Dubai' => '1', 'Sharjah' => '1', 'Abu Dhabi' => '0' ) === array_map( 'strval', $zones ) && 'Al Aweer desert' === $d['points'][0]['name'], 'zones Dubai and Sharjah, no pickup from Abu Dhabi; Al Aweer meeting point' );
-	$rzr = $t['2-seater-polaris-rzr-1000-cc-buggy'];
-	check( 'per_vehicle' === $rzr['product']['pricing_mode'] && 2 === $rzr['product']['seats_per_unit'] && array( '30 min' => '699.00', '1 hour' => '899.00', '2 hours' => '1299.00' ) === array_map( $amt, $rzr['variants'] ) && array( 'Morning', 'Evening' ) === array_keys( $rzr['sessions'] ), '2-seater RZR: per vehicle, 2 seats, 699 / 899 / 1,299, morning and evening' );
-	check( 'addon' === $rzr['product']['pickup_policy'] && 'meet' === $rzr['product']['pickup_default'] && 'pickup' === $rzr['addons'][0]['condition_key'] && '300.00' === $amt( $rzr['addons'][0]['price'] ) && 'per_booking' === $rzr['addons'][0]['price_type'], 'buggies meet at Al Aweer; hotel pickup AED 300 per booking (13.3.1)' );
-	$saf = $t['evening-desert-safari-dubai'];
-	check( 'per_person' === $saf['product']['pricing_mode'] && 'included' === $saf['product']['pickup_policy'] && 'pickup' === $saf['product']['pickup_default'] && '99.00' === $amt( $saf['from'] ) && array() === $saf['addons'], 'evening safari: per person from 99, pickup included' );
-	$mor = $t['morning-desert-safari'];
-	check( 'per_group' === $mor['product']['pricing_mode'] && 7 === $mor['product']['max_pax_per_unit'] && '650.00' === $amt( $mor['from'] ), 'morning safari: per car up to 7, from 650' );
-	check( 'on_request' === $t['private-desert-safari-tour']['addons'][0]['price_type'] && 'Private desert setup' === $t['private-desert-safari-tour']['addons'][0]['label'], 'private safari: “Private desert setup” on request' );
-	$req = array( 'new-year-desert-safari-dubai', 'ramadan-iftar-desert-safari', 'desert-photoshoot-dubai', 'dune-buggy-desert-safari', 'corporate-and-group-events' );
-	check( array() === array_filter( $req, static fn( $s ) => 'on_request' !== $t[ $s ]['product']['pricing_mode'] || null !== $t[ $s ]['from'] ), 'the 5 price-on-request tours have no price' );
-	check( array( '729.00', '1249.00', '1899.00' ) === array_values( array_map( $amt, $t['yamaha-raptor-700-cc']['variants'] ) ) && array( '249.00', '349.00', '549.00' ) === array_values( array_map( $amt, $t['desert-yamaha-quad-bike-400-cc']['variants'] ) ) && array( '499.00', '699.00', '849.00' ) === array_values( array_map( $amt, $t['dirt-bike-ktm-rental']['variants'] ) ), 'quads and KTM price ladders' );
-	$confirm = implode( ' ', array_merge( ...array_map( static fn( $x ) => $x['confirm'], $d['report']['tours'] ) ) );
-	check( str_contains( $confirm, 'session times' ) && str_contains( $confirm, 'first option is 1 hour' ) && str_contains( implode( ' ', $d['report']['confirm'] ), 'Stripe and PayPal keys' ), 'report lists the [CONFIRM] items' );
 
-	$tools = step( $site, 'render_admin', array( 'screen' => 'tools', 'get' => array( 'done' => 'demo' ), 'admin' => true ) );
-	check( str_contains( $tools['html'], 'Demo data imported' ) && str_contains( $tools['html'], '[CONFIRM]' ) && str_contains( $tools['html'], 'value="dgb_import_demo"' ) && str_contains( $tools['html'], '2-seater-polaris-rzr-1000-cc-buggy' ), 'Tools screen: demo button and report with [CONFIRM] items' );
+	$s0 = step( $site, 'demo_snapshot' );
+	check( 0 === $s0['tours'] && 0 === array_sum( $s0['rows'] ) && false === $s0['active'], 'fresh install: no tours, zones, meeting points, coupons, offers or bookings' );
+	check( '' === $s0['all_settings']['general']['business_name'] && '' === $s0['all_settings']['general']['phone'] && '' === $s0['all_settings']['general']['email'], 'fresh install: business details empty' );
 
-	// Second run: nothing duplicated or overwritten.
-	step( $site, 'settings_merge', array( 'values' => array( 'general' => array( 'phone' => '+971 4 000 0000' ) ) ) );
-	$d2 = step( $site, 'demo_import' );
-	check( 27 === count( array_filter( $d2['report']['tours'], static fn( $x ) => 'kept' === $x['result'] ) ) && 3 === count( $d2['zones'] ) && 1 === count( $d2['points'] ) && '+971 4 000 0000' === $d2['settings']['general']['phone'], 'running it again changes nothing and keeps your own settings' );
+	$list = step( $site, 'demo_packs' )['packs'];
+	check( isset( $list['desert-tours']['preview'], $list['sample-pack']['preview'] ) && isset( $list['broken']['error'] ), 'packs from demo/ and the dgb_demo_packs filter are listed; a broken pack shows why' );
+	check( array( 'tours' => 4, 'variants' => 4, 'sessions' => 4, 'addons' => 1, 'zones' => 2, 'locations' => 1, 'coupons' => 2, 'offers' => 1, 'settings' => 4 ) === $list['sample-pack']['preview'], 'preview counts per type' );
+	$tools = step( $site, 'render_admin', array( 'screen' => 'tools', 'admin' => true ) );
+	check( str_contains( $tools['html'], 'data-dgb-demo="packs"' ) && str_contains( $tools['html'], 'Sample pack' ) && str_contains( $tools['html'], '4 tours' ) && ! str_contains( $tools['html'], 'data-dgb-demo="active"' ), 'Tools lists the packs with what each creates' );
+	$tools = step( $site, 'render_admin', array( 'screen' => 'tools', 'admin' => true, 'get' => array( 'demo' => 'import', 'pack' => 'sample-pack' ) ) );
+	check( str_contains( $tools['html'], 'data-dgb-demo="confirm-import"' ) && str_contains( $tools['html'], 'value="sample-pack"' ) && str_contains( $tools['html'], 'value="dgb_import_demo"' ), 'import asks for confirmation first' );
+	check( 0 === step( $site, 'demo_snapshot' )['tours'], 'nothing is created before the owner confirms' );
 
-	// Live site: tours already exist under /tour/ (attached post type), so they are set up in place.
-	$site2 = make_site( 'm7-demo-attach' );
-	file_put_contents( "{$site2}/wp-content/mu-plugins/traveler-stub.php", "<?php\nadd_action( 'init', static fn() => register_post_type( 'st_tours', array( 'public' => true, 'label' => 'Tours', 'rewrite' => array( 'slug' => 'tour', 'with_front' => false ) ) ) );\n" );
+	// The owner's own records, before the import.
+	$own  = step( $site, 'create_post', array( 'type' => 'dgb_tour', 'title' => 'My walk', 'slug' => 'sample-walk', 'content' => '<p>Mine.</p>' ) );
+	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'currency' => 'GBP' ) ) ) );
+	$before = step( $site, 'demo_snapshot' );
+
+	$d = step( $site, 'demo_import', array( 'pack' => 'sample-pack' ) );
+	$r = $d['report'];
+	$t = $d['tours'];
+	check( 'imported' === $r['status'] && 'skipped' === $t['walk']['result'] && $own['id'] === $t['walk']['id'], 'a tour whose slug exists is skipped, never overwritten' );
+	$mine = step( $site, 'tour_state', array( 'post' => $own['id'] ) );
+	check( 'My walk' === $mine['title'] && '<p>Mine.</p>' === $mine['content'] && '' === $t['walk']['demo'], 'the owner’s tour keeps its title and text and gets no demo tag' );
+	check( 'added' === $t['boat']['result'] && 'draft' === $t['boat']['status'] && 'sample-boat' === $t['boat']['slug'] && false === $t['boat']['product']['enabled'] && 'sample-pack' === $t['boat']['demo'], 'demo tours are drafts with bookings off, tagged with the pack' );
+	check( array( '1 hour' => '100.00', '2 hours' => '180.00' ) === array_map( $amt, $t['boat']['variants'] ) && 'per_vehicle' === $t['boat']['product']['pricing_mode'] && 4 === $t['boat']['product']['seats_per_unit'] && 'meet' === $t['boat']['product']['pickup_default'], 'options and booking settings from the pack' );
+	check( '16:00:00' === $t['boat']['sessions'][1]['start_time'] && '08:00:00' === $t['boat']['sessions'][1]['pickup_window_start'] && gmdate( 'Y' ) . '-12-31' === $t['boat']['sessions'][1]['season_start'], 'sessions from templates with overrides; {year} filled in' );
+	check( null === $t['event']['from'] && 'on_request' === $t['event']['product']['pricing_mode'], 'price-on-request tour has no price' );
+	check( in_array( 'WALK10 left out: none of its tours were added.', $r['skipped'], true ) && in_array( 'Added coupon ALL5.', $r['done'], true ) && in_array( 'Added offer “Free pickup on 2 boats” (switched on).', $r['done'], true ), 'a coupon whose tours were all skipped is left out; others added' );
+	check( in_array( 'Kept your Currency.', $r['skipped'], true ) && in_array( 'Set Business name to Sample Tours Co.', $r['done'], true ), 'settings: empty or default ones set, the owner’s own kept' );
+
+	$s1 = step( $site, 'demo_snapshot' );
+	$expect = array( 'variants' => 3, 'sessions' => 3, 'addons' => 1, 'zones' => 2, 'locations' => 1, 'coupons' => 1, 'offers' => 1 );
+	check( $expect === array_map( static fn( $k ) => $s1['rows'][ $k ] - $before['rows'][ $k ], array_combine( array_keys( $expect ), array_keys( $expect ) ) ) && $s1['tours'] - $before['tours'] === 3, 'import creates exactly the pack’s records (3 tours, 3 options, 3 sessions, 1 add-on, 2 zones, 1 meeting point, 1 coupon, 1 offer)' );
+	check( 12 === $s1['tagged'] && 3 === $s1['demo_meta'], 'every created row and tour is tagged' );
+	check( 'Sample Tours Co' === $s1['all_settings']['general']['business_name'] && 'GBP' === $s1['all_settings']['currency']['currency'] && 7.0 === (float) $s1['all_settings']['currency']['vat_rate'] && 'sample-pack' === $s1['backup']['pack'] && '' === $s1['backup']['settings']['general']['business_name']['before'], 'changed settings backed up in dgb_demo_backup' );
+
+	$again = step( $site, 'demo_import', array( 'pack' => 'sample-pack' ) );
+	$s2    = step( $site, 'demo_snapshot' );
+	check( 'already' === $again['report']['status'] && $s1['rows'] === $s2['rows'] && $s1['tours'] === $s2['tours'], 'importing the same pack again does nothing and says so' );
+	$other = step( $site, 'demo_import', array( 'pack' => 'desert-tours' ) );
+	check( 'other_active' === $other['report']['status'] && $s1['tours'] === step( $site, 'demo_snapshot' )['tours'], 'only one pack at a time: another pack asks to remove the current one first' );
+
+	$n = step( $site, 'demo_notice' );
+	check( str_contains( $n['html'], 'Demo data is active (Sample pack). Remove it from Tools when you no longer need it.' ), 'admin notice while demo data is active' );
+	check( '' === step( $site, 'demo_notice', array( 'dismiss' => true ) )['html'], 'notice dismissed for this user' );
+	$editor = step( $site, 'create_user', array( 'login' => 'admin2', 'role' => 'administrator' ) )['id'];
+	check( '' !== step( $site, 'demo_notice', array( 'user' => $editor ) )['html'], 'other administrators still see it (dismissed per user)' );
+	$tools = step( $site, 'render_admin', array( 'screen' => 'tools', 'admin' => true ) );
+	check( str_contains( $tools['html'], 'data-dgb-demo="active"' ) && str_contains( $tools['html'], 'Remove demo data' ) && ! str_contains( $tools['html'], 'data-dgb-demo="packs"' ), 'Tools shows the active pack and the remove button' );
+
+	// No changes yet: nothing to ask.
+	check( array() === step( $site, 'demo_plan' )['plan']['conflicts'], 'untouched demo tours need no decision' );
+
+	// The owner edits one demo tour, a guest books another, and the owner changes a setting the pack set.
+	step( $site, 'save_box', array( 'post' => $t['boat']['id'], 'admin' => true, 'dgb' => array( 'product' => array( 'pricing_mode' => 'per_vehicle', 'seats_per_unit' => '4', 'pickup_policy' => 'addon', 'meeting_point_id' => (string) $t['boat']['product']['meeting_point_id'] ), 'variants' => array(), 'sessions' => array(), 'addons' => array() ) ) );
+	step( $site, 'raw_booking', array( 'product' => $t['bike']['id'] ) );
+	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'vat_rate' => 9 ) ) ) );
+	$plan = step( $site, 'demo_plan' )['plan'];
+	$conf = array_column( $plan['conflicts'], null, 'id' );
+	check( 2 === count( $conf ) && $conf[ $t['boat']['id'] ]['edited'] && 0 === $conf[ $t['boat']['id'] ]['bookings'] && 1 === $conf[ $t['bike']['id'] ]['bookings'], 'edited and booked demo tours are listed for a keep-or-delete choice' );
+	check( 3 === $plan['counts']['tours'] && 1 === $plan['counts']['offers'] && 3 === $plan['counts']['settings'], 'removal plan counts what will be deleted and restored' );
+	$tools = step( $site, 'render_admin', array( 'screen' => 'tools', 'admin' => true, 'get' => array( 'demo' => 'remove' ) ) );
+	check( str_contains( $tools['html'], 'data-dgb-demo="confirm-remove"' ) && str_contains( $tools['html'], 'data-dgb-demo="conflicts"' ) && str_contains( $tools['html'], 'name="choice[' . $t['boat']['id'] . ']"' ) && str_contains( $tools['html'], '3 tours' ), 'remove asks for confirmation, shows the counts and the choices' );
+	check( 'dgb_demo_choice' === ( step( $site, 'demo_remove' )['error'] ?? '' ) && 3 === step( $site, 'demo_snapshot' )['demo_meta'], 'without a choice for each listed tour nothing is removed' );
+
+	$bookings = step( $site, 'demo_snapshot' )['rows']['bookings'];
+	$rm       = step( $site, 'demo_remove', array( 'choices' => array( $t['boat']['id'] => 'keep', $t['bike']['id'] => 'delete' ) ) )['report'];
+	$s3       = step( $site, 'demo_snapshot' );
+	check( array( 'Sample Bike' ) === $rm['trashed'] && 1 === $rm['removed']['tours'] && 1 === $s3['trashed'], 'a booked demo tour the owner deletes goes to the trash; the untouched one is deleted' );
+	check( $bookings === $s3['rows']['bookings'] && 1 === $s3['rows']['booking_items'], 'bookings are never deleted' );
+	check( 0 === $s3['tagged'] && 0 === $s3['demo_meta'] && false === $s3['active'] && false === $s3['backup'], 'no demo tags or demo options left' );
+	$kept = step( $site, 'tour_state', array( 'post' => $t['boat']['id'] ) );
+	check( 'draft' === $kept['status'] && 1 === $s3['rows']['locations'] && 0 === $s3['rows']['zones'] && 0 === $s3['rows']['coupons'] && 0 === $s3['rows']['offers'], 'the kept tour stays as the owner’s own (with its meeting point); demo zones, coupons and offers are gone' );
+	check( '' === $s3['all_settings']['general']['business_name'] && '' === $s3['all_settings']['general']['phone'] && 'GBP' === $s3['all_settings']['currency']['currency'] && 9.0 === (float) $s3['all_settings']['currency']['vat_rate'], 'settings restored, except one the owner changed after the import' );
+	$own2 = step( $site, 'tour_state', array( 'post' => $own['id'] ) );
+	check( 'My walk' === $own2['title'], 'the owner’s own tour is untouched' );
+
+	// The shipped pack: import, check against its JSON, remove, and the site is as before.
+	$site2 = make_site( 'v08-demo-shipped' );
 	step( $site2, 'install' );
 	step( $site2, 'activate' );
-	step( $site2, 'settings_merge', array( 'values' => array( 'general' => array( 'product_mode' => 'attach', 'attach_post_type' => 'st_tours', '_attach_slug' => 'tour' ) ) ) );
-	$live = step( $site2, 'create_post', array( 'type' => 'st_tours', 'title' => 'Evening Desert Safari Dubai with BBQ', 'slug' => 'evening-desert-safari-dubai', 'content' => '<p>Live text.</p>' ) );
-	$d3   = step( $site2, 'demo_import' );
-	$e    = $d3['tours']['evening-desert-safari-dubai'];
-	$st   = step( $site2, 'tour_state', array( 'post' => $live['id'] ) );
-	check( $live['id'] === $e['id'] && 'publish' === $e['status'] && $live['permalink'] === $e['permalink'] && 'Evening Desert Safari Dubai with BBQ' === $st['title'] && '<p>Live text.</p>' === $st['content'] && 'per_person' === $e['product']['pricing_mode'], 'existing live tour set up in place: same ID, URL, title and text' );
-	check( 26 === count( array_filter( $d3['report']['tours'], static fn( $x ) => 'added' === $x['result'] ) ), 'the other 26 tours added as drafts' );
+	$json  = json_decode( (string) file_get_contents( dirname( __DIR__, 2 ) . '/demo/desert-tours.json' ), true );
+	$b0    = step( $site2, 'demo_snapshot' );
+	$d     = step( $site2, 'demo_import', array( 'pack' => 'desert-tours' ) );
+	$added = array_filter( $d['tours'], static fn( $x ) => 'added' === $x['result'] && 'draft' === $x['status'] && false === $x['product']['enabled'] );
+	check( count( $json['tours'] ) === count( $added ), 'shipped pack: every tour added as a draft with bookings off (' . count( $added ) . ')' );
+	$wrong = array();
+	foreach ( $json['tours'] as $tour ) {
+		$got   = $d['tours'][ $tour['key'] ];
+		$want  = array_map( $amt, array_column( $tour['variants'], 'price', 'label' ) );
+		$from  = array() === $want || 'on_request' === $tour['settings']['pricing_mode'] ? null : min( array_map( 'floatval', $want ) );
+		$addon = in_array( 'pickup', array_column( $got['addons'], 'condition_key' ), true );
+		if ( $want !== array_map( $amt, $got['variants'] ) || $tour['settings']['pricing_mode'] !== $got['product']['pricing_mode'] || $amt( $from ) !== $amt( $got['from'] ) || ( 'addon' === ( $tour['settings']['pickup_policy'] ?? '' ) ) !== $addon || ( $addon && 'meet' !== $got['product']['pickup_default'] ) || count( $tour['sessions'] ) !== count( $got['sessions'] ) ) {
+			$wrong[] = $tour['key'];
+		}
+	}
+	check( array() === $wrong, 'shipped pack: prices, from-prices, pricing modes, sessions and pickup add-ons as in the file' . ( $wrong ? ' (' . implode( ', ', $wrong ) . ')' : '' ) );
+	$offer = step( $site2, 'demo_snapshot' );
+	check( 1 === $offer['rows']['offers'] && 'AED' === $offer['all_settings']['currency']['currency'] && true === $offer['all_settings']['payments']['arrival_enabled'] && false === $offer['all_settings']['payments']['deposit_enabled'], 'shipped pack: one offer, pack currency, pay on arrival, deposits off' );
+	$rm = step( $site2, 'demo_remove' );
+	$b1 = step( $site2, 'demo_snapshot' );
+	check( ! isset( $rm['error'] ) && $b0['rows'] === $b1['rows'] && $b0['tours'] === $b1['tours'] && $b0['all_settings'] === $b1['all_settings'] && false === $b1['active'] && false === $b1['backup'], 'removal returns the database and settings to the state before the import' );
 }
 
 /* -------------------------------------------------------------------- */

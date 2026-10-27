@@ -188,6 +188,17 @@ add_filter( 'dgb_llms_txt_lines', function ( array $lines ) {
 } );
 ```
 
+### `dgb_demo_packs` (0.8.0)
+
+Demo packs offered on Digitum Bookings › Tools: pack id => path of a JSON file (or the decoded pack as an array). The plugin's own packs come from `demo/*.json`. The format is in [DEMO-PACKS.md](DEMO-PACKS.md); invalid packs are listed with the reason and cannot be imported.
+
+```php
+add_filter( 'dgb_demo_packs', function ( array $packs ) {
+	$packs['my-agency-sample'] = __DIR__ . '/demo/my-agency-sample.json';
+	return $packs;
+} );
+```
+
 ### `dgb_update_repository` (0.7.0)
 
 The GitHub repository (owner/name) updates come from. Default `digitumarketing/digitum-bookings`. The latest release must carry a `digitum-bookings.zip` asset; its `readme.txt` (at the release tag) gives "Tested up to", "Requires PHP" and the changelog shown in "View details".
@@ -338,12 +349,17 @@ Errors use WordPress's REST format: `{ "code": "dgb_invalid", "message": "…", 
 |---|---|---|
 | `dgb_settings` | option | All settings, grouped by tab: `general`, `currency`, `payments`, `emails`, `analytics`, `seo`, `privacy`, `branding`, `updates` |
 | `dgb_emails` | option | Email templates edited on the Emails screen |
-| `dgb_db_version` | option | Schema version applied by the migrations runner (1.5.0 in this release) |
+| `dgb_db_version` | option | Schema version applied by the migrations runner (1.6.0 in this release) |
 | `dgb_version` | option | Plugin version that last ran its upgrade routine |
 | `dgb_traveler_import_log` | option | Result of the last Traveler import |
-| `dgb_demo_report` | option | Result of the last demo data import |
+| `dgb_demo_active` | option | The demo pack imported now: id, name, imported_at, user |
+| `dgb_demo_backup` | option | Settings the active demo pack changed: tab => key => before, after |
+| `dgb_demo_report` | option | Result of the last demo pack import |
+| `dgb_demo_notice` | user meta | Id of the demo pack whose reminder this user dismissed |
 | `dgb_update_release` | site transient | Latest GitHub release (6 hours) |
-| `_dgb_demo` | post meta | Set on tours created or set up by the demo data import |
+| `_dgb_demo` | post meta | Id of the demo pack that created the tour (`1` on tours set up by the 0.7 demo import: never removed by Remove demo data) |
+| `_dgb_demo_hash` | post meta | Fingerprint of a demo tour at import, to tell whether it was edited |
+| `demo_pack` | column | Id of the demo pack that created the row, in `dgb_variants`, `dgb_sessions`, `dgb_addons`, `dgb_zones`, `dgb_locations`, `dgb_coupons` and `dgb_offers` |
 | `_dgb_*` | post meta | Booking settings of a tour (see `src/Domain/Product.php`); `_dgb_gallery` holds image IDs |
 | `_dgb_imported_from` | post meta | `traveler` on tours brought in by the importer |
 | `{prefix}dgb_*` | tables | See `src/Database/Schema.php` |

@@ -1,6 +1,6 @@
 <?php
 /**
- * Tools: Traveler import, CSV import and export.
+ * Tools: Traveler import, CSV import and export, demo packs.
  *
  * @package Digitum\Bookings
  */
@@ -13,7 +13,7 @@ use Digitum\Bookings\Integrations\Traveler\TravelerImporter;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Roles\Capabilities;
 use Digitum\Bookings\Services\CsvExchange;
-use Digitum\Bookings\Services\DemoData;
+use Digitum\Bookings\Services\DemoPacks;
 use Digitum\Bookings\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
@@ -46,6 +46,9 @@ final class ToolsScreen {
 		add_action( 'admin_post_dgb_export_csv', array( $this, 'export_csv' ) );
 		add_action( 'admin_post_dgb_import_csv', array( $this, 'import_csv' ) );
 		add_action( 'admin_post_dgb_import_demo', array( $this, 'import_demo' ) );
+		add_action( 'admin_post_dgb_remove_demo', array( $this, 'remove_demo' ) );
+		add_action( 'admin_post_dgb_dismiss_demo_notice', array( $this, 'dismiss_demo_notice' ) );
+		add_action( 'admin_notices', array( $this, 'demo_notice' ) );
 	}
 
 	/**
@@ -85,7 +88,7 @@ final class ToolsScreen {
 			<?php $this->traveler_section( $importer, $sources, $source ); ?>
 
 			<?php if ( current_user_can( 'manage_options' ) ) : ?>
-				<h2><?php esc_html_e( 'Import Desert Bookings demo data', 'digitum-bookings' ); ?></h2>
+				<h2 id="dgb-demo"><?php esc_html_e( 'Demo data', 'digitum-bookings' ); ?></h2>
 				<?php $this->demo_section(); ?>
 			<?php endif; ?>
 
@@ -275,45 +278,219 @@ final class ToolsScreen {
 	}
 
 	/**
-	 * Demo data button and the last report.
+	 * Demo packs: list, import confirmation, active pack and removal confirmation.
 	 */
 	private function demo_section(): void {
-		$report = get_option( DemoData::REPORT );
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only shows the result of the last run.
-		if ( isset( $_GET['done'] ) && 'demo' === $_GET['done'] && is_array( $report ) ) {
+		$service = new DemoPacks( $this->settings, $this->product_type );
+		$active  = DemoPacks::active();
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- only selects what to show.
+		$done  = isset( $_GET['done'] ) ? sanitize_key( wp_unslash( $_GET['done'] ) ) : '';
+		$step  = isset( $_GET['demo'] ) ? sanitize_key( wp_unslash( $_GET['demo'] ) ) : '';
+		$chose = isset( $_GET['pack'] ) ? sanitize_key( wp_unslash( $_GET['pack'] ) ) : '';
+		$error = isset( $_GET['demo_error'] ) ? sanitize_key( wp_unslash( $_GET['demo_error'] ) ) : '';
+		// phpcs:enable
+
+		$report = get_option( DemoPacks::REPORT );
+		if ( 'demo' === $done && is_array( $report ) ) {
 			$this->demo_report( $report );
 		}
+		$message = get_transient( 'dgb_demo_message_' . get_current_user_id() );
+		if ( in_array( $done, array( 'demo', 'demo-removed' ), true ) && is_array( $message ) ) {
+			$this->demo_message( $message );
+		}
+		if ( 'dgb_demo_choice' === $error ) {
+			echo '<div class="notice notice-error"><p>' . esc_html__( 'Choose for every listed tour whether to keep it or delete it.', 'digitum-bookings' ) . '</p></div>';
+		}
+
+		echo '<p>' . esc_html__( 'A demo pack fills an empty site with sample tours, pickup zones, meeting points and settings so you can try the booking flow. Nothing is created until you import a pack, and “Remove demo data” deletes everything the pack created and puts your settings back. Tours you created yourself are never touched.', 'digitum-bookings' ) . '</p>';
+
+		if ( $active ) {
+			$plan = $service->removal_plan();
+			if ( 'remove' === $step && $plan ) {
+				$this->demo_remove_form( $plan );
+				return;
+			}
+			echo '<div class="dgb-callout" data-dgb-demo="active"><p><strong>';
+			/* translators: 1: pack name, 2: date. */
+			echo esc_html( sprintf( __( 'Demo data is active: %1$s (imported %2$s).', 'digitum-bookings' ), (string) $active['name'], wp_date( (string) get_option( 'date_format' ), (int) $active['imported_at'] ) ) );
+			echo '</strong></p>';
+			if ( $plan ) {
+				echo '<p>' . esc_html( implode( ', ', DemoPacks::describe( $plan['counts'] ) ) ) . '</p>';
+			}
+			echo '<p><a class="button" href="' . esc_url( self::url( array( 'demo' => 'remove' ) ) . '#dgb-demo' ) . '">' . esc_html__( 'Remove demo data…', 'digitum-bookings' ) . '</a></p></div>';
+			return;
+		}
+
+		$packs = $service->packs();
+		if ( 'import' === $step && isset( $packs[ $chose ] ) && is_array( $packs[ $chose ] ) ) {
+			$this->demo_import_form( $chose, $packs[ $chose ] );
+			return;
+		}
+		if ( array() === $packs ) {
+			echo '<p>' . esc_html__( 'No demo packs are installed.', 'digitum-bookings' ) . '</p>';
+			return;
+		}
 		?>
-		<p><?php esc_html_e( 'Sets up desertbookings.com: business details, AED with 5% VAT, pickup zones (Dubai, Sharjah; no pickup from Abu Dhabi), the Al Aweer desert meeting point, and every tour with its pricing, options, sessions and hotel pickup rules. Tours that already exist keep their URL and text; missing tours are added as drafts. Your own settings are never overwritten, and running it again changes nothing that is already set up. Bookings stay switched off until you check each tour.', 'digitum-bookings' ); ?></p>
-		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-			<input type="hidden" name="action" value="dgb_import_demo">
-			<?php wp_nonce_field( 'dgb_import_demo' ); ?>
-			<?php submit_button( __( 'Import Desert Bookings demo data', 'digitum-bookings' ), 'secondary', 'submit', false ); ?>
-		</form>
+		<div class="dgb-table-wrap">
+			<table class="widefat striped dgb-table" data-dgb-demo="packs">
+				<thead>
+					<tr>
+						<th scope="col"><?php esc_html_e( 'Pack', 'digitum-bookings' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Creates', 'digitum-bookings' ); ?></th>
+						<td></td>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ( $packs as $id => $pack ) : ?>
+						<tr>
+							<?php if ( is_wp_error( $pack ) ) : ?>
+								<th scope="row"><code><?php echo esc_html( $id ); ?></code></th>
+								<td colspan="2"><?php echo esc_html( $pack->get_error_message() ); ?></td>
+							<?php else : ?>
+								<th scope="row"><strong><?php echo esc_html( (string) $pack['name'] ); ?></strong><br><span class="description"><?php echo esc_html( (string) ( $pack['description'] ?? '' ) ); ?></span></th>
+								<td><?php echo esc_html( implode( ', ', DemoPacks::describe( DemoPacks::preview( $pack ) ) ) ); ?></td>
+								<td><a class="button" href="
+								<?php
+								echo esc_url(
+									self::url(
+										array(
+											'demo' => 'import',
+											'pack' => $id,
+										)
+									) . '#dgb-demo'
+								);
+								?>
+															"><?php esc_html_e( 'Import…', 'digitum-bookings' ); ?></a></td>
+							<?php endif; ?>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
 		<?php
 	}
 
 	/**
-	 * Result of the demo import, with what to confirm.
+	 * Confirm an import.
+	 *
+	 * @param string               $id   Pack id.
+	 * @param array<string, mixed> $pack Pack.
+	 */
+	private function demo_import_form( string $id, array $pack ): void {
+		?>
+		<div class="dgb-callout" data-dgb-demo="confirm-import">
+			<p><strong>
+				<?php
+				/* translators: %s: pack name. */
+				echo esc_html( sprintf( __( 'Import the demo pack “%s”?', 'digitum-bookings' ), (string) $pack['name'] ) );
+				?>
+			</strong></p>
+			<p><?php echo esc_html( __( 'It will create:', 'digitum-bookings' ) . ' ' . implode( ', ', DemoPacks::describe( DemoPacks::preview( $pack ) ) ) . '.' ); ?></p>
+			<p><?php esc_html_e( 'Tours are added as drafts with bookings switched off. A tour whose URL slug already exists on this site is skipped, and settings you already filled in are kept.', 'digitum-bookings' ); ?></p>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<input type="hidden" name="action" value="dgb_import_demo">
+				<input type="hidden" name="pack" value="<?php echo esc_attr( $id ); ?>">
+				<?php wp_nonce_field( 'dgb_import_demo' ); ?>
+				<?php submit_button( __( 'Import demo data', 'digitum-bookings' ), 'primary', 'submit', false ); ?>
+				<a class="button-link" href="<?php echo esc_url( self::url() . '#dgb-demo' ); ?>"><?php esc_html_e( 'Cancel', 'digitum-bookings' ); ?></a>
+			</form>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Confirm a removal, with a keep-or-delete choice for edited or booked tours.
+	 *
+	 * @param array<string, mixed> $plan Plan from DemoPacks::removal_plan().
+	 */
+	private function demo_remove_form( array $plan ): void {
+		$counts = DemoPacks::describe( array_diff_key( $plan['counts'], array( 'settings' => 0 ) ) );
+		?>
+		<div class="dgb-callout" data-dgb-demo="confirm-remove">
+			<p><strong>
+				<?php
+				/* translators: %s: pack name. */
+				echo esc_html( sprintf( __( 'Remove the demo data “%s”?', 'digitum-bookings' ), (string) $plan['name'] ) );
+				?>
+			</strong></p>
+			<p><?php echo esc_html( array() === $counts ? __( 'No demo records are left.', 'digitum-bookings' ) : __( 'This deletes:', 'digitum-bookings' ) . ' ' . implode( ', ', $counts ) . '.' ); ?></p>
+			<?php if ( $plan['counts']['settings'] > 0 ) : ?>
+				<p>
+					<?php
+					/* translators: %s: number of settings. */
+					echo esc_html( sprintf( _n( '%s setting the pack changed is put back as it was (unless you changed it since).', '%s settings the pack changed are put back as they were (unless you changed them since).', (int) $plan['counts']['settings'], 'digitum-bookings' ), number_format_i18n( (int) $plan['counts']['settings'] ) ) );
+					?>
+				</p>
+			<?php endif; ?>
+			<p><?php esc_html_e( 'Bookings are never deleted.', 'digitum-bookings' ); ?></p>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<input type="hidden" name="action" value="dgb_remove_demo">
+				<?php wp_nonce_field( 'dgb_remove_demo' ); ?>
+				<?php if ( array() !== $plan['conflicts'] ) : ?>
+					<p><?php esc_html_e( 'These demo tours were changed after the import or already have bookings. Choose what to do with each:', 'digitum-bookings' ); ?></p>
+					<div class="dgb-table-wrap">
+						<table class="widefat striped dgb-table" data-dgb-demo="conflicts">
+							<thead>
+								<tr>
+									<th scope="col"><?php esc_html_e( 'Tour', 'digitum-bookings' ); ?></th>
+									<th scope="col"><?php esc_html_e( 'Why', 'digitum-bookings' ); ?></th>
+									<th scope="col"><?php esc_html_e( 'Keep as my own tour', 'digitum-bookings' ); ?></th>
+									<th scope="col"><?php esc_html_e( 'Delete', 'digitum-bookings' ); ?></th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php foreach ( $plan['conflicts'] as $tour ) : ?>
+									<?php
+									$why = array();
+									if ( $tour['edited'] ) {
+										$why[] = __( 'edited', 'digitum-bookings' );
+									}
+									if ( $tour['bookings'] > 0 ) {
+										/* translators: %s: number of bookings. */
+										$why[] = sprintf( _n( '%s booking (the tour goes to the trash instead, so the booking keeps it)', '%s bookings (the tour goes to the trash instead, so the bookings keep it)', (int) $tour['bookings'], 'digitum-bookings' ), number_format_i18n( (int) $tour['bookings'] ) );
+									}
+									$name = 'choice[' . (int) $tour['id'] . ']';
+									?>
+									<tr>
+										<th scope="row"><a href="<?php echo esc_url( (string) get_edit_post_link( (int) $tour['id'] ) ); ?>"><?php echo esc_html( (string) $tour['title'] ); ?></a></th>
+										<td><?php echo esc_html( implode( '; ', $why ) ); ?></td>
+										<td><input type="radio" name="<?php echo esc_attr( $name ); ?>" value="keep" required aria-label="<?php echo esc_attr( sprintf( /* translators: %s: tour. */ __( 'Keep %s', 'digitum-bookings' ), (string) $tour['title'] ) ); ?>"></td>
+										<td><input type="radio" name="<?php echo esc_attr( $name ); ?>" value="delete" required aria-label="<?php echo esc_attr( sprintf( /* translators: %s: tour. */ __( 'Delete %s', 'digitum-bookings' ), (string) $tour['title'] ) ); ?>"></td>
+									</tr>
+								<?php endforeach; ?>
+							</tbody>
+						</table>
+					</div>
+				<?php endif; ?>
+				<?php submit_button( __( 'Remove demo data', 'digitum-bookings' ), 'delete', 'submit', false ); ?>
+				<a class="button-link" href="<?php echo esc_url( self::url() . '#dgb-demo' ); ?>"><?php esc_html_e( 'Cancel', 'digitum-bookings' ); ?></a>
+			</form>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Result of the demo import, with what to check.
 	 *
 	 * @param array<string, mixed> $report Report.
 	 */
 	private function demo_report( array $report ): void {
 		$labels = array(
-			'added'      => __( 'added as a draft', 'digitum-bookings' ),
-			'configured' => __( 'booking settings added', 'digitum-bookings' ),
-			'kept'       => __( 'already set up, not changed', 'digitum-bookings' ),
-			'failed'     => __( 'failed', 'digitum-bookings' ),
+			'added'   => __( 'added as a draft', 'digitum-bookings' ),
+			'skipped' => __( 'skipped: a post with this URL slug already exists', 'digitum-bookings' ),
+			'failed'  => __( 'failed', 'digitum-bookings' ),
 		);
-		echo '<div class="notice notice-info"><p><strong>' . esc_html__( 'Demo data imported', 'digitum-bookings' ) . '</strong></p>';
-		echo '<ul>';
-		foreach ( array_merge( (array) $report['done'], (array) $report['kept'] ) as $line ) {
+		echo '<div class="notice notice-info" data-dgb-demo="report"><p><strong>';
+		/* translators: %s: pack name. */
+		echo esc_html( sprintf( __( 'Demo data imported: %s', 'digitum-bookings' ), (string) $report['name'] ) );
+		echo '</strong></p><ul>';
+		foreach ( array_merge( (array) $report['done'], (array) $report['skipped'] ) as $line ) {
 			echo '<li>' . esc_html( (string) $line ) . '</li>';
 		}
 		echo '</ul><h3>' . esc_html__( 'Tours', 'digitum-bookings' ) . '</h3><ul>';
 		foreach ( (array) $report['tours'] as $tour ) {
 			$name = esc_html( (string) $tour['title'] );
-			if ( ! empty( $tour['id'] ) ) {
+			if ( 'added' === $tour['result'] && ! empty( $tour['id'] ) ) {
 				$name = '<a href="' . esc_url( (string) get_edit_post_link( (int) $tour['id'] ) ) . '">' . $name . '</a>';
 			}
 			printf(
@@ -321,25 +498,138 @@ final class ToolsScreen {
 				$name, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
 				esc_html( (string) $tour['slug'] ),
 				esc_html( $labels[ $tour['result'] ] ?? (string) $tour['result'] ),
-				array() !== (array) $tour['confirm'] ? ' — <strong>[CONFIRM]</strong> ' . esc_html( implode( ', ', (array) $tour['confirm'] ) ) : ''
+				'added' === $tour['result'] && array() !== (array) $tour['confirm'] ? ' — <strong>[CONFIRM]</strong> ' . esc_html( implode( ', ', (array) $tour['confirm'] ) ) : ''
 			);
 		}
-		echo '</ul><h3>' . esc_html__( 'Still to do', 'digitum-bookings' ) . '</h3><ul>';
-		foreach ( (array) $report['confirm'] as $line ) {
-			echo '<li>' . esc_html( (string) $line ) . '</li>';
+		echo '</ul>';
+		if ( array() !== (array) $report['notes'] ) {
+			echo '<h3>' . esc_html__( 'Still to do', 'digitum-bookings' ) . '</h3><ul>';
+			foreach ( (array) $report['notes'] as $line ) {
+				echo '<li>' . esc_html( (string) $line ) . '</li>';
+			}
+			echo '</ul>';
 		}
-		echo '</ul></div>';
+		echo '</div>';
 	}
 
 	/**
-	 * Run the demo import (administrators only).
+	 * One-off result: import refused, or what a removal did.
+	 *
+	 * @param array<string, mixed> $message Message.
+	 */
+	private function demo_message( array $message ): void {
+		if ( 'removed' === ( $message['status'] ?? '' ) ) {
+			echo '<div class="notice notice-success" data-dgb-demo="removed"><p><strong>';
+			/* translators: %s: pack name. */
+			echo esc_html( sprintf( __( 'Demo data removed: %s', 'digitum-bookings' ), (string) $message['name'] ) );
+			echo '</strong></p><ul>';
+			$deleted = DemoPacks::describe( (array) $message['removed'] );
+			echo '<li>' . esc_html( array() === $deleted ? __( 'Nothing was left to delete.', 'digitum-bookings' ) : __( 'Deleted:', 'digitum-bookings' ) . ' ' . implode( ', ', $deleted ) . '.' ) . '</li>';
+			if ( $message['restored'] > 0 ) {
+				/* translators: %s: number of settings. */
+				echo '<li>' . esc_html( sprintf( _n( '%s setting put back.', '%s settings put back.', (int) $message['restored'], 'digitum-bookings' ), number_format_i18n( (int) $message['restored'] ) ) ) . '</li>';
+			}
+			foreach ( (array) $message['kept'] as $title ) {
+				/* translators: %s: tour. */
+				echo '<li>' . esc_html( sprintf( __( 'Kept as your own tour: %s', 'digitum-bookings' ), (string) $title ) ) . '</li>';
+			}
+			foreach ( (array) $message['trashed'] as $title ) {
+				/* translators: %s: tour. */
+				echo '<li>' . esc_html( sprintf( __( 'Moved to the trash because bookings use it: %s', 'digitum-bookings' ), (string) $title ) ) . '</li>';
+			}
+			echo '</ul></div>';
+			return;
+		}
+		$texts  = array(
+			/* translators: %s: pack name. */
+			'already'      => __( 'The demo pack “%s” is already imported. Nothing was changed.', 'digitum-bookings' ),
+			/* translators: %s: pack name. */
+			'other_active' => __( 'The demo pack “%s” is imported. Remove it first, then import another pack.', 'digitum-bookings' ),
+			/* translators: %s: problem. */
+			'invalid'      => __( 'The demo pack cannot be imported: %s', 'digitum-bookings' ),
+		);
+		$status = (string) ( $message['status'] ?? '' );
+		if ( isset( $texts[ $status ] ) ) {
+			$detail = 'invalid' === $status ? implode( ' ', (array) $message['skipped'] ) : (string) $message['name'];
+			echo '<div class="notice notice-warning" data-dgb-demo="' . esc_attr( $status ) . '"><p>' . esc_html( sprintf( $texts[ $status ], $detail ) ) . '</p></div>';
+		}
+	}
+
+	/**
+	 * Import a demo pack (administrators only).
 	 */
 	public function import_demo(): void {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'dgb_import_demo' ) ) {
-			wp_die( esc_html__( 'Only administrators can import the demo data.', 'digitum-bookings' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'Only administrators can import demo data.', 'digitum-bookings' ), '', array( 'response' => 403 ) );
 		}
-		( new DemoData( $this->settings, $this->product_type ) )->import();
-		wp_safe_redirect( self::url( array( 'done' => 'demo' ) ) );
+		$pack   = isset( $_POST['pack'] ) ? sanitize_key( wp_unslash( $_POST['pack'] ) ) : '';
+		$report = ( new DemoPacks( $this->settings, $this->product_type ) )->import( $pack );
+		if ( 'imported' !== $report['status'] ) {
+			set_transient( 'dgb_demo_message_' . get_current_user_id(), $report, HOUR_IN_SECONDS );
+		} else {
+			delete_transient( 'dgb_demo_message_' . get_current_user_id() );
+		}
+		wp_safe_redirect( self::url( array( 'done' => 'demo' ) ) . '#dgb-demo' );
+		exit;
+	}
+
+	/**
+	 * Remove the active demo pack (administrators only).
+	 */
+	public function remove_demo(): void {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'dgb_remove_demo' ) ) {
+			wp_die( esc_html__( 'Only administrators can remove demo data.', 'digitum-bookings' ), '', array( 'response' => 403 ) );
+		}
+		$choices = array();
+		if ( isset( $_POST['choice'] ) && is_array( $_POST['choice'] ) ) {
+			foreach ( wp_unslash( $_POST['choice'] ) as $post_id => $choice ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each key and value is sanitized below.
+				$choices[ absint( $post_id ) ] = sanitize_key( (string) $choice );
+			}
+		}
+		$result = ( new DemoPacks( $this->settings, $this->product_type ) )->remove( $choices );
+		if ( is_wp_error( $result ) ) {
+			wp_safe_redirect(
+				self::url(
+					array(
+						'demo'       => 'remove',
+						'demo_error' => $result->get_error_code(),
+					)
+				) . '#dgb-demo'
+			);
+			exit;
+		}
+		set_transient( 'dgb_demo_message_' . get_current_user_id(), array( 'status' => 'removed' ) + $result, HOUR_IN_SECONDS );
+		wp_safe_redirect( self::url( array( 'done' => 'demo-removed' ) ) . '#dgb-demo' );
+		exit;
+	}
+
+	/**
+	 * Reminder on admin screens while demo data is active.
+	 */
+	public function demo_notice(): void {
+		$active = DemoPacks::active();
+		if ( null === $active || ! current_user_can( 'manage_options' ) || get_user_meta( get_current_user_id(), DemoPacks::DISMISS, true ) === $active['id'] ) {
+			return;
+		}
+		$dismiss = wp_nonce_url( admin_url( 'admin-post.php?action=dgb_dismiss_demo_notice' ), 'dgb_dismiss_demo_notice' );
+		echo '<div class="notice notice-info" data-dgb-demo="notice"><p>';
+		/* translators: %s: pack name. */
+		echo esc_html( sprintf( __( 'Demo data is active (%s). Remove it from Tools when you no longer need it.', 'digitum-bookings' ), (string) $active['name'] ) );
+		echo ' <a href="' . esc_url( self::url() . '#dgb-demo' ) . '">' . esc_html__( 'Tools', 'digitum-bookings' ) . '</a> · <a href="' . esc_url( $dismiss ) . '">' . esc_html__( 'Dismiss', 'digitum-bookings' ) . '</a></p></div>';
+	}
+
+	/**
+	 * Hide the demo reminder for this user (until another pack is imported).
+	 */
+	public function dismiss_demo_notice(): void {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'dgb_dismiss_demo_notice' ) ) {
+			wp_die( esc_html__( 'You do not have permission to use these tools.', 'digitum-bookings' ), '', array( 'response' => 403 ) );
+		}
+		$active = DemoPacks::active();
+		if ( $active ) {
+			update_user_meta( get_current_user_id(), DemoPacks::DISMISS, $active['id'] );
+		}
+		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url() );
 		exit;
 	}
 

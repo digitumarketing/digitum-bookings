@@ -1,0 +1,966 @@
+{
+	"schema": 1,
+	"id": "desert-tours",
+	"name": "Desert tours",
+	"description": "A desert safari and adventure operator: safaris, buggies, quad bikes, a dirt bike, activities, city tours and price-on-request events, with hotel pickup zones, a desert meeting point and one inactive offer. Prices in AED.",
+	"settings": {
+		"general": {
+			"business_name": "Desert Bookings",
+			"phone": "+971 55 526 0561",
+			"email": "info@desertbookings.com",
+			"country_code": "+971"
+		},
+		"currency": {
+			"currency": "AED",
+			"vat_mode": "inclusive",
+			"vat_rate": 5
+		},
+		"payments": {
+			"arrival_enabled": true,
+			"deposit_enabled": false,
+			"stripe_enabled": false,
+			"paypal_enabled": false,
+			"bank_enabled": false,
+			"bank_whatsapp": "+971 55 526 0561"
+		}
+	},
+	"session_templates": {
+		"morning": {
+			"name": "Morning",
+			"type": "morning",
+			"start_time": "06:00",
+			"pickup_window_start": "06:00",
+			"pickup_window_end": "09:00"
+		},
+		"evening": {
+			"name": "Evening",
+			"type": "evening",
+			"start_time": "14:00",
+			"end_time": "21:45",
+			"pickup_window_start": "14:00",
+			"pickup_window_end": "15:00"
+		},
+		"overnight": {
+			"name": "Overnight",
+			"type": "overnight",
+			"start_time": "14:00",
+			"end_time": "08:30",
+			"pickup_window_start": "14:00",
+			"pickup_window_end": "15:00"
+		},
+		"day": {
+			"name": "Day tour",
+			"type": "fixed",
+			"start_time": "09:00",
+			"pickup_window_start": "09:00",
+			"pickup_window_end": "09:30"
+		}
+	},
+	"locations": [
+		{
+			"key": "camp",
+			"name": "Al Aweer desert",
+			"address": "Al Aweer, Dubai",
+			"instructions": ""
+		}
+	],
+	"zones": [
+		{
+			"name": "Dubai",
+			"allowed": true
+		},
+		{
+			"name": "Sharjah",
+			"allowed": true
+		},
+		{
+			"name": "Abu Dhabi",
+			"allowed": false,
+			"notes": "Pickup is not available from Abu Dhabi. Please meet us at Al Aweer desert."
+		}
+	],
+	"tours": [
+		{
+			"key": "evening-safari",
+			"title": "Evening Desert Safari with BBQ Dinner",
+			"slug": "evening-desert-safari-dubai",
+			"settings": {
+				"pricing_mode": "per_person",
+				"max_pax_per_unit": 7,
+				"pickup_policy": "included",
+				"pickup_default": "pickup",
+				"meeting_point": "camp"
+			},
+			"variants": [
+				{
+					"label": "Standard",
+					"price": "89"
+				}
+			],
+			"sessions": [
+				"evening"
+			],
+			"addons": [],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "evening-safari-atv",
+			"title": "Evening Desert Safari + ATV",
+			"slug": "evening-desert-safari-dubai-atv",
+			"settings": {
+				"pricing_mode": "per_person",
+				"max_pax_per_unit": 7,
+				"pickup_policy": "included",
+				"pickup_default": "pickup",
+				"meeting_point": "camp"
+			},
+			"variants": [
+				{
+					"label": "Standard",
+					"price": "199"
+				}
+			],
+			"sessions": [
+				"evening"
+			],
+			"addons": [],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "vip-evening-safari-atv",
+			"title": "VIP Evening Desert Safari + ATV",
+			"slug": "vip-evening-desert-safari-dubai-atv-bike",
+			"settings": {
+				"pricing_mode": "per_person",
+				"max_pax_per_unit": 7,
+				"pickup_policy": "included",
+				"pickup_default": "pickup",
+				"meeting_point": "camp"
+			},
+			"variants": [
+				{
+					"label": "Standard",
+					"price": "239"
+				}
+			],
+			"sessions": [
+				"evening"
+			],
+			"addons": [],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "vip-safari",
+			"title": "VIP Desert Safari",
+			"slug": "vip-desert-safari",
+			"settings": {
+				"pricing_mode": "per_person",
+				"max_pax_per_unit": 7,
+				"pickup_policy": "included",
+				"pickup_default": "pickup",
+				"meeting_point": "camp"
+			},
+			"variants": [
+				{
+					"label": "Standard",
+					"price": "149"
+				}
+			],
+			"sessions": [
+				"evening"
+			],
+			"addons": [],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "overnight-safari",
+			"title": "Overnight Desert Safari",
+			"slug": "overnight-desert-safari",
+			"settings": {
+				"pricing_mode": "per_person",
+				"max_pax_per_unit": 7,
+				"pickup_policy": "included",
+				"pickup_default": "pickup",
+				"meeting_point": "camp"
+			},
+			"variants": [
+				{
+					"label": "Standard",
+					"price": "299"
+				}
+			],
+			"sessions": [
+				"overnight"
+			],
+			"addons": [],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "morning-safari",
+			"title": "Morning Desert Safari",
+			"slug": "morning-desert-safari",
+			"settings": {
+				"pricing_mode": "per_group",
+				"max_pax_per_unit": 7,
+				"pickup_policy": "included",
+				"pickup_default": "pickup",
+				"meeting_point": "camp"
+			},
+			"variants": [
+				{
+					"label": "Private car (up to 7 guests)",
+					"price": "599"
+				}
+			],
+			"sessions": [
+				"morning"
+			],
+			"addons": [],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "private-safari",
+			"title": "Private Desert Safari with BBQ Dinner",
+			"slug": "private-desert-safari-tour",
+			"settings": {
+				"pricing_mode": "per_group",
+				"max_pax_per_unit": 7,
+				"pickup_policy": "included",
+				"pickup_default": "pickup",
+				"meeting_point": "camp"
+			},
+			"variants": [
+				{
+					"label": "Private car (up to 7 guests)",
+					"price": "699"
+				}
+			],
+			"sessions": [
+				"evening"
+			],
+			"addons": [
+				{
+					"label": "Private desert setup",
+					"price": "",
+					"price_type": "on_request",
+					"condition_key": ""
+				}
+			],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "rzr-1",
+			"title": "1-Seater Polaris RZR 1000",
+			"slug": "1-seater-polaris-buggy-rzr-1000-cc",
+			"settings": {
+				"pricing_mode": "per_vehicle",
+				"pickup_policy": "addon",
+				"pickup_default": "meet",
+				"meeting_point": "camp",
+				"seats_per_unit": 1
+			},
+			"variants": [
+				{
+					"label": "30 min",
+					"price": "599",
+					"duration_minutes": 30
+				},
+				{
+					"label": "1 hour",
+					"price": "799",
+					"duration_minutes": 60
+				},
+				{
+					"label": "2 hours",
+					"price": "999",
+					"duration_minutes": 120
+				}
+			],
+			"sessions": [
+				"morning"
+			],
+			"addons": [
+				{
+					"label": "Hotel pickup",
+					"price": "300",
+					"price_type": "per_booking",
+					"condition_key": "pickup"
+				}
+			],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "rzr-2",
+			"title": "2-Seater Polaris RZR 1000",
+			"slug": "2-seater-polaris-rzr-1000-cc-buggy",
+			"settings": {
+				"pricing_mode": "per_vehicle",
+				"pickup_policy": "addon",
+				"pickup_default": "meet",
+				"meeting_point": "camp",
+				"seats_per_unit": 2
+			},
+			"variants": [
+				{
+					"label": "30 min",
+					"price": "699",
+					"duration_minutes": 30
+				},
+				{
+					"label": "1 hour",
+					"price": "899",
+					"duration_minutes": 60
+				},
+				{
+					"label": "2 hours",
+					"price": "1299",
+					"duration_minutes": 120
+				}
+			],
+			"sessions": [
+				"morning"
+			],
+			"addons": [
+				{
+					"label": "Hotel pickup",
+					"price": "300",
+					"price_type": "per_booking",
+					"condition_key": "pickup"
+				}
+			],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "rzr-4",
+			"title": "4-Seater Polaris RZR 1000",
+			"slug": "4-seater-polaris-rzr-1000-cc",
+			"settings": {
+				"pricing_mode": "per_vehicle",
+				"pickup_policy": "addon",
+				"pickup_default": "meet",
+				"meeting_point": "camp",
+				"seats_per_unit": 4
+			},
+			"variants": [
+				{
+					"label": "30 min",
+					"price": "799",
+					"duration_minutes": 30
+				},
+				{
+					"label": "1 hour",
+					"price": "999",
+					"duration_minutes": 60
+				},
+				{
+					"label": "2 hours",
+					"price": "1399",
+					"duration_minutes": 120
+				}
+			],
+			"sessions": [
+				"morning"
+			],
+			"addons": [
+				{
+					"label": "Hotel pickup",
+					"price": "300",
+					"price_type": "per_booking",
+					"condition_key": "pickup"
+				}
+			],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "maverick-2",
+			"title": "2-Seater Can-Am Maverick X3",
+			"slug": "2-seater-can-am-maverick-buggy",
+			"settings": {
+				"pricing_mode": "per_vehicle",
+				"pickup_policy": "addon",
+				"pickup_default": "meet",
+				"meeting_point": "camp",
+				"seats_per_unit": 2
+			},
+			"variants": [
+				{
+					"label": "30 min",
+					"price": "1099",
+					"duration_minutes": 30
+				},
+				{
+					"label": "1 hour",
+					"price": "1399",
+					"duration_minutes": 60
+				},
+				{
+					"label": "2 hours",
+					"price": "2399",
+					"duration_minutes": 120
+				}
+			],
+			"sessions": [
+				"morning"
+			],
+			"addons": [
+				{
+					"label": "Hotel pickup",
+					"price": "300",
+					"price_type": "per_booking",
+					"condition_key": "pickup"
+				}
+			],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "maverick-4",
+			"title": "4-Seater Can-Am Maverick X3",
+			"slug": "4-seater-can-am-maverick-buggy",
+			"settings": {
+				"pricing_mode": "per_vehicle",
+				"pickup_policy": "addon",
+				"pickup_default": "meet",
+				"meeting_point": "camp",
+				"seats_per_unit": 4
+			},
+			"variants": [
+				{
+					"label": "30 min",
+					"price": "1499",
+					"duration_minutes": 30
+				},
+				{
+					"label": "1 hour",
+					"price": "1899",
+					"duration_minutes": 60
+				},
+				{
+					"label": "2 hours",
+					"price": "2699",
+					"duration_minutes": 120
+				}
+			],
+			"sessions": [
+				"morning"
+			],
+			"addons": [
+				{
+					"label": "Hotel pickup",
+					"price": "300",
+					"price_type": "per_booking",
+					"condition_key": "pickup"
+				}
+			],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "raptor-700",
+			"title": "Yamaha Raptor 700",
+			"slug": "yamaha-raptor-700-cc",
+			"settings": {
+				"pricing_mode": "per_vehicle",
+				"pickup_policy": "addon",
+				"pickup_default": "meet",
+				"meeting_point": "camp",
+				"seats_per_unit": 1
+			},
+			"variants": [
+				{
+					"label": "30 min",
+					"price": "349",
+					"duration_minutes": 30
+				},
+				{
+					"label": "1 hour",
+					"price": "729",
+					"duration_minutes": 60
+				},
+				{
+					"label": "2 hours",
+					"price": "1249",
+					"duration_minutes": 120
+				},
+				{
+					"label": "3 hours",
+					"price": "1899",
+					"duration_minutes": 180
+				}
+			],
+			"sessions": [
+				"morning"
+			],
+			"addons": [
+				{
+					"label": "Hotel pickup",
+					"price": "300",
+					"price_type": "per_booking",
+					"condition_key": "pickup"
+				}
+			],
+			"confirm": [
+				"session times",
+				"seats per quad"
+			]
+		},
+		{
+			"key": "polaris-570",
+			"title": "Polaris 570 Quad Bike",
+			"slug": "desert-polaris-quad-bike-570-cc",
+			"settings": {
+				"pricing_mode": "per_vehicle",
+				"pickup_policy": "addon",
+				"pickup_default": "meet",
+				"meeting_point": "camp",
+				"seats_per_unit": 1
+			},
+			"variants": [
+				{
+					"label": "1 hour",
+					"price": "699",
+					"duration_minutes": 60
+				},
+				{
+					"label": "2 hours",
+					"price": "1149",
+					"duration_minutes": 120
+				},
+				{
+					"label": "3 hours",
+					"price": "1699",
+					"duration_minutes": 180
+				}
+			],
+			"sessions": [
+				"morning"
+			],
+			"addons": [
+				{
+					"label": "Hotel pickup",
+					"price": "300",
+					"price_type": "per_booking",
+					"condition_key": "pickup"
+				}
+			],
+			"confirm": [
+				"session times",
+				"seats per quad"
+			]
+		},
+		{
+			"key": "yamaha-400",
+			"title": "Yamaha 400 Quad Bike",
+			"slug": "desert-yamaha-quad-bike-400-cc",
+			"settings": {
+				"pricing_mode": "per_vehicle",
+				"pickup_policy": "addon",
+				"pickup_default": "meet",
+				"meeting_point": "camp",
+				"seats_per_unit": 1
+			},
+			"variants": [
+				{
+					"label": "30 min",
+					"price": "249",
+					"duration_minutes": 30
+				},
+				{
+					"label": "1 hour",
+					"price": "349",
+					"duration_minutes": 60
+				},
+				{
+					"label": "2 hours",
+					"price": "549",
+					"duration_minutes": 120
+				}
+			],
+			"sessions": [
+				"morning"
+			],
+			"addons": [
+				{
+					"label": "Hotel pickup",
+					"price": "300",
+					"price_type": "per_booking",
+					"condition_key": "pickup"
+				}
+			],
+			"confirm": [
+				"session times",
+				"seats per quad"
+			]
+		},
+		{
+			"key": "ktm",
+			"title": "KTM Dirt Bike",
+			"slug": "dirt-bike-ktm-rental",
+			"settings": {
+				"pricing_mode": "per_vehicle",
+				"pickup_policy": "addon",
+				"pickup_default": "meet",
+				"meeting_point": "camp",
+				"seats_per_unit": 1
+			},
+			"variants": [
+				{
+					"label": "1 hour",
+					"price": "499",
+					"duration_minutes": 60
+				},
+				{
+					"label": "2 hours",
+					"price": "699",
+					"duration_minutes": 120
+				},
+				{
+					"label": "3 hours",
+					"price": "849",
+					"duration_minutes": 180
+				}
+			],
+			"sessions": [
+				"morning"
+			],
+			"addons": [
+				{
+					"label": "Hotel pickup",
+					"price": "300",
+					"price_type": "per_booking",
+					"condition_key": "pickup"
+				}
+			],
+			"confirm": [
+				"session times",
+				"seats per bike"
+			]
+		},
+		{
+			"key": "dune-bashing",
+			"title": "Dune Bashing",
+			"slug": "dune-bashing-dubai",
+			"settings": {
+				"pricing_mode": "per_group",
+				"pickup_policy": "addon",
+				"pickup_default": "meet",
+				"meeting_point": "camp",
+				"max_pax_per_unit": 7
+			},
+			"variants": [
+				{
+					"label": "30 min",
+					"price": "349",
+					"duration_minutes": 30
+				}
+			],
+			"sessions": [
+				"morning"
+			],
+			"addons": [
+				{
+					"label": "Hotel pickup",
+					"price": "300",
+					"price_type": "per_booking",
+					"condition_key": "pickup"
+				}
+			],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "camel-ride",
+			"title": "Camel Ride",
+			"slug": "camel-ride-dubai",
+			"settings": {
+				"pricing_mode": "per_person",
+				"pickup_policy": "addon",
+				"pickup_default": "meet",
+				"meeting_point": "camp"
+			},
+			"variants": [
+				{
+					"label": "20 min",
+					"price": "49",
+					"duration_minutes": 20
+				}
+			],
+			"sessions": [
+				"morning",
+				"evening"
+			],
+			"addons": [
+				{
+					"label": "Hotel pickup",
+					"price": "300",
+					"price_type": "per_booking",
+					"condition_key": "pickup"
+				}
+			],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "sandboarding",
+			"title": "Sandboarding",
+			"slug": "sandboarding-dubai",
+			"settings": {
+				"pricing_mode": "on_request",
+				"pickup_policy": "addon",
+				"pickup_default": "meet",
+				"meeting_point": "camp"
+			},
+			"variants": [],
+			"sessions": [
+				"morning",
+				"evening"
+			],
+			"addons": [
+				{
+					"label": "Hotel pickup",
+					"price": "300",
+					"price_type": "per_booking",
+					"condition_key": "pickup"
+				}
+			],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "dubai-city",
+			"title": "Dubai City Tour",
+			"slug": "dubai-city-tour",
+			"settings": {
+				"pricing_mode": "per_person",
+				"pickup_policy": "included",
+				"pickup_default": "pickup"
+			},
+			"variants": [
+				{
+					"label": "Standard",
+					"price": "250"
+				}
+			],
+			"sessions": [
+				"day"
+			],
+			"addons": [],
+			"confirm": [
+				"day tour start time and end time",
+				"pickup included"
+			]
+		},
+		{
+			"key": "abu-dhabi-city",
+			"title": "Abu Dhabi City Tour",
+			"slug": "abu-dhabi-city-tour",
+			"settings": {
+				"pricing_mode": "per_person",
+				"pickup_policy": "included",
+				"pickup_default": "pickup"
+			},
+			"variants": [
+				{
+					"label": "Standard",
+					"price": "350"
+				}
+			],
+			"sessions": [
+				"day"
+			],
+			"addons": [],
+			"confirm": [
+				"day tour start time and end time",
+				"pickup included"
+			]
+		},
+		{
+			"key": "hatta",
+			"title": "Hatta Wadi Tour",
+			"slug": "hatta-wadi-tour",
+			"settings": {
+				"pricing_mode": "per_person",
+				"pickup_policy": "included",
+				"pickup_default": "pickup"
+			},
+			"variants": [
+				{
+					"label": "Standard",
+					"price": "250"
+				}
+			],
+			"sessions": [
+				"day"
+			],
+			"addons": [],
+			"confirm": [
+				"day tour start time and end time",
+				"pickup included"
+			]
+		},
+		{
+			"key": "new-year",
+			"title": "New Year Desert Safari",
+			"slug": "new-year-desert-safari-dubai",
+			"settings": {
+				"pricing_mode": "on_request",
+				"pickup_policy": "included",
+				"pickup_default": "pickup",
+				"meeting_point": "camp"
+			},
+			"variants": [],
+			"sessions": [
+				{
+					"template": "evening",
+					"season_start": "{year}-12-31",
+					"season_end": "{year}-12-31"
+				}
+			],
+			"addons": [],
+			"confirm": [
+				"session times",
+				"the session runs on 31 December of the year of the import: change the date each year"
+			]
+		},
+		{
+			"key": "ramadan",
+			"title": "Ramadan Iftar Desert Safari",
+			"slug": "ramadan-iftar-desert-safari",
+			"settings": {
+				"pricing_mode": "on_request",
+				"pickup_policy": "included",
+				"pickup_default": "pickup",
+				"meeting_point": "camp"
+			},
+			"variants": [],
+			"sessions": [
+				"evening"
+			],
+			"addons": [],
+			"confirm": [
+				"session times",
+				"Ramadan dates (set the season of the session)"
+			]
+		},
+		{
+			"key": "photoshoot",
+			"title": "Desert Photoshoot",
+			"slug": "desert-photoshoot-dubai",
+			"settings": {
+				"pricing_mode": "on_request",
+				"pickup_policy": "addon",
+				"pickup_default": "meet",
+				"meeting_point": "camp"
+			},
+			"variants": [],
+			"sessions": [
+				"morning",
+				"evening"
+			],
+			"addons": [
+				{
+					"label": "Hotel pickup",
+					"price": "300",
+					"price_type": "per_booking",
+					"condition_key": "pickup"
+				}
+			],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "buggy-safari",
+			"title": "Dune Buggy Desert Safari",
+			"slug": "dune-buggy-desert-safari",
+			"settings": {
+				"pricing_mode": "on_request",
+				"pickup_policy": "included",
+				"pickup_default": "pickup",
+				"meeting_point": "camp"
+			},
+			"variants": [],
+			"sessions": [
+				"evening"
+			],
+			"addons": [],
+			"confirm": [
+				"session times"
+			]
+		},
+		{
+			"key": "corporate",
+			"title": "Corporate and Group Events",
+			"slug": "corporate-and-group-events",
+			"settings": {
+				"pricing_mode": "on_request",
+				"pickup_policy": "none",
+				"pickup_default": "meet"
+			},
+			"variants": [],
+			"sessions": [],
+			"addons": [],
+			"confirm": [
+				"place the booking widget on the corporate events page with [dgb_booking product=\"ID\"]"
+			]
+		}
+	],
+	"coupons": [],
+	"offers": [
+		{
+			"name": "Free hotel pickup on 2 or more vehicles",
+			"label": "Free hotel pickup on 2 or more vehicles",
+			"active": false,
+			"priority": 10,
+			"starts_on": "2026-11-01",
+			"ends_on": "2027-03-31",
+			"date_basis": "travel",
+			"conditions": {
+				"tours": [
+					"rzr-1",
+					"rzr-2",
+					"rzr-4",
+					"maverick-2",
+					"maverick-4"
+				],
+				"min_units": 2
+			},
+			"effect": "waive_addon",
+			"addon_key": "pickup",
+			"show_hint": true
+		}
+	],
+	"notes": [
+		"Bookings are switched off on every tour until you check it: open the tour, check the items listed for it, then tick “Take bookings for this tour”.",
+		"Only pay on arrival is switched on. Add Stripe, PayPal or bank details in Settings › Payments if you want them.",
+		"VAT: 5% with prices including VAT (Settings › Currency & VAT).",
+		"Meeting point Al Aweer desert: add the map pin, map link and arrival instructions (Pickup zones).",
+		"Session end times of the morning and day tour sessions are not set.",
+		"The offer “Free hotel pickup on 2 or more vehicles” is switched off; switch it on in Offers when you want it."
+	]
+}

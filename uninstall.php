@@ -27,9 +27,10 @@ function dgb_uninstall_site(): void {
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off cleanup of our own meta keys.
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE %s", $wpdb->esc_like( '_dgb_' ) . '%' ) );
 
-	foreach ( array( 'dgb_settings', 'dgb_db_version', 'dgb_version', 'dgb_flush_rewrite', 'dgb_roles_version', 'dgb_emails', 'dgb_summary_schedule', 'dgb_traveler_import_log', 'dgb_demo_report' ) as $option ) {
+	foreach ( array( 'dgb_settings', 'dgb_db_version', 'dgb_version', 'dgb_flush_rewrite', 'dgb_roles_version', 'dgb_emails', 'dgb_summary_schedule', 'dgb_traveler_import_log', 'dgb_demo_report', 'dgb_demo_active', 'dgb_demo_backup' ) as $option ) {
 		delete_option( $option );
 	}
+	delete_metadata( 'user', 0, 'dgb_demo_notice', '', true );
 	delete_transient( 'dgb_llms_txt' );
 	delete_site_transient( 'dgb_update_release' );
 	\Digitum\Bookings\Roles\Capabilities::uninstall();

@@ -104,6 +104,12 @@ switch ( $dgb_action ) {
 		}
 		break;
 
+	case 'raw_booking':
+		// A booking on a tour, straight into the tables (no flow), e.g. to give a demo tour a real booking.
+		$dgb_repo = new \Digitum\Bookings\Database\Repositories\BookingRepository();
+		$dgb_out  = $dgb_repo->create( array( 'customer_name' => 'Raw guest', 'status' => 'confirmed', 'currency' => 'EUR' ), array( array( 'product_id' => (int) $dgb_args['product'], 'date' => gmdate( 'Y-m-d' ), 'adults' => 1, 'zone_id' => $dgb_args['zone'] ?? null ) ), new DateTimeImmutable( 'now', wp_timezone() ) );
+		break;
+
 	case 'count_bookings':
 		global $wpdb;
 		$dgb_out['rows']     = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}dgb_bookings" );
@@ -782,6 +788,7 @@ switch ( $dgb_action ) {
 		$dgb_out['type']      = $dgb_post ? $dgb_post->post_type : '';
 		$dgb_out['slug']      = $dgb_post ? $dgb_post->post_name : '';
 		$dgb_out['title']     = $dgb_post ? $dgb_post->post_title : '';
+		$dgb_out['status']    = $dgb_post ? $dgb_post->post_status : '';
 		$dgb_out['content']   = $dgb_post ? $dgb_post->post_content : '';
 		$dgb_out['thumbnail'] = (int) get_post_thumbnail_id( $dgb_id );
 		$dgb_out['permalink'] = get_permalink( $dgb_id );
@@ -873,28 +880,78 @@ switch ( $dgb_action ) {
 		$dgb_out['bookings']   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}dgb_bookings" );
 		break;
 
+	case 'demo_packs':
+		wp_set_current_user( 1 );
+		$dgb_plugin = \Digitum\Bookings\Plugin::instance();
+		$dgb_packs  = ( new \Digitum\Bookings\Services\DemoPacks( $dgb_plugin->settings(), $dgb_plugin->product_type() ) )->packs();
+		foreach ( $dgb_packs as $dgb_id => $dgb_pack ) {
+			$dgb_out['packs'][ $dgb_id ] = is_wp_error( $dgb_pack ) ? array( 'error' => $dgb_pack->get_error_message() ) : array( 'name' => $dgb_pack['name'], 'preview' => \Digitum\Bookings\Services\DemoPacks::preview( $dgb_pack ), 'tours' => array_column( $dgb_pack['tours'], 'slug', 'key' ) );
+		}
+		break;
+
 	case 'demo_import':
 		wp_set_current_user( 1 );
 		$dgb_plugin        = \Digitum\Bookings\Plugin::instance();
-		$dgb_out['report'] = ( new \Digitum\Bookings\Services\DemoData( $dgb_plugin->settings(), $dgb_plugin->product_type() ) )->import();
-		$dgb_out['settings'] = $dgb_plugin->settings()->all();
-		$dgb_out['zones']    = ( new \Digitum\Bookings\Database\Repositories\ZoneRepository() )->all();
-		$dgb_out['points']   = ( new \Digitum\Bookings\Database\Repositories\LocationRepository() )->all();
-		$dgb_out['tours']    = array();
+		$dgb_out['report'] = ( new \Digitum\Bookings\Services\DemoPacks( $dgb_plugin->settings(), $dgb_plugin->product_type() ) )->import( $dgb_args['pack'] );
+		$dgb_out['tours']  = array();
 		foreach ( $dgb_out['report']['tours'] as $dgb_t ) {
 			$dgb_id = (int) ( $dgb_t['id'] ?? 0 );
-			$dgb_out['tours'][ $dgb_t['slug'] ] = array(
+			$dgb_out['tours'][ $dgb_t['key'] ] = array(
 				'id'        => $dgb_id,
+				'result'    => $dgb_t['result'],
 				'status'    => get_post_status( $dgb_id ),
 				'slug'      => get_post_field( 'post_name', $dgb_id ),
-				'permalink' => get_permalink( $dgb_id ),
 				'product'   => \Digitum\Bookings\Domain\Product::find( $dgb_id )->to_array(),
 				'variants'  => array_column( ( new \Digitum\Bookings\Database\Repositories\VariantRepository() )->for_product( $dgb_id ), 'price', 'label' ),
-				'sessions'  => array_column( ( new \Digitum\Bookings\Database\Repositories\SessionRepository() )->for_product( $dgb_id ), 'pickup_window_start', 'name' ),
+				'sessions'  => ( new \Digitum\Bookings\Database\Repositories\SessionRepository() )->for_product( $dgb_id ),
 				'addons'    => ( new \Digitum\Bookings\Database\Repositories\AddonRepository() )->for_product( $dgb_id ),
 				'from'      => $dgb_plugin->quotes()->from_price( $dgb_id ),
+				'demo'      => get_post_meta( $dgb_id, '_dgb_demo', true ),
 			);
 		}
+		break;
+
+	case 'demo_plan':
+		wp_set_current_user( 1 );
+		$dgb_plugin      = \Digitum\Bookings\Plugin::instance();
+		$dgb_out['plan'] = ( new \Digitum\Bookings\Services\DemoPacks( $dgb_plugin->settings(), $dgb_plugin->product_type() ) )->removal_plan();
+		break;
+
+	case 'demo_remove':
+		wp_set_current_user( 1 );
+		$dgb_plugin = \Digitum\Bookings\Plugin::instance();
+		$dgb_result = ( new \Digitum\Bookings\Services\DemoPacks( $dgb_plugin->settings(), $dgb_plugin->product_type() ) )->remove( $dgb_args['choices'] ?? array() );
+		$dgb_out    = is_wp_error( $dgb_result ) ? array( 'error' => $dgb_result->get_error_code() ) : array( 'report' => $dgb_result );
+		break;
+
+	case 'demo_snapshot':
+		// Everything a demo pack can touch: row counts, tours, settings and demo options.
+		global $wpdb;
+		foreach ( array( 'variants', 'sessions', 'addons', 'zones', 'locations', 'coupons', 'offers', 'calendar_overrides', 'bookings', 'booking_items' ) as $dgb_table ) {
+			$dgb_out['rows'][ $dgb_table ] = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}dgb_{$dgb_table}" );
+		}
+		$dgb_type                = \Digitum\Bookings\Plugin::instance()->product_type()->key();
+		$dgb_out['tours']        = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status <> 'auto-draft'", $dgb_type ) );
+		$dgb_out['trashed']      = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'trash'", $dgb_type ) );
+		$dgb_out['settings']     = get_option( 'dgb_settings' );
+		$dgb_out['all_settings'] = \Digitum\Bookings\Plugin::instance()->settings()->all();
+		$dgb_out['active']       = get_option( 'dgb_demo_active' );
+		$dgb_out['backup']       = get_option( 'dgb_demo_backup' );
+		$dgb_out['demo_meta']    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = '_dgb_demo'" );
+		$dgb_out['tagged']       = 0;
+		foreach ( array( 'variants', 'sessions', 'addons', 'zones', 'locations', 'coupons', 'offers' ) as $dgb_table ) {
+			$dgb_out['tagged'] += (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}dgb_{$dgb_table} WHERE demo_pack <> ''" );
+		}
+		break;
+
+	case 'demo_notice':
+		wp_set_current_user( $dgb_args['user'] ?? 1 );
+		if ( ! empty( $dgb_args['dismiss'] ) ) {
+			update_user_meta( get_current_user_id(), 'dgb_demo_notice', ( get_option( 'dgb_demo_active' ) ?: array() )['id'] ?? '' );
+		}
+		ob_start();
+		( new \Digitum\Bookings\Admin\Screens\ToolsScreen( \Digitum\Bookings\Plugin::instance()->settings(), \Digitum\Bookings\Plugin::instance()->product_type() ) )->demo_notice();
+		$dgb_out['html'] = ob_get_clean();
 		break;
 
 	case 'coupon_save':

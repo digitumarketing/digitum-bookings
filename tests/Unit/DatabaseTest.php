@@ -15,7 +15,7 @@ final class DatabaseTest extends TestCase {
 
 	public function test_schema_has_every_table_from_the_spec(): void {
 		$this->assertEqualsCanonicalizing(
-			array( 'variants', 'sessions', 'addons', 'zones', 'locations', 'bookings', 'booking_items', 'booking_events', 'payments', 'payment_proofs', 'coupons', 'calendar_overrides', 'notifications' ),
+			array( 'variants', 'sessions', 'addons', 'zones', 'locations', 'bookings', 'booking_items', 'booking_events', 'payments', 'payment_proofs', 'coupons', 'offers', 'calendar_overrides', 'notifications' ),
 			Schema::table_names()
 		);
 	}

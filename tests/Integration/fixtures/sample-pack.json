@@ -1,0 +1,175 @@
+{
+	"schema": 1,
+	"id": "sample-pack",
+	"name": "Sample pack",
+	"description": "Neutral test pack.",
+	"settings": {
+		"general": {
+			"business_name": "Sample Tours Co",
+			"phone": "+1 555 0100"
+		},
+		"currency": {
+			"currency": "EUR",
+			"vat_rate": 7
+		}
+	},
+	"session_templates": {
+		"am": {
+			"name": "Morning",
+			"type": "morning",
+			"start_time": "09:00",
+			"pickup_window_start": "08:00",
+			"pickup_window_end": "08:30"
+		}
+	},
+	"locations": [
+		{
+			"key": "pier",
+			"name": "Sample Meeting Point",
+			"address": "1 Sample Street"
+		}
+	],
+	"zones": [
+		{
+			"name": "North Zone",
+			"allowed": true
+		},
+		{
+			"name": "Far Zone",
+			"allowed": false,
+			"notes": "No pickup from here."
+		}
+	],
+	"tours": [
+		{
+			"key": "boat",
+			"title": "Sample Boat",
+			"slug": "sample-boat",
+			"content": "<p>Sample text.</p>",
+			"settings": {
+				"pricing_mode": "per_vehicle",
+				"seats_per_unit": 4,
+				"pickup_policy": "addon",
+				"meeting_point": "pier"
+			},
+			"variants": [
+				{
+					"label": "1 hour",
+					"duration_minutes": 60,
+					"price": "100"
+				},
+				{
+					"label": "2 hours",
+					"duration_minutes": 120,
+					"price": "180"
+				}
+			],
+			"sessions": [
+				"am",
+				{
+					"template": "am",
+					"name": "Late",
+					"start_time": "16:00",
+					"season_start": "{year}-12-31",
+					"season_end": "{year}-12-31"
+				}
+			],
+			"addons": [
+				{
+					"label": "Hotel pickup",
+					"price": "30",
+					"price_type": "per_booking",
+					"condition_key": "pickup"
+				}
+			],
+			"confirm": [
+				"check times"
+			]
+		},
+		{
+			"key": "walk",
+			"title": "Sample Walk",
+			"slug": "sample-walk",
+			"settings": {
+				"pricing_mode": "per_person"
+			},
+			"variants": [
+				{
+					"label": "Standard",
+					"price": "20",
+					"child_price": "10"
+				}
+			],
+			"sessions": [
+				"am"
+			]
+		},
+		{
+			"key": "bike",
+			"title": "Sample Bike",
+			"slug": "sample-bike",
+			"settings": {
+				"pricing_mode": "per_vehicle",
+				"seats_per_unit": 1
+			},
+			"variants": [
+				{
+					"label": "1 hour",
+					"duration_minutes": 60,
+					"price": "40"
+				}
+			],
+			"sessions": [
+				"am"
+			]
+		},
+		{
+			"key": "event",
+			"title": "Sample Event",
+			"slug": "sample-event",
+			"settings": {
+				"pricing_mode": "on_request"
+			},
+			"variants": [],
+			"sessions": []
+		}
+	],
+	"coupons": [
+		{
+			"code": "WALK10",
+			"type": "percent",
+			"amount": 10,
+			"active": true,
+			"tours": [
+				"walk"
+			]
+		},
+		{
+			"code": "ALL5",
+			"type": "fixed",
+			"amount": 5,
+			"active": true
+		}
+	],
+	"offers": [
+		{
+			"name": "Free pickup on 2 boats",
+			"label": "Free pickup on 2 or more boats",
+			"active": true,
+			"priority": 5,
+			"date_basis": "travel",
+			"conditions": {
+				"tours": [
+					"boat"
+				],
+				"min_units": 2
+			},
+			"effect": "waive_addon",
+			"addon_key": "pickup",
+			"show_hint": true
+		}
+	],
+	"notes": [
+		"Sample note."
+	]
+}

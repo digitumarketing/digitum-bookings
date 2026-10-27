@@ -117,6 +117,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 
 == Changelog ==
 
+= 0.8.0 =
+* Demo packs: optional sample data imported from Tools and removed again in one click; a fresh install has no demo content.
+
 = 0.7.0 =
 * Updates from GitHub releases (Dashboard › Updates, automatic updates, private repository token).
 * Arabic translation and right-to-left fixes.
