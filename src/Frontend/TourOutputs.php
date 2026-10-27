@@ -589,7 +589,7 @@ final class TourOutputs {
 			return $html;
 		}
 		self::$styled = true;
-		return '<style id="dgb-outputs-css">' . self::css() . '</style>' . $html;
+		return '<style id="dgb-outputs-css">' . self::css() . Theme::css( $this->settings ) . '</style>' . $html;
 	}
 
 	/**
@@ -600,7 +600,7 @@ final class TourOutputs {
 		return '.dgb-o{color:var(--dgb-ink,inherit);font-family:var(--dgb-font,inherit)}'
 			. '.dgb-from-price__basis,.dgb-price-table__share,.dgb-price-table__duration{color:var(--dgb-muted,inherit)}'
 			. '.dgb-second{unicode-bidi:isolate;white-space:nowrap}'
-			. 'table.dgb-price-table{width:100%;border-collapse:collapse}.dgb-price-table :is(th,td){padding:.5em .6em;border-bottom:1px solid var(--dgb-border,#e5e7eb);text-align:start}'
+			. 'table.dgb-price-table{width:100%;border-collapse:collapse}.dgb-price-table :is(th,td){padding:.5em .6em;border-bottom:1px solid var(--dgb-line,#d6d3d1);text-align:start}'
 			. '.dgb-tour-list{list-style:none;padding:0;margin:0}.dgb-tour-list__item{position:relative;padding-inline-start:1.6em;margin:.3em 0}'
 			. '.dgb-tour-list__item:before{position:absolute;inset-inline-start:0;font-weight:700;content:"•"}'
 			. '.dgb-tour-list--check .dgb-tour-list__item:before{content:"✓";color:var(--dgb-accent,#b45309)}.dgb-tour-list--cross .dgb-tour-list__item:before{content:"✕"}'

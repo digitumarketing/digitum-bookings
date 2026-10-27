@@ -26,6 +26,48 @@ Cards, hub pages and tour templates can show the same prices and details as the 
 
 Elementor also has dynamic tags for single values: minimum age, seats or guests per car, pickup policy, meeting point name, meeting point map link (for buttons) and the next pickup window. A small stylesheet (under 1 KB) is added once per page; it follows the widget colours of Settings › Branding.
 
+## Mobile bar and the look of the widget
+
+**Settings › General › Mobile sticky bar**: on phones, tour pages show a bar with the “From” price and a Book button at the bottom of the screen. Choose **Off**, **On**, or **On, and hide the theme's own bar on tour pages** when your theme already has a bottom bar (for example a WhatsApp or call bar): enter its CSS selector in **Theme bar to hide** (ask your web designer, or right-click the bar › Inspect, for example `.mobile-bar`). It is hidden on tour pages only. While the plugin's bar shows, the page gets extra space at the bottom so the bar never covers the footer.
+
+**Settings › Branding**: accent colour, text on the accent colour, text colour, muted text, borders, panel background, corner radius, button text (as written, capitals, capitalised words) and the font. An empty field keeps the plugin default. **Font** uses the theme's font unless you enter a font family the theme already loads; the plugin never loads web fonts. If the accent colour and its text, or the text and the panel background, are too close for everyone to read (below WCAG AA, 4.5:1), the Branding tab shows a warning; you can still save.
+
+### Styling from a theme
+
+Everything below can be set in the theme's CSS without copying templates. Settings › Branding writes the same variables (on `.dgb-w, .dgb-o`), so a theme rule with higher specificity, for example `body .dgb-w { … }`, wins over both.
+
+| CSS variable | Default | Used for |
+|---|---|---|
+| `--dgb-accent` | `#b45309` | Buttons, chosen day and option, focus rings, links, ticks in tour lists |
+| `--dgb-on-accent` | `#fff` | Text on the accent colour |
+| `--dgb-ink` | `#1c1917` | Text |
+| `--dgb-muted` | `#57534e` | Hints, labels, the price basis |
+| `--dgb-line` | `#d6d3d1` | Borders and table lines |
+| `--dgb-soft` | `#f5f5f4` | Soft backgrounds (summaries, closed days) |
+| `--dgb-bg` | `#fff` | Panel, cards, inputs, the mobile bar |
+| `--dgb-danger` | `#991b1b` | Errors |
+| `--dgb-radius` | `12px` | Corners (panels a little rounder, inputs at most 8px) |
+| `--dgb-font` | the theme's | Font family inside the widget and the tour detail outputs |
+| `--dgb-btn-transform` | `none` | Button text transform |
+
+| Class | What it is |
+|---|---|
+| `.dgb-w` | The booking widget (a `section`); `.dgb-w-done` when it shows a booking's confirmation |
+| `.dgb-teaser`, `.dgb-teaser-price` | Price line and Book button above the closed widget on phones |
+| `.dgb-panel`, `.dgb-head`, `.dgb-title`, `.dgb-close`, `.dgb-from`, `.dgb-progress`, `.dgb-form`, `.dgb-foot` | Panel (the bottom sheet on phones), its header with title, close button, “From” price and step counter, the form and its footer |
+| `.dgb-step`, `.dgb-legend`, `.dgb-group`, `.dgb-field`, `.dgb-label`, `.dgb-hint`, `.dgb-field-error`, `.dgb-errors`, `.dgb-note` | A step (`data-step` = choose, guests, pickup, extras, details, pay), its heading, field groups, fields, labels, hints and errors |
+| `.dgb-options`, `.dgb-options-2`, `.dgb-card`, `.dgb-card-body`, `.dgb-card-title`, `.dgb-card-meta` | Choice cards (options, sessions, pickup, extras, payment methods) |
+| `.dgb-cal`, `.dgb-cal-head`, `.dgb-cal-month`, `.dgb-cal-grid`, `.dgb-cal-wd`, `.dgb-day` | Calendar |
+| `.dgb-sessions` | Sessions of the chosen day |
+| `.dgb-stepper`, `.dgb-count`, `.dgb-count-label`, `.dgb-count-note`, `.dgb-icon-btn` | Guest and vehicle counters |
+| `.dgb-pickup`, `.dgb-meet`, `.dgb-zone-note`, `.dgb-phone`, `.dgb-coupon-row` | Pickup choice, meeting point details, zone message, phone with country code, coupon field |
+| `.dgb-breakdown`, `.dgb-lines`, `.dgb-line` (`.is-total`, `.is-vat`, `.is-discount`…), `.dgb-price-errors`, `.dgb-offer-hint`, `.dgb-second` | Price breakdown, its lines, problems, “add one more” offer hint, second-currency amount |
+| `.dgb-btn`, `.dgb-btn-primary`, `.dgb-btn-quiet`, `.dgb-submit` | Buttons |
+| `.dgb-sticky` | Mobile bar; `body.dgb-has-sticky-bar` while it shows |
+| `.dgb-result`, `.dgb-confirm`, `.dgb-confirm-title`, `.dgb-ref`, `.dgb-summary`, `.dgb-box`, `.dgb-bank`, `.dgb-copyable`, `.dgb-pay`, `.dgb-pay-button`, `.dgb-pay-element`, `.dgb-pay-message`, `.dgb-proof`, `.dgb-proof-row`, `.dgb-proof-files`, `.dgb-actions`, `.dgb-money` | Confirmation and booking page: reference, summary, bank details, payment box, screenshot upload |
+| `.dgb-credit` | “Booking by Digitum” |
+| `.dgb-o` | Every tour detail output, with `.dgb-from-price` (`__amount`, `__basis`, `--request`), `.dgb-price-table` (`__option`, `__duration`, `__price`, `__share`), `.dgb-tour-list` (`--check`, `--cross`, `--plain`, `__item`), `.dgb-tour-facts` (`__item`, `__item--duration` … `--sessions`, `__list`) |
+
 ## Every day
 
 - **Dashboard**: today's sessions (bookings, guests, pickups, unpaid), revenue for the last 7 and 30 days, open quote requests and bank transfers waiting, each with **Mark as paid** and the screenshot when the guest sent one.

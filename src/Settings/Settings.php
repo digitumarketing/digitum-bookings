@@ -47,7 +47,8 @@ final class Settings {
 	/**
 	 * Field definitions per tab.
 	 *
-	 * Supported types: text, email, tel, url, textarea, number, checkbox, select, multicheck, color, key, slug,
+	 * Supported types: text, email, tel, url, textarea, number, checkbox, select, multicheck, color, color_optional
+	 * (empty allowed), selector (CSS selector), font (CSS font-family), key, slug,
 	 * secret (never shown again; empty input keeps it) and heading (a section title, not stored).
 	 * Keys starting with an underscore are internal: stored, never rendered.
 	 *
@@ -116,11 +117,21 @@ final class Settings {
 					'text'    => __( 'Add the booking widget to single tour pages automatically', 'digitum-bookings' ),
 					'default' => true,
 				),
-				'sticky_bar'       => array(
-					'type'    => 'checkbox',
+				'sticky_mode'      => array(
+					'type'    => 'select',
 					'label'   => __( 'Mobile sticky bar', 'digitum-bookings' ),
-					'text'    => __( 'Show price and Book button at the bottom of the screen on phones', 'digitum-bookings' ),
-					'default' => true,
+					'options' => array(
+						'off'     => __( 'Off', 'digitum-bookings' ),
+						'plugin'  => __( 'On: price and Book button at the bottom of the screen on phones', 'digitum-bookings' ),
+						'replace' => __( 'On, and hide the theme’s own bar on tour pages', 'digitum-bookings' ),
+					),
+					'default' => 'plugin',
+				),
+				'sticky_hide'      => array(
+					'type'    => 'selector',
+					'label'   => __( 'Theme bar to hide', 'digitum-bookings' ),
+					'help'    => __( 'CSS selector of the theme’s bottom bar, for example .mobile-bar. Hidden on tour pages only, when the option above hides it.', 'digitum-bookings' ),
+					'default' => '',
 				),
 				'hold_minutes'     => array(
 					'type'    => 'number',
@@ -607,16 +618,80 @@ final class Settings {
 				),
 			),
 			'branding'  => array(
-				'about'        => array(
+				'about'             => array(
 					'type'    => 'heading',
 					'label'   => __( 'Digitum Bookings by Digitum Marketing', 'digitum-bookings' ),
 					'help'    => __( '“Booking by Digitum” is shown under every booking widget and booking page.', 'digitum-bookings' ),
 					'default' => '',
 				),
-				'accent_color' => array(
+				'accent_color'      => array(
 					'type'    => 'color',
 					'label'   => __( 'Widget accent colour', 'digitum-bookings' ),
 					'default' => '#B45309',
+				),
+				'accent_text_color' => array(
+					'type'    => 'color_optional',
+					'label'   => __( 'Text on the accent colour', 'digitum-bookings' ),
+					'help'    => __( 'Buttons and the chosen day. Empty: white.', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'text_color'        => array(
+					'type'    => 'color_optional',
+					'label'   => __( 'Text colour', 'digitum-bookings' ),
+					'help'    => __( 'Empty: the plugin default (near black).', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'muted_color'       => array(
+					'type'    => 'color_optional',
+					'label'   => __( 'Muted text colour', 'digitum-bookings' ),
+					'help'    => __( 'Hints and secondary text. Empty: the plugin default.', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'border_color'      => array(
+					'type'    => 'color_optional',
+					'label'   => __( 'Border colour', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'panel_bg'          => array(
+					'type'    => 'color_optional',
+					'label'   => __( 'Panel background', 'digitum-bookings' ),
+					'help'    => __( 'Empty: white.', 'digitum-bookings' ),
+					'default' => '',
+				),
+				'radius'            => array(
+					'type'    => 'number',
+					'label'   => __( 'Corner radius', 'digitum-bookings' ),
+					'suffix'  => __( 'px (empty: 12)', 'digitum-bookings' ),
+					'min'     => 0,
+					'max'     => 32,
+					'step'    => 1,
+					'default' => '',
+				),
+				'button_transform'  => array(
+					'type'    => 'select',
+					'label'   => __( 'Button text', 'digitum-bookings' ),
+					'options' => array(
+						''           => __( 'Plugin default', 'digitum-bookings' ),
+						'none'       => __( 'As written', 'digitum-bookings' ),
+						'uppercase'  => __( 'CAPITALS', 'digitum-bookings' ),
+						'capitalize' => __( 'Capitalised Words', 'digitum-bookings' ),
+					),
+					'default' => '',
+				),
+				'font_mode'         => array(
+					'type'    => 'select',
+					'label'   => __( 'Font', 'digitum-bookings' ),
+					'options' => array(
+						'inherit' => __( 'Use the theme’s font', 'digitum-bookings' ),
+						'custom'  => __( 'Use this font family', 'digitum-bookings' ),
+					),
+					'default' => 'inherit',
+				),
+				'font_family'       => array(
+					'type'    => 'font',
+					'label'   => __( 'Font family', 'digitum-bookings' ),
+					'help'    => __( 'A CSS font-family your theme already loads, for example "Inter", sans-serif. The plugin never loads web fonts.', 'digitum-bookings' ),
+					'default' => '',
 				),
 			),
 			'updates'   => array(
@@ -755,6 +830,22 @@ final class Settings {
 	}
 
 	/**
+	 * Carry settings of older versions over to their new form (runs once after an update).
+	 */
+	public static function upgrade(): void {
+		$stored = get_option( self::OPTION );
+		if ( ! is_array( $stored ) || ! isset( $stored['general'] ) || ! is_array( $stored['general'] ) ) {
+			return;
+		}
+		// 0.8.0: the "Mobile sticky bar" checkbox became a mode.
+		if ( array_key_exists( 'sticky_bar', $stored['general'] ) && ! isset( $stored['general']['sticky_mode'] ) ) {
+			$stored['general']['sticky_mode'] = empty( $stored['general']['sticky_bar'] ) ? 'off' : 'plugin';
+			unset( $stored['general']['sticky_bar'] );
+			update_option( self::OPTION, $stored );
+		}
+	}
+
+	/**
 	 * Forget the cached values (after the option changed elsewhere).
 	 */
 	public function flush(): void {
@@ -850,6 +941,16 @@ final class Settings {
 			case 'color':
 				$color = is_string( $value ) ? sanitize_hex_color( $value ) : null;
 				return $color ? $color : $default;
+
+			case 'color_optional':
+				$color = is_string( $value ) ? sanitize_hex_color( trim( $value ) ) : null;
+				return $color ? $color : '';
+
+			case 'selector':
+				return is_string( $value ) ? \Digitum\Bookings\Frontend\StickyBar::selector( sanitize_text_field( $value ) ) : '';
+
+			case 'font':
+				return is_string( $value ) ? mb_substr( \Digitum\Bookings\Frontend\Theme::font( sanitize_text_field( $value ) ), 0, 200 ) : '';
 
 			case 'key':
 				$key = is_string( $value ) ? substr( sanitize_key( $value ), 0, 20 ) : '';

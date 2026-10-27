@@ -58,6 +58,20 @@ if ( isset( $_COOKIE['dgb_test_second'] ) && preg_match( '/^([A-Z]{3}):([0-9.]+)
 		}
 	);
 }
+// Sticky bar "hide the theme's bar" on request (v0.8): cookie dgb_test_sticky = 1, with a stand-in theme bar.
+if ( isset( $_COOKIE['dgb_test_sticky'] ) ) {
+	add_filter(
+		'option_dgb_settings',
+		static function ( $value ) {
+			$value            = is_array( $value ) ? $value : array();
+			$value['general'] = array_merge( (array) ( $value['general'] ?? array() ), array( 'sticky_mode' => 'replace', 'sticky_hide' => '.test-theme-bar' ) );
+			return $value;
+		}
+	);
+	add_action( 'wp_footer', static function () {
+		echo '<div class="test-theme-bar" style="position:fixed;bottom:0;left:0;right:0;height:60px;background:#000;color:#fff">Theme bar</div>';
+	} );
+}
 PHP
 );
 step( $site, 'install' );

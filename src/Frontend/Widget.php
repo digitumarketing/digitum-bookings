@@ -230,7 +230,7 @@ final class Widget {
 			'cancellation' => (string) $all['general']['cancellation'],
 			'country_code' => (string) $all['general']['country_code'],
 			'coupons'      => ! $on_req && ( new CouponRepository() )->any_active( $now ),
-			'sticky'       => ! empty( $all['general']['sticky_bar'] ) && is_singular( $this->product_type->key() ) && get_queried_object_id() === $product_id,
+			'sticky'       => is_singular( $this->product_type->key() ) && get_queried_object_id() === $product_id && ( new StickyBar( $this->settings, $this->product_type ) )->enabled( $product_id ),
 			'accent'       => (string) $all['branding']['accent_color'],
 			'turnstile'    => $script['turnstile'],
 			'script'       => $script,

@@ -10,6 +10,7 @@ namespace Digitum\Bookings\Admin\Screens;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Roles\Capabilities;
 use Digitum\Bookings\Services\Updater;
+use Digitum\Bookings\Frontend\Theme;
 use Digitum\Bookings\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
@@ -144,6 +145,16 @@ final class SettingsScreen {
 					<p><?php esc_html_e( 'Stripe:', 'digitum-bookings' ); ?> <code><?php echo esc_html( rest_url( 'dgb/v1/webhooks/stripe' ) ); ?></code></p>
 					<p><?php esc_html_e( 'PayPal:', 'digitum-bookings' ); ?> <code><?php echo esc_html( rest_url( 'dgb/v1/webhooks/paypal' ) ); ?></code></p>
 				</div>
+			<?php endif; ?>
+			<?php if ( 'branding' === $tab ) : ?>
+				<?php foreach ( Theme::contrast_problems( $this->settings ) as $problem ) : ?>
+					<div class="notice notice-warning inline" data-dgb-contrast><p>
+						<?php
+						/* translators: 1: colour pair, 2: contrast ratio. */
+						echo esc_html( sprintf( __( 'Low contrast: %1$s (%2$s:1). Text needs at least 4.5:1 to be readable for everyone (WCAG AA). You can still save these colours.', 'digitum-bookings' ), $problem['pair'], number_format_i18n( $problem['ratio'], 2 ) ) );
+						?>
+					</p></div>
+				<?php endforeach; ?>
 			<?php endif; ?>
 			<?php if ( 'updates' === $tab ) : ?>
 				<?php $this->updates_status(); ?>
@@ -323,12 +334,13 @@ final class SettingsScreen {
 					'url'   => 'url',
 				)[ $type ] ?? 'text';
 				printf(
-					'<input type="%1$s" id="%2$s" name="%3$s" value="%4$s" class="%5$s">',
+					'<input type="%1$s" id="%2$s" name="%3$s" value="%4$s" class="%5$s"%6$s>',
 					esc_attr( $input_type ),
 					esc_attr( $id ),
 					esc_attr( $name ),
 					esc_attr( (string) $value ),
-					'color' === $input_type ? '' : 'regular-text'
+					'color' === $input_type ? '' : ( 'color_optional' === $type ? 'small-text code' : 'regular-text' ),
+					'color_optional' === $type ? ' placeholder="#RRGGBB" pattern="#([0-9A-Fa-f]{3}){1,2}" spellcheck="false"' : ''
 				);
 		}
 

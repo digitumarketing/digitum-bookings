@@ -27,6 +27,7 @@ use Digitum\Bookings\Frontend\Assets;
 use Digitum\Bookings\Frontend\Placement;
 use Digitum\Bookings\Frontend\ProofForm;
 use Digitum\Bookings\Frontend\SchemaOutput;
+use Digitum\Bookings\Frontend\StickyBar;
 use Digitum\Bookings\Frontend\TourOutputs;
 use Digitum\Bookings\Frontend\Widget;
 use Digitum\Bookings\Integrations\Elementor\ElementorIntegration;
@@ -153,6 +154,7 @@ final class Plugin {
 		$assets = new Assets( $this->settings, $this->product_type );
 		$widget = new Widget( $this->settings, $this->product_type, $quotes, $assets );
 		$assets->register_hooks();
+		( new StickyBar( $this->settings, $this->product_type ) )->register_hooks();
 		( new Placement( $this->settings, $this->product_type, $widget ) )->register_hooks();
 		$outputs = new TourOutputs( $this->settings, $this->product_type, $quotes );
 		$outputs->register_hooks();
@@ -214,6 +216,8 @@ final class Plugin {
 			return;
 		}
 		$migrator->migrate();
+		Settings::upgrade();
+		$this->settings->flush();
 		Capabilities::maybe_upgrade();
 		update_option( 'dgb_version', DGB_VERSION, true );
 	}

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { tours, path, events, axe, pickTomorrow, chooseRide, fillDetails } from './helpers';
+import { e2e, tours, path, events, axe, pickTomorrow, chooseRide, fillDetails } from './helpers';
 
 test.describe( 'desktop', () => {
 	test.skip( ( { isMobile } ) => isMobile, 'desktop layout' );
@@ -133,6 +133,26 @@ test.describe( 'desktop', () => {
 
 test.describe( 'phone', () => {
 	test.skip( ( { isMobile } ) => ! isMobile, 'phone layout' );
+
+	test( 'sticky bar never covers the end of the page; can replace the theme’s bar', async ( { page } ) => {
+		await page.goto( path( tours.rzr.url ) );
+		await expect( page.locator( 'body' ) ).toHaveClass( /dgb-has-sticky-bar/ );
+		const bar = page.locator( '[data-dgb-sticky]' );
+		await expect( bar ).toBeVisible();
+		await page.evaluate( () => window.scrollTo( 0, document.documentElement.scrollHeight ) );
+		const covered = await page.evaluate( () => {
+			const barTop = ( document.querySelector( '[data-dgb-sticky]' ) as HTMLElement ).getBoundingClientRect().top;
+			const items = Array.from( document.body.querySelectorAll( 'footer, .wp-site-blocks > *:last-child' ) ) as HTMLElement[];
+			return items.some( ( el ) => el.getBoundingClientRect().bottom > barTop + 1 && el.offsetHeight > 0 );
+		} );
+		expect( covered ).toBe( false );
+
+		await page.context().addCookies( [ { name: 'dgb_test_sticky', value: '1', url: `http://127.0.0.1:${ e2e.port }` } ] );
+		await page.reload();
+		await expect( page.locator( '.test-theme-bar' ) ).toBeHidden();
+		await expect( bar ).toBeVisible();
+		await page.context().clearCookies( { name: 'dgb_test_sticky' } );
+	} );
 
 	test( 'sticky bar opens a stepped booking sheet', async ( { page } ) => {
 		await page.goto( path( tours.rzr.url ) );

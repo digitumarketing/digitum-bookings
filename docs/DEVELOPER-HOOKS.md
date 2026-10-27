@@ -221,6 +221,14 @@ add_filter( 'dgb_rating_sources', function ( array $sources ) {
 } );
 ```
 
+### `dgb_sticky_bar_enabled` (0.8.0)
+
+Whether the mobile sticky bar shows on a tour page (after Settings › General › Mobile sticky bar). Also decides the `dgb-has-sticky-bar` body class.
+
+```php
+add_filter( 'dgb_sticky_bar_enabled', fn( bool $on, int $post_id ) => $on && 'corporate-events' !== get_post_field( 'post_name', $post_id ), 10, 2 );
+```
+
 ### `dgb_demo_packs` (0.8.0)
 
 Demo packs offered on Digitum Bookings › Tools: pack id => path of a JSON file (or the decoded pack as an array). The plugin's own packs come from `demo/*.json`. The format is in [DEMO-PACKS.md](DEMO-PACKS.md); invalid packs are listed with the reason and cannot be imported.

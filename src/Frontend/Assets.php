@@ -47,7 +47,7 @@ final class Assets {
 	 */
 	public function register(): void {
 		wp_register_style( self::HANDLE, false, array(), DGB_VERSION );
-		wp_add_inline_style( self::HANDLE, self::css() );
+		wp_add_inline_style( self::HANDLE, self::css() . Theme::css( $this->settings ) );
 		wp_register_script(
 			self::HANDLE,
 			DGB_PLUGIN_URL . 'assets/build/front/booking.js',
@@ -122,7 +122,7 @@ final class Assets {
 			return '';
 		}
 		wp_styles()->done[] = self::HANDLE;
-		return '<style id="' . esc_attr( self::HANDLE ) . '-inline-css">' . self::css() . '</style>';
+		return '<style id="' . esc_attr( self::HANDLE ) . '-inline-css">' . self::css() . Theme::css( $this->settings ) . '</style>';
 	}
 
 	/**

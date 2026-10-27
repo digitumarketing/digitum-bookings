@@ -16,6 +16,7 @@
 	margin-block: 1.5rem;
 	color: var(--dgb-ink);
 	font: inherit;
+	font-family: var(--dgb-font, inherit);
 	line-height: 1.45;
 }
 
@@ -36,7 +37,7 @@
 	flex-direction: column;
 	background: var(--dgb-bg);
 	border: 1px solid var(--dgb-line);
-	border-radius: 16px;
+	border-radius: calc(var(--dgb-radius) + 4px);
 	box-shadow: 0 8px 24px rgba(28, 25, 23, 0.06);
 }
 
@@ -138,7 +139,7 @@
 	height: 26px;
 	border-radius: 50%;
 	background: var(--dgb-ink);
-	color: #fff;
+	color: var(--dgb-bg);
 	font-size: 0.8rem;
 }
 
@@ -175,8 +176,8 @@
 	min-height: 44px;
 	padding: 8px 12px;
 	border: 1px solid #a8a29e;
-	border-radius: 8px;
-	background: #fff;
+	border-radius: min(8px, var(--dgb-radius));
+	background: var(--dgb-bg);
 	color: var(--dgb-ink);
 	font: inherit;
 }
@@ -251,8 +252,8 @@
 	min-height: 52px;
 	padding: 10px 12px;
 	border: 2px solid var(--dgb-line);
-	border-radius: 10px;
-	background: #fff;
+	border-radius: min(10px, var(--dgb-radius));
+	background: var(--dgb-bg);
 	cursor: pointer;
 }
 
@@ -266,7 +267,7 @@
 
 .dgb-card.is-selected {
 	border-color: var(--dgb-accent);
-	background: color-mix(in srgb, var(--dgb-accent) 7%, #fff);
+	background: color-mix(in srgb, var(--dgb-accent) 7%, var(--dgb-bg));
 }
 
 .dgb-card:focus-within {
@@ -334,8 +335,8 @@
 	min-height: 44px;
 	padding: 0;
 	border: 1px solid var(--dgb-line);
-	border-radius: 8px;
-	background: #fff;
+	border-radius: min(8px, var(--dgb-radius));
+	background: var(--dgb-bg);
 	color: var(--dgb-ink);
 	font: inherit;
 	font-weight: 600;
@@ -375,7 +376,7 @@
 	height: 44px;
 	border: 1px solid #a8a29e;
 	border-radius: 50%;
-	background: #fff;
+	background: var(--dgb-bg);
 	color: var(--dgb-ink);
 	font: inherit;
 	font-size: 1.25rem;
@@ -449,7 +450,7 @@
 	margin-top: 10px;
 	padding: 10px 12px;
 	border: 1px solid #fdba74;
-	border-radius: 8px;
+	border-radius: min(8px, var(--dgb-radius));
 	background: #fff7ed;
 	color: #7c2d12;
 	font-size: 0.9rem;
@@ -502,7 +503,7 @@
 	margin: 8px 0 0;
 	padding: 10px 14px;
 	border: 1px solid #fca5a5;
-	border-radius: 8px;
+	border-radius: min(8px, var(--dgb-radius));
 	background: #fef2f2;
 	color: var(--dgb-danger);
 	font-size: 0.9rem;
@@ -538,12 +539,13 @@
 	min-height: 48px;
 	padding: 0 18px;
 	border: 2px solid var(--dgb-ink);
-	border-radius: 12px;
-	background: #fff;
+	border-radius: var(--dgb-radius);
+	background: var(--dgb-bg);
 	color: var(--dgb-ink);
 	font: inherit;
 	font-weight: 700;
 	text-decoration: none;
+	text-transform: var(--dgb-btn-transform, none);
 	cursor: pointer;
 }
 
@@ -622,6 +624,13 @@
 	font-size: 1.15rem;
 }
 
+/* Keeps the end of the page clear of the bar while it shows (the class is removed when it hides). */
+@media (max-width: 781px) {
+	body.dgb-has-sticky-bar {
+		padding-bottom: calc(72px + env(safe-area-inset-bottom));
+	}
+}
+
 .dgb-sticky {
 	position: fixed;
 	inset-inline: 0;
@@ -647,7 +656,7 @@
 		z-index: 100000;
 		max-height: 92vh;
 		max-height: 92dvh;
-		border-radius: 18px 18px 0 0;
+		border-radius: calc(var(--dgb-radius) + 6px) calc(var(--dgb-radius) + 6px) 0 0;
 		box-shadow: 0 0 0 100vmax rgba(28, 25, 23, 0.5);
 	}
 
@@ -693,7 +702,7 @@
 .dgb-confirm {
 	padding: 20px;
 	border: 1px solid var(--dgb-line);
-	border-radius: 16px;
+	border-radius: calc(var(--dgb-radius) + 4px);
 	background: var(--dgb-bg);
 }
 
@@ -773,7 +782,7 @@
 .dgb-admin-note {
 	padding: 10px 12px;
 	border: 1px dashed #a8a29e;
-	border-radius: 8px;
+	border-radius: min(8px, var(--dgb-radius));
 	font-size: 0.9rem;
 }
 

@@ -1725,6 +1725,40 @@ if ( scenario( 'N' ) ) {
 	check( 'From AED 699.00 per vehicle' === $h['from'] && '16' === $h['age'] && '2' === $h['seats'] && 'Hotel pickup on request (+AED 300.00 per booking)' === $h['pick'] && 'Al Aweer desert' === $h['point'] && in_array( $h['next'], array( '6:45 am – 7:15 am', '2:15 pm – 2:45 pm' ), true ), 'dynamic tags: from price, minimum age, seats, pickup, meeting point, next pickup window' );
 	check( 'https://maps.example/al-aweer' === $h['map'] && 'Price on request' === $h['nyf'], 'dynamic tags: map link (URL); price on request' );
 	step( $site, 'set_option', array( 'name' => 'dgb_fake_elementor', 'value' => 0 ) );
+
+	// Sticky bar modes and widget theming (sections 6 and 7), on real page loads.
+	file_put_contents( "{$site}/wp-content/mu-plugins/sticky-filter.php", "<?php\nadd_filter( 'dgb_sticky_bar_enabled', static fn( \$on, \$id ) => \$on && ! get_option( 'dgb_test_no_sticky' ), 10, 2 );\n" );
+	$server = start_server( $site, $port );
+	$page   = static fn( string $url ): string => http_get( $home . wp_make_link_relative_test( $url ) )[2];
+	$body   = static fn( string $html ): string => preg_match( '#<body[^>]*class="([^"]*)"#', $html, $m ) ? $m[1] : '';
+	$html   = $page( $rzr['url'] );
+	check( str_contains( $body( $html ), 'dgb-has-sticky-bar' ) && str_contains( $html, 'data-dgb-sticky' ) && ! str_contains( $body( $page( $demo['blog'] ) ), 'dgb-has-sticky-bar' ), 'default: plugin bar on tour pages with the body class dgb-has-sticky-bar; not on other pages' );
+	check( str_contains( $html, 'body.dgb-has-sticky-bar{padding-bottom:calc(72px + env(safe-area-inset-bottom))}' ), 'space reserved at the bottom of the page while the bar shows (phones)' );
+	check( ! str_contains( $html, '.dgb-w,.dgb-o{' ) && ! str_contains( $html, 'dgb-sticky-replace' ), 'no branding variables and nothing hidden by default' );
+	step( $site, 'set_option', array( 'name' => 'dgb_test_no_sticky', 'value' => 1 ) );
+	$html = $page( $rzr['url'] );
+	check( ! str_contains( $body( $html ), 'dgb-has-sticky-bar' ) && ! str_contains( $html, 'data-dgb-sticky' ), 'dgb_sticky_bar_enabled filter turns the bar off' );
+	step( $site, 'set_option', array( 'name' => 'dgb_test_no_sticky', 'value' => 0 ) );
+	step( $site, 'settings_merge', array( 'values' => array( 'general' => array( 'sticky_mode' => 'off' ) ) ) );
+	$html = $page( $rzr['url'] );
+	check( ! str_contains( $body( $html ), 'dgb-has-sticky-bar' ) && ! str_contains( $html, 'data-dgb-sticky' ), 'mode Off: no bar, no body class' );
+	step( $site, 'settings_merge', array( 'values' => array( 'general' => array( 'sticky_mode' => 'replace', 'sticky_hide' => '.theme-bar > a' ) ) ) );
+	$html = $page( $rzr['url'] );
+	check( str_contains( $html, '.theme-bar > a{display:none!important}' ) && str_contains( $html, 'data-dgb-sticky' ) && ! str_contains( $page( $demo['blog'] ), '.theme-bar > a{display:none' ), 'mode “hide the theme’s bar”: the selector is hidden on tour pages only, and the plugin bar shows' );
+	step( $site, 'settings_merge', array( 'values' => array( 'general' => array( 'sticky_mode' => 'plugin', 'sticky_hide' => '' ) ) ) );
+
+	step( $site, 'settings_merge', array( 'values' => array( 'branding' => array( 'accent_color' => '#0f766e', 'text_color' => '#111111', 'radius' => 4, 'button_transform' => 'uppercase', 'font_mode' => 'custom', 'font_family' => 'Georgia, serif' ) ) ) );
+	$html = $page( $rzr['url'] );
+	check( str_contains( $html, '.dgb-w,.dgb-o{--dgb-accent:#0f766e;--dgb-ink:#111111;--dgb-radius:4px;--dgb-btn-transform:uppercase;--dgb-font:Georgia, serif}' ), 'branding settings become the widget’s CSS variables' );
+	check( ! preg_match( '#<link[^>]+fonts\.(googleapis|gstatic)#', $html ), 'no web fonts loaded by the plugin' );
+	$x = step( $site, 'outputs', array( 'post' => $rzr['id'], 'shortcodes' => array( 'from' => '[dgb_from_price]' ) ) )['shortcodes']['from'];
+	check( str_contains( $x, '--dgb-accent:#0f766e' ), 'tour detail outputs use the same variables' );
+	check( ! str_contains( step( $site, 'render_settings', array( 'tab' => 'branding' ) )['html'], 'data-dgb-contrast' ), 'good contrast: no warning' );
+	step( $site, 'settings_merge', array( 'values' => array( 'branding' => array( 'accent_color' => '#fbbf24' ) ) ) );
+	$set = step( $site, 'render_settings', array( 'tab' => 'branding' ) )['html'];
+	check( str_contains( $set, 'data-dgb-contrast' ) && str_contains( $set, 'Accent colour and its text (buttons)' ), 'low contrast between accent and its text: warning (saving still works)' );
+	step( $site, 'settings_merge', array( 'values' => array( 'branding' => array( 'accent_color' => '#B45309', 'text_color' => '', 'radius' => '', 'button_transform' => '', 'font_mode' => 'inherit', 'font_family' => '' ) ) ) );
+	stop_server( $server );
 }
 
 /* -------------------------------------------------------------------- */

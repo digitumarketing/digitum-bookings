@@ -127,6 +127,7 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 * Rating source for structured data: Site Reviews, or a developer filter; no rating without real reviews.
 * Automatic offers (discounts without a code) with conditions, priorities and an optional “add one more” hint.
 * From price, price table, tour lists and key facts as shortcodes, blocks, Elementor widgets and dynamic tags.
+* Mobile sticky bar can replace the theme's own bar; more widget colours, corner radius and font in Settings › Branding.
 
 = 0.7.0 =
 * Updates from GitHub releases (Dashboard › Updates, automatic updates, private repository token).

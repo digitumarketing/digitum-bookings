@@ -756,6 +756,7 @@
 				panel.classList.remove( 'is-open' );
 				document.documentElement.classList.remove( 'dgb-lock' );
 				qa( '.dgb-teaser, [data-dgb-sticky]' ).forEach( ( n ) => ( n.hidden = true ) );
+				document.body.classList.remove( 'dgb-has-sticky-bar' );
 				const confirmation = result.querySelector( '[data-dgb-confirmation]' );
 				if ( result.querySelector( '[data-dgb-pay], [data-dgb-proof]' ) ) {
 					loadPayments( result );
