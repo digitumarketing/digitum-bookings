@@ -119,6 +119,7 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 
 = 0.8.0 =
 * Demo packs: optional sample data imported from Tools and removed again in one click; a fresh install has no demo content.
+* Optional second display currency next to prices.
 
 = 0.7.0 =
 * Updates from GitHub releases (Dashboard › Updates, automatic updates, private repository token).

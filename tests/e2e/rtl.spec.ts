@@ -34,6 +34,18 @@ test.describe( 'Arabic (RTL)', () => {
 		await page.screenshot( { path: `test-results/rtl-${ info.project.name }.png`, fullPage: false } );
 	} );
 
+	test( 'second currency next to the price, isolated in right-to-left text', async ( { page } ) => {
+		await page.context().addCookies( [ { name: 'dgb_test_second', value: 'USD:3.6725', url: `http://127.0.0.1:${ e2e.port }` } ] );
+		await arabicPage( page, path( tours.rzr.url ) );
+		const second = page.locator( '[data-dgb-widget] .dgb-from .dgb-second' );
+		await expect( second ).toHaveText( /^\(.*USD [0-9٠-٩,٬]+\)$/ );
+		await expect( second ).toContainText( arabic );
+		expect( await second.evaluate( ( el ) => getComputedStyle( el ).unicodeBidi ) ).toBe( 'isolate' );
+		await page.context().clearCookies( { name: 'dgb_test_second' } );
+		await page.reload();
+		await expect( page.locator( '[data-dgb-widget] .dgb-second' ) ).toHaveCount( 0 );
+	} );
+
 	test( 'booking in Arabic, paid on arrival', async ( { page, isMobile } ) => {
 		test.skip( isMobile, 'flow covered on desktop; the phone layout is checked above' );
 		await arabicPage( page, path( tours.rzr.url ) );

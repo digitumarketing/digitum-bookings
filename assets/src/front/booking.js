@@ -141,6 +141,10 @@
 			maximumFractionDigits: cfg.decimals,
 		} );
 		const fmt = ( v ) => ( null === v || undefined === v ? '' : money.format( Number( v ) ) );
+		// Optional second currency, for display only: " (about USD 190)".
+		const sc = cfg.second;
+		const scNum = sc && new Intl.NumberFormat( cfg.locale, { minimumFractionDigits: sc.decimals, maximumFractionDigits: sc.decimals } );
+		const second = ( v ) => ( sc && null !== v && undefined !== v ? ' (' + sc.template.replace( '{amount}', sc.code + ' ' + scNum.format( Number( v ) / sc.rate ) ) + ')' : '' );
 		const timeFmt = new Intl.DateTimeFormat( cfg.locale, { hour: 'numeric', minute: '2-digit' } );
 		const fmtTime = ( v ) => {
 			if ( ! v ) {
@@ -470,7 +474,7 @@
 				return el( 'div', { class: 'dgb-line is-' + line.type }, [ el( 'dt', { text: label } ), el( 'dd', { text: amount } ) ] );
 			} );
 			const list = el( 'dl', { class: 'dgb-lines' }, rows );
-			list.appendChild( el( 'div', { class: 'dgb-line is-total' }, [ el( 'dt', { text: t.total } ), el( 'dd', { text: fmt( r.total ) } ) ] ) );
+			list.appendChild( el( 'div', { class: 'dgb-line is-total' }, [ el( 'dt', { text: t.total } ), el( 'dd', { text: fmt( r.total ) + second( r.total ) } ) ] ) );
 			list.appendChild(
 				el( 'div', { class: 'dgb-line is-vat' }, [
 					el( 'dt', { text: sprintf( r.vat_inclusive ? t.includesVat : t.plusVat, r.vat_rate + '%' ) } ),

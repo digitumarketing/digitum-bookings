@@ -342,6 +342,7 @@ switch ( $dgb_action ) {
 		$dgb_out['js_after']    = wp_script_is( 'dgb-booking', 'enqueued' );
 		$dgb_out['block']       = render_block( array( 'blockName' => 'digitum-bookings/booking', 'attrs' => array( 'productId' => $dgb_args['block_product'] ?? $dgb_id ), 'innerBlocks' => array(), 'innerHTML' => '', 'innerContent' => array() ) );
 		$dgb_out['has_block']   = WP_Block_Type_Registry::get_instance()->is_registered( 'digitum-bookings/booking' );
+		$dgb_out['html']        = $dgb_html;
 		break;
 
 	case 'payments_setup':

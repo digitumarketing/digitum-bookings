@@ -196,6 +196,7 @@ final class Widget {
 				'value'      => null === $from ? 0 : (float) $from,
 			),
 			'turnstile' => $turnstile->enabled() ? (string) $all['analytics']['turnstile_site_key'] : '',
+			'second'    => ( new SecondCurrency( $this->settings ) )->config(),
 			'payment'   => Assets::payment_url(),
 			'i18n'      => self::strings(),
 		);
@@ -208,6 +209,7 @@ final class Widget {
 			'mode'         => $config->mode,
 			'seats'        => $config->seats_per_unit,
 			'from'         => null === $from ? '' : Format::money( $from, $currency ),
+			'from_second'  => null === $from ? '' : ( new SecondCurrency( $this->settings ) )->html( $from ),
 			'basis'        => self::basis( $config->mode ),
 			'variants'     => $variants,
 			'currency'     => $currency,

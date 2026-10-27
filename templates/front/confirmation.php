@@ -176,7 +176,7 @@ defined( 'ABSPATH' ) || exit;
 	<?php if ( $view['priced'] ) : ?>
 		<dl class="dgb-summary dgb-money">
 			<dt><?php esc_html_e( 'Total', 'digitum-bookings' ); ?></dt>
-			<dd><strong><?php echo esc_html( $view['total'] ); ?></strong></dd>
+			<dd><strong><?php echo esc_html( $view['total'] ); ?></strong><?php echo $view['total_second'] ?? ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in SecondCurrency::html(). ?></dd>
 			<dt><?php esc_html_e( 'Includes VAT', 'digitum-bookings' ); ?></dt>
 			<dd><?php echo esc_html( $view['vat'] ); ?></dd>
 			<?php if ( '' !== $view['deposit'] ) : ?>

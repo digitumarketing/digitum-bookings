@@ -77,6 +77,11 @@
 	font-size: 1.15rem;
 }
 
+.dgb-second {
+	unicode-bidi: isolate;
+	white-space: nowrap;
+}
+
 .dgb-close {
 	display: none;
 	position: absolute;

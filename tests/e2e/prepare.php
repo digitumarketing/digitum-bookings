@@ -47,6 +47,17 @@ if ( isset( $_COOKIE['dgb_test_locale'] ) && 'ar' === $_COOKIE['dgb_test_locale'
 		0
 	);
 }
+// Second display currency on request (v0.8): cookie dgb_test_second = "CODE:rate".
+if ( isset( $_COOKIE['dgb_test_second'] ) && preg_match( '/^([A-Z]{3}):([0-9.]+)$/', (string) $_COOKIE['dgb_test_second'], $dgb_m ) ) {
+	add_filter(
+		'option_dgb_settings',
+		static function ( $value ) use ( $dgb_m ) {
+			$value             = is_array( $value ) ? $value : array();
+			$value['currency'] = array_merge( (array) ( $value['currency'] ?? array() ), array( 'second_enabled' => true, 'second_currency' => $dgb_m[1], 'second_rate' => (float) $dgb_m[2], 'second_rounding' => 'whole', 'second_template' => '' ) );
+			return $value;
+		}
+	);
+}
 PHP
 );
 step( $site, 'install' );

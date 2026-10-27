@@ -13,6 +13,7 @@ use Digitum\Bookings\Database\Repositories\SessionRepository;
 use Digitum\Bookings\Database\Repositories\ZoneRepository;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\Frontend\Format;
+use Digitum\Bookings\Frontend\SecondCurrency;
 use Digitum\Bookings\Frontend\Widget;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Settings\Settings;
@@ -219,10 +220,11 @@ final class LlmsTxt {
 		$points  = $this->quotes->price_points( $post_id );
 		$basis   = Widget::basis( $points['mode'] );
 		$title   = self::inline( wp_strip_all_tags( get_the_title( $post_id ) ) );
+		$second  = new SecondCurrency( $this->settings );
 		$price   = null === $points['from'] || 'on_request' === $points['mode']
 			? __( 'Price on request (send an enquiry for a quote)', 'digitum-bookings' )
 			/* translators: 1: price, 2: per person, per vehicle or per car. */
-			: trim( sprintf( __( 'From %1$s %2$s', 'digitum-bookings' ), Format::money( $points['from'], $points['currency'] ), $basis ) );
+			: trim( sprintf( __( 'From %1$s %2$s', 'digitum-bookings' ), $second->append( Format::money( $points['from'], $points['currency'] ), $points['from'] ), $basis ) );
 
 		$lines = array( sprintf( '- [%s](%s): %s', $title, get_permalink( $post_id ), $price ) );
 
@@ -243,7 +245,7 @@ final class LlmsTxt {
 				$text .= ' (' . self::duration( (int) $option['duration'] ) . ')';
 			}
 			if ( null !== $option['price'] && 'on_request' !== $points['mode'] ) {
-				$text .= ' ' . Format::money( $option['price'], $points['currency'] );
+				$text .= ' ' . $second->append( Format::money( $option['price'], $points['currency'] ), $option['price'] );
 			}
 			$options[] = self::inline( $text );
 		}

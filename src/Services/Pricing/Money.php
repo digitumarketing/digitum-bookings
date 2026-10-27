@@ -15,9 +15,10 @@ defined( 'ABSPATH' ) || exit;
 final class Money {
 
 	/**
-	 * Currencies with three decimal places; every other currency has two.
+	 * Currencies with three decimal places, and without decimals; every other currency has two.
 	 */
 	private const THREE_DECIMALS = array( 'BHD', 'JOD', 'KWD', 'OMR', 'TND' );
+	private const NO_DECIMALS    = array( 'ISK', 'JPY', 'KRW', 'VND' );
 
 	/**
 	 * Decimal places of a currency.
@@ -25,7 +26,11 @@ final class Money {
 	 * @param string $currency ISO 4217 code.
 	 */
 	public static function decimals( string $currency ): int {
-		return in_array( strtoupper( $currency ), self::THREE_DECIMALS, true ) ? 3 : 2;
+		$currency = strtoupper( $currency );
+		if ( in_array( $currency, self::NO_DECIMALS, true ) ) {
+			return 0;
+		}
+		return in_array( $currency, self::THREE_DECIMALS, true ) ? 3 : 2;
 	}
 
 	/**

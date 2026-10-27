@@ -23,6 +23,13 @@ function scenario( string $letter ): bool {
 }
 
 /**
+ * JSON with readable Unicode (for searching test output).
+ */
+function wp_json_encode_n( $value ): string {
+	return (string) json_encode( $value, JSON_UNESCAPED_UNICODE );
+}
+
+/**
  * Path of a URL (for labels and requests).
  */
 function wp_make_link_relative_test( string $url ): string {
@@ -1505,6 +1512,42 @@ if ( scenario( 'M' ) ) {
 	$guide = step( $site, 'create_user', array( 'login' => 'guide1', 'role' => 'dgb_guide' ) )['id'];
 	$rs    = step( $site, 'render_admin', array( 'screen' => 'reports', 'user' => $guide, 'admin' => true ) );
 	check( ! empty( $rs['died'] ), 'guides cannot see reports' );
+}
+
+/* -------------------------------------------------------------------- */
+if ( scenario( 'N' ) ) {
+	echo "\nScenario N: v0.8 display and pricing features\n";
+	$amt  = static fn( $v ) => null === $v ? null : number_format( (float) $v, 2, '.', '' );
+	$site = make_site( 'v08-features' );
+	copy( __DIR__ . '/fake-gateways.php', "{$site}/wp-content/mu-plugins/fake-gateways.php" );
+	step( $site, 'install' );
+	step( $site, 'activate' );
+	$demo = step( $site, 'demo_setup' );
+	$rzr  = $demo['tours']['rzr'];
+	$day  = static fn( int $n ) => ( new DateTimeImmutable( '+' . $n . ' days', new DateTimeZone( 'Asia/Dubai' ) ) )->format( 'Y-m-d' );
+
+	// Second display currency (section 2).
+	$off = step( $site, 'render_page', array( 'url' => $rzr['url'] ) );
+	check( ! str_contains( $off['html'], 'dgb-second' ) && null === $off['config']['second'], 'second currency off by default: nothing shown' );
+	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_enabled' => true, 'second_currency' => 'USD', 'second_rate' => 0 ) ) ) );
+	check( ! str_contains( step( $site, 'render_page', array( 'url' => $rzr['url'] ) )['html'], 'dgb-second' ), 'switched on without a rate: still hidden' );
+	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_rate' => 3.6725 ) ) ) );
+	$on = step( $site, 'render_page', array( 'url' => $rzr['url'] ) );
+	check( str_contains( $on['html'], '<strong>AED 699.00</strong> <span class="dgb-second">(about USD 190)</span>' ), 'from price shows “AED 699.00 (about USD 190)” (whole units)' );
+	check( array( 'code' => 'USD', 'rate' => 3.6725, 'decimals' => 0, 'template' => 'about {amount}' ) === $on['config']['second'], 'widget script gets the rate for the live total' );
+	$llms = step( $site, 'llms' )['text'];
+	check( str_contains( $llms, 'From AED 699.00 (about USD 190)' ), 'llms.txt shows the second amount' );
+	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_rounding' => 'decimals', 'second_template' => '≈ {amount}' ) ) ) );
+	check( str_contains( step( $site, 'render_page', array( 'url' => $rzr['url'] ) )['html'], '(≈ USD 190.33)' ), 'two decimals and custom wording' );
+	$q = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'quote', 'body' => array( 'product' => $rzr['id'], 'variant_id' => $rzr['variants']['1 hour'], 'date' => $day( 3 ), 'session_id' => $rzr['sessions']['Evening'], 'adults' => 2, 'units' => 1 ) ) )['data'];
+	check( 'AED' === $q['currency'] && '899.00' === $amt( $q['total'] ) && ! isset( $q['second'] ), 'quotes and charges stay in the site currency' );
+	$b = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'ip' => '10.8.0.1', 'body' => array( 'product' => $rzr['id'], 'variant_id' => $rzr['variants']['1 hour'], 'date' => $day( 3 ), 'session_id' => $rzr['sessions']['Evening'], 'adults' => 2, 'units' => 1, 'payment_method' => 'arrival', 'name' => 'Second Guest', 'email' => 'second@example.com', 'phone_code' => '+1', 'phone' => '5550100', 'terms' => true ) ) );
+	$v = step( $site, 'view', array( 'reference' => $b['data']['reference'], 'link' => true ) );
+	check( 201 === $b['status'] && str_contains( $v['html'], 'AED 899.00</strong> <span class="dgb-second">(≈ USD 244.79)</span>' ), 'confirmation page shows the second amount next to the total' );
+	$m = step( $site, 'mails' );
+	check( ! empty( $m['mails'] ) && ! str_contains( (string) wp_json_encode_n( $m ), 'USD' ), 'emails stay in the site currency only' );
+	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_enabled' => false ) ) ) );
+	check( ! str_contains( step( $site, 'render_page', array( 'url' => $rzr['url'] ) )['html'], 'dgb-second' ) && ! str_contains( step( $site, 'llms' )['text'], 'USD' ), 'switched off again: gone everywhere' );
 }
 
 /* -------------------------------------------------------------------- */

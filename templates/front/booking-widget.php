@@ -40,7 +40,7 @@ $dgb_selectable = array_filter( $view['extras'], static fn( $e ) => ! $e['requir
 	<div class="dgb-teaser">
 		<p class="dgb-teaser-price">
 			<?php if ( '' !== $view['from'] && ! $dgb_enquiry ) : ?>
-				<span><?php esc_html_e( 'From', 'digitum-bookings' ); ?></span> <strong><?php echo esc_html( $view['from'] ); ?></strong> <span><?php echo esc_html( $view['basis'] ); ?></span>
+				<span><?php esc_html_e( 'From', 'digitum-bookings' ); ?></span> <strong><?php echo esc_html( $view['from'] ); ?></strong><?php echo $view['from_second'] ?? ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in SecondCurrency::html(). ?> <span><?php echo esc_html( $view['basis'] ); ?></span>
 			<?php else : ?>
 				<strong><?php esc_html_e( 'Price on request', 'digitum-bookings' ); ?></strong>
 			<?php endif; ?>
@@ -53,7 +53,7 @@ $dgb_selectable = array_filter( $view['extras'], static fn( $e ) => ! $e['requir
 			<h2 class="dgb-title" id="<?php echo esc_attr( $dgb_id ); ?>-title" tabindex="-1"><?php echo $dgb_enquiry ? esc_html__( 'Request a quote', 'digitum-bookings' ) : esc_html__( 'Book this tour', 'digitum-bookings' ); ?></h2>
 			<p class="dgb-from">
 				<?php if ( '' !== $view['from'] && ! $dgb_enquiry ) : ?>
-					<?php esc_html_e( 'From', 'digitum-bookings' ); ?> <strong><?php echo esc_html( $view['from'] ); ?></strong> <?php echo esc_html( $view['basis'] ); ?>
+					<?php esc_html_e( 'From', 'digitum-bookings' ); ?> <strong><?php echo esc_html( $view['from'] ); ?></strong><?php echo $view['from_second'] ?? ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in SecondCurrency::html(). ?> <?php echo esc_html( $view['basis'] ); ?>
 				<?php else : ?>
 					<strong><?php esc_html_e( 'Price on request', 'digitum-bookings' ); ?></strong>
 				<?php endif; ?>
@@ -351,7 +351,7 @@ $dgb_selectable = array_filter( $view['extras'], static fn( $e ) => ! $e['requir
 		<div class="dgb-sticky" data-dgb-sticky>
 			<p class="dgb-teaser-price">
 				<?php if ( '' !== $view['from'] && ! $dgb_enquiry ) : ?>
-					<span><?php esc_html_e( 'From', 'digitum-bookings' ); ?></span> <strong><?php echo esc_html( $view['from'] ); ?></strong>
+					<span><?php esc_html_e( 'From', 'digitum-bookings' ); ?></span> <strong><?php echo esc_html( $view['from'] ); ?></strong><?php echo $view['from_second'] ?? ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in SecondCurrency::html(). ?>
 				<?php else : ?>
 					<strong><?php esc_html_e( 'Price on request', 'digitum-bookings' ); ?></strong>
 				<?php endif; ?>

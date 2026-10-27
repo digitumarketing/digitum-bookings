@@ -175,6 +175,7 @@ final class Confirmation {
 			'meeting'      => $point,
 			'priced'       => BookingStatus::QUOTE_REQUESTED !== $status,
 			'total'        => Format::money( $booking['total'], $currency ),
+			'total_second' => $currency === (string) $this->settings->get( 'currency', 'currency' ) ? ( new SecondCurrency( $this->settings ) )->html( $booking['total'] ) : '',
 			'vat'          => Format::money( $booking['vat_amount'], $currency ),
 			'deposit'      => (float) $booking['deposit_amount'] > 0 ? Format::money( $booking['deposit_amount'], $currency ) : '',
 			'due'          => Format::money( $booking['balance_due'], $currency ),

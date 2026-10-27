@@ -148,25 +148,13 @@ final class Settings {
 				),
 			),
 			'currency'  => array(
-				'currency'     => array(
+				'currency'        => array(
 					'type'    => 'select',
 					'label'   => __( 'Currency', 'digitum-bookings' ),
-					'options' => array(
-						'AED' => 'AED',
-						'SAR' => 'SAR',
-						'OMR' => 'OMR',
-						'QAR' => 'QAR',
-						'BHD' => 'BHD',
-						'KWD' => 'KWD',
-						'USD' => 'USD',
-						'EUR' => 'EUR',
-						'GBP' => 'GBP',
-						'INR' => 'INR',
-						'PKR' => 'PKR',
-					),
+					'options' => array( self::class, 'currencies' ),
 					'default' => 'AED',
 				),
-				'vat_mode'     => array(
+				'vat_mode'        => array(
 					'type'    => 'select',
 					'label'   => __( 'Prices are entered', 'digitum-bookings' ),
 					'options' => array(
@@ -175,7 +163,7 @@ final class Settings {
 					),
 					'default' => 'inclusive',
 				),
-				'vat_rate'     => array(
+				'vat_rate'        => array(
 					'type'    => 'number',
 					'label'   => __( 'VAT rate', 'digitum-bookings' ),
 					'suffix'  => '%',
@@ -184,13 +172,13 @@ final class Settings {
 					'step'    => 0.01,
 					'default' => 5,
 				),
-				'trn'          => array(
+				'trn'             => array(
 					'type'    => 'text',
 					'label'   => __( 'Tax registration number (TRN)', 'digitum-bookings' ),
 					'help'    => __( 'Shown on receipts.', 'digitum-bookings' ),
 					'default' => '',
 				),
-				'weekend_days' => array(
+				'weekend_days'    => array(
 					'type'    => 'multicheck',
 					'label'   => __( 'Weekend days', 'digitum-bookings' ),
 					'help'    => __( 'A tour’s weekend uplift applies on these days.', 'digitum-bookings' ),
@@ -204,6 +192,50 @@ final class Settings {
 						'7' => __( 'Sunday', 'digitum-bookings' ),
 					),
 					'default' => array( '6', '7' ),
+				),
+				'second_heading'  => array(
+					'type'    => 'heading',
+					'label'   => __( 'Second currency', 'digitum-bookings' ),
+					'help'    => __( 'Shows an approximate amount in another currency next to prices, for example for visitors from abroad. Guests are always charged in your currency; emails, receipts and structured data only use your currency.', 'digitum-bookings' ),
+					'default' => null,
+				),
+				'second_enabled'  => array(
+					'type'    => 'checkbox',
+					'label'   => __( 'Second currency', 'digitum-bookings' ),
+					'text'    => __( 'Show prices in a second currency', 'digitum-bookings' ),
+					'default' => false,
+				),
+				'second_currency' => array(
+					'type'    => 'select',
+					'label'   => __( 'Second currency', 'digitum-bookings' ),
+					'options' => array( self::class, 'second_currencies' ),
+					'default' => '',
+				),
+				'second_rate'     => array(
+					'type'    => 'number',
+					'label'   => __( 'Exchange rate', 'digitum-bookings' ),
+					'suffix'  => __( 'of your currency = 1 unit of the second currency', 'digitum-bookings' ),
+					'help'    => __( 'Not updated automatically. With no rate the second amount stays hidden.', 'digitum-bookings' ),
+					'min'     => 0,
+					'max'     => 1000000,
+					'step'    => 0.000001,
+					'default' => 0,
+				),
+				'second_rounding' => array(
+					'type'    => 'select',
+					'label'   => __( 'Round the second amount to', 'digitum-bookings' ),
+					'options' => array(
+						'whole'    => __( 'Whole units', 'digitum-bookings' ),
+						'decimals' => __( 'Two decimals', 'digitum-bookings' ),
+					),
+					'default' => 'whole',
+				),
+				'second_template' => array(
+					'type'    => 'text',
+					'label'   => __( 'Wording', 'digitum-bookings' ),
+					/* translators: {amount} is a placeholder: keep it as it is. */
+					'help'    => __( '{amount} is replaced by the converted amount. Empty: “about {amount}” in the visitor’s language.', 'digitum-bookings' ),
+					'default' => '',
 				),
 			),
 			'payments'  => array(
@@ -603,6 +635,25 @@ final class Settings {
 			$hours[ $value ] = $value;
 		}
 		return $hours;
+	}
+
+	/**
+	 * Currencies a site can use (ISO 4217).
+	 *
+	 * @return array<string, string>
+	 */
+	public static function currencies(): array {
+		$codes = array( 'AED', 'AUD', 'BHD', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EGP', 'EUR', 'GBP', 'HKD', 'HUF', 'IDR', 'ILS', 'INR', 'ISK', 'JOD', 'JPY', 'KES', 'KRW', 'KWD', 'LKR', 'MAD', 'MXN', 'MYR', 'NOK', 'NZD', 'OMR', 'PHP', 'PKR', 'PLN', 'QAR', 'RON', 'SAR', 'SEK', 'SGD', 'THB', 'TND', 'TRY', 'TWD', 'TZS', 'USD', 'VND', 'ZAR' );
+		return array_combine( $codes, $codes );
+	}
+
+	/**
+	 * Second currency choices (none first).
+	 *
+	 * @return array<string, string>
+	 */
+	public static function second_currencies(): array {
+		return array( '' => __( '— Choose —', 'digitum-bookings' ) ) + self::currencies();
 	}
 
 	/**
