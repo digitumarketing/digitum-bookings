@@ -1523,6 +1523,9 @@ if ( scenario( 'N' ) ) {
 	$site = make_site( 'v08-features', null, $home );
 	copy( __DIR__ . '/fake-gateways.php', "{$site}/wp-content/mu-plugins/fake-gateways.php" );
 	copy( __DIR__ . '/fake-site-reviews.php', "{$site}/wp-content/mu-plugins/fake-site-reviews.php" );
+	copy( __DIR__ . '/fake-elementor.php', "{$site}/wp-content/mu-plugins/fake-elementor.php" );
+	mkdir( "{$site}/wp-content/mu-plugins/fake-elementor" );
+	copy( __DIR__ . '/fake-elementor/classes.php', "{$site}/wp-content/mu-plugins/fake-elementor/classes.php" );
 	step( $site, 'install' );
 	step( $site, 'activate' );
 	$demo = step( $site, 'demo_setup' );
@@ -1654,6 +1657,74 @@ if ( scenario( 'N' ) ) {
 	check( str_contains( $rs['html'], 'data-dgb-report="offers"' ), 'Reports screen shows the offers table' );
 	$screen = step( $site, 'render_admin', array( 'screen' => 'offers', 'admin' => true ) );
 	check( str_contains( $screen['html'], 'Pickup deal' ) && str_contains( $screen['html'], 'Hotel pickup free' ) && str_contains( $screen['html'], '2+ vehicles or cars' ), 'Offers screen lists the offer with its effect and conditions' );
+
+	// Tour details for page builders (section 5).
+	$ny    = $demo['tours']['newyear'];
+	$group = step( $site, 'create_post', array( 'type' => 'dgb_tour', 'title' => 'Sample Group Tour', 'slug' => 'sample-group' ) );
+	step( $site, 'save_box', array( 'post' => $group['id'], 'admin' => true, 'dgb' => array( 'product' => array( 'enabled' => '1', 'pricing_mode' => 'per_group', 'max_pax_per_unit' => '4', 'pickup_policy' => 'none', 'min_age' => '0', 'licence_required' => '1', 'inclusions' => "- Water\n- Guide\n\n", 'exclusions' => '* Tips', 'requirements' => "1. Closed shoes" ), 'variants' => array( array( 'label' => 'Private car', 'duration_minutes' => '90', 'price' => '500', 'active' => '1' ) ), 'sessions' => array( array( 'name' => 'Day', 'type' => 'fixed', 'start_time' => '10:00', 'days_of_week' => array( '1', '2', '3', '4', '5', '6', '7' ), 'active' => '1' ) ), 'addons' => array() ) ) );
+	$empty = step( $site, 'create_post', array( 'type' => 'dgb_tour', 'title' => 'Sample Empty Tour', 'slug' => 'sample-empty' ) );
+	step( $site, 'save_box', array( 'post' => $empty['id'], 'admin' => true, 'dgb' => array( 'product' => array( 'enabled' => '1', 'pricing_mode' => 'per_person' ), 'variants' => array(), 'sessions' => array(), 'addons' => array() ) ) );
+	$codes = array(
+		'from'       => '[dgb_from_price]',
+		'from_plain' => '[dgb_from_price basis="no" second_currency="no"]',
+		'table'      => '[dgb_price_table]',
+		'incl'       => '[dgb_tour_list field="inclusions"]',
+		'excl'       => '[dgb_tour_list field="exclusions"]',
+		'req'        => '[dgb_tour_list field="requirements" style="check"]',
+		'facts'      => '[dgb_tour_facts]',
+		'some'       => '[dgb_tour_facts fields="pickup, duration"]',
+	);
+	$o = static fn( int $post, array $extra = array() ) => step( $site, 'outputs', array( 'post' => $post, 'shortcodes' => $codes + $extra ) )['shortcodes'];
+	$r = $o( $rzr['id'] );
+	check( 1 === substr_count( implode( '', $r ), '<style id="dgb-outputs-css">' ) && strlen( (string) preg_replace( '#^.*?<style id="dgb-outputs-css">(.*?)</style>.*$#s', '$1', $r['from'] ) ) < 1024, 'inline stylesheet printed once per page, under 1 KB' );
+	check( str_contains( $r['from'], 'From <strong class="dgb-from-price__amount">AED 699.00</strong> <span class="dgb-from-price__basis">per vehicle</span>' ) && str_contains( $r['from_plain'], '<strong class="dgb-from-price__amount">AED 699.00</strong></span>' ), 'from price per vehicle, with or without its basis' );
+	check( str_contains( $r['table'], '<th scope="row" class="dgb-price-table__option">30 min</th><td class="dgb-price-table__duration">30 min</td>' ) && str_contains( $r['table'], 'AED 349.50 (2 people)' ) && 3 === substr_count( $r['table'], '<tr><th scope="row"' ), 'price table: every option, duration, per-person share of a 2-seater' );
+	check( str_contains( $r['facts'], 'Up to 2 people per vehicle' ) && str_contains( $r['facts'], '16 years' ) && str_contains( $r['facts'], 'Hotel pickup on request (+AED 300.00 per booking)' ) && str_contains( $r['facts'], 'href="https://maps.example/al-aweer"' ) && str_contains( $r['facts'], '30 min – 2 h<' ) && str_contains( $r['facts'], 'Evening: starts 3:30 pm, pickup 2:15 pm – 2:45 pm' ), 'tour facts: group size, age, pickup with price, map link, durations, sessions with pickup windows' );
+	check( 2 === substr_count( $r['some'], '<dt>' ) && strpos( $r['some'], 'Pickup' ) < strpos( $r['some'], 'Duration' ), 'facts limited to chosen fields, in their order' );
+	check( '' === $r['incl'] && '' === $r['excl'], 'empty lists print nothing' );
+	$g = $o( $group['id'] );
+	check( str_contains( $g['from'], 'AED 500.00' ) && str_contains( $g['from'], 'per car' ) && str_contains( $g['table'], 'AED 125.00 (4 people)' ), 'per group: from price per car, per-person share of 4' );
+	check( str_contains( $g['incl'], 'dgb-tour-list--check' ) && 2 === substr_count( $g['incl'], '<li' ) && str_contains( $g['incl'], '>Water</li>' ) && str_contains( $g['excl'], 'dgb-tour-list--cross' ) && str_contains( $g['excl'], '>Tips</li>' ) && str_contains( $g['req'], 'dgb-tour-list--check' ) && str_contains( $g['req'], '>Closed shoes</li>' ), 'lists from the tour meta, markers removed, styles by field or attribute' );
+	check( str_contains( $g['facts'], 'A driving licence is required' ) && str_contains( $g['facts'], 'Up to 4 guests per car' ) && str_contains( $g['facts'], 'Meet at the meeting point' ) && ! str_contains( $g['facts'], 'Minimum age' ), 'facts of a group tour' );
+	$s = $o( $saf['id'] );
+	check( str_contains( $s['from'], 'AED 99.00' ) && str_contains( $s['from'], 'per person' ) && ! str_contains( $s['table'], 'Per person</th>' ) && str_contains( $s['facts'], 'Hotel pickup included' ), 'per person: price, no share column, pickup included' );
+	$n = $o( $ny['id'] );
+	check( str_contains( $n['from'], 'Price on request' ) && ! preg_match( '/AED|\d+\.\d\d/', $n['from'] . $n['table'] ) && str_contains( $n['table'], 'Price on request' ) && str_contains( $n['facts'], 'Price on request' ), 'price on request: never a price' );
+	$e = $o( $empty['id'] );
+	check( '' === $e['table'] && str_contains( $e['from'], 'Price on request' ), 'tour without options: no table, no price' );
+	$x = $o( 0, array( 'by_id' => '[dgb_price_table id="' . $rzr['id'] . '"]' ) );
+	check( '' === $x['from'] && '' === $x['table'] && str_contains( $x['by_id'], '30 min' ), 'outside a tour nothing is printed, unless id is given' );
+	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_enabled' => true, 'second_currency' => 'USD', 'second_rate' => 3.6725, 'second_rounding' => 'whole', 'second_template' => '' ) ) ) );
+	$r2 = $o( $rzr['id'] );
+	check( str_contains( $r2['from'], '<span class="dgb-second">(about USD 190)</span>' ) && ! str_contains( $r2['from_plain'], 'USD' ) && str_contains( $r2['table'], '(about USD 245)' ), 'second currency on: from price and table; second_currency="no" hides it' );
+	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_enabled' => false ) ) ) );
+
+	$b = step( $site, 'outputs', array( 'post' => $rzr['id'], 'blocks' => array( 'from' => array( 'digitum-bookings/from-price', array( 'showBasis' => true, 'secondCurrency' => true ) ), 'table' => array( 'digitum-bookings/price-table', array() ), 'list' => array( 'digitum-bookings/tour-list', array( 'productId' => $group['id'], 'field' => 'exclusions' ) ), 'facts' => array( 'digitum-bookings/tour-facts', array( 'fields' => 'capacity' ) ) ) ) );
+	check( array( 'digitum-bookings/booking', 'digitum-bookings/from-price', 'digitum-bookings/price-table', 'digitum-bookings/tour-list', 'digitum-bookings/tour-facts' ) === $b['registered'], 'blocks registered: from price, price table, tour list, tour facts' );
+	check( str_contains( $b['blocks']['from'], 'AED 699.00' ) && str_contains( $b['blocks']['table'], '2 hours' ) && str_contains( $b['blocks']['list'], '>Tips</li>' ) && str_contains( $b['blocks']['facts'], 'Up to 2 people per vehicle' ), 'blocks render the same output as the shortcodes' );
+
+	$el = step( $site, 'elementor', array( 'post' => $rzr['id'] ) );
+	check( array() === $el['widgets'] && array() === $el['tags'], 'without Elementor nothing is registered' );
+	step( $site, 'set_option', array( 'name' => 'dgb_fake_elementor', 'value' => 1 ) );
+	$el = step( $site, 'elementor', array( 'post' => $rzr['id'], 'render' => array(
+		'table' => array( 'dgb_price_table', array() ),
+		'list'  => array( 'dgb_tour_list', array( 'product_id' => $group['id'], 'field' => 'inclusions' ) ),
+		'facts' => array( 'dgb_tour_facts', array( 'fields' => 'age' ) ),
+		'from'  => array( 'dgb-from-price', array() ),
+		'age'   => array( 'dgb-min-age', array() ),
+		'seats' => array( 'dgb-seats', array() ),
+		'pick'  => array( 'dgb-pickup', array() ),
+		'point' => array( 'dgb-meeting-point', array() ),
+		'next'  => array( 'dgb-next-pickup', array() ),
+		'map'   => array( 'dgb-map-link', array() ),
+		'nyf'   => array( 'dgb-from-price', array( 'product_id' => $ny['id'] ) ),
+	) ) );
+	check( array( 'dgb_booking', 'dgb_price_table', 'dgb_tour_list', 'dgb_tour_facts' ) === array_keys( $el['widgets'] ) && 7 === count( $el['tags'] ) && isset( $el['groups']['digitum-bookings'] ), 'with Elementor: 4 widgets and 7 dynamic tags in a “Digitum Bookings” group' );
+	$h = $el['html'];
+	check( str_contains( $h['table'], '1 hour' ) && str_contains( $h['list'], '>Guide</li>' ) && str_contains( $h['facts'], '16 years' ), 'Elementor widgets: price table, tour list, tour facts' );
+	check( 'From AED 699.00 per vehicle' === $h['from'] && '16' === $h['age'] && '2' === $h['seats'] && 'Hotel pickup on request (+AED 300.00 per booking)' === $h['pick'] && 'Al Aweer desert' === $h['point'] && in_array( $h['next'], array( '6:45 am – 7:15 am', '2:15 pm – 2:45 pm' ), true ), 'dynamic tags: from price, minimum age, seats, pickup, meeting point, next pickup window' );
+	check( 'https://maps.example/al-aweer' === $h['map'] && 'Price on request' === $h['nyf'], 'dynamic tags: map link (URL); price on request' );
+	step( $site, 'set_option', array( 'name' => 'dgb_fake_elementor', 'value' => 0 ) );
 }
 
 /* -------------------------------------------------------------------- */

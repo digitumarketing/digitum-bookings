@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "digitum-bookings/tour-list",
+  "title": "Tour list",
+  "category": "widgets",
+  "icon": "list-view",
+  "description": "What is included, not included, or the requirements of the tour. Leave the tour empty to use the tour being viewed.",
+  "keywords": [
+    "tour",
+    "price",
+    "digitum"
+  ],
+  "textdomain": "digitum-bookings",
+  "attributes": {
+    "productId": {
+      "type": "number",
+      "default": 0
+    },
+    "field": {
+      "type": "string",
+      "default": "inclusions"
+    },
+    "style": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false
+  }
+}

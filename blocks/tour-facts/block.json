@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "digitum-bookings/tour-facts",
+  "title": "Tour facts",
+  "category": "widgets",
+  "icon": "info-outline",
+  "description": "Key facts: duration, price basis, group size, age, licence, pickup, meeting point and sessions. Leave the tour empty to use the tour being viewed.",
+  "keywords": [
+    "tour",
+    "price",
+    "digitum"
+  ],
+  "textdomain": "digitum-bookings",
+  "attributes": {
+    "productId": {
+      "type": "number",
+      "default": 0
+    },
+    "fields": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false
+  }
+}

@@ -968,6 +968,58 @@ switch ( $dgb_action ) {
 		$dgb_out['html'] = ob_get_clean();
 		break;
 
+	case 'outputs':
+		// Tour detail outputs (v0.8): shortcodes and blocks in the loop of a tour (or of another page).
+		global $wp_query, $wp_the_query;
+		\Digitum\Bookings\Frontend\TourOutputs::reset();
+		$dgb_id       = (int) ( $dgb_args['post'] ?? 0 );
+		$wp_query     = new WP_Query( array( 'p' => $dgb_id, 'post_type' => 'any' ) );
+		$wp_the_query = $wp_query;
+		if ( $dgb_id ) {
+			$wp_query->the_post();
+		}
+		foreach ( (array) ( $dgb_args['shortcodes'] ?? array() ) as $dgb_key => $dgb_code ) {
+			$dgb_out['shortcodes'][ $dgb_key ] = do_shortcode( $dgb_code );
+		}
+		foreach ( (array) ( $dgb_args['blocks'] ?? array() ) as $dgb_key => $dgb_block ) {
+			$dgb_out['blocks'][ $dgb_key ] = render_block( array( 'blockName' => $dgb_block[0], 'attrs' => $dgb_block[1], 'innerBlocks' => array(), 'innerHTML' => '', 'innerContent' => array() ) );
+		}
+		$dgb_out['registered'] = array_values( array_filter( array_keys( WP_Block_Type_Registry::get_instance()->get_all_registered() ), static fn( $n ) => str_starts_with( $n, 'digitum-bookings/' ) ) );
+		break;
+
+	case 'elementor':
+		// Elementor widgets and dynamic tags, with the stand-in classes (fake-elementor.php).
+		global $wp_query, $wp_the_query;
+		\Digitum\Bookings\Frontend\TourOutputs::reset();
+		$dgb_id       = (int) ( $dgb_args['post'] ?? 0 );
+		$wp_query     = new WP_Query( array( 'p' => $dgb_id, 'post_type' => 'any' ) );
+		$wp_the_query = $wp_query;
+		if ( $dgb_id ) {
+			$wp_query->the_post();
+		}
+		$dgb_make    = static fn() => new class() {
+			public array $items = array();
+			public array $groups = array();
+			public function register( $item ) {
+				$this->items[ $item->get_name() ] = get_class( $item );
+			}
+			public function register_group( $name, $args ) {
+				$this->groups[ $name ] = $args;
+			}
+		};
+		$dgb_manager = $dgb_make();
+		do_action( 'elementor/widgets/register', $dgb_manager );
+		$dgb_tags = $dgb_make();
+		do_action( 'elementor/dynamic_tags/register', $dgb_tags );
+		$dgb_out['widgets'] = $dgb_manager->items;
+		$dgb_out['tags']    = $dgb_tags->items;
+		$dgb_out['groups']  = $dgb_tags->groups;
+		foreach ( (array) ( $dgb_args['render'] ?? array() ) as $dgb_key => $dgb_r ) {
+			$dgb_class = $dgb_manager->items[ $dgb_r[0] ] ?? $dgb_tags->items[ $dgb_r[0] ] ?? null;
+			$dgb_out['html'][ $dgb_key ] = $dgb_class ? ( new $dgb_class( array( 'settings' => $dgb_r[1] ) ) )->dgb_output() : null;
+		}
+		break;
+
 	case 'offer_save':
 		$dgb_data = \Digitum\Bookings\Database\Repositories\OfferRepository::sanitize( $dgb_args['offer'] );
 		if ( is_wp_error( $dgb_data ) ) {

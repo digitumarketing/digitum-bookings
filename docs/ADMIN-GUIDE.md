@@ -13,6 +13,19 @@ For the people who run bookings day to day. Menu: **Digitum Bookings**.
 7. **Settings › Emails**: sender, staff recipients, reminder time; **Digitum Bookings › Emails › Send test email** checks that mail arrives (install an SMTP plugin if it does not).
 8. To try the plugin with sample content first, import a **demo pack** (Tools › Demo data) and remove it again in one click when you are done. A fresh install has no demo content.
 
+## Prices and tour details on any page
+
+Cards, hub pages and tour templates can show the same prices and details as the booking widget; they always come from the tour's own booking settings, so there is nothing to retype when a price changes. Leave the tour empty to use the tour being viewed (or the one in a loop of tour cards).
+
+| What | Shortcode | Block / Elementor |
+|---|---|---|
+| “From AED 699.00 per vehicle”, or “Price on request” | `[dgb_from_price id="123" basis="yes" second_currency="yes"]` | “From price” block, Elementor dynamic tag **From price** (Digitum Bookings group) |
+| Table of all options: option, duration, price, and the price per person for vehicles and private cars | `[dgb_price_table id="123"]` | “Price table” block and Elementor widget |
+| Included, not included, requirements (from Booking settings; one item per line) | `[dgb_tour_list id="123" field="inclusions" style="check"]` (`field`: inclusions, exclusions, requirements; `style`: check, cross, plain) | “Tour list” block and Elementor widget |
+| Key facts: duration, price basis, group size, minimum age, licence, pickup, meeting point, sessions with pickup times | `[dgb_tour_facts id="123" fields="duration,pickup,sessions"]` (empty `fields` shows all) | “Tour facts” block and Elementor widget |
+
+Elementor also has dynamic tags for single values: minimum age, seats or guests per car, pickup policy, meeting point name, meeting point map link (for buttons) and the next pickup window. A small stylesheet (under 1 KB) is added once per page; it follows the widget colours of Settings › Branding.
+
 ## Every day
 
 - **Dashboard**: today's sessions (bookings, guests, pickups, unpaid), revenue for the last 7 and 30 days, open quote requests and bank transfers waiting, each with **Mark as paid** and the screenshot when the guest sent one.

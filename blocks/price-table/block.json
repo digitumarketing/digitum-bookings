@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "digitum-bookings/price-table",
+  "title": "Price table",
+  "category": "widgets",
+  "icon": "editor-table",
+  "description": "Every option of the tour with its duration and price. Leave the tour empty to use the tour being viewed.",
+  "keywords": [
+    "tour",
+    "price",
+    "digitum"
+  ],
+  "textdomain": "digitum-bookings",
+  "attributes": {
+    "productId": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "supports": {
+    "html": false
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "digitum-bookings/from-price",
+  "title": "From price",
+  "category": "widgets",
+  "icon": "money-alt",
+  "description": "The tour’s “From” price with its basis, or “Price on request”. Leave the tour empty to use the tour being viewed.",
+  "keywords": [
+    "tour",
+    "price",
+    "digitum"
+  ],
+  "textdomain": "digitum-bookings",
+  "attributes": {
+    "productId": {
+      "type": "number",
+      "default": 0
+    },
+    "showBasis": {
+      "type": "boolean",
+      "default": true
+    },
+    "secondCurrency": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "supports": {
+    "html": false
+  }
+}

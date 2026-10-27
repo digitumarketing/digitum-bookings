@@ -27,9 +27,11 @@ use Digitum\Bookings\Frontend\Assets;
 use Digitum\Bookings\Frontend\Placement;
 use Digitum\Bookings\Frontend\ProofForm;
 use Digitum\Bookings\Frontend\SchemaOutput;
+use Digitum\Bookings\Frontend\TourOutputs;
 use Digitum\Bookings\Frontend\Widget;
 use Digitum\Bookings\Integrations\Elementor\ElementorIntegration;
 use Digitum\Bookings\Integrations\Gutenberg\BookingBlock;
+use Digitum\Bookings\Integrations\Gutenberg\TourBlocks;
 use Digitum\Bookings\Integrations\RankMath\RankMathSchema;
 use Digitum\Bookings\Integrations\Yoast\YoastSchema;
 use Digitum\Bookings\Rest\AdminController;
@@ -152,8 +154,11 @@ final class Plugin {
 		$widget = new Widget( $this->settings, $this->product_type, $quotes, $assets );
 		$assets->register_hooks();
 		( new Placement( $this->settings, $this->product_type, $widget ) )->register_hooks();
+		$outputs = new TourOutputs( $this->settings, $this->product_type, $quotes );
+		$outputs->register_hooks();
 		( new BookingBlock( $widget ) )->register_hooks();
-		( new ElementorIntegration( $widget ) )->register_hooks();
+		( new TourBlocks( $outputs ) )->register_hooks();
+		( new ElementorIntegration( $widget, $outputs ) )->register_hooks();
 		( new PublicController(
 			$this->settings,
 			$this->product_type,

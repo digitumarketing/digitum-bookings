@@ -71,6 +71,10 @@ New versions appear under Dashboard › Updates like any other plugin.
 
 On tour pages it appears automatically (Settings › General › Booking widget). Anywhere else, use the "Booking widget" block, the Elementor widget, or the shortcode [dgb_booking product="123"].
 
+= Can I show the price or tour details in my theme's cards? =
+
+Yes: [dgb_from_price], [dgb_price_table], [dgb_tour_list field="inclusions"] and [dgb_tour_facts] (or the blocks and Elementor widgets of the same names, and Elementor dynamic tags). They use the same prices as the booking widget.
+
 = Can I change the widget's markup? =
 
 Copy `templates/front/booking-widget.php` to `your-theme/digitum-bookings/front/booking-widget.php` and edit the copy.
@@ -122,6 +126,7 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 * Optional second display currency next to prices.
 * Rating source for structured data: Site Reviews, or a developer filter; no rating without real reviews.
 * Automatic offers (discounts without a code) with conditions, priorities and an optional “add one more” hint.
+* From price, price table, tour lists and key facts as shortcodes, blocks, Elementor widgets and dynamic tags.
 
 = 0.7.0 =
 * Updates from GitHub releases (Dashboard › Updates, automatic updates, private repository token).
