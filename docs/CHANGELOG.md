@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.1
+
+- Main currency can show whole units, e.g. AED 699 instead of AED 699.00. New setting Settings › Currency & VAT › **Show prices as**: “Currency default” (default, so existing sites do not change) or “Whole units when the amount has no fraction” (349.50 still shows its decimals). Display only (`Money::display_decimals()`, used by `Format::money()` and the booking widget's `wholeUnits` flag): totals, payments, gateways and structured data keep full ISO precision.
+
 ## 0.8.0 (generic gap fixes)
 
 Everything new is off by default.

@@ -1544,6 +1544,16 @@ if ( scenario( 'N' ) ) {
 	check( array( 'code' => 'USD', 'rate' => 3.6725, 'decimals' => 0, 'template' => 'about {amount}' ) === $on['config']['second'], 'widget script gets the rate for the live total' );
 	$llms = step( $site, 'llms' )['text'];
 	check( str_contains( $llms, 'From AED 699.00 (about USD 190)' ), 'llms.txt shows the second amount' );
+
+	// Whole units for the site currency: display only, schema and money keep full precision.
+	check( false === $on['config']['wholeUnits'], 'currency default: widget keeps decimals' );
+	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'display_rounding' => 'whole' ) ) ) );
+	$whole = step( $site, 'render_page', array( 'url' => $buggy['url'] ) );
+	check( str_contains( $whole['html'], '<strong>AED 699</strong>' ) && ! str_contains( $whole['html'], 'AED 699.00' ) && true === $whole['config']['wholeUnits'] && 2 === $whole['config']['decimals'], 'whole units: “AED 699” on the page, widget told to drop .00' );
+	check( str_contains( step( $site, 'llms' )['text'], 'From AED 699 (about USD 190)' ), 'whole units: llms.txt' );
+	$sc = step( $site, 'schema', array( 'post' => $buggy['id'] ) );
+	check( 'AED 699' === $sc['visible'] && '699.00' === $amt( $sc['points']['from'] ) && '699.00' === $amt( $sc['node']['offers']['lowPrice'] ) && str_contains( (string) $sc['node']['offers']['lowPrice'], '.' ), 'whole units: schema price keeps full precision' );
+	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'display_rounding' => 'decimals' ) ) ) );
 	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_rounding' => 'decimals', 'second_template' => '≈ {amount}' ) ) ) );
 	check( str_contains( step( $site, 'render_page', array( 'url' => $buggy['url'] ) )['html'], '(≈ USD 190.33)' ), 'two decimals and custom wording' );
 	$q = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'quote', 'body' => array( 'product' => $buggy['id'], 'variant_id' => $buggy['variants']['1 hour'], 'date' => $day( 3 ), 'session_id' => $buggy['sessions']['Evening'], 'adults' => 2, 'units' => 1 ) ) )['data'];

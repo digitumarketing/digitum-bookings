@@ -5259,6 +5259,22 @@ msgid "Currency"
 msgstr ""
 
 #: src/Settings/Settings.php:173
+msgid "Show prices as"
+msgstr ""
+
+#: src/Settings/Settings.php:174
+msgid "Display only: amounts with a fraction, such as 349.50, keep their decimals, and payments always use the full amount."
+msgstr ""
+
+#: src/Settings/Settings.php:176
+msgid "Currency default (e.g. 699.00)"
+msgstr ""
+
+#: src/Settings/Settings.php:177
+msgid "Whole units when the amount has no fraction (e.g. 699)"
+msgstr ""
+
+#: src/Settings/Settings.php:173
 msgid "Prices are entered"
 msgstr ""
 

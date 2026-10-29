@@ -17,13 +17,13 @@ defined( 'ABSPATH' ) || exit;
 final class Format {
 
 	/**
-	 * "AED 1,199.00".
+	 * "AED 1,199.00", or "AED 1,199" when the site shows whole units.
 	 *
 	 * @param string|float|null $amount   Decimal amount.
 	 * @param string            $currency Currency code.
 	 */
 	public static function money( $amount, string $currency ): string {
-		return $currency . ' ' . number_format_i18n( (float) $amount, Money::decimals( $currency ) );
+		return $currency . ' ' . number_format_i18n( (float) $amount, Money::display_decimals( $currency, $amount ) );
 	}
 
 	/**
