@@ -162,13 +162,23 @@ final class Settings {
 				),
 			),
 			'currency'  => array(
-				'currency'        => array(
+				'currency'         => array(
 					'type'    => 'select',
 					'label'   => __( 'Currency', 'digitum-bookings' ),
 					'options' => array( self::class, 'currencies' ),
 					'default' => self::default_currency(),
 				),
-				'vat_mode'        => array(
+				'display_rounding' => array(
+					'type'    => 'select',
+					'label'   => __( 'Show prices as', 'digitum-bookings' ),
+					'help'    => __( 'Display only: amounts with a fraction, such as 349.50, keep their decimals, and payments always use the full amount.', 'digitum-bookings' ),
+					'options' => array(
+						'decimals' => __( 'Currency default (e.g. 699.00)', 'digitum-bookings' ),
+						'whole'    => __( 'Whole units when the amount has no fraction (e.g. 699)', 'digitum-bookings' ),
+					),
+					'default' => 'decimals',
+				),
+				'vat_mode'         => array(
 					'type'    => 'select',
 					'label'   => __( 'Prices are entered', 'digitum-bookings' ),
 					'options' => array(
@@ -177,7 +187,7 @@ final class Settings {
 					),
 					'default' => 'inclusive',
 				),
-				'vat_rate'        => array(
+				'vat_rate'         => array(
 					'type'    => 'number',
 					'label'   => __( 'VAT rate', 'digitum-bookings' ),
 					'suffix'  => '%',
@@ -186,13 +196,13 @@ final class Settings {
 					'step'    => 0.01,
 					'default' => 0,
 				),
-				'trn'             => array(
+				'trn'              => array(
 					'type'    => 'text',
 					'label'   => __( 'Tax registration number (TRN)', 'digitum-bookings' ),
 					'help'    => __( 'Shown on receipts.', 'digitum-bookings' ),
 					'default' => '',
 				),
-				'weekend_days'    => array(
+				'weekend_days'     => array(
 					'type'    => 'multicheck',
 					'label'   => __( 'Weekend days', 'digitum-bookings' ),
 					'help'    => __( 'A tour’s weekend uplift applies on these days.', 'digitum-bookings' ),
@@ -207,25 +217,25 @@ final class Settings {
 					),
 					'default' => array( '6', '7' ),
 				),
-				'second_heading'  => array(
+				'second_heading'   => array(
 					'type'    => 'heading',
 					'label'   => __( 'Second currency', 'digitum-bookings' ),
 					'help'    => __( 'Shows an approximate amount in another currency next to prices, for example for visitors from abroad. Guests are always charged in your currency; emails, receipts and structured data only use your currency.', 'digitum-bookings' ),
 					'default' => null,
 				),
-				'second_enabled'  => array(
+				'second_enabled'   => array(
 					'type'    => 'checkbox',
 					'label'   => __( 'Second currency', 'digitum-bookings' ),
 					'text'    => __( 'Show prices in a second currency', 'digitum-bookings' ),
 					'default' => false,
 				),
-				'second_currency' => array(
+				'second_currency'  => array(
 					'type'    => 'select',
 					'label'   => __( 'Second currency', 'digitum-bookings' ),
 					'options' => array( self::class, 'second_currencies' ),
 					'default' => '',
 				),
-				'second_rate'     => array(
+				'second_rate'      => array(
 					'type'    => 'number',
 					'label'   => __( 'Exchange rate', 'digitum-bookings' ),
 					'suffix'  => __( 'of your currency = 1 unit of the second currency', 'digitum-bookings' ),
@@ -235,7 +245,7 @@ final class Settings {
 					'step'    => 0.000001,
 					'default' => 0,
 				),
-				'second_rounding' => array(
+				'second_rounding'  => array(
 					'type'    => 'select',
 					'label'   => __( 'Round the second amount to', 'digitum-bookings' ),
 					'options' => array(
@@ -244,7 +254,7 @@ final class Settings {
 					),
 					'default' => 'whole',
 				),
-				'second_template' => array(
+				'second_template'  => array(
 					'type'    => 'text',
 					'label'   => __( 'Wording', 'digitum-bookings' ),
 					/* translators: {amount} is a placeholder: keep it as it is. */

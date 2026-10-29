@@ -5600,6 +5600,22 @@ msgid "Currency"
 msgstr "العملة"
 
 #: src/Settings/Settings.php:173
+msgid "Show prices as"
+msgstr "عرض الأسعار"
+
+#: src/Settings/Settings.php:174
+msgid "Display only: amounts with a fraction, such as 349.50, keep their decimals, and payments always use the full amount."
+msgstr "للعرض فقط: المبالغ التي فيها كسور، مثل 349.50، تبقى بخاناتها العشرية، وتُدفع المبالغ دائمًا كاملة."
+
+#: src/Settings/Settings.php:176
+msgid "Currency default (e.g. 699.00)"
+msgstr "الافتراضي للعملة (مثل 699.00)"
+
+#: src/Settings/Settings.php:177
+msgid "Whole units when the amount has no fraction (e.g. 699)"
+msgstr "وحدات كاملة عندما لا يكون في المبلغ كسور (مثل 699)"
+
+#: src/Settings/Settings.php:173
 msgid "Prices are entered"
 msgstr "إدخال الأسعار"
 

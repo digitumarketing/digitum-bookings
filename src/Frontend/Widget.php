@@ -169,8 +169,8 @@ final class Widget {
 		$policy    = (string) $product->get( 'pickup_policy' );
 
 		$script = array(
-			'id'        => $id,
-			'product'   => array(
+			'id'         => $id,
+			'product'    => array(
 				'id'        => $product_id,
 				'name'      => $title,
 				'mode'      => $config->mode,
@@ -178,31 +178,32 @@ final class Widget {
 				'maxPax'    => $config->max_pax_per_unit,
 				'onRequest' => $on_req,
 			),
-			'variants'  => $variants,
-			'pickup'    => array(
+			'variants'   => $variants,
+			'pickup'     => array(
 				'policy'  => $policy,
 				'default' => (string) $product->get( 'pickup_default' ),
 				'price'   => $pickup_price,
 			),
-			'zones'     => $zones,
-			'currency'  => $currency,
-			'decimals'  => Money::decimals( $currency ),
-			'locale'    => str_replace( '_', '-', determine_locale() ),
-			'today'     => $now->format( 'Y-m-d' ),
-			'rest'      => array(
+			'zones'      => $zones,
+			'currency'   => $currency,
+			'decimals'   => Money::decimals( $currency ),
+			'wholeUnits' => Money::whole_units(),
+			'locale'     => str_replace( '_', '-', determine_locale() ),
+			'today'      => $now->format( 'Y-m-d' ),
+			'rest'       => array(
 				'root'     => esc_url_raw( rest_url( 'dgb/v1/' ) ),
 				'wpNonce'  => wp_create_nonce( 'wp_rest' ),
 				'dgbNonce' => wp_create_nonce( 'dgb_booking' ),
 			),
-			'analytics' => array(
+			'analytics'  => array(
 				'enabled'    => ! empty( $all['analytics']['datalayer'] ),
 				'cookieDays' => (int) $all['analytics']['attribution_days'],
 				'value'      => null === $from ? 0 : (float) $from,
 			),
-			'turnstile' => $turnstile->enabled() ? (string) $all['analytics']['turnstile_site_key'] : '',
-			'second'    => ( new SecondCurrency( $this->settings ) )->config(),
-			'payment'   => Assets::payment_url(),
-			'i18n'      => self::strings(),
+			'turnstile'  => $turnstile->enabled() ? (string) $all['analytics']['turnstile_site_key'] : '',
+			'second'     => ( new SecondCurrency( $this->settings ) )->config(),
+			'payment'    => Assets::payment_url(),
+			'i18n'       => self::strings(),
 		);
 
 		return array(

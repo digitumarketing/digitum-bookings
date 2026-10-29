@@ -4,7 +4,7 @@ Tags: bookings, tours, activities, reservations, deposits
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.8.0
+Stable tag: 0.8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -121,6 +121,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 
 == Changelog ==
 
+= 0.8.1 =
+* Main currency can show whole units, e.g. AED 699 instead of AED 699.00
+
 = 0.8.0 =
 * Demo packs: optional sample data imported from Tools and removed again in one click; a fresh install has no demo content.
 * Optional second display currency next to prices.
@@ -173,6 +176,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 * Foundation: settings, tour post type (attach or own), booking settings box, database tables, roles.
 
 == Upgrade Notice ==
+
+= 0.8.1 =
+New optional setting Settings › Currency & VAT › Show prices as. Nothing changes until you choose whole units.
 
 = 0.8.0 =
 Demo packs, automatic offers, a second display currency, rating source, page-builder outputs and theming. The database is updated automatically (schema 1.6.0). If you used the dgb_schema_rating filter, set Settings › Schema & SEO › Rating source to Custom.

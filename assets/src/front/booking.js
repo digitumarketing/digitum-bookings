@@ -140,7 +140,20 @@
 			minimumFractionDigits: cfg.decimals,
 			maximumFractionDigits: cfg.decimals,
 		} );
-		const fmt = ( v ) => ( null === v || undefined === v ? '' : money.format( Number( v ) ) );
+		// "Whole units" setting: whole amounts drop their decimals; amounts with a fraction keep them.
+		const whole = cfg.wholeUnits && cfg.decimals > 0 && new Intl.NumberFormat( cfg.locale, {
+			style: 'currency',
+			currency: cfg.currency,
+			minimumFractionDigits: 0,
+			maximumFractionDigits: cfg.decimals,
+		} );
+		const fmt = ( v ) => {
+			if ( null === v || undefined === v ) {
+				return '';
+			}
+			const n = Number( v );
+			return ( whole && 0 === Math.round( n * 10 ** cfg.decimals ) % 10 ** cfg.decimals ? whole : money ).format( n );
+		};
 		const couponCodes = [ 'coupon_invalid', 'coupon_not_combinable' ];
 		// Optional second currency, for display only: " (about USD 190)".
 		const sc = cfg.second;
