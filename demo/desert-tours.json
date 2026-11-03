@@ -271,7 +271,9 @@
 				"pickup_policy": "addon",
 				"pickup_default": "meet",
 				"meeting_point": "camp",
-				"seats_per_unit": 1
+				"seats_per_unit": 1,
+				"unit_name": "buggy",
+				"unit_name_plural": "buggies"
 			},
 			"variants": [
 				{
@@ -314,7 +316,9 @@
 				"pickup_policy": "addon",
 				"pickup_default": "meet",
 				"meeting_point": "camp",
-				"seats_per_unit": 2
+				"seats_per_unit": 2,
+				"unit_name": "buggy",
+				"unit_name_plural": "buggies"
 			},
 			"variants": [
 				{
@@ -357,7 +361,9 @@
 				"pickup_policy": "addon",
 				"pickup_default": "meet",
 				"meeting_point": "camp",
-				"seats_per_unit": 4
+				"seats_per_unit": 4,
+				"unit_name": "buggy",
+				"unit_name_plural": "buggies"
 			},
 			"variants": [
 				{
@@ -400,7 +406,9 @@
 				"pickup_policy": "addon",
 				"pickup_default": "meet",
 				"meeting_point": "camp",
-				"seats_per_unit": 2
+				"seats_per_unit": 2,
+				"unit_name": "buggy",
+				"unit_name_plural": "buggies"
 			},
 			"variants": [
 				{
@@ -443,7 +451,9 @@
 				"pickup_policy": "addon",
 				"pickup_default": "meet",
 				"meeting_point": "camp",
-				"seats_per_unit": 4
+				"seats_per_unit": 4,
+				"unit_name": "buggy",
+				"unit_name_plural": "buggies"
 			},
 			"variants": [
 				{
@@ -486,7 +496,9 @@
 				"pickup_policy": "addon",
 				"pickup_default": "meet",
 				"meeting_point": "camp",
-				"seats_per_unit": 1
+				"seats_per_unit": 1,
+				"unit_name": "quad",
+				"unit_name_plural": "quads"
 			},
 			"variants": [
 				{
@@ -535,7 +547,9 @@
 				"pickup_policy": "addon",
 				"pickup_default": "meet",
 				"meeting_point": "camp",
-				"seats_per_unit": 1
+				"seats_per_unit": 1,
+				"unit_name": "quad",
+				"unit_name_plural": "quads"
 			},
 			"variants": [
 				{
@@ -579,7 +593,9 @@
 				"pickup_policy": "addon",
 				"pickup_default": "meet",
 				"meeting_point": "camp",
-				"seats_per_unit": 1
+				"seats_per_unit": 1,
+				"unit_name": "quad",
+				"unit_name_plural": "quads"
 			},
 			"variants": [
 				{
@@ -623,7 +639,9 @@
 				"pickup_policy": "addon",
 				"pickup_default": "meet",
 				"meeting_point": "camp",
-				"seats_per_unit": 1
+				"seats_per_unit": 1,
+				"unit_name": "bike",
+				"unit_name_plural": "bikes"
 			},
 			"variants": [
 				{

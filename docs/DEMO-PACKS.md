@@ -84,8 +84,8 @@ Tour keys:
 | `key` | yes | Unique within the pack; coupons and offers refer to it |
 | `title`, `slug` | yes | Post title and URL slug |
 | `content` | no | Post text (HTML allowed in posts) |
-| `settings` | no | Booking settings by the keys of `src/Domain/Product.php` (`pricing_mode`, `seats_per_unit`, `max_pax_per_unit`, `pickup_policy`, `pickup_default`, `min_age`, …) plus `meeting_point` (a location key). `enabled` is always off. |
-| `variants` | no | Options: `label`, `duration_minutes`, `price`, `child_price` |
+| `settings` | no | Booking settings by the keys of `src/Domain/Product.php` (`pricing_mode`, `seats_per_unit`, `max_pax_per_unit`, `pickup_policy`, `pickup_default`, `min_age`, …) plus `meeting_point` (a location key). `unit_name` and `unit_name_plural` name one vehicle or car (“buggy”, “buggies”) for the booking card and price. `enabled` is always off. |
+| `variants` | no | Options: `label`, `duration_minutes`, `price`, `child_price`, `badge` (shown on the option in the booking card, e.g. “Most picked”; only when it is true) |
 | `sessions` | no | A template key, or session fields (`template` to start from a template, `name`, `type`, `start_time`, `end_time`, `pickup_window_start`, `pickup_window_end`, `days_of_week`, `season_start`, `season_end`). `{year}` in a value becomes the current year. |
 | `addons` | no | `label`, `price`, `price_type` (per_booking, per_person, per_vehicle, on_request), `condition_key` (`pickup` or empty), `required` |
 | `confirm` | no | What to check on this tour, listed in the import report |

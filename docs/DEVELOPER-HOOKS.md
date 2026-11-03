@@ -229,6 +229,22 @@ Whether the mobile sticky bar shows on a tour page (after Settings › General �
 add_filter( 'dgb_sticky_bar_enabled', fn( bool $on, int $post_id ) => $on && 'corporate-events' !== get_post_field( 'post_name', $post_id ), 10, 2 );
 ```
 
+### `dgb_card_whatsapp_text` (0.9.0)
+
+The WhatsApp message of the booking card's “Ask on WhatsApp” button. `{tour}` becomes the tour name and `{details}` the guest's choices (date, option, quantity or guests, pickup).
+
+```php
+add_filter( 'dgb_card_whatsapp_text', fn( string $text, int $post_id ) => 'Hi, can I book {tour}? {details}', 10, 2 );
+```
+
+### `dgb_gallery_images` (0.9.0)
+
+Images of the tour gallery (`[dgb_gallery]`, block, Elementor widget): a list of `id`, `caption`, `alt`, at most five by default (Tour gallery box, else the featured image).
+
+```php
+add_filter( 'dgb_gallery_images', fn( array $images, int $post_id ) => array_slice( $images, 0, 3 ), 10, 2 );
+```
+
 ### `dgb_demo_packs` (0.8.0)
 
 Demo packs offered on Digitum Bookings › Tools: pack id => path of a JSON file (or the decoded pack as an array). The plugin's own packs come from `demo/*.json`. The format is in [DEMO-PACKS.md](DEMO-PACKS.md); invalid packs are listed with the reason and cannot be imported.
@@ -247,6 +263,19 @@ The GitHub repository (owner/name) updates come from. Default `digitumarketing/d
 ```php
 add_filter( 'dgb_update_repository', fn() => 'my-agency/digitum-bookings-fork' );
 ```
+
+## Opening the booking form from your own code (0.9.0)
+
+With Settings › General › Booking form display set to “Modal on all devices” (the default), these open the booking form of the tour being viewed, with no code: a link to `#book` or `#dgb-book`, any element with the class `dgb-open`, an element with `data-dgb-open="123"` (tour 123's form, when it is on the page), and `?book=1` in the address. The form is printed once per page (in the footer when no booking widget is in the content).
+
+From JavaScript, after the `dgb:ready` event on `document`:
+
+```js
+// Open tour 123's form with values; it starts on step 2 when date, session, option and guests are complete.
+window.dgbBooking.open( 123, { variant_id: 7, date: '2026-11-06', units: 2, adults: 4, children: 0, pickup: true, zone_id: 3 }, buttonThatOpenedIt );
+```
+
+`open()` returns `false` when that tour's form is not on the page (link to the tour with `?book=1` instead).
 
 ## Actions
 

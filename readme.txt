@@ -4,7 +4,7 @@ Tags: bookings, tours, activities, reservations, deposits
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.8.3
+Stable tag: 0.9.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -121,6 +121,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 
 == Changelog ==
 
+= 0.9.0 =
+* Booking card for the sidebar, booking form in a modal on every device, tour price, gallery and fact chips widgets, and a new mobile bar.
+
 = 0.8.3 =
 * Dates shown as “Fri 6 Nov 2026” everywhere (setting for “Fri, Nov 6, 2026”), one payment line on the review step, the pickup zone in the price and emails, and no false “update available” after an update.
 
@@ -182,6 +185,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 * Foundation: settings, tour post type (attach or own), booking settings box, database tables, roles.
 
 == Upgrade Notice ==
+
+= 0.9.0 =
+The booking form now opens in a modal by default (Settings › General › Booking form display; choose Inline to keep the form on the page). If your theme has its own copy of templates/front/booking-widget.php, update it from the plugin.
 
 = 0.8.3 =
 Fixes the “update available” notice for the version already installed. If your theme has its own copy of templates/front/booking-widget.php or confirmation.php, update it from the plugin.
