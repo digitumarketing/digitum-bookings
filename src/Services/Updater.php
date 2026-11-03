@@ -28,6 +28,13 @@ final class Updater {
 	private const API = 'https://api.github.com';
 
 	/**
+	 * Installed version read from the plugin header (per request; reset by flush()).
+	 *
+	 * @var string|null
+	 */
+	private static ?string $installed = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Settings $settings Settings service.
@@ -43,7 +50,9 @@ final class Updater {
 		add_filter( 'upgrader_pre_download', array( $this, 'download' ), 10, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'source_folder' ), 10, 4 );
 		add_action( 'admin_post_dgb_check_updates', array( $this, 'check_now' ) );
-		add_action( 'upgrader_process_complete', array( self::class, 'flush' ), 10, 0 );
+		add_filter( 'site_transient_update_plugins', array( $this, 'drop_stale' ) );
+		// Priority 9: before WordPress's own update check, which runs right after an update (priority 10).
+		add_action( 'upgrader_process_complete', array( self::class, 'flush' ), 9, 0 );
 		add_action( 'update_option_' . Settings::OPTION, array( self::class, 'flush' ), 10, 0 );
 	}
 
@@ -99,7 +108,7 @@ final class Updater {
 				$asset = $item;
 			}
 		}
-		$version = ltrim( (string) ( $release['tag_name'] ?? '' ), 'vV' );
+		$version = self::normalise( (string) ( $release['tag_name'] ?? '' ) );
 		if ( ! $asset || ! preg_match( '/^\d+\.\d+\.\d+([.-][0-9A-Za-z.-]+)?$/', $version ) ) {
 			set_site_transient(
 				self::CACHE,
@@ -198,7 +207,7 @@ final class Updater {
 		if ( ! isset( $transient->no_update ) || ! is_array( $transient->no_update ) ) {
 			$transient->no_update = array();
 		}
-		if ( version_compare( $latest['version'], DGB_VERSION, '>' ) ) {
+		if ( self::is_newer( $latest['version'], self::installed( $transient ) ) ) {
 			$transient->response[ $basename ] = $item;
 			unset( $transient->no_update[ $basename ] );
 		} else {
@@ -207,6 +216,63 @@ final class Updater {
 			unset( $transient->response[ $basename ] );
 		}
 		return $transient;
+	}
+
+	/**
+	 * Remove a stored "update available" that is not newer than the installed version (left from before an update).
+	 *
+	 * @param mixed $transient update_plugins site transient, as read.
+	 * @return mixed
+	 */
+	public function drop_stale( $transient ) {
+		$basename = self::basename();
+		if ( ! is_object( $transient ) || ! isset( $transient->response ) || ! is_array( $transient->response ) || ! isset( $transient->response[ $basename ] ) ) {
+			return $transient;
+		}
+		$offered = (string) ( ( (object) $transient->response[ $basename ] )->new_version ?? '' );
+		if ( ! self::is_newer( $offered, self::installed() ) ) {
+			unset( $transient->response[ $basename ] );
+		}
+		return $transient;
+	}
+
+	/**
+	 * Version without a leading "v" and surrounding spaces ("v0.8.3 " → "0.8.3").
+	 *
+	 * @param string $version Version or tag.
+	 */
+	public static function normalise( string $version ): string {
+		return ltrim( trim( $version, " \t\n\r\0\x0B\u{FEFF}" ), 'vV' );
+	}
+
+	/**
+	 * Whether the remote version is newer than the installed one (both normalised).
+	 *
+	 * @param string $remote    Remote version.
+	 * @param string $installed Installed version.
+	 */
+	public static function is_newer( string $remote, string $installed ): bool {
+		$remote    = self::normalise( $remote );
+		$installed = self::normalise( $installed );
+		return '' !== $remote && '' !== $installed && version_compare( $remote, $installed, '>' );
+	}
+
+	/**
+	 * Installed version, read from disk: right after an update the old DGB_VERSION is still loaded in this request,
+	 * and WordPress checks for updates in that same request.
+	 *
+	 * @param mixed $transient update_plugins transient (its `checked` list comes from the plugin files).
+	 */
+	public static function installed( $transient = null ): string {
+		$basename = self::basename();
+		if ( is_object( $transient ) && isset( $transient->checked ) && is_array( $transient->checked ) && ! empty( $transient->checked[ $basename ] ) ) {
+			return self::normalise( (string) $transient->checked[ $basename ] );
+		}
+		if ( null === self::$installed ) {
+			$header          = is_readable( DGB_PLUGIN_FILE ) ? get_file_data( DGB_PLUGIN_FILE, array( 'version' => 'Version' ) ) : array();
+			self::$installed = self::normalise( (string) ( $header['version'] ?? '' ) );
+		}
+		return '' !== self::$installed ? self::$installed : self::normalise( DGB_VERSION );
 	}
 
 	/**
@@ -330,7 +396,7 @@ final class Updater {
 		$cached = get_site_transient( self::CACHE );
 		$cached = is_array( $cached ) ? $cached : array();
 		return array(
-			'installed' => DGB_VERSION,
+			'installed' => self::installed(),
 			'latest'    => (string) ( $cached['version'] ?? '' ),
 			'checked'   => (string) ( $cached['checked'] ?? '' ),
 			'error'     => (string) ( $cached['error'] ?? '' ),
@@ -342,6 +408,7 @@ final class Updater {
 	 * Forget the cached release (after an update, or when the token changes).
 	 */
 	public static function flush(): void {
+		self::$installed = null;
 		delete_site_transient( self::CACHE );
 	}
 

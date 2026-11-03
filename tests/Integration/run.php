@@ -1304,6 +1304,14 @@ if ( scenario( 'K' ) ) {
 		check( true === $up['result'], 'automatic (background) update installs the release' . ( true === $up['result'] ? '' : ' → ' . json_encode( $up ) ) );
 		check( $v1 === $st['header'] && $v1 === $st['constant'] && $v1 === $st['marker'] && $st['active'], "plugin now v{$v1} and still active" );
 		check( $v1 === $st['option'] && 3 === $st['bookings'], 'upgrade routine ran; bookings kept' );
+		$stored = step( $site, 'stored_updates' );
+		check( null === $stored['raw'] && null === $stored['shown'] && 0 === $stored['count'], "after the update to v{$v1}: no “update available {$v1}” (the check in the update request reads the new version from disk)" . ( null === $stored['raw'] ? '' : " → stored {$stored['raw']}" ) );
+		$u = step( $site, 'updates_check' );
+		check( null === $u['response'] && $u['no_update'] && $v1 === $u['status']['installed'], "v{$v1} installed and on GitHub: no notice" );
+		$test = $next( $v1, 1 ) . '-test';
+		step( $site, 'set_option', array( 'name' => 'dgb_fake_release', 'value' => $test ) );
+		$u = step( $site, 'updates_check' );
+		check( $test === ( $u['response']['new_version'] ?? '' ), "a test release v{$test} shows the notice" );
 
 		// Private repository: the token is required and the zip comes through the API.
 		$v2 = $next( $installed, 2 );

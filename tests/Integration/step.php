@@ -882,11 +882,29 @@ switch ( $dgb_action ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 		wp_set_current_user( 1 );
 		$dgb_skin           = new Automatic_Upgrader_Skin();
-		$dgb_result         = ( new Plugin_Upgrader( $dgb_skin ) )->upgrade( \Digitum\Bookings\Services\Updater::basename() );
+		if ( ! empty( $dgb_args['cron'] ) ) {
+			// Like WP_Automatic_Updater: keep the update cache, then check for updates again in this same request,
+			// where the old version's code (and DGB_VERSION) is still loaded.
+			$dgb_result = ( new Plugin_Upgrader( $dgb_skin ) )->upgrade( \Digitum\Bookings\Services\Updater::basename(), array( 'clear_update_cache' => false ) );
+			wp_update_plugins( array( \Digitum\Bookings\Services\Updater::basename() => true === $dgb_result ) );
+		} else {
+			$dgb_result = ( new Plugin_Upgrader( $dgb_skin ) )->upgrade( \Digitum\Bookings\Services\Updater::basename() );
+		}
 		$dgb_out['result']  = is_wp_error( $dgb_result ) ? $dgb_result->get_error_message() : $dgb_result;
 		$dgb_out['skin']    = $dgb_skin->get_upgrade_messages();
 		$dgb_out['log']     = get_option( 'dgb_fake_github_log', array() );
 		delete_option( 'dgb_fake_github_log' );
+		break;
+
+	case 'stored_updates':
+		// What the next admin page sees: the raw stored transient (no filters) and the filtered one.
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		$dgb_basename       = \Digitum\Bookings\Services\Updater::basename();
+		$dgb_raw            = get_option( '_site_transient_update_plugins' );
+		$dgb_out['raw']     = is_object( $dgb_raw ) && isset( $dgb_raw->response[ $dgb_basename ] ) ? (string) $dgb_raw->response[ $dgb_basename ]->new_version : null;
+		$dgb_read           = get_site_transient( 'update_plugins' );
+		$dgb_out['shown']   = is_object( $dgb_read ) && isset( $dgb_read->response[ $dgb_basename ] ) ? (string) $dgb_read->response[ $dgb_basename ]->new_version : null;
+		$dgb_out['count']   = wp_get_update_data()['counts']['plugins'];
 		break;
 
 	case 'plugin_state':
