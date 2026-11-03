@@ -21,7 +21,7 @@ if ( 'per_vehicle' === $view['mode'] ) {
 	$dgb_counts = array_merge(
 		array(
 			/* translators: %d: seats per vehicle. */
-			'units' => array( __( 'Vehicles', 'digitum-bookings' ), sprintf( _n( '%d seat each', '%d seats each', $view['seats'], 'digitum-bookings' ), $view['seats'] ), 1 ),
+			'units' => array( $view['units_label'] ?? __( 'Vehicles', 'digitum-bookings' ), sprintf( _n( '%d seat each', '%d seats each', $view['seats'], 'digitum-bookings' ), $view['seats'] ), 1 ),
 		),
 		$dgb_counts
 	);

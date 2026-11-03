@@ -305,7 +305,7 @@ final class BookingsScreen {
 					<dt><?php esc_html_e( 'Session', 'digitum-bookings' ); ?></dt>
 					<dd><?php echo esc_html( trim( $d['session'] . ' ' . $d['start'] ) ); ?></dd>
 					<dt><?php esc_html_e( 'Guests', 'digitum-bookings' ); ?></dt>
-					<dd><?php echo esc_html( $d['guests'] ); ?><?php echo in_array( $d['mode'], array( 'per_vehicle', 'per_group' ), true ) ? ' · ' . esc_html( sprintf( /* translators: %d: number of vehicles. */ _n( '%d vehicle', '%d vehicles', $d['units'], 'digitum-bookings' ), $d['units'] ) ) : ''; ?></dd>
+					<dd><?php echo esc_html( $d['guests'] ); ?><?php echo in_array( $d['mode'], array( 'per_vehicle', 'per_group' ), true ) ? ' · ' . esc_html( MergeTags::units( $d ) ) : ''; ?></dd>
 					<dt><?php esc_html_e( 'Pickup', 'digitum-bookings' ); ?></dt>
 					<dd>
 						<?php

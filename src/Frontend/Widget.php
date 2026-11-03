@@ -37,6 +37,13 @@ final class Widget {
 	private static array $rendered = array();
 
 	/**
+	 * Whether “Booking by Digitum” was printed on this page.
+	 *
+	 * @var bool
+	 */
+	private static bool $credited = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Settings     $settings     Settings service.
@@ -241,7 +248,11 @@ final class Widget {
 			'stepped'    => ! empty( $all['general']['stepped_desktop'] ),
 			'pointName'  => $point ? (string) $point['name'] : '',
 			'dates'      => self::date_names(),
-			'i18n'       => self::strings(),
+			'i18n'       => array_merge(
+				self::strings(),
+				// "Buggies: 2" in the review, with the tour's own word.
+				array( 'nUnits' => mb_strtoupper( mb_substr( TourWords::many( $product ), 0, 1 ) ) . mb_substr( TourWords::many( $product ), 1 ) . ': %s' )
+			),
 		);
 
 		return array(
@@ -254,6 +265,7 @@ final class Widget {
 			'from'         => null === $from ? '' : Format::money( $from, $currency ),
 			'from_second'  => null === $from ? '' : ( new SecondCurrency( $this->settings ) )->html( $from ),
 			'basis'        => '' !== TourWords::basis( $product ) ? TourWords::basis( $product ) : self::basis( $config->mode ),
+			'units_label'  => mb_strtoupper( mb_substr( TourWords::many( $product ), 0, 1 ) ) . mb_substr( TourWords::many( $product ), 1 ),
 			/* translators: %s: what is booked, e.g. buggy or tour. */
 			'heading'      => sprintf( __( 'Book this %s', 'digitum-bookings' ), TourWords::noun( $product ) ),
 			'variants'     => $variants,
@@ -281,10 +293,15 @@ final class Widget {
 	}
 
 	/**
-	 * "Booking by Digitum" under every widget and booking page. Printed outside the (overridable) template and
+	 * "Booking by Digitum" once per page, under the first widget, booking card or booking page. Printed outside the (overridable) template and
 	 * not a setting: Digitum's credit is always shown. Nofollow, as Google expects for links in distributed widgets.
 	 */
 	public static function credit(): string {
+		// Once per page, under the first booking card, widget or booking page.
+		if ( self::$credited ) {
+			return '';
+		}
+		self::$credited = true;
 		return '<p class="dgb-credit">' . sprintf(
 			/* translators: %s: "Digitum", linked to digitum.marketing. */
 			esc_html__( 'Booking by %s', 'digitum-bookings' ),

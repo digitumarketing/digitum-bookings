@@ -269,18 +269,21 @@ final class TourOutputs {
 		}
 		if ( $options['amount'] ) {
 			$html .= '<span class="dgb-price__amount">' . esc_html( Format::money( $from, $points['currency'] ) ) . '</span>';
-			if ( $options['second'] ) {
-				$html .= ( new SecondCurrency( $this->settings ) )->html( $from );
-			}
 		}
+		// The second currency goes in the basis line: “per buggy, 30 min · about USD 190 · VAT included”.
+		$second = $options['second'] ? ( new SecondCurrency( $this->settings ) )->label( $from ) : '';
 		if ( $options['basis'] ) {
 			$basis = trim( (string) $options['basis_text'] );
 			if ( '' === $basis ) {
-				$basis = $this->price_basis( $id, $points );
+				$basis = $this->price_basis( $id, $points, $second );
+			} elseif ( '' !== $second ) {
+				$basis .= ' · ' . $second;
 			}
 			if ( '' !== $basis ) {
 				$html .= '<span class="dgb-price__basis">' . esc_html( $basis ) . '</span>';
 			}
+		} elseif ( '' !== $second ) {
+			$html .= '<span class="dgb-price__basis">' . esc_html( $second ) . '</span>';
 		}
 		return $this->wrap( $html . '</div>' );
 	}
@@ -290,8 +293,9 @@ final class TourOutputs {
 	 *
 	 * @param int                  $id     Tour post ID.
 	 * @param array<string, mixed> $points QuoteService::price_points().
+	 * @param string               $second Second currency text (“about USD 190”), or ''.
 	 */
-	public function price_basis( int $id, array $points ): string {
+	public function price_basis( int $id, array $points, string $second = '' ): string {
 		$product = Product::find( $id );
 		$basis   = TourWords::basis( $product );
 		$minutes = null;
@@ -306,6 +310,9 @@ final class TourOutputs {
 		if ( '' !== $duration ) {
 			/* translators: 1: price basis, e.g. per buggy, 2: duration, e.g. 30 min. */
 			$basis = '' === $basis ? $duration : sprintf( __( '%1$s, %2$s', 'digitum-bookings' ), $basis, $duration );
+		}
+		if ( '' !== $second ) {
+			$basis = '' === $basis ? $second : $basis . ' · ' . $second;
 		}
 		$config = $this->quotes->config( $product );
 		if ( $config->vat_rate > 0 ) {
@@ -880,7 +887,7 @@ final class TourOutputs {
 			. '.dgb-tour-list__item:before{position:absolute;inset-inline-start:0;font-weight:700;content:"•"}'
 			. '.dgb-tour-list--check .dgb-tour-list__item:before{content:"✓";color:var(--dgb-accent,#b45309)}.dgb-tour-list--cross .dgb-tour-list__item:before{content:"✕"}'
 			. '.dgb-tour-facts{display:grid;gap:.6em;margin:0}.dgb-tour-facts dt{font-weight:600}.dgb-tour-facts dd{margin:0}'
-			. '.dgb-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none;color:inherit}.dgb-chip{margin:0;padding:.3em .85em;border:1px solid color-mix(in srgb,currentColor 20%,transparent);border-radius:999px;font-size:.85rem;line-height:1.4}'
-			. '.dgb-price{display:flex;flex-direction:column;gap:2px;color:inherit}.dgb-price__label{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8}.dgb-price__amount{font-size:2.25rem;font-weight:800;line-height:1.1}.dgb-price__basis{font-size:.9rem;opacity:.85}';
+			. '.dgb-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}.dgb-chip{display:inline-flex;align-items:center;min-height:var(--dgb-chip-h,auto);margin:0;padding:.3em .85em;border:1px solid var(--dgb-chip-border,color-mix(in srgb,currentColor 20%,transparent));border-radius:999px;background:var(--dgb-chip-bg,transparent);color:var(--dgb-chip-color,inherit);font-size:.85rem;line-height:1.4}'
+			. '.dgb-price{display:flex;flex-direction:column;gap:2px;color:var(--dgb-ink,inherit)}.dgb-price__label{color:var(--dgb-muted,inherit);font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.dgb-price__amount{color:var(--dgb-ink,inherit);font-size:2.25rem;font-weight:800;line-height:1.1}.dgb-price__basis{color:var(--dgb-muted,inherit);font-size:.9rem}';
 	}
 }

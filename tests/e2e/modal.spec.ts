@@ -48,7 +48,7 @@ test.describe( 'booking card and modal', () => {
 			await expect( page.locator( '.dgb-price__label' ) ).toHaveText( /from/i );
 			await expect( page.locator( '.dgb-price__amount' ) ).toHaveText( 'AED 699.00' );
 			await expect( page.locator( '.dgb-price__basis' ) ).toHaveText( 'per buggy, 30 min · VAT included' );
-			await expect( page.locator( '.dgb-chips .dgb-chip' ) ).toHaveText( [ '30 min to 2 h', '2 seats', 'Driver 16+', 'No licence needed', 'Hotel pickup available' ] );
+			await expect( page.locator( '.qa-hero .dgb-chips .dgb-chip' ) ).toHaveText( [ '30 min to 2 h', '2 seats', 'Driver 16+', 'No licence needed', 'Hotel pickup available' ] );
 
 			// Card: title, pills with prices and badge, quantity by vehicle, pickup choices with prices.
 			await expect( card.locator( '.dgb-bc-title' ) ).toHaveText( 'Book this buggy' );
@@ -206,7 +206,7 @@ test.describe( 'booking card and modal', () => {
 			await expect( card.locator( '[data-dgb-card-pickup]' ) ).toHaveValue( '1' );
 			await expect( card.locator( '[data-dgb-card-pickup] option' ).nth( 1 ) ).toHaveText( 'Hotel pickup, North Zone, included' );
 			await expect( page.locator( '.dgb-price__basis' ) ).toHaveText( 'per person, 3 h · VAT included' );
-			await expect( page.locator( '.dgb-chips .dgb-chip' ) ).toHaveText( [ '3 h', 'Pickup included' ] );
+			await expect( page.locator( '.qa-hero .dgb-chips .dgb-chip' ) ).toHaveText( [ '3 h', 'Pickup included' ] );
 			await card.getByRole( 'button', { name: 'More: Children' } ).click();
 			await expect( card.locator( '[data-dgb-card-total]' ) ).toHaveText( 'AED 277.00' );
 			await pickCardDate( card, tomorrow );
@@ -248,6 +248,31 @@ test.describe( 'booking card and modal', () => {
 		await expect( gallery ).toHaveCSS( 'scroll-snap-type', 'x mandatory' );
 		const peek = await items.nth( 1 ).boundingBox();
 		expect( peek!.x ).toBeLessThan( 375 );
+	} );
+
+	test( 'dark hero: price and chips take the widget colours; chips on light unchanged; one credit line', async ( { page } ) => {
+		await cookies( page, [ 'dgb_test_card' ] );
+		for ( const width of [ 390, 1440 ] ) {
+			await page.setViewportSize( { width, height: 900 } );
+			await page.goto( path( tours.buggy.url ) );
+			const colour = ( l: Locator, prop = 'color' ) => l.evaluate( ( n, p ) => getComputedStyle( n ).getPropertyValue( p ), prop );
+			const hero = page.locator( '.qa-hero' );
+			expect( await colour( hero.locator( '.dgb-price__amount' ) ) ).toBe( 'rgb(255, 255, 255)' );
+			expect( await colour( hero.locator( '.dgb-price__label' ) ) ).toBe( 'rgb(201, 184, 166)' );
+			expect( await colour( hero.locator( '.dgb-price__basis' ) ) ).toBe( 'rgb(201, 184, 166)' );
+			const chip = hero.locator( '.dgb-chip' ).first();
+			expect( await colour( chip ) ).toBe( 'rgb(243, 233, 220)' );
+			expect( await colour( chip, 'background-color' ) ).toBe( 'rgba(251, 246, 239, 0.08)' );
+			expect( await colour( chip, 'border-top-color' ) ).toBe( 'rgba(251, 246, 239, 0.16)' );
+			expect( Math.round( ( await chip.boundingBox() )!.height ) ).toBeGreaterThanOrEqual( 36 );
+			// Chips on a light background: text colour of the page, border at 20% of it, no fill (as in 0.9.0).
+			const light = page.locator( '.qa-light .dgb-chip' ).first();
+			const text = await colour( page.locator( '.qa-light' ) );
+			expect( await colour( light ) ).toBe( text );
+			expect( await colour( light, 'background-color' ) ).toBe( 'rgba(0, 0, 0, 0)' );
+			await expect( page.locator( '.dgb-credit' ) ).toHaveCount( 1 );
+			await expect( page.locator( '[data-dgb-sticky] .dgb-sticky-basis' ) ).toHaveText( '2 seater, per buggy from' );
+		}
 	} );
 
 	test( 'theme and kit button styles do not reach the card', async ( { page } ) => {

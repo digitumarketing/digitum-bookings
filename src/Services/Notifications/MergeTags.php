@@ -9,7 +9,9 @@ namespace Digitum\Bookings\Services\Notifications;
 
 use Digitum\Bookings\Admin\Screens\BookingsScreen;
 use Digitum\Bookings\Frontend\Confirmation;
+use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\Frontend\Format;
+use Digitum\Bookings\Frontend\TourWords;
 use Digitum\Bookings\Gateways\PayOnArrival;
 use Digitum\Bookings\Services\BookingDetails;
 use Digitum\Bookings\Services\PaymentService;
@@ -101,7 +103,7 @@ final class MergeTags {
 					__( 'Tour', 'digitum-bookings' )      => trim( $d['tour'] . ( '' !== $d['option'] ? ' · ' . $d['option'] : '' ) ),
 					__( 'Date', 'digitum-bookings' )      => $d['date'],
 					__( 'Session', 'digitum-bookings' )   => $text['{session}'],
-					__( 'Guests', 'digitum-bookings' )    => $d['guests'] . ( in_array( $d['mode'], array( 'per_vehicle', 'per_group' ), true ) ? ' · ' . sprintf( /* translators: %d: number of vehicles. */ _n( '%d vehicle', '%d vehicles', $d['units'], 'digitum-bookings' ), $d['units'] ) : '' ),
+					__( 'Guests', 'digitum-bookings' )    => $d['guests'] . ( in_array( $d['mode'], array( 'per_vehicle', 'per_group' ), true ) ? ' · ' . self::units( $d ) : '' ),
 					__( 'Pickup', 'digitum-bookings' )    => self::pickup_row( $d ),
 					__( 'Total', 'digitum-bookings' )     => 'quote_requested' === $booking['status'] ? __( 'Price on request', 'digitum-bookings' ) : $money( $booking['total'] ),
 					__( 'Paid', 'digitum-bookings' )      => (float) $booking['amount_paid'] > 0 ? $money( $booking['amount_paid'] ) : '',
@@ -148,6 +150,16 @@ final class MergeTags {
 			'html' => $html,
 			'text' => $text,
 		);
+	}
+
+	/**
+	 * Number of vehicles or cars with the tour's own word: “2 buggies”.
+	 *
+	 * @param array<string, mixed> $d Booking details.
+	 */
+	public static function units( array $d ): string {
+		$product = Product::find( (int) $d['product_id'] );
+		return sprintf( '%d %s', (int) $d['units'], 1 === (int) $d['units'] ? TourWords::one( $product ) : TourWords::many( $product ) );
 	}
 
 	/**

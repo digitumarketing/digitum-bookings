@@ -87,6 +87,63 @@ final class TourFactsWidget extends \Elementor\Widget_Base {
 			)
 		);
 		$this->end_controls_section();
+
+		// Chips on a dark hero: colours, typography and size (the chips otherwise take the text colour around them).
+		$this->start_controls_section(
+			'dgb_chip_style',
+			array(
+				'label'     => __( 'Chips', 'digitum-bookings' ),
+				'tab'       => \Elementor\Controls_Manager::TAB_STYLE,
+				'condition' => array( 'style' => 'chips' ),
+			)
+		);
+		foreach ( array(
+			'chip_color'  => array( __( 'Text colour', 'digitum-bookings' ), '--dgb-chip-color' ),
+			'chip_border' => array( __( 'Border colour', 'digitum-bookings' ), '--dgb-chip-border' ),
+			'chip_bg'     => array( __( 'Background', 'digitum-bookings' ), '--dgb-chip-bg' ),
+		) as $id => $control ) {
+			$this->add_control(
+				$id,
+				array(
+					'label'     => $control[0],
+					'type'      => \Elementor\Controls_Manager::COLOR,
+					'selectors' => array( '{{WRAPPER}} .dgb-chips' => $control[1] . ': {{VALUE}};' ),
+				)
+			);
+		}
+		$this->add_group_control(
+			\Elementor\Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'chip_type',
+				'label'    => __( 'Typography', 'digitum-bookings' ),
+				'selector' => '{{WRAPPER}} .dgb-chips .dgb-chip',
+			)
+		);
+		$this->add_responsive_control(
+			'chip_padding',
+			array(
+				'label'      => __( 'Padding', 'digitum-bookings' ),
+				'type'       => \Elementor\Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em' ),
+				'selectors'  => array( '{{WRAPPER}} .dgb-chips .dgb-chip' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ),
+			)
+		);
+		$this->add_responsive_control(
+			'chip_height',
+			array(
+				'label'      => __( 'Minimum height', 'digitum-bookings' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 80,
+					),
+				),
+				'selectors'  => array( '{{WRAPPER}} .dgb-chips' => '--dgb-chip-h: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+		$this->end_controls_section();
 	}
 
 	/**

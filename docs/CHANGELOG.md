@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.1 (dark hero fixes)
+
+- **Tour price** (`dgb_price`): the colour controls now apply. The label and the basis use `--dgb-muted`, the amount `--dgb-ink`; `.dgb-price` no longer forces `color: inherit`, which overrode the widget's colours (on a dark hero the price inherited the page's dark text).
+- **Second currency in the price**: shown in the basis line, “per buggy, 30 min · about USD 190 · VAT included”; a custom basis text gets it too. It needs Settings › Currency & VAT › second currency switched on, with a currency and a rate.
+- **Fact chips**: new Style section for the chips style in Elementor: text colour, border colour (default 20% of the text colour), background, typography, padding and minimum height (CSS variables `--dgb-chip-color`, `--dgb-chip-border`, `--dgb-chip-bg`, `--dgb-chip-h` on `.dgb-chips`). Chips on light backgrounds look as before.
+- **The tour's own noun everywhere**: the setting on the tour is now labelled **Noun shown to guests** (Booking settings › Pricing; one and several, e.g. buggy / buggies; default vehicle). It is used by the booking form title (“Book this buggy”), the price basis, the mobile bar (“2 seater, per buggy from”), the number of vehicles in the form and its review (“Buggies”), and the emails and booking view (“2 buggies”).
+- **“Booking by Digitum” once per page**: under the first booking card, widget or booking page only; no second line for a second card or the modal.
+
 ## 0.9.0 (booking card, booking modal, tour page widgets)
 
 - **Booking card** (`[dgb_booking_card]`, Elementor widget `dgb_booking_card`, block): a short sidebar form with the plugin's calendar in a popover (no browser date field), option pills with prices and an optional badge, a stepper by price basis (“Buggies · 2 people each”, or adults and children), pickup choices with prices (“Meet at …, free”, “Hotel pickup, North Zone, AED 300” or “… included”), and the live total from the same calculator as the form. **Check availability** opens the booking form with these values, on step 2 when the trip is complete; **Ask on WhatsApp** opens WhatsApp to the business phone with the choices (filter `dgb_card_whatsapp_text`); three editable trust lines; “Pay on arrival” label when that is the only payment method; sticky in the sidebar on computers. After a booking the confirmation takes the card's place. Elementor Style controls for colours, typography, padding and radius; buttons are isolated from theme and kit CSS.

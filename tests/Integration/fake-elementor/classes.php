@@ -11,7 +11,18 @@ namespace Elementor {
 	class Controls_Manager {
 		const NUMBER = 'number';
 		const SELECT = 'select';
-		const TEXT   = 'text';
+		const TEXT       = 'text';
+		const COLOR      = 'color';
+		const SWITCHER   = 'switcher';
+		const DIMENSIONS = 'dimensions';
+		const SLIDER     = 'slider';
+		const TAB_STYLE  = 'style';
+	}
+
+	class Group_Control_Typography {
+		public static function get_type() {
+			return 'typography';
+		}
 	}
 
 	abstract class Widget_Base {
@@ -24,6 +35,12 @@ namespace Elementor {
 		public function end_controls_section() {}
 		public function add_control( $id, array $args = array() ) {
 			$this->dgb_controls[ $id ] = $args;
+		}
+		public function add_responsive_control( $id, array $args = array() ) {
+			$this->dgb_controls[ $id ] = $args;
+		}
+		public function add_group_control( $type, array $args = array() ) {
+			$this->dgb_controls[ $args['name'] ] = $args + array( 'group' => $type );
 		}
 		public function get_settings_for_display( $key = null ) {
 			return null === $key ? $this->dgb_settings : ( $this->dgb_settings[ $key ] ?? null );

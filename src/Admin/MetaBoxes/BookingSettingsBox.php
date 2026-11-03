@@ -222,13 +222,13 @@ final class BookingSettingsBox {
 				<input type="number" id="dgb-seats" name="dgb[product][seats_per_unit]" min="1" max="50" value="<?php echo esc_attr( (string) $product->get( 'seats_per_unit' ) ); ?>">
 			</p>
 			<p class="dgb-field" data-dgb-show-when="per_vehicle per_group">
-				<label for="dgb-unit-name"><?php esc_html_e( 'One vehicle is called', 'digitum-bookings' ); ?></label>
-				<input type="text" id="dgb-unit-name" name="dgb[product][unit_name]" maxlength="40" value="<?php echo esc_attr( (string) $product->get( 'unit_name' ) ); ?>" placeholder="<?php esc_attr_e( 'e.g. buggy', 'digitum-bookings' ); ?>">
+				<label for="dgb-unit-name"><?php esc_html_e( 'Noun shown to guests (one)', 'digitum-bookings' ); ?></label>
+				<input type="text" id="dgb-unit-name" name="dgb[product][unit_name]" maxlength="40" value="<?php echo esc_attr( (string) $product->get( 'unit_name' ) ); ?>" placeholder="<?php esc_attr_e( 'vehicle', 'digitum-bookings' ); ?>">
 			</p>
 			<p class="dgb-field" data-dgb-show-when="per_vehicle per_group">
-				<label for="dgb-unit-plural"><?php esc_html_e( 'Several are called', 'digitum-bookings' ); ?></label>
-				<input type="text" id="dgb-unit-plural" name="dgb[product][unit_name_plural]" maxlength="40" value="<?php echo esc_attr( (string) $product->get( 'unit_name_plural' ) ); ?>" placeholder="<?php esc_attr_e( 'e.g. buggies', 'digitum-bookings' ); ?>" aria-describedby="dgb-unit-help">
-				<span class="description" id="dgb-unit-help"><?php esc_html_e( 'Used in the booking card: “Book this buggy”, “Buggies · 2 people each”, “per buggy”. Empty: vehicle or car.', 'digitum-bookings' ); ?></span>
+				<label for="dgb-unit-plural"><?php esc_html_e( 'Noun shown to guests (several)', 'digitum-bookings' ); ?></label>
+				<input type="text" id="dgb-unit-plural" name="dgb[product][unit_name_plural]" maxlength="40" value="<?php echo esc_attr( (string) $product->get( 'unit_name_plural' ) ); ?>" placeholder="<?php esc_attr_e( 'vehicles', 'digitum-bookings' ); ?>" aria-describedby="dgb-unit-help">
+				<span class="description" id="dgb-unit-help"><?php esc_html_e( 'For example buggy and buggies, quad and quads, bike and bikes. Used wherever guests read what they book: “Book this buggy” (booking card and form title), “per buggy” (prices), “2 seater, per buggy from” (mobile bar), “Buggies” (number of vehicles) and emails. Empty: vehicle or car.', 'digitum-bookings' ); ?></span>
 			</p>
 			<p class="dgb-field" data-dgb-show-when="per_group">
 				<label for="dgb-max-pax"><?php esc_html_e( 'Maximum guests per car', 'digitum-bookings' ); ?></label>

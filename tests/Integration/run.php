@@ -1844,7 +1844,17 @@ if ( scenario( 'P' ) ) {
 	check( str_contains( $p['html'], '<span class="dgb-price__amount">AED 699.00</span>' ) && str_contains( $p['html'], 'per buggy, 30 min · VAT included' ), 'tour price with basis, shortest duration and VAT' );
 	check( (bool) preg_match( '#<li class="dgb-chip dgb-chip--duration">30 min to 2 h</li><li class="dgb-chip dgb-chip--seats">2 seats</li><li class="dgb-chip dgb-chip--age">Driver 16\+</li><li class="dgb-chip dgb-chip--licence">No licence needed</li>#', $p['html'] ) && ! str_contains( $p['html'], 'dgb-chip--rating' ), 'fact chips, no rating chip' );
 	check( ! str_contains( $p['html'], 'data-dgb-gallery' ), 'gallery: nothing without images (no empty boxes)' );
-	check( 3 === substr_count( $p['html'] . $p['footer'], '<p class="dgb-credit">' ), '“Booking by Digitum” under both cards and the modal' );
+	check( 1 === substr_count( $p['html'] . $p['footer'], '<p class="dgb-credit">' ) && strpos( $p['html'], '<p class="dgb-credit">' ) > strpos( $p['html'], 'data-dgb-card ' ), '“Booking by Digitum” once per page, under the first card (not again under the second card or the modal)' );
+
+	// 0.9.1: price colours from the widget's variables, chips colour variables, second currency in the basis line.
+	check( str_contains( $p['html'], '.dgb-price{display:flex;flex-direction:column;gap:2px;color:var(--dgb-ink,inherit)}' ) && str_contains( $p['html'], '.dgb-price__label{color:var(--dgb-muted,inherit)' ) && str_contains( $p['html'], '.dgb-price__amount{color:var(--dgb-ink,inherit)' ) && ! str_contains( $p['html'], '.dgb-price{display:flex;flex-direction:column;gap:2px;color:inherit}' ), 'price parts use --dgb-ink and --dgb-muted (Elementor colour controls work)' );
+	check( str_contains( $p['html'], 'color:var(--dgb-chip-color,inherit)' ) && str_contains( $p['html'], 'background:var(--dgb-chip-bg,transparent)' ) && str_contains( $p['html'], 'border:1px solid var(--dgb-chip-border,color-mix(in srgb,currentColor 20%,transparent))' ), 'chips: colour, background and border variables; on light backgrounds unchanged' );
+	check( str_contains( $p['footer'], 'Buggies' ) && str_contains( $p['footer'], 'Book this buggy' ) && str_contains( $p['footer'], '"nUnits":"Buggies: %s"' ), 'modal: “Book this buggy”, “Buggies” stepper and review' );
+	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_enabled' => true, 'second_currency' => 'USD', 'second_rate' => 3.6725 ) ) ) );
+	$sc = step( $site, 'tour_parts', array( 'post' => $buggy['id'], 'content' => '[dgb_price][dgb_price basis_text="per buggy"]' ) );
+	check( str_contains( $sc['html'], '<span class="dgb-price__basis">per buggy, 30 min · about USD 190 · VAT included</span>' ), 'second currency in the basis line: “per buggy, 30 min · about USD 190 · VAT included”' );
+	check( str_contains( $sc['html'], '<span class="dgb-price__basis">per buggy · about USD 190</span>' ), 'a custom basis text still gets the second currency' );
+	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_enabled' => false ) ) ) );
 
 	// Gallery: featured image fallback, then five images with a caption.
 	step( $site, 'attach_image', array( 'post' => $safari['id'] ) );

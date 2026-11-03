@@ -4,7 +4,7 @@ Tags: bookings, tours, activities, reservations, deposits
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.9.0
+Stable tag: 0.9.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -121,6 +121,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 
 == Changelog ==
 
+= 0.9.1 =
+* Price and fact chips readable on dark backgrounds (colour controls apply; chips get colour, border, background and size controls), second currency in the price line, the tour's noun in every title and line, and one “Booking by Digitum” line per page.
+
 = 0.9.0 =
 * Booking card for the sidebar, booking form in a modal on every device, tour price, gallery and fact chips widgets, and a new mobile bar.
 
@@ -185,6 +188,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 * Foundation: settings, tour post type (attach or own), booking settings box, database tables, roles.
 
 == Upgrade Notice ==
+
+= 0.9.1 =
+Set “Noun shown to guests” (Booking settings › Pricing) on vehicle tours, for example buggy / buggies, so titles read “Book this buggy”.
 
 = 0.9.0 =
 The booking form now opens in a modal by default (Settings › General › Booking form display; choose Inline to keep the form on the page). If your theme has its own copy of templates/front/booking-widget.php, update it from the plugin.

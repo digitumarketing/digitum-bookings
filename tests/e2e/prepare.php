@@ -72,9 +72,9 @@ if ( isset( $_COOKIE['dgb_test_card'] ) ) {
 			if ( ! is_singular() || ! in_the_loop() ) {
 				return $content;
 			}
-			return '<style>.qa-layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:32px;align-items:start}.qa-hero{padding:24px;border-radius:16px;background:#1c1410;color:#fff}@media (max-width:1024px){.qa-layout{grid-template-columns:1fr}}</style>'
+			return '<style>.qa-layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:32px;align-items:start}.qa-hero{padding:24px;border-radius:16px;background:#1c1410}.qa-hero .dgb-price{--dgb-accent:#FFFFFF;--dgb-ink:#FFFFFF;--dgb-muted:#C9B8A6}.qa-hero .dgb-chips{--dgb-chip-color:#F3E9DC;--dgb-chip-border:rgba(251,246,239,.16);--dgb-chip-bg:rgba(251,246,239,.08);--dgb-chip-h:36px}@media (max-width:1024px){.qa-layout{grid-template-columns:1fr}}</style>'
 				. '<p><a class="qa-header-book" href="#book">Book now</a> <button type="button" class="dgb-open qa-class-open">Open by class</button> <span data-dgb-open="' . get_the_ID() . '" class="qa-data-open" role="button" tabindex="0">Open by data</span></p>'
-				. '<div class="qa-hero">' . do_shortcode( '[dgb_price]' ) . do_shortcode( '[dgb_tour_facts style="chips"]' ) . '<p><a class="qa-hero-book" href="#dgb-book">Check availability</a></p></div>'
+				. '<div class="qa-hero">' . do_shortcode( '[dgb_price]' ) . do_shortcode( '[dgb_tour_facts style="chips"]' ) . '<p><a class="qa-hero-book" href="#dgb-book" style="color:#fff">Check availability</a></p></div><div class="qa-light">' . do_shortcode( '[dgb_tour_facts style="chips"]' ) . '</div>'
 				. do_shortcode( '[dgb_gallery]' )
 				. '<div class="qa-layout"><div class="qa-main">' . $content . str_repeat( '<p>Tour description paragraph for scrolling.</p>', 30 ) . '</div><aside id="book" class="qa-side">' . do_shortcode( '[dgb_booking_card trust2="Confirmed in minutes"]' ) . '</aside></div>';
 		},

@@ -8,7 +8,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2026-10-22T16:32:13+00:00\n"
-"PO-Revision-Date: 2026-11-03T20:49:26+00:00\n"
+"PO-Revision-Date: 2026-11-03T21:46:15+00:00\n"
 "Language: ar\n"
 "Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5);\n"
 "X-Domain: digitum-bookings\n"
@@ -73,13 +73,13 @@ msgstr "الضيف"
 #: src/Admin/Screens/ReportsScreen.php:140
 #: src/Admin/Screens/ToolsScreen.php:165
 #: src/Admin/Screens/ToolsScreen.php:435
-#: src/Frontend/Widget.php:412
+#: src/Frontend/Widget.php:429
 #: src/Integrations/Elementor/BookingWidget.php:56
 #: src/Integrations/Elementor/PriceTableWidget.php:56
 #: src/Integrations/Elementor/TourFactsWidget.php:58
 #: src/Integrations/Elementor/TourListWidget.php:56
 #: src/PostTypes/ProductType.php:106
-#: src/Services/Notifications/MergeTags.php:101
+#: src/Services/Notifications/MergeTags.php:103
 #: src/Services/Privacy.php:141
 #: templates/front/confirmation.php:61
 #: assets/src/blocks/booking-block.js:24
@@ -93,8 +93,8 @@ msgstr "الجولة"
 #: src/Admin/Screens/ManifestScreen.php:330
 #: src/Admin/Screens/PaymentsScreen.php:265
 #: src/Admin/Screens/PaymentsScreen.php:366
-#: src/Frontend/Widget.php:414
-#: src/Services/Notifications/MergeTags.php:102
+#: src/Frontend/Widget.php:431
+#: src/Services/Notifications/MergeTags.php:104
 #: src/Services/Privacy.php:143
 #: templates/front/booking-card.php:36
 #: templates/front/booking-widget.php:99
@@ -107,8 +107,8 @@ msgstr "التاريخ"
 #: src/Admin/Screens/DashboardScreen.php:159
 #: src/Admin/Screens/ReportsScreen.php:226
 #: src/Frontend/BookingCard.php:232
-#: src/Frontend/Widget.php:416
-#: src/Services/Notifications/MergeTags.php:104
+#: src/Frontend/Widget.php:433
+#: src/Services/Notifications/MergeTags.php:106
 #: src/Services/Privacy.php:145
 #: templates/front/booking-widget.php:121
 #: templates/front/confirmation.php:71
@@ -118,8 +118,8 @@ msgstr "الضيوف"
 #: src/Admin/ListTables/BookingsListTable.php:88
 #: src/Admin/Screens/PaymentsScreen.php:230
 #: src/Frontend/BookingCard.php:273
-#: src/Frontend/Widget.php:382
-#: src/Services/Notifications/MergeTags.php:106
+#: src/Frontend/Widget.php:399
+#: src/Services/Notifications/MergeTags.php:108
 #: src/Services/Privacy.php:154
 #: templates/front/booking-card.php:99
 #: templates/front/confirmation.php:178
@@ -179,9 +179,9 @@ msgstr "كل الجولات"
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:668
 #: src/Admin/Screens/CouponsScreen.php:179
 #: src/Admin/Screens/OffersScreen.php:216
-#: src/Frontend/TourOutputs.php:225
-#: src/Frontend/TourOutputs.php:260
-#: src/Frontend/Widget.php:307
+#: src/Frontend/TourOutputs.php:233
+#: src/Frontend/TourOutputs.php:268
+#: src/Frontend/Widget.php:324
 #: templates/front/booking-widget.php:46
 #: templates/front/booking-widget.php:59
 #: templates/front/booking-widget.php:403
@@ -227,10 +227,8 @@ msgstr "تم المسح"
 
 #. translators: %d: number of vehicles.
 #: src/Admin/ListTables/BookingsListTable.php:262
-#: src/Admin/Screens/BookingsScreen.php:308
 #: src/Admin/Screens/CheckInScreen.php:154
 #: src/Admin/Screens/ManifestScreen.php:376
-#: src/Services/Notifications/MergeTags.php:104
 #: templates/front/confirmation.php:77
 #, php-format
 msgid "%d vehicle"
@@ -245,7 +243,7 @@ msgstr[5] "%d مركبة"
 #: src/Admin/ListTables/BookingsListTable.php:272
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:205
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:532
-#: src/Frontend/Widget.php:396
+#: src/Frontend/Widget.php:413
 msgid "On request"
 msgstr "عند الطلب"
 
@@ -352,7 +350,7 @@ msgid "Options"
 msgstr "الخيارات"
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:152
-#: src/Frontend/TourOutputs.php:678
+#: src/Frontend/TourOutputs.php:698
 msgid "Sessions"
 msgstr "الفترات"
 
@@ -384,7 +382,7 @@ msgstr "لا تظهر أداة الحجز إلا في الجولات التي ف
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:202
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:530
 #: src/Admin/Screens/OffersScreen.php:167
-#: src/Frontend/TourOutputs.php:408
+#: src/Frontend/TourOutputs.php:428
 msgid "Per person"
 msgstr "للشخص"
 
@@ -423,24 +421,26 @@ msgid "Seats per vehicle"
 msgstr "المقاعد في كل مركبة"
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:225
-msgid "One vehicle is called"
-msgstr "اسم المركبة الواحدة"
+msgid "Noun shown to guests (one)"
+msgstr "الاسم الظاهر للضيوف (مفرد)"
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:226
-msgid "e.g. buggy"
-msgstr "مثال: باغي"
+#: src/Frontend/TourWords.php:38
+msgid "vehicle"
+msgstr "مركبة"
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:229
-msgid "Several are called"
-msgstr "اسم المركبات (جمع)"
+msgid "Noun shown to guests (several)"
+msgstr "الاسم الظاهر للضيوف (جمع)"
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:230
-msgid "e.g. buggies"
-msgstr "مثال: باغيات"
+#: src/Frontend/TourWords.php:54
+msgid "vehicles"
+msgstr "مركبات"
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:231
-msgid "Used in the booking card: “Book this buggy”, “Buggies · 2 people each”, “per buggy”. Empty: vehicle or car."
-msgstr "يُستخدم في بطاقة الحجز: «احجز هذا الباغي»، «باغيات · شخصان لكل منها»، «لكل باغي». فارغ: مركبة أو سيارة."
+msgid "For example buggy and buggies, quad and quads, bike and bikes. Used wherever guests read what they book: “Book this buggy” (booking card and form title), “per buggy” (prices), “2 seater, per buggy from” (mobile bar), “Buggies” (number of vehicles) and emails. Empty: vehicle or car."
+msgstr "مثل باغي وباغيات، كواد وكوادات، دراجة ودراجات. يُستخدم حيثما يقرأ الضيف ما يحجزه: «احجز هذا الباغي» (بطاقة الحجز وعنوان النموذج)، «لكل باغي» (الأسعار)، «مقعدان، لكل باغي من» (الشريط السفلي)، «باغيات» (عدد المركبات) والرسائل. فارغ: مركبة أو سيارة."
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:234
 msgid "Maximum guests per car"
@@ -525,7 +525,7 @@ msgstr "المدة (دقيقة)"
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:342
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:492
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:517
-#: src/Frontend/TourOutputs.php:627
+#: src/Frontend/TourOutputs.php:647
 msgid "Price"
 msgstr "السعر"
 
@@ -775,7 +775,7 @@ msgstr "— لا شيء —"
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:573
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:594
 #: src/Frontend/BookingCard.php:186
-#: src/Frontend/Widget.php:418
+#: src/Frontend/Widget.php:435
 #: src/Services/BookingDetails.php:83
 #: src/Services/Pricing/PriceCalculator.php:129
 #: src/Services/Pricing/PriceCalculator.php:133
@@ -803,7 +803,7 @@ msgid "Preselected choice"
 msgstr "الخيار المحدد مسبقاً"
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:593
-#: src/Frontend/TourOutputs.php:707
+#: src/Frontend/TourOutputs.php:727
 msgid "Meet at the meeting point"
 msgstr "الالتقاء عند نقطة الالتقاء"
 
@@ -815,7 +815,7 @@ msgstr "الالتقاء عند نقطة الالتقاء"
 #: src/Admin/Screens/ManifestScreen.php:377
 #: src/Admin/Screens/ZonesScreen.php:101
 #: src/Frontend/BookingCard.php:177
-#: src/Frontend/TourOutputs.php:665
+#: src/Frontend/TourOutputs.php:685
 #: src/Integrations/Elementor/Tags/MeetingPointTag.php:28
 #: src/Services/Notifications/Listener.php:204
 msgid "Meeting point"
@@ -851,7 +851,7 @@ msgid "days ahead"
 msgstr "يوماً مقدماً"
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:624
-#: src/Frontend/TourOutputs.php:647
+#: src/Frontend/TourOutputs.php:667
 #: src/Integrations/Elementor/Tags/MinAgeTag.php:28
 msgid "Minimum age"
 msgstr "الحد الأدنى للعمر"
@@ -898,8 +898,8 @@ msgstr "إلى"
 #: src/Admin/Screens/BookingsScreen.php:305
 #: src/Admin/Screens/BookingsScreen.php:353
 #: src/Admin/Screens/DashboardScreen.php:157
-#: src/Frontend/Widget.php:415
-#: src/Services/Notifications/MergeTags.php:103
+#: src/Frontend/Widget.php:432
+#: src/Services/Notifications/MergeTags.php:105
 #: src/Services/Privacy.php:144
 #: templates/front/booking-widget.php:113
 #: templates/front/confirmation.php:68
@@ -1100,15 +1100,14 @@ msgstr "صفحة حجز الضيف"
 msgid "Trip"
 msgstr "الرحلة"
 
-#. translators: %d: number of vehicles.
 #: src/Admin/Screens/BookingsScreen.php:309
 #: src/Admin/Screens/ManifestScreen.php:233
 #: src/Admin/Screens/ManifestScreen.php:364
 #: src/Admin/Screens/ZonesScreen.php:76
 #: src/Admin/Screens/ZonesScreen.php:146
-#: src/Frontend/TourOutputs.php:659
-#: src/Frontend/Widget.php:417
-#: src/Services/Notifications/MergeTags.php:105
+#: src/Frontend/TourOutputs.php:679
+#: src/Frontend/Widget.php:434
+#: src/Services/Notifications/MergeTags.php:107
 #: templates/front/booking-card.php:88
 msgid "Pickup"
 msgstr "الاستلام"
@@ -1408,7 +1407,7 @@ msgid "Open"
 msgstr "فتح"
 
 #: src/Admin/Screens/CalendarScreen.php:249
-#: src/Frontend/TourOutputs.php:335
+#: src/Frontend/TourOutputs.php:350
 msgid "Close"
 msgstr "إغلاق"
 
@@ -1510,7 +1509,7 @@ msgstr "الرمز"
 
 #: src/Admin/Screens/CouponsScreen.php:89
 #: src/Admin/Screens/CouponsScreen.php:148
-#: src/Frontend/Widget.php:387
+#: src/Frontend/Widget.php:404
 msgid "Discount"
 msgstr "خصم"
 
@@ -1919,7 +1918,7 @@ msgstr "التحويل قيد الانتظار"
 #: src/Admin/Screens/ManifestScreen.php:391
 #: src/Admin/Screens/PaymentsScreen.php:522
 #: src/Services/Notifications/Listener.php:205
-#: src/Services/Notifications/MergeTags.php:107
+#: src/Services/Notifications/MergeTags.php:109
 #: src/Services/Privacy.php:155
 msgid "Paid"
 msgstr "مدفوع"
@@ -2081,7 +2080,7 @@ msgstr "يظهر للضيوف في تفصيل السعر، مثل «توصيل �
 #: src/Admin/Screens/PaymentsScreen.php:268
 #: src/Admin/Screens/PaymentsScreen.php:321
 #: src/Admin/Screens/PaymentsScreen.php:366
-#: src/Services/Notifications/MergeTags.php:123
+#: src/Services/Notifications/MergeTags.php:125
 msgid "Amount"
 msgstr "المبلغ"
 
@@ -2343,7 +2342,7 @@ msgid "Method"
 msgstr "الطريقة"
 
 #: src/Admin/Screens/PaymentsScreen.php:270
-#: src/Services/Notifications/MergeTags.php:100
+#: src/Services/Notifications/MergeTags.php:102
 #: src/Services/Privacy.php:139
 msgid "Reference"
 msgstr "المرجع"
@@ -2465,13 +2464,13 @@ msgid "Processing"
 msgstr "قيد المعالجة"
 
 #: src/Admin/Screens/PaymentsScreen.php:528
-#: src/Frontend/Widget.php:390
+#: src/Frontend/Widget.php:407
 #: templates/front/booking-widget.php:352
 msgid "Full amount"
 msgstr "المبلغ كاملاً"
 
 #: src/Admin/Screens/PaymentsScreen.php:531
-#: src/Services/Notifications/MergeTags.php:109
+#: src/Services/Notifications/MergeTags.php:111
 #: templates/front/booking-widget.php:309
 msgid "Payment"
 msgstr "الدفع"
@@ -2740,12 +2739,12 @@ msgstr "تم استيرادها سابقاً"
 
 #: src/Admin/Screens/ToolsScreen.php:183
 #: src/Frontend/BookingCard.php:274
-#: src/Frontend/TourOutputs.php:223
-#: src/Frontend/TourOutputs.php:256
-#: src/Frontend/TourOutputs.php:372
-#: src/Frontend/TourOutputs.php:394
-#: src/Frontend/TourOutputs.php:628
-#: src/Services/Notifications/MergeTags.php:106
+#: src/Frontend/TourOutputs.php:231
+#: src/Frontend/TourOutputs.php:264
+#: src/Frontend/TourOutputs.php:392
+#: src/Frontend/TourOutputs.php:414
+#: src/Frontend/TourOutputs.php:648
+#: src/Services/Notifications/MergeTags.php:108
 #: src/Services/Schema.php:130
 #: templates/front/booking-widget.php:48
 #: templates/front/booking-widget.php:61
@@ -2768,7 +2767,7 @@ msgstr "للمركبة (عربات الباجي، الدراجات الرباع�
 
 #: src/Admin/Screens/ToolsScreen.php:202
 #: src/Frontend/TourWords.php:76
-#: src/Frontend/Widget.php:322
+#: src/Frontend/Widget.php:339
 #: src/Services/LlmsTxt.php:395
 #: templates/front/booking-widget.php:169
 msgid "per person"
@@ -3257,8 +3256,8 @@ msgstr "اللقاء في نقطة التجمع، مجانًا"
 #. translators: 1: "Hotel pickup" (or the pickup add-on's name), 2: pickup zone.
 #: src/Frontend/BookingCard.php:186
 #: src/Frontend/BookingCard.php:191
-#: src/Frontend/TourOutputs.php:300
-#: src/Frontend/Widget.php:408
+#: src/Frontend/TourOutputs.php:312
+#: src/Frontend/Widget.php:425
 #: src/Services/BookingDetails.php:83
 #: src/Services/Pricing/PriceCalculator.php:481
 #, php-format
@@ -3280,7 +3279,7 @@ msgstr "نقدًا أو بالبطاقة عند الوصول، بدون عربو
 
 #. translators: %s: what is booked, e.g. buggy or tour.
 #: src/Frontend/BookingCard.php:220
-#: src/Frontend/Widget.php:258
+#: src/Frontend/Widget.php:270
 #, php-format
 msgid "Book this %s"
 msgstr "احجز %s"
@@ -3298,19 +3297,19 @@ msgstr[4] "%1$s · %2$d شخص لكل منها"
 msgstr[5] "%1$s · %2$d شخص لكل منها"
 
 #: src/Frontend/BookingCard.php:267
-#: src/Frontend/Widget.php:401
+#: src/Frontend/Widget.php:418
 msgid "today"
 msgstr "اليوم"
 
 #: src/Frontend/BookingCard.php:268
-#: src/Frontend/Widget.php:364
+#: src/Frontend/Widget.php:381
 #: templates/front/booking-card.php:43
 #: templates/front/booking-widget.php:102
 msgid "Previous month"
 msgstr "الشهر السابق"
 
 #: src/Frontend/BookingCard.php:269
-#: src/Frontend/Widget.php:365
+#: src/Frontend/Widget.php:382
 #: templates/front/booking-card.php:45
 #: templates/front/booking-widget.php:104
 msgid "Next month"
@@ -3361,7 +3360,7 @@ msgstr "الاصطحاب: %s"
 #. translators: %s: number of adults.
 #. translators: 1: number of adults.
 #: src/Frontend/BookingCard.php:291
-#: src/Frontend/Widget.php:423
+#: src/Frontend/Widget.php:440
 #, php-format
 msgid "Adults: %s"
 msgstr "البالغون: %s"
@@ -3369,7 +3368,7 @@ msgstr "البالغون: %s"
 #. translators: %s: number of children.
 #. translators: 1: number of children.
 #: src/Frontend/BookingCard.php:293
-#: src/Frontend/Widget.php:425
+#: src/Frontend/Widget.php:442
 #, php-format
 msgid "Children: %s"
 msgstr "الأطفال: %s"
@@ -3520,55 +3519,55 @@ msgstr "اللون المميز ونصه (الأزرار)"
 msgid "Text colour and panel background"
 msgstr "لون النص وخلفية اللوحة"
 
-#: src/Frontend/TourOutputs.php:304
+#: src/Frontend/TourOutputs.php:319
 msgid "VAT included"
 msgstr "شامل الضريبة"
 
-#: src/Frontend/TourOutputs.php:304
+#: src/Frontend/TourOutputs.php:319
 msgid "plus VAT"
 msgstr "دون الضريبة"
 
-#: src/Frontend/TourOutputs.php:335
+#: src/Frontend/TourOutputs.php:350
 msgid "Previous image"
 msgstr "الصورة السابقة"
 
-#: src/Frontend/TourOutputs.php:335
+#: src/Frontend/TourOutputs.php:350
 msgid "Next image"
 msgstr "الصورة التالية"
 
 #. translators: 1: image number, 2: total.
-#: src/Frontend/TourOutputs.php:350
+#: src/Frontend/TourOutputs.php:365
 #, php-format
 msgid "Open image %1$d of %2$d"
 msgstr "فتح الصورة %1$d من %2$d"
 
 #. translators: %s: price, e.g. AED 699.00.
-#: src/Frontend/TourOutputs.php:376
+#: src/Frontend/TourOutputs.php:396
 #, php-format
 msgid "From %s"
 msgstr "ابتداءً من %s"
 
-#: src/Frontend/TourOutputs.php:404
-#: src/Frontend/Widget.php:413
+#: src/Frontend/TourOutputs.php:424
+#: src/Frontend/Widget.php:430
 #: src/Services/Privacy.php:142
 #: templates/front/booking-card.php:53
 #: templates/front/booking-widget.php:75
 msgid "Option"
 msgstr "الخيار"
 
-#: src/Frontend/TourOutputs.php:405
-#: src/Frontend/TourOutputs.php:622
+#: src/Frontend/TourOutputs.php:425
+#: src/Frontend/TourOutputs.php:642
 msgid "Duration"
 msgstr "المدة"
 
 #. translators: %s: per person, per vehicle or per car.
-#: src/Frontend/TourOutputs.php:407
+#: src/Frontend/TourOutputs.php:427
 #, php-format
 msgid "Price %s"
 msgstr "السعر %s"
 
 #. translators: 1: price per person, 2: number of people sharing.
-#: src/Frontend/TourOutputs.php:421
+#: src/Frontend/TourOutputs.php:441
 #, php-format
 msgid "%1$s (%2$d person)"
 msgid_plural "%1$s (%2$d people)"
@@ -3579,34 +3578,34 @@ msgstr[3] "%1$s (%2$d أشخاص)"
 msgstr[4] "%1$s (%2$d شخصًا)"
 msgstr[5] "%1$s (%2$d شخص)"
 
-#: src/Frontend/TourOutputs.php:451
-#: src/Frontend/Widget.php:409
+#: src/Frontend/TourOutputs.php:471
+#: src/Frontend/Widget.php:426
 #: src/Integrations/Elementor/TourListWidget.php:73
 #: templates/front/booking-widget.php:208
 #: assets/src/blocks/tour-blocks.js:34
 msgid "Included"
 msgstr "مشمول"
 
-#: src/Frontend/TourOutputs.php:452
+#: src/Frontend/TourOutputs.php:472
 #: src/Integrations/Elementor/TourListWidget.php:74
 #: assets/src/blocks/tour-blocks.js:35
 msgid "Not included"
 msgstr "غير مشمول"
 
-#: src/Frontend/TourOutputs.php:453
+#: src/Frontend/TourOutputs.php:473
 #: src/Integrations/Elementor/TourListWidget.php:75
 #: assets/src/blocks/tour-blocks.js:36
 msgid "Requirements"
 msgstr "المتطلبات"
 
 #. translators: 1: shortest duration, 2: longest duration.
-#: src/Frontend/TourOutputs.php:512
+#: src/Frontend/TourOutputs.php:532
 #, php-format
 msgid "%1$s to %2$s"
 msgstr "من %1$s إلى %2$s"
 
 #. translators: %d: seats per vehicle.
-#: src/Frontend/TourOutputs.php:517
+#: src/Frontend/TourOutputs.php:537
 #, php-format
 msgid "%d seat"
 msgid_plural "%d seats"
@@ -3618,46 +3617,46 @@ msgstr[4] "%d مقعد"
 msgstr[5] "%d مقعد"
 
 #. translators: 1: guests, 2: what one car is called.
-#: src/Frontend/TourOutputs.php:521
+#: src/Frontend/TourOutputs.php:541
 #, php-format
 msgid "Up to %1$d per %2$s"
 msgstr "حتى %1$d لكل %2$s"
 
 #. translators: %d: minimum age.
-#: src/Frontend/TourOutputs.php:526
+#: src/Frontend/TourOutputs.php:546
 #, php-format
 msgid "Driver %d+"
 msgstr "السائق %d+"
 
 #. translators: %d: minimum age.
-#: src/Frontend/TourOutputs.php:526
+#: src/Frontend/TourOutputs.php:546
 #, php-format
 msgid "Age %d+"
 msgstr "العمر %d+"
 
-#: src/Frontend/TourOutputs.php:529
+#: src/Frontend/TourOutputs.php:549
 msgid "Driving licence needed"
 msgstr "رخصة القيادة مطلوبة"
 
-#: src/Frontend/TourOutputs.php:531
+#: src/Frontend/TourOutputs.php:551
 msgid "No licence needed"
 msgstr "لا حاجة لرخصة"
 
-#: src/Frontend/TourOutputs.php:535
+#: src/Frontend/TourOutputs.php:555
 msgid "Pickup included"
 msgstr "الاصطحاب مشمول"
 
-#: src/Frontend/TourOutputs.php:537
+#: src/Frontend/TourOutputs.php:557
 msgid "Hotel pickup available"
 msgstr "الاصطحاب من الفندق متاح"
 
-#: src/Frontend/TourOutputs.php:633
-#: src/Frontend/TourOutputs.php:640
+#: src/Frontend/TourOutputs.php:653
+#: src/Frontend/TourOutputs.php:660
 msgid "Group size"
 msgstr "حجم المجموعة"
 
 #. translators: %d: seats.
-#: src/Frontend/TourOutputs.php:635
+#: src/Frontend/TourOutputs.php:655
 #: src/Services/LlmsTxt.php:234
 #, php-format
 msgid "Up to %d person per vehicle"
@@ -3670,7 +3669,7 @@ msgstr[4] "حتى %d شخصاً لكل مركبة"
 msgstr[5] "حتى %d شخص لكل مركبة"
 
 #. translators: %d: guests.
-#: src/Frontend/TourOutputs.php:642
+#: src/Frontend/TourOutputs.php:662
 #, php-format
 msgid "Up to %d guest per car"
 msgid_plural "Up to %d guests per car"
@@ -3682,7 +3681,7 @@ msgstr[4] "حتى %d ضيفًا لكل سيارة"
 msgstr[5] "حتى %d ضيف لكل سيارة"
 
 #. translators: %d: age in years.
-#: src/Frontend/TourOutputs.php:649
+#: src/Frontend/TourOutputs.php:669
 #, php-format
 msgid "%d year"
 msgid_plural "%d years"
@@ -3693,37 +3692,37 @@ msgstr[3] "%d سنوات"
 msgstr[4] "%d سنة"
 msgstr[5] "%d سنة"
 
-#: src/Frontend/TourOutputs.php:654
+#: src/Frontend/TourOutputs.php:674
 msgid "Licence"
 msgstr "الرخصة"
 
-#: src/Frontend/TourOutputs.php:655
+#: src/Frontend/TourOutputs.php:675
 msgid "A driving licence is required"
 msgstr "تلزم رخصة قيادة"
 
-#: src/Frontend/TourOutputs.php:696
+#: src/Frontend/TourOutputs.php:716
 msgid "Hotel pickup included"
 msgstr "التوصيل من الفندق مشمول"
 
 #. translators: %s: price.
-#: src/Frontend/TourOutputs.php:702
+#: src/Frontend/TourOutputs.php:722
 #, php-format
 msgid "Hotel pickup on request (+%s per booking)"
 msgstr "التوصيل من الفندق عند الطلب (+%s لكل حجز)"
 
-#: src/Frontend/TourOutputs.php:705
+#: src/Frontend/TourOutputs.php:725
 msgid "Hotel pickup on request"
 msgstr "التوصيل من الفندق عند الطلب"
 
 #. translators: %s: time.
-#: src/Frontend/TourOutputs.php:730
+#: src/Frontend/TourOutputs.php:750
 #: src/Services/LlmsTxt.php:303
 #, php-format
 msgid "starts %s"
 msgstr "تبدأ %s"
 
 #. translators: %s: time range.
-#: src/Frontend/TourOutputs.php:735
+#: src/Frontend/TourOutputs.php:755
 #: src/Services/LlmsTxt.php:309
 #, php-format
 msgid "pickup %s"
@@ -3733,17 +3732,9 @@ msgstr "الاستلام %s"
 msgid "car"
 msgstr "سيارة"
 
-#: src/Frontend/TourWords.php:38
-msgid "vehicle"
-msgstr "مركبة"
-
 #: src/Frontend/TourWords.php:54
 msgid "cars"
 msgstr "سيارات"
-
-#: src/Frontend/TourWords.php:54
-msgid "vehicles"
-msgstr "مركبات"
 
 #: src/Frontend/TourWords.php:63
 msgid "tour"
@@ -3770,282 +3761,282 @@ msgstr "%d ساعة"
 msgid "%d min"
 msgstr "%d دقيقة"
 
-#: src/Frontend/Widget.php:95
+#: src/Frontend/Widget.php:102
 msgid "Booking widget: switch on “Take bookings for this tour” in the tour’s Booking settings to show it here."
 msgstr "أداة الحجز: فعّل “استقبال الحجوزات لهذه الجولة” في إعدادات الحجز الخاصة بالجولة لعرضها هنا."
 
 #. translators: %s: "Digitum", linked to digitum.marketing.
-#: src/Frontend/Widget.php:290
+#: src/Frontend/Widget.php:307
 #, php-format
 msgid "Booking by %s"
 msgstr "الحجز عبر %s"
 
 #. translators: 1: seats per vehicle, 2: price basis, e.g. per buggy.
-#: src/Frontend/Widget.php:304
+#: src/Frontend/Widget.php:321
 #, php-format
 msgid "%1$d seater, %2$s from"
 msgstr "%1$d مقعد، %2$s من"
 
 #. translators: %s: price basis, e.g. per person.
-#: src/Frontend/Widget.php:307
+#: src/Frontend/Widget.php:324
 #, php-format
 msgid "%s from"
 msgstr "%s من"
 
-#: src/Frontend/Widget.php:318
+#: src/Frontend/Widget.php:335
 #: src/Services/LlmsTxt.php:397
 #: templates/front/booking-widget.php:170
 msgid "per vehicle"
 msgstr "للمركبة"
 
-#: src/Frontend/Widget.php:320
+#: src/Frontend/Widget.php:337
 msgid "per car"
 msgstr "للسيارة"
 
-#: src/Frontend/Widget.php:367
+#: src/Frontend/Widget.php:384
 msgid "available"
 msgstr "متاح"
 
-#: src/Frontend/Widget.php:368
+#: src/Frontend/Widget.php:385
 msgid "closed"
 msgstr "مغلق"
 
-#: src/Frontend/Widget.php:369
+#: src/Frontend/Widget.php:386
 msgid "past"
 msgstr "انتهى"
 
-#: src/Frontend/Widget.php:370
+#: src/Frontend/Widget.php:387
 msgid "not open yet"
 msgstr "لم يُفتح بعد"
 
-#: src/Frontend/Widget.php:371
+#: src/Frontend/Widget.php:388
 msgid "no tours"
 msgstr "لا جولات"
 
-#: src/Frontend/Widget.php:372
+#: src/Frontend/Widget.php:389
 msgid "closed for today"
 msgstr "مغلق لليوم"
 
-#: src/Frontend/Widget.php:374
+#: src/Frontend/Widget.php:391
 #: templates/front/booking-widget.php:115
 msgid "Choose a date to see the times."
 msgstr "اختر تاريخاً لعرض المواعيد."
 
-#: src/Frontend/Widget.php:375
+#: src/Frontend/Widget.php:392
 msgid "No tours on this day. Please choose another date."
 msgstr "لا توجد جولات في هذا اليوم. يرجى اختيار تاريخ آخر."
 
-#: src/Frontend/Widget.php:376
+#: src/Frontend/Widget.php:393
 msgid "Loading…"
 msgstr "جارٍ التحميل…"
 
 #. translators: %s: time.
-#: src/Frontend/Widget.php:378
+#: src/Frontend/Widget.php:395
 #, php-format
 msgid "Starts %s"
 msgstr "تبدأ %s"
 
 #. translators: %s: time range.
-#: src/Frontend/Widget.php:380
+#: src/Frontend/Widget.php:397
 #, php-format
 msgid "Pickup %s"
 msgstr "الاستلام %s"
 
-#: src/Frontend/Widget.php:381
+#: src/Frontend/Widget.php:398
 msgid "Not available"
 msgstr "غير متاح"
 
 #. translators: %s: VAT amount.
-#: src/Frontend/Widget.php:384
+#: src/Frontend/Widget.php:401
 #, php-format
 msgid "Includes VAT %s"
 msgstr "شامل ضريبة القيمة المضافة %s"
 
 #. translators: %s: VAT amount.
-#: src/Frontend/Widget.php:386
+#: src/Frontend/Widget.php:403
 #, php-format
 msgid "VAT %s"
 msgstr "ضريبة القيمة المضافة %s"
 
-#: src/Frontend/Widget.php:388
+#: src/Frontend/Widget.php:405
 msgid "Pay now"
 msgstr "ادفع الآن"
 
-#: src/Frontend/Widget.php:389
+#: src/Frontend/Widget.php:406
 msgid "Due on arrival"
 msgstr "يُدفع عند الوصول"
 
 #. translators: %s: deposit percentage.
-#: src/Frontend/Widget.php:392
+#: src/Frontend/Widget.php:409
 #, php-format
 msgid "%s%% deposit"
 msgstr "عربون %s%%"
 
 #. translators: 1: amount now, 2: amount on arrival.
-#: src/Frontend/Widget.php:394
+#: src/Frontend/Widget.php:411
 #, php-format
 msgid "%1$s now, %2$s on arrival"
 msgstr "%1$s الآن، و%2$s عند الوصول"
 
 #. translators: %s: meeting point.
-#: src/Frontend/Widget.php:395
+#: src/Frontend/Widget.php:412
 #: templates/front/booking-widget.php:18
 #: templates/front/booking-widget.php:201
 msgid "Free"
 msgstr "مجاناً"
 
 #. translators: 1: current step, 2: number of steps, 3: step name.
-#: src/Frontend/Widget.php:398
+#: src/Frontend/Widget.php:415
 #, php-format
 msgid "Step %1$s of %2$s: %3$s"
 msgstr "الخطوة %1$s من %2$s: %3$s"
 
 #. translators: %s: date, e.g. Thu 5 Nov 2026.
-#: src/Frontend/Widget.php:400
+#: src/Frontend/Widget.php:417
 #, php-format
 msgid "Selected: %s"
 msgstr "المختار: %s"
 
 #. translators: %s: VAT rate, e.g. 5%.
-#: src/Frontend/Widget.php:403
+#: src/Frontend/Widget.php:420
 #, php-format
 msgid "Prices include %s VAT"
 msgstr "الأسعار تشمل ضريبة القيمة المضافة %s"
 
-#: src/Frontend/Widget.php:410
+#: src/Frontend/Widget.php:427
 msgid "Cash or card when we pick you up."
 msgstr "نقدًا أو بالبطاقة عند استلامك."
 
-#: src/Frontend/Widget.php:411
+#: src/Frontend/Widget.php:428
 #: src/Gateways/PayOnArrival.php:35
 msgid "Cash or card at the meeting point."
 msgstr "نقداً أو بالبطاقة عند نقطة الالتقاء."
 
 #. translators: %s: meeting point.
-#: src/Frontend/Widget.php:420
-#: src/Services/Notifications/MergeTags.php:164
+#: src/Frontend/Widget.php:437
+#: src/Services/Notifications/MergeTags.php:176
 #: templates/front/booking-widget.php:200
 #, php-format
 msgid "Meet us at %s"
 msgstr "نلتقي بك في %s"
 
 #. translators: %s: meeting point.
-#: src/Frontend/Widget.php:421
+#: src/Frontend/Widget.php:438
 #: templates/front/booking-widget.php:200
 msgid "Meet us at the meeting point"
 msgstr "نلتقي بك عند نقطة الالتقاء"
 
 #. translators: 1: number of infants.
-#: src/Frontend/Widget.php:427
+#: src/Frontend/Widget.php:444
 #, php-format
 msgid "Infants: %s"
 msgstr "الرضّع: %s"
 
 #. translators: 1: number of vehicles.
-#: src/Frontend/Widget.php:429
+#: src/Frontend/Widget.php:446
 #, php-format
 msgid "Vehicles: %s"
 msgstr "المركبات: %s"
 
 #. translators: %s: total price.
-#: src/Frontend/Widget.php:431
+#: src/Frontend/Widget.php:448
 #, php-format
 msgid "Total: %s"
 msgstr "الإجمالي: %s"
 
-#: src/Frontend/Widget.php:432
+#: src/Frontend/Widget.php:449
 msgid "Please enter the country code."
 msgstr "يرجى إدخال رمز الدولة."
 
-#: src/Frontend/Widget.php:433
+#: src/Frontend/Widget.php:450
 msgid "Please enter 6 to 14 digits."
 msgstr "يرجى إدخال من 6 إلى 14 رقمًا."
 
-#: src/Frontend/Widget.php:434
+#: src/Frontend/Widget.php:451
 #: src/Rest/AdminController.php:267
 #: src/Services/BookingValidator.php:36
 msgid "Please enter a valid email address."
 msgstr "يرجى إدخال بريد إلكتروني صحيح."
 
-#: src/Frontend/Widget.php:435
+#: src/Frontend/Widget.php:452
 #: src/Services/BookingValidator.php:31
 msgid "Please enter your full name."
 msgstr "يرجى إدخال اسمك الكامل."
 
-#: src/Frontend/Widget.php:436
+#: src/Frontend/Widget.php:453
 msgid "Sending…"
 msgstr "جارٍ الإرسال…"
 
-#: src/Frontend/Widget.php:437
+#: src/Frontend/Widget.php:454
 msgid "Something went wrong. Please check your connection and try again."
 msgstr "حدث خطأ ما. يرجى التحقق من اتصالك والمحاولة مرة أخرى."
 
-#: src/Frontend/Widget.php:438
+#: src/Frontend/Widget.php:455
 #: src/Services/BookingService.php:137
 #: src/Services/BookingService.php:156
 msgid "Please check the highlighted fields."
 msgstr "يرجى مراجعة الحقول المحددة."
 
-#: src/Frontend/Widget.php:439
+#: src/Frontend/Widget.php:456
 #: src/Services/BookingService.php:131
 #: src/Services/Pricing/ErrorMessages.php:26
 msgid "Please choose an option."
 msgstr "يرجى اختيار خيار."
 
-#: src/Frontend/Widget.php:440
+#: src/Frontend/Widget.php:457
 msgid "Please choose a date and a session."
 msgstr "يرجى اختيار تاريخ وفترة."
 
-#: src/Frontend/Widget.php:441
+#: src/Frontend/Widget.php:458
 #: src/Services/Pricing/ErrorMessages.php:28
 msgid "Please add at least one guest."
 msgstr "يرجى إضافة ضيف واحد على الأقل."
 
-#: src/Frontend/Widget.php:442
+#: src/Frontend/Widget.php:459
 #: src/Services/BookingService.php:103
 #: src/Services/Pricing/ErrorMessages.php:39
 msgid "Please choose your pickup area."
 msgstr "يرجى اختيار منطقة الاستلام."
 
-#: src/Frontend/Widget.php:443
+#: src/Frontend/Widget.php:460
 #: src/Services/BookingValidator.php:49
 msgid "Please tell us your hotel or pickup address."
 msgstr "يرجى إخبارنا باسم فندقك أو عنوان الاستلام."
 
-#: src/Frontend/Widget.php:444
+#: src/Frontend/Widget.php:461
 msgid "This field is required."
 msgstr "هذا الحقل مطلوب."
 
-#: src/Frontend/Widget.php:445
+#: src/Frontend/Widget.php:462
 #: src/Services/BookingService.php:117
 msgid "Please choose how you want to pay."
 msgstr "يرجى اختيار طريقة الدفع."
 
-#: src/Frontend/Widget.php:446
+#: src/Frontend/Widget.php:463
 #: src/Services/BookingValidator.php:53
 msgid "Please accept the booking terms."
 msgstr "يرجى قبول شروط الحجز."
 
 #. translators: %s: amount.
-#: src/Frontend/Widget.php:448
+#: src/Frontend/Widget.php:465
 #, php-format
 msgid "Continue to payment · %s"
 msgstr "المتابعة إلى الدفع · %s"
 
-#: src/Frontend/Widget.php:449
-#: src/Frontend/Widget.php:450
+#: src/Frontend/Widget.php:466
+#: src/Frontend/Widget.php:467
 #: templates/front/booking-widget.php:391
 msgid "Confirm booking"
 msgstr "تأكيد الحجز"
 
 #. translators: %s: amount.
-#: src/Frontend/Widget.php:452
+#: src/Frontend/Widget.php:469
 #, php-format
 msgid "Book now · %s by bank transfer"
 msgstr "احجز الآن · %s بتحويل بنكي"
 
 #. translators: %s: coupon code.
-#: src/Frontend/Widget.php:454
+#: src/Frontend/Widget.php:471
 #, php-format
 msgid "Coupon %s applied."
 msgstr "تم تطبيق القسيمة %s."
@@ -4309,6 +4300,7 @@ msgid "Primary colour"
 msgstr "اللون الأساسي"
 
 #: src/Integrations/Elementor/StyleControls.php:34
+#: src/Integrations/Elementor/TourFactsWidget.php:101
 #: src/Settings/Settings.php:678
 msgid "Text colour"
 msgstr "لون النص"
@@ -4318,16 +4310,19 @@ msgid "Secondary text colour"
 msgstr "لون النص الثانوي"
 
 #: src/Integrations/Elementor/StyleControls.php:38
+#: src/Integrations/Elementor/TourFactsWidget.php:103
 msgid "Background"
 msgstr "الخلفية"
 
 #: src/Integrations/Elementor/StyleControls.php:39
+#: src/Integrations/Elementor/TourFactsWidget.php:102
 #: src/Settings/Settings.php:690
 msgid "Border colour"
 msgstr "لون الحدود"
 
 #. translators: %s: part of the widget, e.g. Title.
 #: src/Integrations/Elementor/StyleControls.php:57
+#: src/Integrations/Elementor/TourFactsWidget.php:118
 msgid "Typography"
 msgstr "الخط"
 
@@ -4337,6 +4332,7 @@ msgid "Title typography"
 msgstr "خط العنوان"
 
 #: src/Integrations/Elementor/StyleControls.php:66
+#: src/Integrations/Elementor/TourFactsWidget.php:125
 msgid "Padding"
 msgstr "الحشو"
 
@@ -4386,9 +4382,14 @@ msgid "List"
 msgstr "القائمة"
 
 #: src/Integrations/Elementor/TourFactsWidget.php:85
+#: src/Integrations/Elementor/TourFactsWidget.php:95
 #: assets/src/blocks/tour-blocks.js:67
 msgid "Chips"
 msgstr "شرائح"
+
+#: src/Integrations/Elementor/TourFactsWidget.php:134
+msgid "Minimum height"
+msgstr "الحد الأدنى للارتفاع"
 
 #: src/Integrations/Elementor/TourListWidget.php:28
 msgid "Tour list"
@@ -5444,61 +5445,61 @@ msgid "Test email from Digitum Bookings"
 msgstr "رسالة تجريبية من Digitum Bookings"
 
 #. translators: 1: hotel and area, 2: pickup window.
-#: src/Services/Notifications/MergeTags.php:60
+#: src/Services/Notifications/MergeTags.php:62
 #, php-format
 msgid "Hotel pickup from %1$s between %2$s. Please be ready in the lobby."
 msgstr "الاستلام من الفندق من %1$s بين %2$s. يرجى الاستعداد في بهو الفندق."
 
 #. translators: %s: hotel and area.
-#: src/Services/Notifications/MergeTags.php:60
+#: src/Services/Notifications/MergeTags.php:62
 #, php-format
 msgid "Hotel pickup from %s."
 msgstr "الاستلام من الفندق من %s."
 
 #. translators: 1: meeting point, 2: start time.
-#: src/Services/Notifications/MergeTags.php:63
+#: src/Services/Notifications/MergeTags.php:65
 #, php-format
 msgid "Meet us at %1$s. The session starts at %2$s."
 msgstr "نلتقي بك في %1$s. تبدأ الفترة في %2$s."
 
-#: src/Services/Notifications/MergeTags.php:72
+#: src/Services/Notifications/MergeTags.php:74
 msgid "there"
 msgstr "ضيفنا العزيز"
 
-#: src/Services/Notifications/MergeTags.php:108
+#: src/Services/Notifications/MergeTags.php:110
 #: templates/front/confirmation.php:187
 msgid "Still to pay"
 msgstr "المبلغ المتبقي"
 
-#: src/Services/Notifications/MergeTags.php:118
+#: src/Services/Notifications/MergeTags.php:120
 #: templates/front/confirmation.php:121
 msgid "Account name"
 msgstr "اسم الحساب"
 
-#: src/Services/Notifications/MergeTags.php:119
+#: src/Services/Notifications/MergeTags.php:121
 #: templates/front/confirmation.php:122
 msgid "Bank"
 msgstr "البنك"
 
-#: src/Services/Notifications/MergeTags.php:120
+#: src/Services/Notifications/MergeTags.php:122
 #: src/Settings/Settings.php:468
 #: templates/front/confirmation.php:123
 msgid "IBAN"
 msgstr "IBAN"
 
-#: src/Services/Notifications/MergeTags.php:121
+#: src/Services/Notifications/MergeTags.php:123
 #: src/Settings/Settings.php:473
 #: templates/front/confirmation.php:124
 msgid "Account number"
 msgstr "رقم الحساب"
 
-#: src/Services/Notifications/MergeTags.php:122
+#: src/Services/Notifications/MergeTags.php:124
 #: src/Settings/Settings.php:478
 #: templates/front/confirmation.php:125
 msgid "SWIFT / BIC"
 msgstr "SWIFT / BIC"
 
-#: src/Services/Notifications/MergeTags.php:124
+#: src/Services/Notifications/MergeTags.php:126
 #: templates/front/confirmation.php:135
 msgid "Payment reference"
 msgstr "مرجع الدفع"
