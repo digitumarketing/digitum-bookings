@@ -64,7 +64,7 @@ final class MergeTags {
 				$pickup = '';
 			}
 
-			$hold = ! empty( $booking['hold_expires_at'] ) ? (string) wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $booking['hold_expires_at'] . ' UTC' ) ) : '';
+			$hold = ! empty( $booking['hold_expires_at'] ) ? Format::moment( (string) $booking['hold_expires_at'] ) : '';
 
 			$text += array(
 				'{reference}'        => (string) $booking['reference'],

@@ -124,6 +124,16 @@ final class Settings {
 					'help'    => __( 'Off: all three steps are shown in one column. Phones always use steps.', 'digitum-bookings' ),
 					'default' => true,
 				),
+				'date_style'       => array(
+					'type'    => 'select',
+					'label'   => __( 'Date format', 'digitum-bookings' ),
+					'options' => array(
+						'short' => __( 'Fri 6 Nov 2026', 'digitum-bookings' ),
+						'us'    => __( 'Fri, Nov 6, 2026', 'digitum-bookings' ),
+					),
+					'help'    => __( 'How booking dates appear in the widget, on booking pages, in emails and in the bookings list. Day and month names follow the site language.', 'digitum-bookings' ),
+					'default' => 'short',
+				),
 				'sticky_mode'      => array(
 					'type'    => 'select',
 					'label'   => __( 'Mobile sticky bar', 'digitum-bookings' ),

@@ -205,6 +205,7 @@ final class Widget {
 			'payment'    => Assets::payment_url(),
 			'stepped'    => ! empty( $all['general']['stepped_desktop'] ),
 			'pointName'  => $point ? (string) $point['name'] : '',
+			'dates'      => self::date_names(),
 			'i18n'       => self::strings(),
 		);
 
@@ -268,6 +269,29 @@ final class Widget {
 			default:
 				return '';
 		}
+	}
+
+	/**
+	 * Date style and the site language's short day and month names, so the widget writes dates exactly like the
+	 * emails (PHP's "D" and "M").
+	 *
+	 * @return array{style: string, days: list<string>, months: list<string>}
+	 */
+	private static function date_names(): array {
+		global $wp_locale;
+		$days   = array();
+		$months = array();
+		for ( $i = 0; $i < 7; $i++ ) {
+			$days[] = $wp_locale ? $wp_locale->get_weekday_abbrev( $wp_locale->get_weekday( $i ) ) : '';
+		}
+		for ( $i = 1; $i <= 12; $i++ ) {
+			$months[] = $wp_locale ? $wp_locale->get_month_abbrev( $wp_locale->get_month( $i ) ) : '';
+		}
+		return array(
+			'style'  => str_starts_with( Format::date_format(), 'D,' ) ? 'us' : 'short',
+			'days'   => $days,
+			'months' => $months,
+		);
 	}
 
 	/**

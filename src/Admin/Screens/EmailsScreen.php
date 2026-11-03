@@ -9,6 +9,7 @@ namespace Digitum\Bookings\Admin\Screens;
 
 use Digitum\Bookings\Admin\Menus;
 use Digitum\Bookings\Database\Schema;
+use Digitum\Bookings\Frontend\Format;
 use Digitum\Bookings\Roles\Capabilities;
 use Digitum\Bookings\Services\Notifications\EmailTemplates;
 use Digitum\Bookings\Services\Notifications\Events;
@@ -216,7 +217,7 @@ final class EmailsScreen {
 		);
 		if ( 'daily_summary' === $event ) {
 			$context += array(
-				'date'          => wp_date( get_option( 'date_format' ), strtotime( '+1 day' ) ),
+				'date'          => Format::date( wp_date( 'Y-m-d', strtotime( '+1 day' ) ) ),
 				'booking_count' => '0',
 				'guest_count'   => '0',
 				'summary_table' => array(

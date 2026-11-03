@@ -170,7 +170,18 @@
 			return timeFmt.format( new Date( 2000, 0, 1, +p[ 0 ], +p[ 1 ] ) );
 		};
 		const toDate = ( date ) => new Date( +date.slice( 0, 4 ), +date.slice( 5, 7 ) - 1, +date.slice( 8, 10 ) );
-		const shortDate = new Intl.DateTimeFormat( cfg.locale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' } );
+		// "Fri 6 Nov 2026" (or "Fri, Nov 6, 2026"), with the site's day and month names: the same text as the emails.
+		const names = cfg.dates || {};
+		const shortDate = {
+			format: ( d ) => {
+				const day = ( names.days || [] )[ d.getDay() ];
+				const month = ( names.months || [] )[ d.getMonth() ];
+				if ( ! day || ! month ) {
+					return new Intl.DateTimeFormat( 'en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' } ).format( d ).replace( /,/g, '' );
+				}
+				return 'us' === names.style ? `${ day }, ${ month } ${ d.getDate() }, ${ d.getFullYear() }` : `${ day } ${ d.getDate() } ${ month } ${ d.getFullYear() }`;
+			},
+		};
 		const longDate = new Intl.DateTimeFormat( cfg.locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' } );
 
 		const state = {

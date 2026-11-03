@@ -27,13 +27,32 @@ final class Format {
 	}
 
 	/**
-	 * Date in the site's date format, e.g. "24 October 2026".
+	 * Date style for guests: "Fri 6 Nov 2026" (default) or "Fri, Nov 6, 2026" (Settings › General). Weekday and
+	 * month names follow the site language.
+	 */
+	public static function date_format(): string {
+		$all = get_option( 'dgb_settings', array() );
+		return 'us' === ( is_array( $all ) ? ( $all['general']['date_style'] ?? '' ) : '' ) ? 'D, M j, Y' : 'D j M Y';
+	}
+
+	/**
+	 * Booking date, e.g. "Fri 6 Nov 2026".
 	 *
 	 * @param string $date Y-m-d.
 	 */
 	public static function date( string $date ): string {
 		$time = \DateTimeImmutable::createFromFormat( '!Y-m-d', $date, wp_timezone() );
-		return $time ? wp_date( 'l, ' . get_option( 'date_format' ), $time->getTimestamp() ) : $date;
+		return $time ? wp_date( self::date_format(), $time->getTimestamp() ) : $date;
+	}
+
+	/**
+	 * A moment stored in UTC (e.g. a payment deadline), in the site's time zone: "Fri 6 Nov 2026 3:30 pm".
+	 *
+	 * @param string $utc Y-m-d H:i:s in UTC.
+	 */
+	public static function moment( string $utc ): string {
+		$time = strtotime( $utc . ' UTC' );
+		return false === $time ? $utc : wp_date( self::date_format() . ' ' . get_option( 'time_format' ), $time );
 	}
 
 	/**

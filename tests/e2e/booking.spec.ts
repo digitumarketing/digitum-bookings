@@ -140,7 +140,7 @@ test.describe( 'desktop', () => {
 		await expect( chosen ).toHaveAttribute( 'aria-pressed', 'true' );
 		await expect( chosen ).toHaveClass( /is-selected/ );
 		await expect( chosen ).toHaveAttribute( 'aria-label', /\d{4}/ );
-		await expect( w.locator( '[data-dgb-selected]' ) ).toHaveText( /^Selected: \w{3}, \w{3} \d{1,2}, \d{4}$/ );
+		await expect( w.locator( '[data-dgb-selected]' ) ).toHaveText( /^Selected: \w{3} \d{1,2} \w{3} \d{4}$/ );
 		const colours = await w.locator( '.dgb-day:not(:disabled)' ).evaluateAll( ( days ) => days.map( ( d ) => getComputedStyle( d ).backgroundColor ) );
 		expect( colours.filter( ( c ) => c !== 'rgba(0, 0, 0, 0)' ) ).toHaveLength( 1 );
 		await expect( w.getByRole( 'radio', { name: /^Morning|^Evening/ } ).first() ).toBeVisible();

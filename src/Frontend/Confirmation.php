@@ -144,7 +144,7 @@ final class Confirmation {
 
 		$hold = '';
 		if ( ! empty( $booking['hold_expires_at'] ) ) {
-			$hold = wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $booking['hold_expires_at'] . ' UTC' ) );
+			$hold = Format::moment( (string) $booking['hold_expires_at'] );
 		}
 
 		$whatsapp = preg_replace( '/\D+/', '', (string) $all['payments']['bank_whatsapp'] );
@@ -266,7 +266,7 @@ final class Confirmation {
 		foreach ( ( new ProofRepository() )->for_booking( (int) $booking['id'] ) as $row ) {
 			$files[] = array(
 				'name' => '' !== (string) $row['original_name'] ? (string) $row['original_name'] : __( 'Screenshot', 'digitum-bookings' ),
-				'date' => wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $row['uploaded_at'] . ' UTC' ) ),
+				'date' => Format::moment( (string) $row['uploaded_at'] ),
 			);
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- message flag after a redirect.
