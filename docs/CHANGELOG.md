@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.8.2 (booking widget fixes)
+
+- **Three steps instead of five**: 1 *Your trip* (option, date, session, guests and vehicles, extras, live total), 2 *Pickup and details* (meeting point or hotel pickup with area, hotel and room; name, phone, email, nationality; special requests behind “Add a note”), 3 *Review and confirm* (summary of tour, option, date, session, guests and pickup; price with VAT note; cancellation text; payment; coupon; terms and marketing opt-in; Confirm). Progress reads “Step 2 of 3: Pickup and details” and is announced; focus moves to the step heading on Continue and Back. The one-column desktop layout uses the same three sections.
+- New setting Settings › General › **Stepped layout on desktop** (on by default), so the widget is short enough for a sidebar.
+- With a single payment method no selector is shown: pay on arrival reads “Pay on the day, cash or card. Nothing to pay now.”, and the note says “Cash or card when we pick you up.” or “… at the meeting point.” depending on pickup.
+- **Validation per step**: Continue checks only the fields of the current step; errors appear under their field, the first one is scrolled to and focused, and each clears as soon as its field changes. The price box never shows validation errors. With hotel pickup, both the area and “Hotel or address” are required.
+- **Calendar**: open days are plain, hover and keyboard focus get a light tint and a focus ring, only the selected day is filled (class `is-selected` with `aria-pressed="true"`), today has a dot, unavailable and past days are muted and crossed out. “Selected: Thu, Nov 5, 2026” under the calendar; every day has the full date as its label.
+- **No theme or kit CSS in the widget**: every plugin button (days, month arrows, steppers, close, Back, Continue, Confirm) and every field is styled for all states (normal, hover, focus, focus-visible, active, disabled) with selectors more specific than theme resets (such as Hello Elementor's pink buttons) and Elementor kit button and form styles. The close button is a small neutral icon button.
+- **Phone bottom sheet**: header and footer stay fixed while only the middle scrolls (the Continue bar no longer covers the last fields); the sheet is sized to the visible viewport, so the keyboard never hides the focused field, which is scrolled into view; page scroll is locked without a jump and restored on close; while open, the sheet sits in a layer on `<body>` (z-index 100000) above theme sticky bars and page-builder containers. Closing and reopening keeps the step and answers.
+- **Price box**: no VAT line at 0%; otherwise one line “Prices include 5% VAT”. With pay on arrival, “Pay on the day: AED X” instead of “Pay now” and “Due on arrival”.
+- **Phone field**: the country code comes from Settings › General (digits; a “+” is shown in front), code and number sit on one row, both accept digits only, and the number must be 6 to 14 digits.
+- Template change: `templates/front/booking-widget.php` has the new three steps (`data-step` = `trip`, `details`, `review`). A theme copy of the template from an earlier version must be updated.
+
 ## 0.8.1
 
 - Main currency can show whole units, e.g. AED 699 instead of AED 699.00. New setting Settings › Currency & VAT › **Show prices as**: “Currency default” (default, so existing sites do not change) or “Whole units when the amount has no fraction” (349.50 still shows its decimals). Display only (`Money::display_decimals()`, used by `Format::money()` and the booking widget's `wholeUnits` flag): totals, payments, gateways and structured data keep full ISO precision.

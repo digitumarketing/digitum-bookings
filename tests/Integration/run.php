@@ -289,7 +289,8 @@ if ( scenario( 'E' ) ) {
 
 	$page = step( $site, 'render_page', array( 'url' => $buggy['url'] ) );
 	check( 1 === $page['widget'] && $page['form'] && $page['js'] && $page['css'], 'tour page gets the widget (auto-insert) and its assets' );
-	check( array( 'choose', 'guests', 'pickup', 'extras', 'details', 'pay' ) === $page['steps'], 'widget has the six steps for a per-vehicle tour with pickup and extras' );
+	check( array( 'trip', 'details', 'review' ) === $page['steps'], 'widget has three steps: trip, pickup and details, review and confirm' );
+	check( true === $page['config']['stepped'] && str_contains( $page['html'], 'data-dgb-selected' ) && str_contains( $page['html'], 'name="payment_method"' ), 'stepped on desktop by default; selected-date line; payment method field' );
 	check( $page['sticky'], 'mobile sticky bar on the tour page' );
 	check( 'per_vehicle' === $page['config']['product']['mode'] && 3 === count( $page['config']['variants'] ) && '300' === (string) (float) $page['config']['pickup']['price'], 'widget data: mode, options and pickup price' );
 	check( '' === $page['shortcode'] && '' === $page['block'] && $page['has_block'], 'a tour’s widget is shown once per page; block registered' );
@@ -370,7 +371,7 @@ if ( scenario( 'E' ) ) {
 	check( 201 === $r['status'] && 'quote_requested' === $r['data']['status'] && 'generate_lead' === $r['data']['event']['event'], 'enquiry: quote requested, generate_lead event' );
 	check( false === strpos( $r['data']['html'], 'dgb-money' ), 'enquiry confirmation shows no price' );
 	$p = step( $site, 'render_page', array( 'url' => $ny['url'] ) );
-	check( ! in_array( 'pay', $p['steps'], true ) && $p['config']['product']['onRequest'], 'price-on-request widget has no payment step' );
+	check( ! str_contains( $p['html'], 'name="payment_method"' ) && array( 'trip', 'details', 'review' ) === $p['steps'] && $p['config']['product']['onRequest'], 'price-on-request widget: same three steps, no payment' );
 
 	$statuses = array();
 	for ( $i = 0; $i < 11; $i++ ) {

@@ -207,18 +207,9 @@ test.describe( 'phone', () => {
 	test( 'card payment from the booking sheet', async ( { page } ) => {
 		await page.goto( path( tours.buggy.url ) );
 		await page.locator( '[data-dgb-sticky] [data-dgb-open]' ).click();
-		const w = page.locator( '[data-dgb-widget]' );
-		const next = w.locator( '[data-dgb-next]' );
-		await w.getByRole( 'radio', { name: /^1 hour/ } ).check();
-		await pickTomorrow( w );
-		await w.getByRole( 'radio', { name: /^Evening/ } ).check();
-		await next.click();
-		await w.getByRole( 'button', { name: 'More: Adults' } ).click();
-		await next.click();
-		await next.click();
-		await next.click();
+		const w = page.locator( '[data-dgb-widget], .dgb-portal' );
+		await chooseRide( w );
 		await fillDetails( w );
-		await next.click();
 		await w.getByRole( 'radio', { name: /^Card, Apple Pay or Google Pay/ } ).check();
 		await w.locator( '[data-dgb-submit]' ).click();
 		await payByCard( page, '4242424242424242' );

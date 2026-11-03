@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: Digitum Bookings 0.6.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/digitum-bookings\n"
 "POT-Creation-Date: 2026-10-22T16:32:13+00:00\n"
-"PO-Revision-Date: 2026-10-27T10:34:43+00:00\n"
+"PO-Revision-Date: 2026-11-03T10:35:12+00:00\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Arabic\n"
 "Language: ar\n"
@@ -78,7 +78,7 @@ msgstr "الضيف"
 #: src/Admin/Screens/ManifestScreen.php:333
 #: src/Admin/Screens/ReportsScreen.php:140
 #: src/Admin/Screens/ToolsScreen.php:165 src/Admin/Screens/ToolsScreen.php:435
-#: src/Integrations/Elementor/BookingWidget.php:56
+#: src/Frontend/Widget.php:330 src/Integrations/Elementor/BookingWidget.php:56
 #: src/Integrations/Elementor/PriceTableWidget.php:56
 #: src/Integrations/Elementor/TourFactsWidget.php:58
 #: src/Integrations/Elementor/TourListWidget.php:56
@@ -94,23 +94,23 @@ msgstr "الجولة"
 #: src/Admin/Screens/BookingsScreen.php:353
 #: src/Admin/Screens/ManifestScreen.php:330
 #: src/Admin/Screens/PaymentsScreen.php:265
-#: src/Admin/Screens/PaymentsScreen.php:366
+#: src/Admin/Screens/PaymentsScreen.php:366 src/Frontend/Widget.php:332
 #: src/Services/Notifications/MergeTags.php:101 src/Services/Privacy.php:143
-#: templates/front/booking-widget.php:95 templates/front/confirmation.php:64
+#: templates/front/booking-widget.php:94 templates/front/confirmation.php:64
 msgid "Date"
 msgstr "التاريخ"
 
 #: src/Admin/ListTables/BookingsListTable.php:87
 #: src/Admin/Screens/BookingsScreen.php:306
 #: src/Admin/Screens/DashboardScreen.php:159
-#: src/Admin/Screens/ReportsScreen.php:226
+#: src/Admin/Screens/ReportsScreen.php:226 src/Frontend/Widget.php:334
 #: src/Services/Notifications/MergeTags.php:103 src/Services/Privacy.php:145
-#: templates/front/booking-widget.php:117 templates/front/confirmation.php:71
+#: templates/front/booking-widget.php:116 templates/front/confirmation.php:71
 msgid "Guests"
 msgstr "الضيوف"
 
 #: src/Admin/ListTables/BookingsListTable.php:88
-#: src/Admin/Screens/PaymentsScreen.php:230 src/Frontend/Widget.php:301
+#: src/Admin/Screens/PaymentsScreen.php:230 src/Frontend/Widget.php:304
 #: src/Services/Notifications/MergeTags.php:105 src/Services/Privacy.php:154
 #: templates/front/confirmation.php:178
 msgid "Total"
@@ -164,8 +164,8 @@ msgstr "كل الجولات"
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:585
 #: src/Admin/Screens/CouponsScreen.php:179
 #: src/Admin/Screens/OffersScreen.php:216 src/Frontend/TourOutputs.php:168
-#: templates/front/booking-widget.php:43 templates/front/booking-widget.php:56
-#: templates/front/booking-widget.php:354
+#: templates/front/booking-widget.php:41 templates/front/booking-widget.php:54
+#: templates/front/booking-widget.php:394
 msgid "From"
 msgstr "من"
 
@@ -180,7 +180,6 @@ msgstr "كل المصادر"
 
 #: src/Admin/ListTables/BookingsListTable.php:194
 #: src/Admin/Screens/BookingsScreen.php:411 src/Services/Privacy.php:156
-#: templates/front/booking-widget.php:301
 msgid "Payment method"
 msgstr "طريقة الدفع"
 
@@ -225,7 +224,7 @@ msgstr[5] "%d مركبة"
 
 #: src/Admin/ListTables/BookingsListTable.php:272
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:165
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:460 src/Frontend/Widget.php:315
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:460 src/Frontend/Widget.php:318
 msgid "On request"
 msgstr "عند الطلب"
 
@@ -684,8 +683,9 @@ msgid "— None —"
 msgstr "— لا شيء —"
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:490
-#: src/Admin/MetaBoxes/BookingSettingsBox.php:511 src/Services/Privacy.php:151
-#: templates/front/booking-widget.php:166 templates/front/confirmation.php:85
+#: src/Admin/MetaBoxes/BookingSettingsBox.php:511 src/Frontend/Widget.php:336
+#: src/Services/Privacy.php:151 templates/front/booking-widget.php:202
+#: templates/front/confirmation.php:85
 msgid "Hotel pickup"
 msgstr "الاستلام من الفندق"
 
@@ -720,7 +720,6 @@ msgstr "الالتقاء عند نقطة الالتقاء"
 #: src/Admin/Screens/ZonesScreen.php:101 src/Frontend/TourOutputs.php:426
 #: src/Integrations/Elementor/Tags/MeetingPointTag.php:28
 #: src/Services/Notifications/Listener.php:204
-#: templates/front/booking-widget.php:153
 msgid "Meeting point"
 msgstr "نقطة الالتقاء"
 
@@ -742,7 +741,7 @@ msgid "Minimum notice"
 msgstr "أقل مدة إشعار مسبق"
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:539
-#: src/Settings/Settings.php:464
+#: src/Settings/Settings.php:481
 msgid "hours"
 msgstr "ساعات"
 
@@ -806,7 +805,7 @@ msgstr "إلى"
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:607
 #: src/Admin/Screens/BookingsScreen.php:304
 #: src/Admin/Screens/BookingsScreen.php:355
-#: src/Admin/Screens/DashboardScreen.php:157
+#: src/Admin/Screens/DashboardScreen.php:157 src/Frontend/Widget.php:333
 #: src/Services/Notifications/MergeTags.php:102 src/Services/Privacy.php:144
 #: templates/front/booking-widget.php:108 templates/front/confirmation.php:68
 msgid "Session"
@@ -930,18 +929,18 @@ msgid "Card (Stripe)"
 msgstr "بطاقة (Stripe)"
 
 #: src/Admin/Screens/BookingsScreen.php:139 src/Gateways/PayPal.php:50
-#: src/Settings/Settings.php:324 src/Settings/Settings.php:396
+#: src/Settings/Settings.php:341 src/Settings/Settings.php:413
 msgid "PayPal"
 msgstr "PayPal"
 
 #: src/Admin/Screens/BookingsScreen.php:140 src/Gateways/BankTransfer.php:30
-#: src/Settings/Settings.php:397 src/Settings/Settings.php:410
-#: src/Settings/Settings.php:415
+#: src/Settings/Settings.php:414 src/Settings/Settings.php:427
+#: src/Settings/Settings.php:432
 msgid "Bank transfer"
 msgstr "تحويل بنكي"
 
 #: src/Admin/Screens/BookingsScreen.php:141 src/Gateways/PayOnArrival.php:28
-#: src/Settings/Settings.php:258
+#: src/Settings/Settings.php:275
 msgid "Pay on arrival"
 msgstr "الدفع عند الوصول"
 
@@ -1033,7 +1032,7 @@ msgstr "الرحلة"
 #: src/Admin/Screens/ManifestScreen.php:233
 #: src/Admin/Screens/ManifestScreen.php:364
 #: src/Admin/Screens/ZonesScreen.php:76 src/Admin/Screens/ZonesScreen.php:146
-#: src/Frontend/TourOutputs.php:420
+#: src/Frontend/TourOutputs.php:420 src/Frontend/Widget.php:335
 #: src/Services/Notifications/MergeTags.php:104
 msgid "Pickup"
 msgstr "الاستلام"
@@ -1045,7 +1044,7 @@ msgid "Meets at %s"
 msgstr "الالتقاء في %s"
 
 #: src/Admin/Screens/BookingsScreen.php:322
-#: templates/front/booking-widget.php:214
+#: templates/front/booking-widget.php:152
 msgid "Extras"
 msgstr "إضافات"
 
@@ -1059,7 +1058,7 @@ msgstr "عرض"
 msgid "Coupon"
 msgstr "قسيمة"
 
-#: src/Admin/Screens/BookingsScreen.php:334 src/Settings/Settings.php:493
+#: src/Admin/Screens/BookingsScreen.php:334 src/Settings/Settings.php:510
 msgid "Reminder"
 msgstr "تذكير"
 
@@ -1090,14 +1089,14 @@ msgstr "تم مسح البيانات الشخصية في %s."
 #: src/Admin/Screens/BookingsScreen.php:380
 #: src/Admin/Screens/BookingsScreen.php:496 src/Services/LlmsTxt.php:131
 #: src/Services/Privacy.php:147 src/Settings/Settings.php:72
-#: templates/front/booking-widget.php:250
+#: templates/front/booking-widget.php:266
 msgid "Email"
 msgstr "البريد الإلكتروني"
 
 #: src/Admin/Screens/BookingsScreen.php:382
 #: src/Admin/Screens/ManifestScreen.php:230 src/Services/LlmsTxt.php:130
 #: src/Services/Privacy.php:148 src/Settings/Settings.php:67
-#: templates/front/booking-widget.php:256
+#: templates/front/booking-widget.php:255
 msgid "Phone"
 msgstr "الهاتف"
 
@@ -1444,7 +1443,7 @@ msgid "Code"
 msgstr "الرمز"
 
 #: src/Admin/Screens/CouponsScreen.php:89
-#: src/Admin/Screens/CouponsScreen.php:148 src/Frontend/Widget.php:306
+#: src/Admin/Screens/CouponsScreen.php:148 src/Frontend/Widget.php:309
 msgid "Discount"
 msgstr "خصم"
 
@@ -1548,8 +1547,8 @@ msgid "until %s"
 msgstr "حتى %s"
 
 #: src/Admin/Screens/CouponsScreen.php:299
-#: src/Admin/Screens/OffersScreen.php:484 src/Settings/Settings.php:124
-#: src/Settings/Settings.php:567
+#: src/Admin/Screens/OffersScreen.php:484 src/Settings/Settings.php:131
+#: src/Settings/Settings.php:584
 msgid "Off"
 msgstr "إيقاف"
 
@@ -1966,31 +1965,31 @@ msgstr "التواريخ"
 msgid "Priority"
 msgstr "الأولوية"
 
-#: src/Admin/Screens/OffersScreen.php:158 src/Settings/Settings.php:200
+#: src/Admin/Screens/OffersScreen.php:158 src/Settings/Settings.php:217
 msgid "Monday"
 msgstr "الاثنين"
 
-#: src/Admin/Screens/OffersScreen.php:159 src/Settings/Settings.php:201
+#: src/Admin/Screens/OffersScreen.php:159 src/Settings/Settings.php:218
 msgid "Tuesday"
 msgstr "الثلاثاء"
 
-#: src/Admin/Screens/OffersScreen.php:160 src/Settings/Settings.php:202
+#: src/Admin/Screens/OffersScreen.php:160 src/Settings/Settings.php:219
 msgid "Wednesday"
 msgstr "الأربعاء"
 
-#: src/Admin/Screens/OffersScreen.php:161 src/Settings/Settings.php:203
+#: src/Admin/Screens/OffersScreen.php:161 src/Settings/Settings.php:220
 msgid "Thursday"
 msgstr "الخميس"
 
-#: src/Admin/Screens/OffersScreen.php:162 src/Settings/Settings.php:204
+#: src/Admin/Screens/OffersScreen.php:162 src/Settings/Settings.php:221
 msgid "Friday"
 msgstr "الجمعة"
 
-#: src/Admin/Screens/OffersScreen.php:163 src/Settings/Settings.php:205
+#: src/Admin/Screens/OffersScreen.php:163 src/Settings/Settings.php:222
 msgid "Saturday"
 msgstr "السبت"
 
-#: src/Admin/Screens/OffersScreen.php:164 src/Settings/Settings.php:206
+#: src/Admin/Screens/OffersScreen.php:164 src/Settings/Settings.php:223
 msgid "Sunday"
 msgstr "الأحد"
 
@@ -2414,13 +2413,13 @@ msgstr "مستلم"
 msgid "Processing"
 msgstr "قيد المعالجة"
 
-#: src/Admin/Screens/PaymentsScreen.php:528 src/Frontend/Widget.php:309
-#: templates/front/booking-widget.php:327
+#: src/Admin/Screens/PaymentsScreen.php:528 src/Frontend/Widget.php:312
+#: templates/front/booking-widget.php:343
 msgid "Full amount"
 msgstr "المبلغ كاملاً"
 
 #: src/Admin/Screens/PaymentsScreen.php:531
-#: templates/front/booking-widget.php:299
+#: templates/front/booking-widget.php:304
 msgid "Payment"
 msgstr "الدفع"
 
@@ -2564,7 +2563,7 @@ msgstr ""
 "تباين منخفض: %1$s (%2$s:1). يحتاج النص إلى 4.5:1 على الأقل ليقرأه الجميع "
 "(WCAG AA). يمكنك مع ذلك حفظ هذه الألوان."
 
-#: src/Admin/Screens/SettingsScreen.php:164 src/Settings/Settings.php:601
+#: src/Admin/Screens/SettingsScreen.php:164 src/Settings/Settings.php:618
 msgid "llms.txt"
 msgstr "llms.txt"
 
@@ -2732,9 +2731,9 @@ msgstr "تم استيرادها سابقاً"
 #: src/Frontend/TourOutputs.php:191 src/Frontend/TourOutputs.php:213
 #: src/Frontend/TourOutputs.php:389
 #: src/Services/Notifications/MergeTags.php:105 src/Services/Schema.php:130
-#: templates/front/booking-widget.php:45 templates/front/booking-widget.php:58
-#: templates/front/booking-widget.php:223
-#: templates/front/booking-widget.php:356
+#: templates/front/booking-widget.php:43 templates/front/booking-widget.php:56
+#: templates/front/booking-widget.php:161
+#: templates/front/booking-widget.php:396
 msgid "Price on request"
 msgstr "السعر عند الطلب"
 
@@ -2750,8 +2749,8 @@ msgstr "تسعير الجولات التي لها جدول أسعار"
 msgid "per vehicle (buggies, quads, bikes)"
 msgstr "للمركبة (عربات الباجي، الدراجات الرباعية، الدراجات النارية)"
 
-#: src/Admin/Screens/ToolsScreen.php:202 src/Frontend/Widget.php:264
-#: src/Services/LlmsTxt.php:395 templates/front/booking-widget.php:226
+#: src/Admin/Screens/ToolsScreen.php:202 src/Frontend/Widget.php:267
+#: src/Services/LlmsTxt.php:395 templates/front/booking-widget.php:164
 msgid "per person"
 msgstr "للشخص"
 
@@ -3416,8 +3415,8 @@ msgstr "لون النص وخلفية اللوحة"
 msgid "From %s"
 msgstr "ابتداءً من %s"
 
-#: src/Frontend/TourOutputs.php:223 src/Services/Privacy.php:142
-#: templates/front/booking-widget.php:71
+#: src/Frontend/TourOutputs.php:223 src/Frontend/Widget.php:331
+#: src/Services/Privacy.php:142 templates/front/booking-widget.php:70
 msgid "Option"
 msgstr "الخيار"
 
@@ -3445,7 +3444,7 @@ msgstr[5] "%1$s (%2$d شخص)"
 
 #: src/Frontend/TourOutputs.php:270
 #: src/Integrations/Elementor/TourListWidget.php:73
-#: templates/front/booking-widget.php:167 assets/src/blocks/tour-blocks.js:34
+#: templates/front/booking-widget.php:203 assets/src/blocks/tour-blocks.js:34
 msgid "Included"
 msgstr "مشمول"
 
@@ -3544,194 +3543,278 @@ msgstr ""
 "بالجولة لعرضها هنا."
 
 #. translators: %s: "Digitum", linked to digitum.marketing.
-#: src/Frontend/Widget.php:247
+#: src/Frontend/Widget.php:250
 #, php-format
 msgid "Booking by %s"
 msgstr "الحجز عبر %s"
 
-#: src/Frontend/Widget.php:260 src/Services/LlmsTxt.php:397
-#: templates/front/booking-widget.php:227
+#: src/Frontend/Widget.php:263 src/Services/LlmsTxt.php:397
+#: templates/front/booking-widget.php:165
 msgid "per vehicle"
 msgstr "للمركبة"
 
-#: src/Frontend/Widget.php:262
+#: src/Frontend/Widget.php:265
 msgid "per car"
 msgstr "للسيارة"
 
-#: src/Frontend/Widget.php:283 templates/front/booking-widget.php:98
+#: src/Frontend/Widget.php:286 templates/front/booking-widget.php:97
 msgid "Previous month"
 msgstr "الشهر السابق"
 
-#: src/Frontend/Widget.php:284 templates/front/booking-widget.php:100
+#: src/Frontend/Widget.php:287 templates/front/booking-widget.php:99
 msgid "Next month"
 msgstr "الشهر التالي"
 
-#: src/Frontend/Widget.php:286
+#: src/Frontend/Widget.php:289
 msgid "available"
 msgstr "متاح"
 
-#: src/Frontend/Widget.php:287
+#: src/Frontend/Widget.php:290
 msgid "closed"
 msgstr "مغلق"
 
-#: src/Frontend/Widget.php:288
+#: src/Frontend/Widget.php:291
 msgid "past"
 msgstr "انتهى"
 
-#: src/Frontend/Widget.php:289
+#: src/Frontend/Widget.php:292
 msgid "not open yet"
 msgstr "لم يُفتح بعد"
 
-#: src/Frontend/Widget.php:290
+#: src/Frontend/Widget.php:293
 msgid "no tours"
 msgstr "لا جولات"
 
-#: src/Frontend/Widget.php:291
+#: src/Frontend/Widget.php:294
 msgid "closed for today"
 msgstr "مغلق لليوم"
 
-#: src/Frontend/Widget.php:293 templates/front/booking-widget.php:110
+#: src/Frontend/Widget.php:296 templates/front/booking-widget.php:110
 msgid "Choose a date to see the times."
 msgstr "اختر تاريخاً لعرض المواعيد."
 
-#: src/Frontend/Widget.php:294
+#: src/Frontend/Widget.php:297
 msgid "No tours on this day. Please choose another date."
 msgstr "لا توجد جولات في هذا اليوم. يرجى اختيار تاريخ آخر."
 
-#: src/Frontend/Widget.php:295
+#: src/Frontend/Widget.php:298
 msgid "Loading…"
 msgstr "جارٍ التحميل…"
 
 #. translators: %s: time.
-#: src/Frontend/Widget.php:297
+#: src/Frontend/Widget.php:300
 #, php-format
 msgid "Starts %s"
 msgstr "تبدأ %s"
 
 #. translators: %s: time range.
-#: src/Frontend/Widget.php:299
+#: src/Frontend/Widget.php:302
 #, php-format
 msgid "Pickup %s"
 msgstr "الاستلام %s"
 
-#: src/Frontend/Widget.php:300
+#: src/Frontend/Widget.php:303
 msgid "Not available"
 msgstr "غير متاح"
 
 #. translators: %s: VAT amount.
-#: src/Frontend/Widget.php:303
+#: src/Frontend/Widget.php:306
 #, php-format
 msgid "Includes VAT %s"
 msgstr "شامل ضريبة القيمة المضافة %s"
 
 #. translators: %s: VAT amount.
-#: src/Frontend/Widget.php:305
+#: src/Frontend/Widget.php:308
 #, php-format
 msgid "VAT %s"
 msgstr "ضريبة القيمة المضافة %s"
 
-#: src/Frontend/Widget.php:307
+#: src/Frontend/Widget.php:310
 msgid "Pay now"
 msgstr "ادفع الآن"
 
-#: src/Frontend/Widget.php:308
+#: src/Frontend/Widget.php:311
 msgid "Due on arrival"
 msgstr "يُدفع عند الوصول"
 
 #. translators: %s: deposit percentage.
-#: src/Frontend/Widget.php:311
+#: src/Frontend/Widget.php:314
 #, php-format
 msgid "%s%% deposit"
 msgstr "عربون %s%%"
 
 #. translators: 1: amount now, 2: amount on arrival.
-#: src/Frontend/Widget.php:313
+#: src/Frontend/Widget.php:316
 #, php-format
 msgid "%1$s now, %2$s on arrival"
 msgstr "%1$s الآن، و%2$s عند الوصول"
 
 #. translators: %s: meeting point.
-#: src/Frontend/Widget.php:314 templates/front/booking-widget.php:19
-#: templates/front/booking-widget.php:160
+#: src/Frontend/Widget.php:317 templates/front/booking-widget.php:18
+#: templates/front/booking-widget.php:196
 msgid "Free"
 msgstr "مجاناً"
 
-#. translators: 1: current step, 2: number of steps.
-#: src/Frontend/Widget.php:317
+#. translators: 1: current step, 2: number of steps, 3: step name.
+#: src/Frontend/Widget.php:320
 #, php-format
-msgid "Step %1$s of %2$s"
-msgstr "الخطوة %1$s من %2$s"
+msgid "Step %1$s of %2$s: %3$s"
+msgstr "الخطوة %1$s من %2$s: %3$s"
 
-#: src/Frontend/Widget.php:318
+#. translators: %s: date, e.g. Thu 5 Nov 2026.
+#: src/Frontend/Widget.php:322
+#, php-format
+msgid "Selected: %s"
+msgstr "المختار: %s"
+
+#: src/Frontend/Widget.php:323
+msgid "today"
+msgstr "اليوم"
+
+#. translators: %s: VAT rate, e.g. 5%.
+#: src/Frontend/Widget.php:325
+#, php-format
+msgid "Prices include %s VAT"
+msgstr "الأسعار تشمل ضريبة القيمة المضافة %s"
+
+#. translators: %s: amount.
+#: src/Frontend/Widget.php:327
+#, php-format
+msgid "Pay on the day: %s"
+msgstr "الدفع يوم الرحلة: %s"
+
+#: src/Frontend/Widget.php:328
+msgid "Cash or card when we pick you up."
+msgstr "نقدًا أو بالبطاقة عند استلامك."
+
+#: src/Frontend/Widget.php:329 src/Gateways/PayOnArrival.php:35
+msgid "Cash or card at the meeting point."
+msgstr "نقداً أو بالبطاقة عند نقطة الالتقاء."
+
+#. translators: %s: meeting point.
+#: src/Frontend/Widget.php:338 templates/front/booking-widget.php:195
+#, php-format
+msgid "Meet us at %s"
+msgstr "نلتقي بك في %s"
+
+#. translators: %s: meeting point.
+#: src/Frontend/Widget.php:339 templates/front/booking-widget.php:195
+msgid "Meet us at the meeting point"
+msgstr "نلتقي بك عند نقطة الالتقاء"
+
+#. translators: 1: number of adults.
+#: src/Frontend/Widget.php:341
+#, php-format
+msgid "Adults: %s"
+msgstr "البالغون: %s"
+
+#. translators: 1: number of children.
+#: src/Frontend/Widget.php:343
+#, php-format
+msgid "Children: %s"
+msgstr "الأطفال: %s"
+
+#. translators: 1: number of infants.
+#: src/Frontend/Widget.php:345
+#, php-format
+msgid "Infants: %s"
+msgstr "الرضّع: %s"
+
+#. translators: 1: number of vehicles.
+#: src/Frontend/Widget.php:347
+#, php-format
+msgid "Vehicles: %s"
+msgstr "المركبات: %s"
+
+#. translators: %s: total price.
+#: src/Frontend/Widget.php:349
+#, php-format
+msgid "Total: %s"
+msgstr "الإجمالي: %s"
+
+#: src/Frontend/Widget.php:350
+msgid "Please enter the country code."
+msgstr "يرجى إدخال رمز الدولة."
+
+#: src/Frontend/Widget.php:351
+msgid "Please enter 6 to 14 digits."
+msgstr "يرجى إدخال من 6 إلى 14 رقمًا."
+
+#: src/Frontend/Widget.php:352 src/Rest/AdminController.php:267
+#: src/Services/BookingValidator.php:36
+msgid "Please enter a valid email address."
+msgstr "يرجى إدخال بريد إلكتروني صحيح."
+
+#: src/Frontend/Widget.php:353 src/Services/BookingValidator.php:31
+msgid "Please enter your full name."
+msgstr "يرجى إدخال اسمك الكامل."
+
+#: src/Frontend/Widget.php:354
 msgid "Sending…"
 msgstr "جارٍ الإرسال…"
 
-#: src/Frontend/Widget.php:319
+#: src/Frontend/Widget.php:355
 msgid "Something went wrong. Please check your connection and try again."
 msgstr "حدث خطأ ما. يرجى التحقق من اتصالك والمحاولة مرة أخرى."
 
-#: src/Frontend/Widget.php:320 src/Services/BookingService.php:137
+#: src/Frontend/Widget.php:356 src/Services/BookingService.php:137
 #: src/Services/BookingService.php:156
 msgid "Please check the highlighted fields."
 msgstr "يرجى مراجعة الحقول المحددة."
 
-#: src/Frontend/Widget.php:321 src/Services/BookingService.php:131
+#: src/Frontend/Widget.php:357 src/Services/BookingService.php:131
 #: src/Services/Pricing/ErrorMessages.php:26
 msgid "Please choose an option."
 msgstr "يرجى اختيار خيار."
 
-#: src/Frontend/Widget.php:322
+#: src/Frontend/Widget.php:358
 msgid "Please choose a date and a session."
 msgstr "يرجى اختيار تاريخ وفترة."
 
-#: src/Frontend/Widget.php:323 src/Services/Pricing/ErrorMessages.php:28
+#: src/Frontend/Widget.php:359 src/Services/Pricing/ErrorMessages.php:28
 msgid "Please add at least one guest."
 msgstr "يرجى إضافة ضيف واحد على الأقل."
 
-#: src/Frontend/Widget.php:324 src/Services/BookingService.php:103
+#: src/Frontend/Widget.php:360 src/Services/BookingService.php:103
 #: src/Services/Pricing/ErrorMessages.php:39
 msgid "Please choose your pickup area."
 msgstr "يرجى اختيار منطقة الاستلام."
 
-#: src/Frontend/Widget.php:325 src/Services/BookingValidator.php:49
+#: src/Frontend/Widget.php:361 src/Services/BookingValidator.php:49
 msgid "Please tell us your hotel or pickup address."
 msgstr "يرجى إخبارنا باسم فندقك أو عنوان الاستلام."
 
-#: src/Frontend/Widget.php:326
+#: src/Frontend/Widget.php:362
 msgid "This field is required."
 msgstr "هذا الحقل مطلوب."
 
-#: src/Frontend/Widget.php:327 src/Services/BookingService.php:117
+#: src/Frontend/Widget.php:363 src/Services/BookingService.php:117
 msgid "Please choose how you want to pay."
 msgstr "يرجى اختيار طريقة الدفع."
 
-#: src/Frontend/Widget.php:328 src/Services/BookingValidator.php:53
+#: src/Frontend/Widget.php:364 src/Services/BookingValidator.php:53
 msgid "Please accept the booking terms."
 msgstr "يرجى قبول شروط الحجز."
 
 #. translators: %s: amount.
-#: src/Frontend/Widget.php:330
+#: src/Frontend/Widget.php:366
 #, php-format
 msgid "Continue to payment · %s"
 msgstr "المتابعة إلى الدفع · %s"
 
-#: src/Frontend/Widget.php:331
-msgid "Confirm booking · pay on arrival"
-msgstr "تأكيد الحجز · الدفع عند الوصول"
-
-#: src/Frontend/Widget.php:332 templates/front/booking-widget.php:48
-#: templates/front/booking-widget.php:342
-msgid "Book now"
-msgstr "احجز الآن"
+#: src/Frontend/Widget.php:367 src/Frontend/Widget.php:368
+#: templates/front/booking-widget.php:382
+msgid "Confirm booking"
+msgstr "تأكيد الحجز"
 
 #. translators: %s: amount.
-#: src/Frontend/Widget.php:334
+#: src/Frontend/Widget.php:370
 #, php-format
 msgid "Book now · %s by bank transfer"
 msgstr "احجز الآن · %s بتحويل بنكي"
 
 #. translators: %s: coupon code.
-#: src/Frontend/Widget.php:336
+#: src/Frontend/Widget.php:372
 #, php-format
 msgid "Coupon %s applied."
 msgstr "تم تطبيق القسيمة %s."
@@ -3763,10 +3846,6 @@ msgstr "تعذّر الاتصال بمزوّد الدفع. يرجى المحاو
 #: src/Gateways/NGenius.php:44 src/Gateways/Telr.php:44
 msgid "Pay by card on a secure payment page."
 msgstr "ادفع بالبطاقة عبر صفحة دفع آمنة."
-
-#: src/Gateways/PayOnArrival.php:35
-msgid "Cash or card at the meeting point."
-msgstr "نقداً أو بالبطاقة عند نقطة الالتقاء."
 
 #: src/Gateways/PayPal.php:57
 msgid "Pay with your PayPal account or a card through PayPal."
@@ -4052,10 +4131,6 @@ msgstr "لم يُعثر على الحجز."
 msgid "The guest data of this booking was erased."
 msgstr "تم مسح بيانات الضيف لهذا الحجز."
 
-#: src/Rest/AdminController.php:267 src/Services/BookingValidator.php:36
-msgid "Please enter a valid email address."
-msgstr "يرجى إدخال بريد إلكتروني صحيح."
-
 #: src/Rest/AdminController.php:270
 msgid "Please enter the guest’s name."
 msgstr "يرجى إدخال اسم الضيف."
@@ -4220,10 +4295,6 @@ msgstr "الاستلام غير متاح من %s. يرجى ملاقاتنا عن
 #: src/Services/Pricing/ErrorMessages.php:47
 msgid "This coupon code cannot be used for this booking."
 msgstr "لا يمكن استخدام رمز القسيمة هذا لهذا الحجز."
-
-#: src/Services/BookingValidator.php:31
-msgid "Please enter your full name."
-msgstr "يرجى إدخال اسمك الكامل."
 
 #: src/Services/BookingValidator.php:43
 msgid "Please enter a phone number we can reach you on."
@@ -5087,17 +5158,17 @@ msgstr "اسم الحساب"
 msgid "Bank"
 msgstr "البنك"
 
-#: src/Services/Notifications/MergeTags.php:118 src/Settings/Settings.php:431
+#: src/Services/Notifications/MergeTags.php:118 src/Settings/Settings.php:448
 #: templates/front/confirmation.php:123
 msgid "IBAN"
 msgstr "IBAN"
 
-#: src/Services/Notifications/MergeTags.php:119 src/Settings/Settings.php:436
+#: src/Services/Notifications/MergeTags.php:119 src/Settings/Settings.php:453
 #: templates/front/confirmation.php:124
 msgid "Account number"
 msgstr "رقم الحساب"
 
-#: src/Services/Notifications/MergeTags.php:120 src/Settings/Settings.php:441
+#: src/Services/Notifications/MergeTags.php:120 src/Settings/Settings.php:458
 #: templates/front/confirmation.php:125
 msgid "SWIFT / BIC"
 msgstr "SWIFT / BIC"
@@ -5382,10 +5453,10 @@ msgstr "لا شيء"
 msgid "Custom (developer filter dgb_schema_rating)"
 msgstr "مخصص (مرشح المطوّر dgb_schema_rating)"
 
-#: src/Services/Schema.php:129 templates/front/booking-widget.php:48
-#: templates/front/booking-widget.php:53
-#: templates/front/booking-widget.php:342
-#: templates/front/booking-widget.php:359
+#: src/Services/Schema.php:129 templates/front/booking-widget.php:46
+#: templates/front/booking-widget.php:51
+#: templates/front/booking-widget.php:382
+#: templates/front/booking-widget.php:399
 msgid "Request a quote"
 msgstr "اطلب عرض سعر"
 
@@ -5540,22 +5611,39 @@ msgid "Add the booking widget to single tour pages automatically"
 msgstr "إضافة أداة الحجز تلقائياً إلى صفحات الجولات"
 
 #: src/Settings/Settings.php:122
+msgid "Stepped layout on desktop"
+msgstr "عرض الخطوات على الكمبيوتر"
+
+#: src/Settings/Settings.php:123
+msgid ""
+"Show the booking widget one step at a time on computers too (short enough "
+"for a sidebar)"
+msgstr ""
+"عرض نموذج الحجز خطوة بخطوة على أجهزة الكمبيوتر أيضًا (قصير بما يكفي للشريط "
+"الجانبي)"
+
+#: src/Settings/Settings.php:124
+msgid "Off: all three steps are shown in one column. Phones always use steps."
+msgstr ""
+"متوقف: تظهر الخطوات الثلاث في عمود واحد. تستخدم الهواتف الخطوات دائمًا."
+
+#: src/Settings/Settings.php:129
 msgid "Mobile sticky bar"
 msgstr "الشريط الثابت على الجوال"
 
-#: src/Settings/Settings.php:125
+#: src/Settings/Settings.php:132
 msgid "On: price and Book button at the bottom of the screen on phones"
 msgstr "مفعّل: السعر وزر الحجز أسفل الشاشة على الهواتف"
 
-#: src/Settings/Settings.php:126
+#: src/Settings/Settings.php:133
 msgid "On, and hide the theme’s own bar on tour pages"
 msgstr "مفعّل، مع إخفاء شريط القالب في صفحات الجولات"
 
-#: src/Settings/Settings.php:132
+#: src/Settings/Settings.php:139
 msgid "Theme bar to hide"
 msgstr "شريط القالب المراد إخفاؤه"
 
-#: src/Settings/Settings.php:133
+#: src/Settings/Settings.php:140
 msgid ""
 "CSS selector of the theme’s bottom bar, for example .mobile-bar. Hidden on "
 "tour pages only, when the option above hides it."
@@ -5563,96 +5651,100 @@ msgstr ""
 "محدد CSS لشريط القالب السفلي، مثل .mobile-bar. يُخفى في صفحات الجولات فقط "
 "عندما يخفيه الخيار أعلاه."
 
-#: src/Settings/Settings.php:138
+#: src/Settings/Settings.php:145
 msgid "Unpaid hold (card, PayPal)"
 msgstr "الحجز المؤقت غير المدفوع (البطاقة، PayPal)"
 
-#: src/Settings/Settings.php:139
+#: src/Settings/Settings.php:146
 msgid "minutes"
 msgstr "دقائق"
 
-#: src/Settings/Settings.php:147
+#: src/Settings/Settings.php:154
 msgid "Booking terms page"
 msgstr "صفحة شروط الحجز"
 
-#: src/Settings/Settings.php:148
+#: src/Settings/Settings.php:155
 msgid "Link shown next to “I accept the booking terms”."
 msgstr "رابط يظهر بجانب “أوافق على شروط الحجز”."
 
-#: src/Settings/Settings.php:153
+#: src/Settings/Settings.php:160
 msgid "Cancellation policy (short)"
 msgstr "سياسة الإلغاء (مختصرة)"
 
-#: src/Settings/Settings.php:154
+#: src/Settings/Settings.php:161
 msgid "One or two sentences shown at payment and on the confirmation."
 msgstr "جملة أو جملتان تظهران عند الدفع وفي التأكيد."
 
-#: src/Settings/Settings.php:159
+#: src/Settings/Settings.php:166
 msgid "Default phone country code"
 msgstr "رمز الدولة الافتراضي للهاتف"
 
-#: src/Settings/Settings.php:160
-msgid "Filled in for guests, for example +44. Empty: guests type it."
-msgstr "يُملأ للضيوف، مثل +44. فارغ: يكتبه الضيوف."
-
 #: src/Settings/Settings.php:167
+msgid "Filled in for guests, for example 44. Empty: guests type it."
+msgstr "يُملأ للضيوف، مثل 44. فارغ: يكتبه الضيوف."
+
+#: src/Settings/Settings.php:174
 msgid "Currency"
 msgstr "العملة"
 
-#: src/Settings/Settings.php:173
+#: src/Settings/Settings.php:180
 msgid "Show prices as"
 msgstr "عرض الأسعار"
 
-#: src/Settings/Settings.php:174
-msgid "Display only: amounts with a fraction, such as 349.50, keep their decimals, and payments always use the full amount."
-msgstr "للعرض فقط: المبالغ التي فيها كسور، مثل 349.50، تبقى بخاناتها العشرية، وتُدفع المبالغ دائمًا كاملة."
+#: src/Settings/Settings.php:181
+msgid ""
+"Display only: amounts with a fraction, such as 349.50, keep their decimals, "
+"and payments always use the full amount."
+msgstr ""
+"للعرض فقط: المبالغ التي فيها كسور، مثل 349.50، تبقى بخاناتها العشرية، وتُدفع"
+" المبالغ دائمًا كاملة."
 
-#: src/Settings/Settings.php:176
+#: src/Settings/Settings.php:183
 msgid "Currency default (e.g. 699.00)"
 msgstr "الافتراضي للعملة (مثل 699.00)"
 
-#: src/Settings/Settings.php:177
+#: src/Settings/Settings.php:184
 msgid "Whole units when the amount has no fraction (e.g. 699)"
 msgstr "وحدات كاملة عندما لا يكون في المبلغ كسور (مثل 699)"
 
-#: src/Settings/Settings.php:173
+#: src/Settings/Settings.php:190
 msgid "Prices are entered"
 msgstr "إدخال الأسعار"
 
-#: src/Settings/Settings.php:175
+#: src/Settings/Settings.php:192
 msgid "Including VAT"
 msgstr "شامل ضريبة القيمة المضافة"
 
-#: src/Settings/Settings.php:176
+#: src/Settings/Settings.php:193
 msgid "Excluding VAT"
 msgstr "غير شامل ضريبة القيمة المضافة"
 
-#: src/Settings/Settings.php:182
+#: src/Settings/Settings.php:199
 msgid "VAT rate"
 msgstr "نسبة ضريبة القيمة المضافة"
 
-#: src/Settings/Settings.php:191
+#: src/Settings/Settings.php:208
 msgid "Tax registration number (TRN)"
 msgstr "الرقم الضريبي (TRN)"
 
-#: src/Settings/Settings.php:192
+#: src/Settings/Settings.php:209
 msgid "Shown on receipts."
 msgstr "يظهر في الإيصالات."
 
-#: src/Settings/Settings.php:197
+#: src/Settings/Settings.php:214
 msgid "Weekend days"
 msgstr "أيام عطلة نهاية الأسبوع"
 
-#: src/Settings/Settings.php:198
+#: src/Settings/Settings.php:215
 msgid "A tour’s weekend uplift applies on these days."
 msgstr "تُطبَّق زيادة عطلة نهاية الأسبوع للجولة في هذه الأيام."
 
-#: src/Settings/Settings.php:212 src/Settings/Settings.php:218
-#: src/Settings/Settings.php:224
+#: src/Settings/Settings.php:229 src/Settings/Settings.php:235
+#: src/Settings/Settings.php:241
 msgid "Second currency"
 msgstr "عملة ثانية"
 
-#: src/Settings/Settings.php:213
+#: src/Settings/Settings.php:230
 msgid ""
 "Shows an approximate amount in another currency next to prices, for example "
 "for visitors from abroad. Guests are always charged in your currency; "
@@ -5662,52 +5754,52 @@ msgstr ""
 "الضيوف دائمًا بعملتك؛ وتستخدم الرسائل والإيصالات والبيانات المنظمة عملتك "
 "فقط."
 
-#: src/Settings/Settings.php:219
+#: src/Settings/Settings.php:236
 msgid "Show prices in a second currency"
 msgstr "عرض الأسعار بعملة ثانية"
 
-#: src/Settings/Settings.php:230 src/Settings/Settings.php:362
+#: src/Settings/Settings.php:247 src/Settings/Settings.php:379
 msgid "Exchange rate"
 msgstr "سعر الصرف"
 
-#: src/Settings/Settings.php:231
+#: src/Settings/Settings.php:248
 msgid "of your currency = 1 unit of the second currency"
 msgstr "من عملتك = وحدة واحدة من العملة الثانية"
 
-#: src/Settings/Settings.php:232
+#: src/Settings/Settings.php:249
 msgid ""
 "Not updated automatically. With no rate the second amount stays hidden."
 msgstr "لا يُحدَّث تلقائيًا. دون سعر صرف يبقى المبلغ الثاني مخفيًا."
 
-#: src/Settings/Settings.php:240
+#: src/Settings/Settings.php:257
 msgid "Round the second amount to"
 msgstr "تقريب المبلغ الثاني إلى"
 
-#: src/Settings/Settings.php:242
+#: src/Settings/Settings.php:259
 msgid "Whole units"
 msgstr "وحدات كاملة"
 
-#: src/Settings/Settings.php:243
+#: src/Settings/Settings.php:260
 msgid "Two decimals"
 msgstr "منزلتين عشريتين"
 
-#: src/Settings/Settings.php:249
+#: src/Settings/Settings.php:266
 msgid "Wording"
 msgstr "الصياغة"
 
 #. translators: {amount} is a placeholder: keep it as it is.
-#: src/Settings/Settings.php:251
+#: src/Settings/Settings.php:268
 msgid ""
 "{amount} is replaced by the converted amount. Empty: “about {amount}” in the"
 " visitor’s language."
 msgstr ""
 "يُستبدل {amount} بالمبلغ المحوَّل. فارغ: «حوالي {amount}» بلغة الزائر."
 
-#: src/Settings/Settings.php:259
+#: src/Settings/Settings.php:276
 msgid "Guests can book now and pay cash or card at the meeting point"
 msgstr "يمكن للضيوف الحجز الآن والدفع نقداً أو بالبطاقة عند نقطة الالتقاء"
 
-#: src/Settings/Settings.php:265
+#: src/Settings/Settings.php:282
 msgid ""
 "Cards, Apple Pay and Google Pay. Card details go straight from the guest to "
 "Stripe; this site never sees them."
@@ -5715,39 +5807,39 @@ msgstr ""
 "البطاقات وApple Pay وGoogle Pay. تذهب بيانات البطاقة من الضيف مباشرة إلى "
 "Stripe، ولا يطّلع عليها هذا الموقع أبداً."
 
-#: src/Settings/Settings.php:270
+#: src/Settings/Settings.php:287
 msgid "Card payments"
 msgstr "الدفع بالبطاقة"
 
-#: src/Settings/Settings.php:271
+#: src/Settings/Settings.php:288
 msgid "Accept cards, Apple Pay and Google Pay through Stripe"
 msgstr "قبول البطاقات وApple Pay وGoogle Pay عبر Stripe"
 
-#: src/Settings/Settings.php:276
+#: src/Settings/Settings.php:293
 msgid "Stripe mode"
 msgstr "وضع Stripe"
 
-#: src/Settings/Settings.php:278
+#: src/Settings/Settings.php:295
 msgid "Test (no real money)"
 msgstr "تجريبي (بدون أموال حقيقية)"
 
-#: src/Settings/Settings.php:279 src/Settings/Settings.php:333
+#: src/Settings/Settings.php:296 src/Settings/Settings.php:350
 msgid "Live"
 msgstr "مباشر"
 
-#: src/Settings/Settings.php:285
+#: src/Settings/Settings.php:302
 msgid "Test publishable key"
 msgstr "المفتاح العام التجريبي"
 
-#: src/Settings/Settings.php:286
+#: src/Settings/Settings.php:303
 msgid "Starts with pk_test_. Stripe › Developers › API keys."
 msgstr "يبدأ بـ pk_test_. من Stripe › Developers › API keys."
 
-#: src/Settings/Settings.php:291
+#: src/Settings/Settings.php:308
 msgid "Test secret key"
 msgstr "المفتاح السري التجريبي"
 
-#: src/Settings/Settings.php:292
+#: src/Settings/Settings.php:309
 msgid ""
 "Starts with sk_test_ (or a restricted key rk_test_ with PaymentIntents and "
 "Refunds write access)."
@@ -5755,11 +5847,11 @@ msgstr ""
 "يبدأ بـ sk_test_ (أو مفتاح مقيّد rk_test_ بصلاحية كتابة على PaymentIntents "
 "وRefunds)."
 
-#: src/Settings/Settings.php:297
+#: src/Settings/Settings.php:314
 msgid "Test webhook signing secret"
 msgstr "سر توقيع Webhook التجريبي"
 
-#: src/Settings/Settings.php:298
+#: src/Settings/Settings.php:315
 msgid ""
 "Starts with whsec_. Add the webhook URL shown above in Stripe › Developers ›"
 " Webhooks with the events payment_intent.succeeded, "
@@ -5769,19 +5861,19 @@ msgstr ""
 "Webhooks مع الأحداث payment_intent.succeeded وpayment_intent.payment_failed "
 "وcharge.refunded."
 
-#: src/Settings/Settings.php:303
+#: src/Settings/Settings.php:320
 msgid "Live publishable key"
 msgstr "المفتاح العام المباشر"
 
-#: src/Settings/Settings.php:308
+#: src/Settings/Settings.php:325
 msgid "Live secret key"
 msgstr "المفتاح السري المباشر"
 
-#: src/Settings/Settings.php:313
+#: src/Settings/Settings.php:330
 msgid "Live webhook signing secret"
 msgstr "سر توقيع Webhook المباشر"
 
-#: src/Settings/Settings.php:319
+#: src/Settings/Settings.php:336
 msgid ""
 "PayPal Checkout. Create a REST app at developer.paypal.com to get the client"
 " id and secret."
@@ -5789,31 +5881,31 @@ msgstr ""
 "PayPal Checkout. أنشئ تطبيق REST على developer.paypal.com للحصول على معرّف "
 "العميل والسر."
 
-#: src/Settings/Settings.php:325
+#: src/Settings/Settings.php:342
 msgid "Accept PayPal"
 msgstr "قبول PayPal"
 
-#: src/Settings/Settings.php:330
+#: src/Settings/Settings.php:347
 msgid "PayPal mode"
 msgstr "وضع PayPal"
 
-#: src/Settings/Settings.php:332
+#: src/Settings/Settings.php:349
 msgid "Sandbox (no real money)"
 msgstr "Sandbox (بدون أموال حقيقية)"
 
-#: src/Settings/Settings.php:339
+#: src/Settings/Settings.php:356
 msgid "Client id"
 msgstr "معرّف العميل"
 
-#: src/Settings/Settings.php:344
+#: src/Settings/Settings.php:361
 msgid "Secret"
 msgstr "السر"
 
-#: src/Settings/Settings.php:349
+#: src/Settings/Settings.php:366
 msgid "Webhook id"
 msgstr "معرّف Webhook"
 
-#: src/Settings/Settings.php:350
+#: src/Settings/Settings.php:367
 msgid ""
 "Add the webhook URL shown above to your PayPal app with the events Payment "
 "capture completed, denied and refunded, then paste the webhook id here."
@@ -5821,11 +5913,11 @@ msgstr ""
 "أضف رابط Webhook الظاهر أعلاه إلى تطبيق PayPal مع أحداث اكتمال تحصيل الدفعة "
 "ورفضها واستردادها، ثم الصق معرّف Webhook هنا."
 
-#: src/Settings/Settings.php:355
+#: src/Settings/Settings.php:372
 msgid "Charge PayPal payments in"
 msgstr "تحصيل مدفوعات PayPal بعملة"
 
-#: src/Settings/Settings.php:357
+#: src/Settings/Settings.php:374
 msgid ""
 "PayPal does not accept AED, SAR, OMR, QAR, BHD or KWD. Amounts in those "
 "currencies are converted to this currency, and the guest sees both amounts "
@@ -5834,11 +5926,11 @@ msgstr ""
 "لا يقبل PayPal عملات AED وSAR وOMR وQAR وBHD وKWD. تُحوَّل المبالغ بهذه "
 "العملات إلى هذه العملة، ويرى الضيف المبلغين قبل الدفع."
 
-#: src/Settings/Settings.php:363
+#: src/Settings/Settings.php:380
 msgid "of your currency = 1 unit of the PayPal currency"
 msgstr "من عملتك = وحدة واحدة من عملة PayPal"
 
-#: src/Settings/Settings.php:364
+#: src/Settings/Settings.php:381
 msgid ""
 "Only used when your currency is not accepted by PayPal; PayPal stays "
 "unavailable for it until a rate is set."
@@ -5846,15 +5938,15 @@ msgstr ""
 "يُستخدم فقط عندما لا يقبل PayPal عملتك؛ ويبقى PayPal غير متاح لها حتى "
 "يُحدَّد سعر الصرف."
 
-#: src/Settings/Settings.php:372 src/Settings/Settings.php:377
+#: src/Settings/Settings.php:389 src/Settings/Settings.php:394
 msgid "Deposits"
 msgstr "العربون"
 
-#: src/Settings/Settings.php:378
+#: src/Settings/Settings.php:395
 msgid "Let guests pay part now and the rest on arrival"
 msgstr "السماح للضيوف بدفع جزء الآن والباقي عند الوصول"
 
-#: src/Settings/Settings.php:379
+#: src/Settings/Settings.php:396
 msgid ""
 "When this is off, guests always pay the full amount or choose pay on "
 "arrival. Each tour can turn deposits off or use its own percentage."
@@ -5862,50 +5954,50 @@ msgstr ""
 "عند إيقاف هذا الخيار، يدفع الضيوف المبلغ كاملاً دائماً أو يختارون الدفع عند "
 "الوصول. يمكن لكل جولة إيقاف العربون أو استخدام نسبتها الخاصة."
 
-#: src/Settings/Settings.php:384
+#: src/Settings/Settings.php:401
 msgid "Deposit percentage"
 msgstr "نسبة العربون"
 
-#: src/Settings/Settings.php:393
+#: src/Settings/Settings.php:410
 msgid "Deposit allowed with"
 msgstr "العربون مسموح مع"
 
-#: src/Settings/Settings.php:395
+#: src/Settings/Settings.php:412
 msgid "Stripe"
 msgstr "Stripe"
 
-#: src/Settings/Settings.php:403
+#: src/Settings/Settings.php:420
 msgid "Coupons and offers"
 msgstr "القسائم والعروض"
 
-#: src/Settings/Settings.php:404
+#: src/Settings/Settings.php:421
 msgid "Let guests use a coupon on top of an automatic offer"
 msgstr "السماح للضيوف باستخدام قسيمة فوق العرض التلقائي"
 
-#: src/Settings/Settings.php:405
+#: src/Settings/Settings.php:422
 msgid ""
 "Off: a booking gets either the offer or the coupon, whichever saves the "
 "guest more."
 msgstr ""
 "متوقف: يحصل الحجز إما على العرض أو على القسيمة، أيهما يوفّر أكثر للضيف."
 
-#: src/Settings/Settings.php:416
+#: src/Settings/Settings.php:433
 msgid "Offer bank transfer (fill in the bank details below)"
 msgstr "تقديم خيار التحويل البنكي (أدخل البيانات البنكية أدناه)"
 
-#: src/Settings/Settings.php:421
+#: src/Settings/Settings.php:438
 msgid "Bank transfer: account name"
 msgstr "التحويل البنكي: اسم صاحب الحساب"
 
-#: src/Settings/Settings.php:426
+#: src/Settings/Settings.php:443
 msgid "Bank name"
 msgstr "اسم البنك"
 
-#: src/Settings/Settings.php:446
+#: src/Settings/Settings.php:463
 msgid "Instructions for the guest"
 msgstr "تعليمات للضيف"
 
-#: src/Settings/Settings.php:447
+#: src/Settings/Settings.php:464
 msgid ""
 "Use your booking reference as the payment reference. After paying, upload a "
 "screenshot of the transfer on the booking page. We confirm your booking by "
@@ -5914,11 +6006,11 @@ msgstr ""
 "استخدم رقم الحجز كمرجع للدفع. بعد الدفع، ارفع لقطة شاشة للتحويل في صفحة "
 "الحجز. نؤكد حجزك بالبريد الإلكتروني بعد التحقق من الدفع."
 
-#: src/Settings/Settings.php:451
+#: src/Settings/Settings.php:468
 msgid "Screenshot upload"
 msgstr "رفع لقطة الشاشة"
 
-#: src/Settings/Settings.php:452
+#: src/Settings/Settings.php:469
 msgid ""
 "Let guests upload the transfer screenshot on the booking page or from the "
 "email link"
@@ -5926,19 +6018,19 @@ msgstr ""
 "السماح للضيوف برفع لقطة شاشة التحويل في صفحة الحجز أو من رابط البريد "
 "الإلكتروني"
 
-#: src/Settings/Settings.php:457
+#: src/Settings/Settings.php:474
 msgid "WhatsApp number (other way to send it)"
 msgstr "رقم WhatsApp (طريقة أخرى للإرسال)"
 
-#: src/Settings/Settings.php:458
+#: src/Settings/Settings.php:475
 msgid "Shown as a small link under the upload box. Leave empty to hide."
 msgstr "يظهر كرابط صغير تحت مربع الرفع. اتركه فارغاً لإخفائه."
 
-#: src/Settings/Settings.php:463
+#: src/Settings/Settings.php:480
 msgid "Hold bank transfer bookings for"
 msgstr "الاحتفاظ بحجوزات التحويل البنكي لمدة"
 
-#: src/Settings/Settings.php:465
+#: src/Settings/Settings.php:482
 msgid ""
 "If the booking is not marked as paid by then, it is cancelled and both sides"
 " get an email."
@@ -5946,19 +6038,19 @@ msgstr ""
 "إذا لم يُؤكَّد دفع الحجز بحلول ذلك الوقت، يُلغى ويتلقى الطرفان بريداً "
 "إلكترونياً."
 
-#: src/Settings/Settings.php:475
+#: src/Settings/Settings.php:492
 msgid "From name"
 msgstr "اسم المرسل"
 
-#: src/Settings/Settings.php:476
+#: src/Settings/Settings.php:493
 msgid "Empty: the business name (Settings › General), or the site title."
 msgstr "فارغ: اسم النشاط التجاري (الإعدادات › عام)، أو عنوان الموقع."
 
-#: src/Settings/Settings.php:481
+#: src/Settings/Settings.php:498
 msgid "From email"
 msgstr "بريد المرسل"
 
-#: src/Settings/Settings.php:482
+#: src/Settings/Settings.php:499
 msgid ""
 "Use an address on your own domain, and an SMTP plugin so emails are "
 "delivered reliably. Empty: the business email."
@@ -5966,11 +6058,11 @@ msgstr ""
 "استخدم عنواناً على نطاقك الخاص، وإضافة SMTP لضمان وصول الرسائل بشكل موثوق. "
 "فارغ: البريد الإلكتروني للنشاط التجاري."
 
-#: src/Settings/Settings.php:487
+#: src/Settings/Settings.php:504
 msgid "Staff recipients"
 msgstr "مستلمو الفريق"
 
-#: src/Settings/Settings.php:488
+#: src/Settings/Settings.php:505
 msgid ""
 "Comma-separated email addresses for staff emails. Empty: the business email,"
 " or the site admin email."
@@ -5978,27 +6070,27 @@ msgstr ""
 "عناوين بريد إلكتروني مفصولة بفواصل لرسائل الفريق. فارغ: البريد الإلكتروني "
 "للنشاط التجاري، أو بريد مدير الموقع."
 
-#: src/Settings/Settings.php:494
+#: src/Settings/Settings.php:511
 msgid "hours before the session (0 = no reminder)"
 msgstr "ساعة قبل الفترة (0 = بدون تذكير)"
 
-#: src/Settings/Settings.php:502
+#: src/Settings/Settings.php:519
 msgid "Daily summary"
 msgstr "الملخص اليومي"
 
-#: src/Settings/Settings.php:503
+#: src/Settings/Settings.php:520
 msgid "Email staff a summary of tomorrow’s bookings every day"
 msgstr "إرسال ملخص بحجوزات الغد إلى الفريق يومياً بالبريد الإلكتروني"
 
-#: src/Settings/Settings.php:508
+#: src/Settings/Settings.php:525
 msgid "Send the summary at"
 msgstr "إرسال الملخص في الساعة"
 
-#: src/Settings/Settings.php:514
+#: src/Settings/Settings.php:531
 msgid "Webhook URL"
 msgstr "رابط Webhook"
 
-#: src/Settings/Settings.php:515
+#: src/Settings/Settings.php:532
 msgid ""
 "Optional. Booking and payment events are sent here as signed JSON (Zapier, "
 "Make, GoHighLevel…). See docs/DEVELOPER-HOOKS.md."
@@ -6006,11 +6098,11 @@ msgstr ""
 "اختياري. تُرسَل أحداث الحجز والدفع إلى هنا بصيغة JSON موقّعة (Zapier وMake "
 "وGoHighLevel…). راجع docs/DEVELOPER-HOOKS.md."
 
-#: src/Settings/Settings.php:520
+#: src/Settings/Settings.php:537
 msgid "Webhook signing secret"
 msgstr "سر توقيع Webhook"
 
-#: src/Settings/Settings.php:521
+#: src/Settings/Settings.php:538
 msgid ""
 "Each request carries X-DGB-Signature: sha256=HMAC of \"timestamp.body\" with"
 " this secret."
@@ -6018,11 +6110,11 @@ msgstr ""
 "يحمل كل طلب X-DGB-Signature: sha256=HMAC لـ \"timestamp.body\" باستخدام هذا "
 "السر."
 
-#: src/Settings/Settings.php:528
+#: src/Settings/Settings.php:545
 msgid "dataLayer events"
 msgstr "أحداث dataLayer"
 
-#: src/Settings/Settings.php:529
+#: src/Settings/Settings.php:546
 msgid ""
 "Push GA4 ecommerce events (view_item … purchase, generate_lead) to dataLayer"
 " for Google Tag Manager"
@@ -6030,32 +6122,32 @@ msgstr ""
 "إرسال أحداث التجارة الإلكترونية في GA4 (view_item … purchase وgenerate_lead)"
 " إلى dataLayer لـ Google Tag Manager"
 
-#: src/Settings/Settings.php:530
+#: src/Settings/Settings.php:547
 msgid "No tags are fired directly; Google Tag Manager owns all tags."
 msgstr "لا تُطلَق أي وسوم مباشرة؛ يتولى Google Tag Manager جميع الوسوم."
 
-#: src/Settings/Settings.php:535
+#: src/Settings/Settings.php:552
 msgid "Enhanced conversions"
 msgstr "التحويلات المحسّنة"
 
-#: src/Settings/Settings.php:536
+#: src/Settings/Settings.php:553
 msgid "Add the guest’s hashed (SHA-256) email and phone to the purchase event"
 msgstr ""
 "إضافة البريد الإلكتروني والهاتف المشفّرين (SHA-256) للضيف إلى حدث الشراء"
 
-#: src/Settings/Settings.php:541
+#: src/Settings/Settings.php:558
 msgid "Attribution cookie"
 msgstr "ملف تعريف الارتباط للإحالة"
 
-#: src/Settings/Settings.php:542
+#: src/Settings/Settings.php:559
 msgid "days (UTM and gclid, first-party)"
 msgstr "يوماً (UTM وgclid، من الطرف الأول)"
 
-#: src/Settings/Settings.php:550
+#: src/Settings/Settings.php:567
 msgid "Cloudflare Turnstile site key"
 msgstr "مفتاح الموقع لـ Cloudflare Turnstile"
 
-#: src/Settings/Settings.php:551
+#: src/Settings/Settings.php:568
 msgid ""
 "Optional bot check on booking and enquiry forms. A hidden honeypot field is "
 "always on."
@@ -6063,23 +6155,23 @@ msgstr ""
 "تحقق اختياري من الروبوتات في نماذج الحجز والاستفسار. حقل الفخ المخفي مفعّل "
 "دائماً."
 
-#: src/Settings/Settings.php:556
+#: src/Settings/Settings.php:573
 msgid "Cloudflare Turnstile secret key"
 msgstr "المفتاح السري لـ Cloudflare Turnstile"
 
-#: src/Settings/Settings.php:563
+#: src/Settings/Settings.php:580
 msgid "Structured data"
 msgstr "البيانات المنظمة"
 
-#: src/Settings/Settings.php:565
+#: src/Settings/Settings.php:582
 msgid "Automatic: inside Rank Math or Yoast when active, otherwise on its own"
 msgstr "تلقائي: داخل Rank Math أو Yoast عند تفعيلهما، وإلا بشكل مستقل"
 
-#: src/Settings/Settings.php:566
+#: src/Settings/Settings.php:583
 msgid "Always on its own"
 msgstr "بشكل مستقل دائماً"
 
-#: src/Settings/Settings.php:569
+#: src/Settings/Settings.php:586
 msgid ""
 "Tour pages get Product or TouristTrip JSON-LD with the same prices the page "
 "shows. In automatic mode it joins the SEO plugin’s graph and replaces any "
@@ -6089,23 +6181,23 @@ msgstr ""
 "المعروضة في الصفحة. في الوضع التلقائي ينضم إلى رسم إضافة SEO ويحل محل أي "
 "عقدة Product أخرى في الصفحة."
 
-#: src/Settings/Settings.php:574
+#: src/Settings/Settings.php:591
 msgid "Business type"
 msgstr "نوع النشاط التجاري"
 
-#: src/Settings/Settings.php:576
+#: src/Settings/Settings.php:593
 msgid "Travel agency / tour operator"
 msgstr "وكالة سفر / منظم جولات"
 
-#: src/Settings/Settings.php:577
+#: src/Settings/Settings.php:594
 msgid "Local business"
 msgstr "نشاط تجاري محلي"
 
-#: src/Settings/Settings.php:578
+#: src/Settings/Settings.php:595
 msgid "Organization"
 msgstr "مؤسسة"
 
-#: src/Settings/Settings.php:580
+#: src/Settings/Settings.php:597
 msgid ""
 "Used when no SEO plugin describes the business. Name, phone, email and "
 "address come from General."
@@ -6113,11 +6205,11 @@ msgstr ""
 "يُستخدم عندما لا تصف أي إضافة SEO النشاط التجاري. الاسم والهاتف والبريد "
 "الإلكتروني والعنوان من إعدادات عام."
 
-#: src/Settings/Settings.php:585
+#: src/Settings/Settings.php:602
 msgid "Rating source"
 msgstr "مصدر التقييم"
 
-#: src/Settings/Settings.php:587
+#: src/Settings/Settings.php:604
 msgid ""
 "Star ratings in search results come only from real reviews. Review plugins "
 "appear here when they are active (Site Reviews: assign each review to its "
@@ -6126,19 +6218,19 @@ msgstr ""
 "تأتي تقييمات النجوم في نتائج البحث من مراجعات حقيقية فقط. تظهر إضافات "
 "المراجعات هنا عندما تكون مفعّلة (Site Reviews: اربط كل مراجعة بجولتها)."
 
-#: src/Settings/Settings.php:592
+#: src/Settings/Settings.php:609
 msgid "Tours without reviews"
 msgstr "جولات بلا مراجعات"
 
-#: src/Settings/Settings.php:594
+#: src/Settings/Settings.php:611
 msgid "No rating"
 msgstr "بلا تقييم"
 
-#: src/Settings/Settings.php:595
+#: src/Settings/Settings.php:612
 msgid "Use the average of all reviews on the site"
 msgstr "استخدام متوسط جميع المراجعات في الموقع"
 
-#: src/Settings/Settings.php:602
+#: src/Settings/Settings.php:619
 msgid ""
 "Serve /llms.txt with your tours, prices, sessions, pickup and contact "
 "details for AI assistants"
@@ -6146,25 +6238,25 @@ msgstr ""
 "تقديم /llms.txt بجولاتك وأسعارك وفتراتك وبيانات الاستلام والتواصل لمساعدي "
 "الذكاء الاصطناعي"
 
-#: src/Settings/Settings.php:607
+#: src/Settings/Settings.php:624
 msgid "llms.txt introduction"
 msgstr "مقدمة llms.txt"
 
-#: src/Settings/Settings.php:608
+#: src/Settings/Settings.php:625
 msgid "One or two sentences about the business. Empty uses the site tagline."
 msgstr ""
 "جملة أو جملتان عن النشاط التجاري. عند تركه فارغاً يُستخدم الشعار النصي "
 "للموقع."
 
-#: src/Settings/Settings.php:615
+#: src/Settings/Settings.php:632
 msgid "On uninstall"
 msgstr "عند إلغاء التثبيت"
 
-#: src/Settings/Settings.php:616
+#: src/Settings/Settings.php:633
 msgid "Delete all booking tables and settings when the plugin is deleted"
 msgstr "حذف جميع جداول الحجز والإعدادات عند حذف الإضافة"
 
-#: src/Settings/Settings.php:617
+#: src/Settings/Settings.php:634
 msgid ""
 "Off keeps your data. Guest data is never deleted automatically; erase it "
 "from a booking when needed."
@@ -6172,100 +6264,100 @@ msgstr ""
 "الإيقاف يحتفظ ببياناتك. لا تُحذف بيانات الضيوف تلقائياً أبداً؛ امسحها من "
 "الحجز عند الحاجة."
 
-#: src/Settings/Settings.php:624
+#: src/Settings/Settings.php:641
 msgid "Digitum Bookings by Digitum Marketing"
 msgstr "Digitum Bookings من Digitum Marketing"
 
-#: src/Settings/Settings.php:625
+#: src/Settings/Settings.php:642
 msgid ""
 "“Booking by Digitum” is shown under every booking widget and booking page."
 msgstr "تظهر عبارة “الحجز عبر Digitum” تحت كل أداة حجز وصفحة حجز."
 
-#: src/Settings/Settings.php:630
+#: src/Settings/Settings.php:647
 msgid "Widget accent colour"
 msgstr "لون إبراز الأداة"
 
-#: src/Settings/Settings.php:635
+#: src/Settings/Settings.php:652
 msgid "Text on the accent colour"
 msgstr "النص على اللون المميز"
 
-#: src/Settings/Settings.php:636
+#: src/Settings/Settings.php:653
 msgid "Buttons and the chosen day. Empty: white."
 msgstr "الأزرار واليوم المختار. فارغ: أبيض."
 
-#: src/Settings/Settings.php:641
+#: src/Settings/Settings.php:658
 msgid "Text colour"
 msgstr "لون النص"
 
-#: src/Settings/Settings.php:642
+#: src/Settings/Settings.php:659
 msgid "Empty: the plugin default (near black)."
 msgstr "فارغ: الافتراضي (قريب من الأسود)."
 
-#: src/Settings/Settings.php:647
+#: src/Settings/Settings.php:664
 msgid "Muted text colour"
 msgstr "لون النص الخافت"
 
-#: src/Settings/Settings.php:648
+#: src/Settings/Settings.php:665
 msgid "Hints and secondary text. Empty: the plugin default."
 msgstr "التلميحات والنص الثانوي. فارغ: الافتراضي."
 
-#: src/Settings/Settings.php:653
+#: src/Settings/Settings.php:670
 msgid "Border colour"
 msgstr "لون الحدود"
 
-#: src/Settings/Settings.php:658
+#: src/Settings/Settings.php:675
 msgid "Panel background"
 msgstr "خلفية اللوحة"
 
-#: src/Settings/Settings.php:659
+#: src/Settings/Settings.php:676
 msgid "Empty: white."
 msgstr "فارغ: أبيض."
 
-#: src/Settings/Settings.php:664
+#: src/Settings/Settings.php:681
 msgid "Corner radius"
 msgstr "استدارة الزوايا"
 
-#: src/Settings/Settings.php:665
+#: src/Settings/Settings.php:682
 msgid "px (empty: 12)"
 msgstr "بكسل (فارغ: 12)"
 
-#: src/Settings/Settings.php:673
+#: src/Settings/Settings.php:690
 msgid "Button text"
 msgstr "نص الأزرار"
 
-#: src/Settings/Settings.php:675
+#: src/Settings/Settings.php:692
 msgid "Plugin default"
 msgstr "الافتراضي"
 
-#: src/Settings/Settings.php:676
+#: src/Settings/Settings.php:693
 msgid "As written"
 msgstr "كما هو مكتوب"
 
-#: src/Settings/Settings.php:677
+#: src/Settings/Settings.php:694
 msgid "CAPITALS"
 msgstr "أحرف كبيرة"
 
-#: src/Settings/Settings.php:678
+#: src/Settings/Settings.php:695
 msgid "Capitalised Words"
 msgstr "أول حرف كبير"
 
-#: src/Settings/Settings.php:684
+#: src/Settings/Settings.php:701
 msgid "Font"
 msgstr "الخط"
 
-#: src/Settings/Settings.php:686
+#: src/Settings/Settings.php:703
 msgid "Use the theme’s font"
 msgstr "استخدام خط القالب"
 
-#: src/Settings/Settings.php:687
+#: src/Settings/Settings.php:704
 msgid "Use this font family"
 msgstr "استخدام عائلة الخط هذه"
 
-#: src/Settings/Settings.php:693
+#: src/Settings/Settings.php:710
 msgid "Font family"
 msgstr "عائلة الخط"
 
-#: src/Settings/Settings.php:694
+#: src/Settings/Settings.php:711
 msgid ""
 "A CSS font-family your theme already loads, for example \"Inter\", sans-"
 "serif. The plugin never loads web fonts."
@@ -6273,11 +6365,11 @@ msgstr ""
 "قيمة font-family يحمّلها قالبك بالفعل، مثل \"Inter\", sans-serif. لا تحمّل "
 "الإضافة خطوط الويب أبدًا."
 
-#: src/Settings/Settings.php:701
+#: src/Settings/Settings.php:718
 msgid "GitHub token"
 msgstr "رمز GitHub"
 
-#: src/Settings/Settings.php:702
+#: src/Settings/Settings.php:719
 msgid ""
 "Only needed while the GitHub repository is private: a fine-grained token "
 "with read-only access to its contents. Updates come from the latest release "
@@ -6287,29 +6379,29 @@ msgstr ""
 "لمحتوياته. تأتي التحديثات من أحدث إصدار على "
 "github.com/digitumarketing/digitum-bookings."
 
-#: src/Settings/Settings.php:779 src/Settings/Settings.php:797
+#: src/Settings/Settings.php:796 src/Settings/Settings.php:814
 msgid "— Choose —"
 msgstr "— اختر —"
 
-#: templates/front/booking-widget.php:17
+#: templates/front/booking-widget.php:16
 msgid "Adults"
 msgstr "بالغون"
 
-#: templates/front/booking-widget.php:18
+#: templates/front/booking-widget.php:17
 msgid "Children"
 msgstr "أطفال"
 
-#: templates/front/booking-widget.php:19
+#: templates/front/booking-widget.php:18
 msgid "Infants"
 msgstr "رُضّع"
 
 #. translators: %d: seats per vehicle.
-#: templates/front/booking-widget.php:25
+#: templates/front/booking-widget.php:24
 msgid "Vehicles"
 msgstr "المركبات"
 
 #. translators: %d: seats per vehicle.
-#: templates/front/booking-widget.php:25
+#: templates/front/booking-widget.php:24
 #, php-format
 msgid "%d seat each"
 msgid_plural "%d seats each"
@@ -6320,168 +6412,185 @@ msgstr[3] "%d مقاعد لكل مركبة"
 msgstr[4] "%d مقعداً لكل مركبة"
 msgstr[5] "%d مقعد لكل مركبة"
 
-#: templates/front/booking-widget.php:53
+#: templates/front/booking-widget.php:46
+msgid "Book now"
+msgstr "احجز الآن"
+
+#: templates/front/booking-widget.php:51
 msgid "Book this tour"
 msgstr "احجز هذه الجولة"
 
-#: templates/front/booking-widget.php:62
+#: templates/front/booking-widget.php:60
 msgid "Close booking"
 msgstr "إغلاق الحجز"
 
-#: templates/front/booking-widget.php:67
-msgid "Choose"
-msgstr "اختر"
+#: templates/front/booking-widget.php:65 templates/front/booking-widget.php:66
+msgid "Your trip"
+msgstr "رحلتك"
 
-#: templates/front/booking-widget.php:117
+#: templates/front/booking-widget.php:116
 msgid "Vehicles and guests"
 msgstr "المركبات والضيوف"
 
 #. translators: %s: Adults, Children…
-#: templates/front/booking-widget.php:127
+#: templates/front/booking-widget.php:126
 #, php-format
 msgid "Fewer: %s"
 msgstr "أقل: %s"
 
 #. translators: %s: Adults, Children…
-#: templates/front/booking-widget.php:129
+#: templates/front/booking-widget.php:128
 #, php-format
 msgid "More: %s"
 msgstr "أكثر: %s"
 
 #. translators: %d: minimum age.
-#: templates/front/booking-widget.php:139
+#: templates/front/booking-widget.php:138
 #, php-format
 msgid "Minimum age %d."
 msgstr "الحد الأدنى للعمر %d."
 
-#: templates/front/booking-widget.php:142
+#: templates/front/booking-widget.php:141
 msgid "The driver must show a driving licence."
 msgstr "يجب أن يُبرز السائق رخصة قيادة."
 
-#: templates/front/booking-widget.php:153
-msgid "Pickup or meeting point"
-msgstr "الاستلام أو نقطة الالتقاء"
-
-#. translators: %s: meeting point.
-#: templates/front/booking-widget.php:159
-#, php-format
-msgid "Meet us at %s"
-msgstr "نلتقي بك في %s"
-
-#. translators: %s: meeting point.
-#: templates/front/booking-widget.php:159
-msgid "Meet us at the meeting point"
-msgstr "نلتقي بك عند نقطة الالتقاء"
-
-#: templates/front/booking-widget.php:173
-msgid "Pickup area"
-msgstr "منطقة الاستلام"
-
-#: templates/front/booking-widget.php:175
-msgid "Choose…"
-msgstr "اختر…"
-
-#: templates/front/booking-widget.php:184
-msgid "Hotel or address"
-msgstr "الفندق أو العنوان"
-
-#: templates/front/booking-widget.php:189
-msgid "Room number (optional)"
-msgstr "رقم الغرفة (اختياري)"
-
-#: templates/front/booking-widget.php:205 templates/front/confirmation.php:105
-msgid "Open in maps"
-msgstr "فتح في الخرائط"
-
-#: templates/front/booking-widget.php:232
+#: templates/front/booking-widget.php:170
 msgid "included in every booking"
 msgstr "مشمول في كل حجز"
 
-#: templates/front/booking-widget.php:243
+#: templates/front/booking-widget.php:185
+#: templates/front/booking-widget.php:186
+msgid "Pickup and details"
+msgstr "التوصيل والبيانات"
+
+#: templates/front/booking-widget.php:185
+#: templates/front/booking-widget.php:186
 msgid "Your details"
 msgstr "بياناتك"
 
-#: templates/front/booking-widget.php:245
+#: templates/front/booking-widget.php:191
+msgid "Pickup or meeting point"
+msgstr "الاستلام أو نقطة الالتقاء"
+
+#: templates/front/booking-widget.php:209
+msgid "Pickup area"
+msgstr "منطقة الاستلام"
+
+#: templates/front/booking-widget.php:211
+msgid "Choose…"
+msgstr "اختر…"
+
+#: templates/front/booking-widget.php:220
+msgid "Hotel or address"
+msgstr "الفندق أو العنوان"
+
+#: templates/front/booking-widget.php:225
+msgid "Room number (optional)"
+msgstr "رقم الغرفة (اختياري)"
+
+#: templates/front/booking-widget.php:241 templates/front/confirmation.php:105
+msgid "Open in maps"
+msgstr "فتح في الخرائط"
+
+#: templates/front/booking-widget.php:250
 msgid "Full name"
 msgstr "الاسم الكامل"
 
-#: templates/front/booking-widget.php:252
-msgid "We send the quote here."
-msgstr "نرسل عرض السعر إلى هنا."
-
-#: templates/front/booking-widget.php:252
-msgid "Your confirmation and receipt are sent here."
-msgstr "يُرسَل تأكيد الحجز والإيصال إلى هنا."
-
-#: templates/front/booking-widget.php:258
+#: templates/front/booking-widget.php:259
 msgid "Country code"
 msgstr "رمز الدولة"
 
-#: templates/front/booking-widget.php:264
+#: templates/front/booking-widget.php:268
+msgid "We send the quote here."
+msgstr "نرسل عرض السعر إلى هنا."
+
+#: templates/front/booking-widget.php:268
+msgid "Your confirmation and receipt are sent here."
+msgstr "يُرسَل تأكيد الحجز والإيصال إلى هنا."
+
+#: templates/front/booking-widget.php:272
 msgid "Nationality (optional)"
 msgstr "الجنسية (اختياري)"
 
-#: templates/front/booking-widget.php:268
+#: templates/front/booking-widget.php:277
 msgid "What are you planning?"
 msgstr "ماذا تخطط؟"
 
-#: templates/front/booking-widget.php:268
+#: templates/front/booking-widget.php:282
+msgid "Add a note"
+msgstr "إضافة ملاحظة"
+
+#: templates/front/booking-widget.php:284
 msgid "Special requests (optional)"
 msgstr "طلبات خاصة (اختياري)"
 
-#: templates/front/booking-widget.php:271
-msgid "Send me offers and news (optional)"
-msgstr "أرسلوا لي العروض والأخبار (اختياري)"
+#: templates/front/booking-widget.php:292
+#: templates/front/booking-widget.php:293
+msgid "Review and send"
+msgstr "المراجعة والإرسال"
+
+#: templates/front/booking-widget.php:292
+#: templates/front/booking-widget.php:293
+msgid "Review and confirm"
+msgstr "المراجعة والتأكيد"
+
+#: templates/front/booking-widget.php:321
+msgid "Pay on the day, cash or card. Nothing to pay now."
+msgstr "الدفع يوم الرحلة نقدًا أو بالبطاقة. لا شيء للدفع الآن."
+
+#: templates/front/booking-widget.php:328
+msgid "Online booking is not available right now. Please contact us."
+msgstr "الحجز عبر الإنترنت غير متاح حالياً. يرجى التواصل معنا."
+
+#: templates/front/booking-widget.php:334
+msgid "Coupon code (optional)"
+msgstr "رمز القسيمة (اختياري)"
+
+#: templates/front/booking-widget.php:337
+msgid "Apply"
+msgstr "تطبيق"
+
+#: templates/front/booking-widget.php:342
+msgid "How much to pay now"
+msgstr "المبلغ المطلوب دفعه الآن"
 
 #. translators: %s: link to the booking terms.
-#: templates/front/booking-widget.php:279
+#: templates/front/booking-widget.php:356
 #, php-format
 msgid "I accept the %s"
 msgstr "أوافق على %s"
 
-#: templates/front/booking-widget.php:280
+#: templates/front/booking-widget.php:357
 msgid "booking terms"
 msgstr "شروط الحجز"
 
-#: templates/front/booking-widget.php:284
+#: templates/front/booking-widget.php:361
 msgid "I accept the booking terms"
 msgstr "أوافق على شروط الحجز"
 
-#: templates/front/booking-widget.php:290
+#: templates/front/booking-widget.php:366
+msgid "Send me offers and news (optional)"
+msgstr "أرسلوا لي العروض والأخبار (اختياري)"
+
+#: templates/front/booking-widget.php:369
 msgid "Leave this empty"
 msgstr "اترك هذا الحقل فارغاً"
 
-#: templates/front/booking-widget.php:313
-msgid "Online booking is not available right now. Please contact us."
-msgstr "الحجز عبر الإنترنت غير متاح حالياً. يرجى التواصل معنا."
-
-#: templates/front/booking-widget.php:318
-msgid "Coupon code (optional)"
-msgstr "رمز القسيمة (اختياري)"
-
-#: templates/front/booking-widget.php:321
-msgid "Apply"
-msgstr "تطبيق"
-
-#: templates/front/booking-widget.php:326
-msgid "How much to pay now"
-msgstr "المبلغ المطلوب دفعه الآن"
-
-#: templates/front/booking-widget.php:340
+#: templates/front/booking-widget.php:380
 msgid "Back"
 msgstr "رجوع"
 
-#: templates/front/booking-widget.php:341
+#: templates/front/booking-widget.php:381
 msgid "Continue"
 msgstr "متابعة"
 
-#: templates/front/booking-widget.php:348
+#: templates/front/booking-widget.php:388
 msgid ""
 "Online booking needs JavaScript. Please enable it or contact us to book."
 msgstr ""
 "يتطلب الحجز عبر الإنترنت JavaScript. يرجى تفعيله أو التواصل معنا للحجز."
 
-#: templates/front/booking-widget.php:359
+#: templates/front/booking-widget.php:399
 msgid "Book"
 msgstr "احجز"
 

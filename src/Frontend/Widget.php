@@ -203,6 +203,8 @@ final class Widget {
 			'turnstile'  => $turnstile->enabled() ? (string) $all['analytics']['turnstile_site_key'] : '',
 			'second'     => ( new SecondCurrency( $this->settings ) )->config(),
 			'payment'    => Assets::payment_url(),
+			'stepped'    => ! empty( $all['general']['stepped_desktop'] ),
+			'pointName'  => $point ? (string) $point['name'] : '',
 			'i18n'       => self::strings(),
 		);
 
@@ -229,7 +231,7 @@ final class Widget {
 			'licence'      => (bool) $product->get( 'licence_required' ),
 			'terms_url'    => (string) $all['general']['terms_url'],
 			'cancellation' => (string) $all['general']['cancellation'],
-			'country_code' => (string) $all['general']['country_code'],
+			'country_code' => (string) preg_replace( '/\D/', '', (string) $all['general']['country_code'] ),
 			'coupons'      => ! $on_req && ( new CouponRepository() )->any_active( $now ),
 			'sticky'       => is_singular( $this->product_type->key() ) && get_queried_object_id() === $product_id && ( new StickyBar( $this->settings, $this->product_type ) )->enabled( $product_id ),
 			'accent'       => (string) $all['branding']['accent_color'],
@@ -280,10 +282,10 @@ final class Widget {
 			$weekdays[] = $wp_locale ? $wp_locale->get_weekday_abbrev( $wp_locale->get_weekday( $day ) ) : '';
 		}
 		return array(
-			'weekdays'      => $weekdays,
-			'prevMonth'     => __( 'Previous month', 'digitum-bookings' ),
-			'nextMonth'     => __( 'Next month', 'digitum-bookings' ),
-			'status'        => array(
+			'weekdays'         => $weekdays,
+			'prevMonth'        => __( 'Previous month', 'digitum-bookings' ),
+			'nextMonth'        => __( 'Next month', 'digitum-bookings' ),
+			'status'           => array(
 				'open'    => __( 'available', 'digitum-bookings' ),
 				'closed'  => __( 'closed', 'digitum-bookings' ),
 				'past'    => __( 'past', 'digitum-bookings' ),
@@ -291,50 +293,83 @@ final class Widget {
 				'none'    => __( 'no tours', 'digitum-bookings' ),
 				'cutoff'  => __( 'closed for today', 'digitum-bookings' ),
 			),
-			'chooseDate'    => __( 'Choose a date to see the times.', 'digitum-bookings' ),
-			'noSessions'    => __( 'No tours on this day. Please choose another date.', 'digitum-bookings' ),
-			'loading'       => __( 'Loading…', 'digitum-bookings' ),
+			'chooseDate'       => __( 'Choose a date to see the times.', 'digitum-bookings' ),
+			'noSessions'       => __( 'No tours on this day. Please choose another date.', 'digitum-bookings' ),
+			'loading'          => __( 'Loading…', 'digitum-bookings' ),
 			/* translators: %s: time. */
-			'starts'        => __( 'Starts %s', 'digitum-bookings' ),
+			'starts'           => __( 'Starts %s', 'digitum-bookings' ),
 			/* translators: %s: time range. */
-			'pickupWindow'  => __( 'Pickup %s', 'digitum-bookings' ),
-			'unavailable'   => __( 'Not available', 'digitum-bookings' ),
-			'total'         => __( 'Total', 'digitum-bookings' ),
+			'pickupWindow'     => __( 'Pickup %s', 'digitum-bookings' ),
+			'unavailable'      => __( 'Not available', 'digitum-bookings' ),
+			'total'            => __( 'Total', 'digitum-bookings' ),
 			/* translators: %s: VAT amount. */
-			'includesVat'   => __( 'Includes VAT %s', 'digitum-bookings' ),
+			'includesVat'      => __( 'Includes VAT %s', 'digitum-bookings' ),
 			/* translators: %s: VAT amount. */
-			'plusVat'       => __( 'VAT %s', 'digitum-bookings' ),
-			'discount'      => __( 'Discount', 'digitum-bookings' ),
-			'payNow'        => __( 'Pay now', 'digitum-bookings' ),
-			'dueOnArrival'  => __( 'Due on arrival', 'digitum-bookings' ),
-			'fullAmount'    => __( 'Full amount', 'digitum-bookings' ),
+			'plusVat'          => __( 'VAT %s', 'digitum-bookings' ),
+			'discount'         => __( 'Discount', 'digitum-bookings' ),
+			'payNow'           => __( 'Pay now', 'digitum-bookings' ),
+			'dueOnArrival'     => __( 'Due on arrival', 'digitum-bookings' ),
+			'fullAmount'       => __( 'Full amount', 'digitum-bookings' ),
 			/* translators: %s: deposit percentage. */
-			'depositOf'     => __( '%s%% deposit', 'digitum-bookings' ),
+			'depositOf'        => __( '%s%% deposit', 'digitum-bookings' ),
 			/* translators: 1: amount now, 2: amount on arrival. */
-			'depositSplit'  => __( '%1$s now, %2$s on arrival', 'digitum-bookings' ),
-			'free'          => __( 'Free', 'digitum-bookings' ),
-			'onRequest'     => __( 'On request', 'digitum-bookings' ),
-			/* translators: 1: current step, 2: number of steps. */
-			'stepOf'        => __( 'Step %1$s of %2$s', 'digitum-bookings' ),
-			'sending'       => __( 'Sending…', 'digitum-bookings' ),
-			'networkError'  => __( 'Something went wrong. Please check your connection and try again.', 'digitum-bookings' ),
-			'fix'           => __( 'Please check the highlighted fields.', 'digitum-bookings' ),
-			'chooseOption'  => __( 'Please choose an option.', 'digitum-bookings' ),
-			'chooseSession' => __( 'Please choose a date and a session.', 'digitum-bookings' ),
-			'addGuest'      => __( 'Please add at least one guest.', 'digitum-bookings' ),
-			'chooseZone'    => __( 'Please choose your pickup area.', 'digitum-bookings' ),
-			'hotel'         => __( 'Please tell us your hotel or pickup address.', 'digitum-bookings' ),
-			'required'      => __( 'This field is required.', 'digitum-bookings' ),
-			'choosePayment' => __( 'Please choose how you want to pay.', 'digitum-bookings' ),
-			'terms'         => __( 'Please accept the booking terms.', 'digitum-bookings' ),
+			'depositSplit'     => __( '%1$s now, %2$s on arrival', 'digitum-bookings' ),
+			'free'             => __( 'Free', 'digitum-bookings' ),
+			'onRequest'        => __( 'On request', 'digitum-bookings' ),
+			/* translators: 1: current step, 2: number of steps, 3: step name. */
+			'stepOf'           => __( 'Step %1$s of %2$s: %3$s', 'digitum-bookings' ),
+			/* translators: %s: date, e.g. Thu 5 Nov 2026. */
+			'selected'         => __( 'Selected: %s', 'digitum-bookings' ),
+			'today'            => __( 'today', 'digitum-bookings' ),
+			/* translators: %s: VAT rate, e.g. 5%. */
+			'pricesIncludeVat' => __( 'Prices include %s VAT', 'digitum-bookings' ),
 			/* translators: %s: amount. */
-			'bookPay'       => __( 'Continue to payment · %s', 'digitum-bookings' ),
-			'bookArrival'   => __( 'Confirm booking · pay on arrival', 'digitum-bookings' ),
-			'book'          => __( 'Book now', 'digitum-bookings' ),
+			'payOnDay'         => __( 'Pay on the day: %s', 'digitum-bookings' ),
+			'arrivalPickup'    => __( 'Cash or card when we pick you up.', 'digitum-bookings' ),
+			'arrivalMeet'      => __( 'Cash or card at the meeting point.', 'digitum-bookings' ),
+			'tour'             => __( 'Tour', 'digitum-bookings' ),
+			'option'           => __( 'Option', 'digitum-bookings' ),
+			'date'             => __( 'Date', 'digitum-bookings' ),
+			'session'          => __( 'Session', 'digitum-bookings' ),
+			'guests'           => __( 'Guests', 'digitum-bookings' ),
+			'pickup'           => __( 'Pickup', 'digitum-bookings' ),
+			'hotelPickup'      => __( 'Hotel pickup', 'digitum-bookings' ),
+			/* translators: %s: meeting point. */
+			'meetAt'           => __( 'Meet us at %s', 'digitum-bookings' ),
+			'meetPoint'        => __( 'Meet us at the meeting point', 'digitum-bookings' ),
+			/* translators: 1: number of adults. */
+			'nAdults'          => __( 'Adults: %s', 'digitum-bookings' ),
+			/* translators: 1: number of children. */
+			'nChildren'        => __( 'Children: %s', 'digitum-bookings' ),
+			/* translators: 1: number of infants. */
+			'nInfants'         => __( 'Infants: %s', 'digitum-bookings' ),
+			/* translators: 1: number of vehicles. */
+			'nUnits'           => __( 'Vehicles: %s', 'digitum-bookings' ),
+			/* translators: %s: total price. */
+			'liveTotal'        => __( 'Total: %s', 'digitum-bookings' ),
+			'phoneCode'        => __( 'Please enter the country code.', 'digitum-bookings' ),
+			'phoneDigits'      => __( 'Please enter 6 to 14 digits.', 'digitum-bookings' ),
+			'emailInvalid'     => __( 'Please enter a valid email address.', 'digitum-bookings' ),
+			'nameRequired'     => __( 'Please enter your full name.', 'digitum-bookings' ),
+			'sending'          => __( 'Sending…', 'digitum-bookings' ),
+			'networkError'     => __( 'Something went wrong. Please check your connection and try again.', 'digitum-bookings' ),
+			'fix'              => __( 'Please check the highlighted fields.', 'digitum-bookings' ),
+			'chooseOption'     => __( 'Please choose an option.', 'digitum-bookings' ),
+			'chooseSession'    => __( 'Please choose a date and a session.', 'digitum-bookings' ),
+			'addGuest'         => __( 'Please add at least one guest.', 'digitum-bookings' ),
+			'chooseZone'       => __( 'Please choose your pickup area.', 'digitum-bookings' ),
+			'hotel'            => __( 'Please tell us your hotel or pickup address.', 'digitum-bookings' ),
+			'required'         => __( 'This field is required.', 'digitum-bookings' ),
+			'choosePayment'    => __( 'Please choose how you want to pay.', 'digitum-bookings' ),
+			'terms'            => __( 'Please accept the booking terms.', 'digitum-bookings' ),
 			/* translators: %s: amount. */
-			'bookTransfer'  => __( 'Book now · %s by bank transfer', 'digitum-bookings' ),
+			'bookPay'          => __( 'Continue to payment · %s', 'digitum-bookings' ),
+			'bookArrival'      => __( 'Confirm booking', 'digitum-bookings' ),
+			'book'             => __( 'Confirm booking', 'digitum-bookings' ),
+			/* translators: %s: amount. */
+			'bookTransfer'     => __( 'Book now · %s by bank transfer', 'digitum-bookings' ),
 			/* translators: %s: coupon code. */
-			'couponApplied' => __( 'Coupon %s applied.', 'digitum-bookings' ),
+			'couponApplied'    => __( 'Coupon %s applied.', 'digitum-bookings' ),
 		);
 	}
 }

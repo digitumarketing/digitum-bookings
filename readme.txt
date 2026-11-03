@@ -4,7 +4,7 @@ Tags: bookings, tours, activities, reservations, deposits
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.8.1
+Stable tag: 0.8.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -121,6 +121,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 
 == Changelog ==
 
+= 0.8.2 =
+* Booking widget in three steps, validation step by step, clearer calendar, no theme button styles inside the widget, better phone sheet, simpler price and phone fields.
+
 = 0.8.1 =
 * Main currency can show whole units, e.g. AED 699 instead of AED 699.00
 
@@ -176,6 +179,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 * Foundation: settings, tour post type (attach or own), booking settings box, database tables, roles.
 
 == Upgrade Notice ==
+
+= 0.8.2 =
+The booking widget has three steps. If your theme has its own copy of templates/front/booking-widget.php, update it from the plugin.
 
 = 0.8.1 =
 New optional setting Settings › Currency & VAT › Show prices as. Nothing changes until you choose whole units.

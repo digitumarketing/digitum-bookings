@@ -90,22 +90,13 @@
 	white-space: nowrap;
 }
 
-.dgb-close {
-	display: none;
-	position: absolute;
-	top: 8px;
-	inset-inline-end: 8px;
-	width: 44px;
-	height: 44px;
-	border: 0;
-	background: transparent;
-	color: var(--dgb-ink);
-	font-size: 1.75rem;
-	line-height: 1;
-	cursor: pointer;
+.dgb-form {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
 }
 
-.dgb-form {
+.dgb-body {
 	display: flex;
 	flex-direction: column;
 	gap: 24px;
@@ -197,8 +188,24 @@
 	gap: 8px;
 }
 
-.dgb-phone input:first-child {
-	flex: 0 0 5.5em;
+.dgb-phone-code {
+	position: relative;
+	flex: 0 0 5.2em;
+}
+
+.dgb-phone-plus {
+	position: absolute;
+	inset-block: 0;
+	inset-inline-start: 10px;
+	display: flex;
+	align-items: center;
+	color: var(--dgb-muted);
+	pointer-events: none;
+}
+
+.dgb-phone > input {
+	flex: 1 1 auto;
+	min-width: 0;
 }
 
 .dgb-field-error {
@@ -234,6 +241,14 @@
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
 	gap: 8px;
+}
+
+.dgb-options-1 {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+.dgb-cancellation + .dgb-group {
+	margin-top: 12px;
 }
 
 .dgb-options-2 {
@@ -324,6 +339,13 @@
 	align-content: start;
 }
 
+.dgb-cal-selected {
+	min-height: 1.4em;
+	margin: 8px 0 0;
+	font-size: 0.9rem;
+	font-weight: 600;
+}
+
 .dgb-cal-wd {
 	padding-bottom: 2px;
 	color: var(--dgb-muted);
@@ -331,63 +353,6 @@
 	text-align: center;
 }
 
-.dgb-day {
-	min-height: 44px;
-	padding: 0;
-	border: 1px solid var(--dgb-line);
-	border-radius: min(8px, var(--dgb-radius));
-	background: var(--dgb-bg);
-	color: var(--dgb-ink);
-	font: inherit;
-	font-weight: 600;
-	cursor: pointer;
-}
-
-.dgb-day:disabled {
-	border-color: transparent;
-	background: transparent;
-	color: #78716c;
-	font-weight: 400;
-	cursor: default;
-}
-
-.dgb-day.is-closed:disabled,
-.dgb-day.is-cutoff:disabled {
-	border: 1px dashed #a8a29e;
-	background: var(--dgb-soft);
-	text-decoration: line-through;
-}
-
-.dgb-day[aria-pressed="true"] {
-	border-color: var(--dgb-accent);
-	background: var(--dgb-accent);
-	color: var(--dgb-on-accent);
-}
-
-.dgb-day:focus-visible,
-.dgb-icon-btn:focus-visible,
-.dgb-btn:focus-visible {
-	outline: 2px solid var(--dgb-accent);
-	outline-offset: 2px;
-}
-
-.dgb-icon-btn {
-	width: 44px;
-	height: 44px;
-	border: 1px solid #a8a29e;
-	border-radius: 50%;
-	background: var(--dgb-bg);
-	color: var(--dgb-ink);
-	font: inherit;
-	font-size: 1.25rem;
-	line-height: 1;
-	cursor: pointer;
-}
-
-.dgb-icon-btn:disabled {
-	opacity: 0.4;
-	cursor: default;
-}
 
 /* Guests ---------------------------------------------------------------------- */
 
@@ -438,6 +403,15 @@
 	margin-top: 12px;
 }
 
+.dgb-pickup {
+	display: grid;
+	gap: 12px;
+}
+
+.dgb-pickup .dgb-field + .dgb-field {
+	margin-top: 0;
+}
+
 .dgb-meet p {
 	margin: 0 0 4px;
 }
@@ -447,7 +421,7 @@
 }
 
 .dgb-zone-note {
-	margin-top: 10px;
+	margin-top: 0;
 	padding: 10px 12px;
 	border: 1px solid #fdba74;
 	border-radius: min(8px, var(--dgb-radius));
@@ -527,47 +501,95 @@
 
 .dgb-foot {
 	display: flex;
+	flex: none;
 	flex-wrap: wrap;
 	gap: 8px;
+	padding: 0 20px 20px;
 }
 
-.dgb-btn {
-	display: inline-flex;
-	flex: 1 1 auto;
-	align-items: center;
-	justify-content: center;
-	min-height: 48px;
-	padding: 0 18px;
-	border: 2px solid var(--dgb-ink);
-	border-radius: var(--dgb-radius);
-	background: var(--dgb-bg);
-	color: var(--dgb-ink);
-	font: inherit;
+.dgb-w.is-stepped .dgb-foot {
+	padding-top: 12px;
+	border-top: 1px solid var(--dgb-line);
+}
+
+/* Stepped layout (phones always; computers when Settings › General › Stepped layout on desktop is on). */
+.dgb-w.is-stepped .dgb-step:not(.is-current) {
+	display: none;
+}
+
+.dgb-live {
+	margin: 16px 0 0;
 	font-weight: 700;
-	text-decoration: none;
-	text-transform: var(--dgb-btn-transform, none);
+}
+
+.dgb-live:empty {
+	display: none;
+}
+
+.dgb-review {
+	display: grid;
+	grid-template-columns: minmax(0, 7em) minmax(0, 1fr);
+	gap: 4px 12px;
+	margin: 0 0 12px;
+	font-size: 0.95rem;
+}
+
+.dgb-review dt {
+	color: var(--dgb-muted);
+}
+
+.dgb-review dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.dgb-line.is-due {
+	margin-top: 4px;
+	font-weight: 600;
+}
+
+.dgb-cancellation {
+	margin: 10px 0 0;
+}
+
+.dgb-pay-only {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	margin: 0;
+	padding: 10px 12px;
+	border: 1px solid var(--dgb-line);
+	border-radius: min(10px, var(--dgb-radius));
+}
+
+.dgb-pay-only .dgb-hint {
+	margin: 0;
+}
+
+.dgb-consent {
+	display: grid;
+	gap: 14px;
+}
+
+.dgb-consent .dgb-field-error {
+	margin: -8px 0 0;
+}
+
+.dgb-note-toggle {
+	margin-top: 12px;
+}
+
+.dgb-note-toggle summary {
+	color: var(--dgb-ink);
+	font-weight: 600;
+	text-decoration: underline;
 	cursor: pointer;
 }
 
-.dgb-btn-primary {
-	border-color: var(--dgb-accent);
-	background: var(--dgb-accent);
-	color: var(--dgb-on-accent);
+.dgb-note-toggle .dgb-field {
+	margin-top: 8px;
 }
 
-.dgb-btn-quiet {
-	flex: 0 1 auto;
-	border-color: #a8a29e;
-}
-
-.dgb-btn:disabled {
-	opacity: 0.6;
-	cursor: wait;
-}
-
-.dgb-submit {
-	flex-basis: 100%;
-}
 
 .dgb-credit {
 	margin: 6px 0 0;
@@ -608,11 +630,6 @@
 	background: var(--dgb-bg);
 }
 
-.dgb-teaser .dgb-btn,
-.dgb-sticky .dgb-btn {
-	flex: 0 0 auto;
-}
-
 .dgb-teaser-price {
 	margin: 0;
 	color: var(--dgb-muted);
@@ -642,57 +659,61 @@
 	box-shadow: 0 -6px 18px rgba(28, 25, 23, 0.08);
 }
 
-/* Phone layout: stepped bottom sheet --------------------------------------------------------- */
+/* Phone layout: bottom sheet ----------------------------------------------------------------- */
+
+.dgb-portal {
+	max-width: none;
+	margin: 0;
+}
 
 @media (max-width: 781px) {
 	.dgb-w {
 		max-width: none;
 	}
 
+	/* Header and footer stay put; only the middle scrolls. Sized to the visible viewport (keyboard open or not). */
 	.dgb-w .dgb-panel.is-open {
 		position: fixed;
 		inset-inline: 0;
-		bottom: 0;
+		bottom: var(--dgb-vvb, 0px);
 		z-index: 100000;
-		max-height: 92vh;
-		max-height: 92dvh;
+		max-height: calc(var(--dgb-vvh, 100dvh) - 24px);
 		border-radius: calc(var(--dgb-radius) + 6px) calc(var(--dgb-radius) + 6px) 0 0;
 		box-shadow: 0 0 0 100vmax rgba(28, 25, 23, 0.5);
 	}
 
-	.dgb-panel.is-open .dgb-close {
-		display: block;
-	}
-
 	.dgb-panel.is-open .dgb-head {
+		flex: none;
 		padding-inline-end: 56px;
 	}
 
 	.dgb-panel.is-open .dgb-form {
 		flex: 1 1 auto;
+		min-height: 0;
+	}
+
+	.dgb-panel.is-open .dgb-body {
+		flex: 1 1 auto;
+		min-height: 0;
 		overflow-y: auto;
 		overscroll-behavior: contain;
+		-webkit-overflow-scrolling: touch;
 	}
 
-	.dgb-w.is-stepped .dgb-step:not(.is-current) {
-		display: none;
-	}
-
-	.dgb-w.is-stepped .dgb-foot {
-		position: sticky;
-		bottom: -20px;
-		margin: 0 -20px -20px;
-		padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
-		border-top: 1px solid var(--dgb-line);
+	.dgb-panel.is-open .dgb-foot {
+		padding-bottom: calc(12px + env(safe-area-inset-bottom));
 		background: var(--dgb-bg);
 	}
 
-	.dgb-w.is-stepped .dgb-submit {
-		flex-basis: auto;
+	/* Page scroll locked without a jump: the page is held at its scroll position while the sheet is open. */
+	html.dgb-lock {
+		overflow: hidden;
 	}
 
-	html.dgb-lock,
 	html.dgb-lock body {
+		position: fixed;
+		top: var(--dgb-scroll-y, 0px);
+		inset-inline: 0;
 		overflow: hidden;
 	}
 }
@@ -798,7 +819,6 @@
 .dgb-pay h3 { margin-top: 0; }
 .dgb-pay-element { min-height: 220px; margin: 12px 0; }
 .dgb-pay-element.is-paypal { min-height: 150px; }
-.dgb-pay-button { width: 100%; }
 .dgb-pay-message:empty, .dgb-proof-message:empty { display: none; }
 .dgb-pay-message, .dgb-proof-message { margin: 8px 0; font-weight: 600; }
 .dgb-pay-message.is-error, .dgb-proof-message.is-error { color: var(--dgb-danger); }
@@ -830,4 +850,299 @@
 
 .dgb-hint.is-error {
 	color: var(--dgb-danger);
+}
+
+/* Isolation from theme and page-builder styles ------------------------------------------------------
+   Themes and kits style every button and field (`button`, `[type=button]`, `.elementor-kit-6 button`, with :hover
+   and :focus). Each plugin control is set here, for every state, with a more specific selector, so nothing leaks in.
+   Layout (display, flex, width) is set once; looks (colours, borders, spacing, type) for every state. */
+
+.dgb-w button.dgb-day,
+.dgb-w button.dgb-icon-btn,
+.dgb-w button.dgb-close,
+.dgb-w button.dgb-btn {
+	-webkit-appearance: none;
+	appearance: none;
+	min-width: 0;
+	margin: 0;
+	transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.dgb-w button.dgb-day:is(*, :hover, :focus, :active),
+.dgb-w button.dgb-icon-btn:is(*, :hover, :focus, :active),
+.dgb-w button.dgb-close:is(*, :hover, :focus, :active),
+.dgb-w button.dgb-btn:is(*, :hover, :focus, :active) {
+	outline: none;
+	box-shadow: none;
+	font-family: inherit;
+	font-size: 1rem;
+	font-style: normal;
+	letter-spacing: normal;
+	line-height: 1.2;
+	text-decoration: none;
+	text-shadow: none;
+	text-transform: none;
+}
+
+.dgb-w button.dgb-day:focus-visible,
+.dgb-w button.dgb-icon-btn:focus-visible,
+.dgb-w button.dgb-close:focus-visible,
+.dgb-w button.dgb-btn:focus-visible {
+	outline: 2px solid var(--dgb-accent);
+	outline-offset: 2px;
+}
+
+/* Calendar days: open days are plain; the chosen day is the only filled one. */
+.dgb-w button.dgb-day {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: auto;
+}
+
+.dgb-w button.dgb-day:is(*, :hover, :focus, :active) {
+	min-height: 44px;
+	padding: 0;
+	border: 1px solid var(--dgb-line);
+	border-radius: min(8px, var(--dgb-radius));
+	background: transparent;
+	color: var(--dgb-ink);
+	font-weight: 500;
+	cursor: pointer;
+}
+
+.dgb-w button.dgb-day:hover:not(:disabled):not(.is-selected),
+.dgb-w button.dgb-day:focus-visible:not(.is-selected) {
+	border-color: var(--dgb-accent);
+	background: color-mix(in srgb, var(--dgb-accent) 12%, var(--dgb-bg));
+}
+
+.dgb-w button.dgb-day.is-selected:is(*, :hover, :focus, :active) {
+	border-color: var(--dgb-accent);
+	background: var(--dgb-accent);
+	color: var(--dgb-on-accent);
+	font-weight: 700;
+}
+
+.dgb-w button.dgb-day.is-today::after {
+	content: "";
+	position: absolute;
+	bottom: 5px;
+	left: 50%;
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	background: currentColor;
+	transform: translateX(-50%);
+}
+
+.dgb-w button.dgb-day:disabled:is(*, :hover, :focus, :active) {
+	border-color: transparent;
+	background: transparent;
+	color: var(--dgb-muted);
+	font-weight: 400;
+	text-decoration: line-through;
+	cursor: default;
+}
+
+/* Round icon buttons: month arrows and the − / + steppers. */
+.dgb-w button.dgb-icon-btn {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+}
+
+.dgb-w button.dgb-icon-btn:is(*, :hover, :focus, :active) {
+	min-height: 0;
+	padding: 0;
+	border: 1px solid #a8a29e;
+	border-radius: 50%;
+	background: var(--dgb-bg);
+	color: var(--dgb-ink);
+	font-size: 1.25rem;
+	font-weight: 400;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.dgb-w button.dgb-icon-btn:hover:not(:disabled) {
+	border-color: var(--dgb-ink);
+	background: var(--dgb-soft);
+}
+
+.dgb-w button.dgb-icon-btn:disabled,
+.dgb-w button.dgb-icon-btn:disabled:hover {
+	background: var(--dgb-bg);
+	opacity: 0.4;
+	cursor: default;
+}
+
+/* Close (phones): a small neutral icon button, never a brand button. */
+.dgb-w button.dgb-close {
+	display: none;
+	position: absolute;
+	top: 10px;
+	inset-inline-end: 10px;
+	width: 40px;
+	height: 40px;
+}
+
+.dgb-w button.dgb-close:is(*, :hover, :focus, :active) {
+	min-height: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--dgb-ink);
+	font-size: 1.6rem;
+	font-weight: 400;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.dgb-w button.dgb-close:hover {
+	background: var(--dgb-soft);
+}
+
+@media (max-width: 781px) {
+	.dgb-w .dgb-panel.is-open button.dgb-close {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+}
+
+/* Buttons: Continue, Confirm, Back, Book, Apply. */
+.dgb-w .dgb-btn {
+	display: inline-flex;
+	flex: 1 1 auto;
+	align-items: center;
+	justify-content: center;
+	width: auto;
+	height: auto;
+}
+
+.dgb-w button.dgb-btn:is(*, :hover, :focus, :active),
+.dgb-w a.dgb-btn:is(*, :hover, :focus, :active) {
+	min-height: 48px;
+	padding: 0 18px;
+	border: 2px solid var(--dgb-ink);
+	border-radius: var(--dgb-radius);
+	background: var(--dgb-bg);
+	color: var(--dgb-ink);
+	font-weight: 700;
+	text-decoration: none;
+	text-transform: var(--dgb-btn-transform, none);
+	cursor: pointer;
+}
+
+.dgb-w button.dgb-btn-primary:is(*, :hover, :focus, :active),
+.dgb-w a.dgb-btn-primary:is(*, :hover, :focus, :active) {
+	border-color: var(--dgb-accent);
+	background: var(--dgb-accent);
+	color: var(--dgb-on-accent);
+}
+
+.dgb-w button.dgb-btn-primary:hover:not(:disabled),
+.dgb-w a.dgb-btn-primary:hover {
+	border-color: color-mix(in srgb, var(--dgb-accent) 85%, #000);
+	background: color-mix(in srgb, var(--dgb-accent) 85%, #000);
+}
+
+.dgb-w button.dgb-btn-quiet:is(*, :hover, :focus, :active) {
+	border-color: #a8a29e;
+	background: var(--dgb-bg);
+	color: var(--dgb-ink);
+}
+
+.dgb-w button.dgb-btn-quiet {
+	flex: 0 1 auto;
+}
+
+.dgb-w button.dgb-btn-quiet:hover:not(:disabled) {
+	border-color: var(--dgb-ink);
+}
+
+.dgb-w button.dgb-btn:disabled,
+.dgb-w button.dgb-btn:disabled:hover {
+	opacity: 0.6;
+	cursor: wait;
+}
+
+.dgb-w button.dgb-submit {
+	flex-basis: 100%;
+}
+
+.dgb-w.is-stepped button.dgb-submit {
+	flex-basis: auto;
+}
+
+.dgb-w .dgb-teaser button.dgb-btn,
+.dgb-w .dgb-sticky button.dgb-btn {
+	flex: 0 0 auto;
+}
+
+.dgb-w button.dgb-pay-button {
+	width: 100%;
+}
+
+/* Text fields and selects (themes and kits style them too). */
+.dgb-w.dgb-w .dgb-field :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]),
+.dgb-w.dgb-w .dgb-phone input,
+.dgb-w.dgb-w .dgb-stepper input,
+.dgb-w.dgb-w .dgb-coupon-row input {
+	min-height: 44px;
+	margin: 0;
+	padding: 8px 12px;
+	border: 1px solid #a8a29e;
+	border-radius: min(8px, var(--dgb-radius));
+	background: var(--dgb-bg);
+	box-shadow: none;
+	color: var(--dgb-ink);
+	font: inherit;
+	line-height: 1.3;
+}
+
+.dgb-w.dgb-w .dgb-field :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):focus,
+.dgb-w.dgb-w .dgb-phone input:focus,
+.dgb-w.dgb-w .dgb-stepper input:focus,
+.dgb-w.dgb-w .dgb-coupon-row input:focus {
+	border-color: var(--dgb-accent);
+	outline: 2px solid color-mix(in srgb, var(--dgb-accent) 35%, transparent);
+	outline-offset: 0;
+	box-shadow: none;
+}
+
+.dgb-w.dgb-w .dgb-field [aria-invalid="true"],
+.dgb-w.dgb-w .dgb-phone [aria-invalid="true"] {
+	border-color: var(--dgb-danger);
+	box-shadow: 0 0 0 1px var(--dgb-danger);
+}
+
+.dgb-w.dgb-w .dgb-field .dgb-phone-code input:not([type="checkbox"]):not([type="radio"]) {
+	width: 100%;
+	padding-inline-start: 24px;
+}
+
+/* Radios and checkboxes keep the browser's own control (kits style every input). */
+.dgb-w.dgb-w :is(.dgb-card, .dgb-check) input:is([type="radio"], [type="checkbox"]) {
+	-webkit-appearance: auto;
+	appearance: auto;
+	padding: 0;
+	border: revert;
+	border-radius: revert;
+	background: revert;
+	box-shadow: none;
+	accent-color: var(--dgb-accent);
+}
+
+.dgb-w.dgb-w .dgb-stepper input {
+	width: 3.5em;
+	padding: 4px;
+	text-align: center;
 }

@@ -117,6 +117,13 @@ final class Settings {
 					'text'    => __( 'Add the booking widget to single tour pages automatically', 'digitum-bookings' ),
 					'default' => true,
 				),
+				'stepped_desktop'  => array(
+					'type'    => 'checkbox',
+					'label'   => __( 'Stepped layout on desktop', 'digitum-bookings' ),
+					'text'    => __( 'Show the booking widget one step at a time on computers too (short enough for a sidebar)', 'digitum-bookings' ),
+					'help'    => __( 'Off: all three steps are shown in one column. Phones always use steps.', 'digitum-bookings' ),
+					'default' => true,
+				),
 				'sticky_mode'      => array(
 					'type'    => 'select',
 					'label'   => __( 'Mobile sticky bar', 'digitum-bookings' ),
@@ -157,7 +164,7 @@ final class Settings {
 				'country_code'     => array(
 					'type'    => 'tel',
 					'label'   => __( 'Default phone country code', 'digitum-bookings' ),
-					'help'    => __( 'Filled in for guests, for example +44. Empty: guests type it.', 'digitum-bookings' ),
+					'help'    => __( 'Filled in for guests, for example 44. Empty: guests type it.', 'digitum-bookings' ),
 					'default' => '',
 				),
 			),

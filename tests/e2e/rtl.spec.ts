@@ -16,8 +16,8 @@ test.describe( 'Arabic (RTL)', () => {
 	test( 'tour page is right to left, translated and fits the screen', async ( { page, isMobile }, info ) => {
 		await arabicPage( page, path( tours.buggy.url ) );
 		await expect( page.locator( 'html' ) ).toHaveAttribute( 'dir', 'rtl' );
-		const w = page.locator( '[data-dgb-widget]' );
-		expect( await w.evaluate( ( el ) => getComputedStyle( el ).direction ) ).toBe( 'rtl' );
+		const w = page.locator( '[data-dgb-widget], .dgb-portal' );
+		expect( await page.locator( '[data-dgb-widget]' ).evaluate( ( el ) => getComputedStyle( el ).direction ) ).toBe( 'rtl' );
 		await expect( w.locator( '.dgb-from' ) ).toContainText( arabic );
 		await expect( w.locator( '[data-dgb-submit]' ) ).toHaveText( arabic );
 		await expect( page.locator( '.dgb-credit' ) ).toContainText( arabic );
@@ -30,7 +30,7 @@ test.describe( 'Arabic (RTL)', () => {
 		}
 		expect( await w.locator( '[data-dgb-next-month]' ).evaluate( ( el ) => getComputedStyle( el ).transform ) ).toBe( 'matrix(-1, 0, 0, 1, 0, 0)' );
 		expect( await w.locator( '.dgb-card-title' ).first().evaluate( ( el ) => getComputedStyle( el ).unicodeBidi ) ).toBe( 'plaintext' );
-		await axe( page );
+		await axe( page, isMobile ? '.dgb-portal' : '[data-dgb-widget]' );
 		await page.screenshot( { path: `test-results/rtl-${ info.project.name }.png`, fullPage: false } );
 	} );
 
@@ -54,9 +54,12 @@ test.describe( 'Arabic (RTL)', () => {
 		await pickTomorrow( w );
 		await w.locator( 'input[name="session_id"]' ).last().check();
 		await w.locator( '[data-dgb-inc="adults"]' ).click();
+		await w.locator( '[data-dgb-next]' ).click();
 		await w.locator( 'input[name="name"]' ).fill( 'ضيف تجريبي' );
 		await w.locator( 'input[name="email"]' ).fill( 'arabic@example.com' );
 		await w.locator( 'input[name="phone"]' ).fill( '501234567' );
+		await w.locator( '[data-dgb-next]' ).click();
+		await expect( w.locator( '[data-dgb-progress]' ) ).toContainText( arabic );
 		await w.locator( 'input[name="terms"]' ).check();
 		await w.locator( 'input[name="payment_method"][value="arrival"]' ).check();
 		await w.locator( '[data-dgb-submit]' ).click();

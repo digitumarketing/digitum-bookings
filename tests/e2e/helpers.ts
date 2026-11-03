@@ -35,10 +35,21 @@ export async function chooseRide( w: Locator ) {
 	await w.getByRole( 'button', { name: 'More: Adults' } ).click();
 }
 
+/** Click Continue until the step is shown (nothing to do when all steps are on one screen). */
+export async function goTo( w: Locator, step: 'trip' | 'details' | 'review' ) {
+	const target = w.locator( `[data-step="${ step }"]` );
+	for ( let i = 0; i < 3 && ! ( await target.evaluate( ( n ) => n.classList.contains( 'is-current' ) ) ); i++ ) {
+		await w.locator( '[data-dgb-next]' ).click();
+	}
+	await expect( target ).toHaveClass( /is-current/ );
+}
+
+/** Step 2 details, then on to the review step and accept the terms. */
 export async function fillDetails( w: Locator ) {
+	await goTo( w, 'details' );
 	await w.getByLabel( 'Full name' ).fill( 'Test Guest' );
 	await w.getByLabel( 'Email', { exact: true } ).fill( 'guest@example.com' );
 	await w.getByLabel( 'Phone', { exact: true } ).fill( '501234567' );
+	await goTo( w, 'review' );
 	await w.getByRole( 'checkbox', { name: /I accept the booking terms/ } ).check();
 }
-

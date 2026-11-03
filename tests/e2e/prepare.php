@@ -72,6 +72,27 @@ if ( isset( $_COOKIE['dgb_test_sticky'] ) ) {
 		echo '<div class="test-theme-bar" style="position:fixed;bottom:0;left:0;right:0;height:60px;background:#000;color:#fff">Theme bar</div>';
 	} );
 }
+// Theme and page-builder button styles on request (v0.8.2): cookie dgb_test_theme_css = 1 prints the rules of
+// Hello Elementor's reset.css and an Elementor kit with global button styles, to check none reach the widget.
+if ( isset( $_COOKIE['dgb_test_theme_css'] ) ) {
+	add_filter( 'body_class', static fn( $c ) => array_merge( $c, array( 'elementor-kit-6' ) ) );
+	add_action( 'wp_head', static function () {
+		echo '<style id="test-theme-css">[type=button],[type=submit],button{background-color:transparent;border:1px solid #c36;border-radius:3px;color:#c36;display:inline-block;font-size:1rem;font-weight:400;padding:.5rem 1rem;text-align:center;transition:all .3s;user-select:none;white-space:nowrap}[type=button]:focus,[type=button]:hover,[type=submit]:focus,[type=submit]:hover,button:focus,button:hover{background-color:#c36;color:#fff;text-decoration:none}'
+			. '.elementor-kit-6 button,.elementor-kit-6 input[type="button"],.elementor-kit-6 input[type="submit"]{background-color:#C2410C;color:#fff;border-radius:12px;padding:16px 22px;font-size:17px;font-weight:700;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 0 #000}.elementor-kit-6 button:hover,.elementor-kit-6 button:focus{background-color:#7C2D12;color:#fff;border:3px solid #c36}'
+			. '.elementor-kit-6 input:not([type="button"]):not([type="submit"]),.elementor-kit-6 select{border:3px solid #c36;border-radius:0;padding:20px;background:#fde68a}</style>';
+	}, 99 );
+}
+// One-column desktop layout on request (v0.8.2): cookie dgb_test_flat = 1 switches "Stepped layout on desktop" off.
+if ( isset( $_COOKIE['dgb_test_flat'] ) ) {
+	add_filter(
+		'option_dgb_settings',
+		static function ( $value ) {
+			$value            = is_array( $value ) ? $value : array();
+			$value['general'] = array_merge( (array) ( $value['general'] ?? array() ), array( 'stepped_desktop' => false ) );
+			return $value;
+		}
+	);
+}
 PHP
 );
 step( $site, 'install' );

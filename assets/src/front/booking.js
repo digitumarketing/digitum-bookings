@@ -129,10 +129,12 @@
 
 		const cfg = JSON.parse( cfgNode.textContent );
 		const t = cfg.i18n;
-		const q = ( s ) => root.querySelector( s );
-		const qa = ( s ) => Array.prototype.slice.call( root.querySelectorAll( s ) );
-		const form = q( '[data-dgb-form]' );
-		const panel = q( '[data-dgb-panel]' );
+		const panel = root.querySelector( '[data-dgb-panel]' );
+		const form = panel.querySelector( '[data-dgb-form]' );
+		const body = panel.querySelector( '[data-dgb-body]' );
+		// On phones the open sheet moves to <body> (above theme bars and stacking contexts): look in both places.
+		const q = ( s ) => root.querySelector( s ) || ( root.contains( panel ) ? null : panel.querySelector( s ) );
+		const qa = ( s ) => Array.prototype.slice.call( root.querySelectorAll( s ) ).concat( root.contains( panel ) ? [] : Array.prototype.slice.call( panel.querySelectorAll( s ) ) );
 		const track = ( event, data ) => push( cfg.analytics.enabled, event, data );
 		const money = new Intl.NumberFormat( cfg.locale, {
 			style: 'currency',
@@ -167,6 +169,9 @@
 			const p = v.split( ':' );
 			return timeFmt.format( new Date( 2000, 0, 1, +p[ 0 ], +p[ 1 ] ) );
 		};
+		const toDate = ( date ) => new Date( +date.slice( 0, 4 ), +date.slice( 5, 7 ) - 1, +date.slice( 8, 10 ) );
+		const shortDate = new Intl.DateTimeFormat( cfg.locale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' } );
+		const longDate = new Intl.DateTimeFormat( cfg.locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' } );
 
 		const state = {
 			month: cfg.today.slice( 0, 7 ),
@@ -175,36 +180,38 @@
 			sessions: [],
 			quote: null,
 			step: 0,
+			stepped: false,
 			mobile: false,
 			seq: 0,
 			sent: {},
 			opener: null,
 			busy: false,
+			scrollY: 0,
 		};
 		let dgbNonce = cfg.rest.dgbNonce;
 		let wpNonce = cfg.rest.wpNonce;
 
 		/* REST -------------------------------------------------------------- */
 
-		async function api( path, body, retry ) {
+		async function api( path, data, retry ) {
 			const headers = { 'X-DGB-Nonce': dgbNonce };
 			if ( wpNonce ) {
 				headers[ 'X-WP-Nonce' ] = wpNonce;
 			}
-			if ( body ) {
+			if ( data ) {
 				headers[ 'Content-Type' ] = 'application/json';
 			}
 			const res = await fetch( cfg.rest.root + path, {
-				method: body ? 'POST' : 'GET',
+				method: data ? 'POST' : 'GET',
 				headers,
-				body: body ? JSON.stringify( body ) : undefined,
+				body: data ? JSON.stringify( data ) : undefined,
 				credentials: 'same-origin',
 			} );
-			let data = null;
+			let json = null;
 			try {
-				data = await res.json();
+				json = await res.json();
 			} catch ( e ) {}
-			const code = data && data.code;
+			const code = json && json.code;
 			if ( 403 === res.status && false !== retry && ( 'dgb_nonce' === code || 'rest_cookie_invalid_nonce' === code ) ) {
 				// The page came from a cache: get fresh nonces once and retry.
 				if ( 'rest_cookie_invalid_nonce' === code ) {
@@ -214,29 +221,32 @@
 					const s = await fetch( cfg.rest.root + 'session', { credentials: 'same-origin' } ).then( ( r ) => r.json() );
 					dgbNonce = s.nonce || dgbNonce;
 				} catch ( e ) {}
-				return api( path, body, false );
+				return api( path, data, false );
 			}
 			if ( ! res.ok ) {
-				const err = new Error( ( data && data.message ) || t.networkError );
-				err.data = data;
+				const err = new Error( ( json && json.message ) || t.networkError );
+				err.data = json;
 				throw err;
 			}
-			return data;
+			return json;
 		}
 
 		/* Values -------------------------------------------------------------- */
 
 		const field = ( name ) => form.elements.namedItem( name );
 		const radio = ( name ) => {
-			const checked = form.querySelector( 'input[name="' + name + '"]:checked' );
+			const checked = form.querySelector( 'input[name="' + name + '"]:checked' ) || form.querySelector( 'input[type="hidden"][name="' + name + '"]' );
 			return checked ? checked.value : '';
 		};
 		const num = ( name ) => {
 			const input = field( name );
 			return input ? Math.max( 0, parseInt( input.value, 10 ) || 0 ) : 0;
 		};
+		const text = ( name ) => ( field( name ) ? String( field( name ).value || '' ).trim() : '' );
 		const variant = () => cfg.variants.find( ( v ) => String( v.id ) === radio( 'variant_id' ) ) || null;
 		const pickupOn = () => '1' === radio( 'pickup' );
+		const zone = () => cfg.zones.find( ( z ) => String( z.id ) === ( field( 'zone_id' ) || {} ).value ) || null;
+		const session = () => state.sessions.find( ( s ) => s.id === state.session ) || null;
 
 		function collect() {
 			const data = new FormData( form );
@@ -303,27 +313,28 @@
 			for ( let i = 0; i < ( first.getDay() + 6 ) % 7; i++ ) {
 				days.appendChild( el( 'span', { class: 'dgb-cal-blank', 'aria-hidden': 'true' } ) );
 			}
-			const label = new Intl.DateTimeFormat( cfg.locale, { weekday: 'long', day: 'numeric', month: 'long' } );
 			let focusable = null;
 			Object.keys( data.days ).forEach( ( date ) => {
 				const status = data.days[ date ];
 				const open = 'open' === status;
-				const d = new Date( +date.slice( 0, 4 ), +date.slice( 5, 7 ) - 1, +date.slice( 8, 10 ) );
+				const d = toDate( date );
+				const chosen = date === state.date;
+				const today = date === cfg.today;
 				const btn = el(
 					'button',
 					{
 						type: 'button',
-						class: 'dgb-day is-' + status,
+						class: 'dgb-day is-' + status + ( chosen ? ' is-selected' : '' ) + ( today ? ' is-today' : '' ),
 						'data-date': date,
 						disabled: ! open,
-						'aria-pressed': date === state.date ? 'true' : 'false',
-						'aria-label': label.format( d ) + ', ' + ( t.status[ status ] || status ),
+						'aria-pressed': chosen ? 'true' : 'false',
+						'aria-label': longDate.format( d ) + ( today ? ', ' + t.today : '' ) + ', ' + ( t.status[ status ] || status ),
 						tabindex: '-1',
 					},
 					[ String( d.getDate() ) ]
 				);
 				days.appendChild( btn );
-				if ( open && ( ! focusable || date === state.date ) ) {
+				if ( open && ( ! focusable || chosen ) ) {
 					focusable = btn;
 				}
 			} );
@@ -386,8 +397,14 @@
 		async function chooseDate( date ) {
 			state.date = date;
 			state.session = 0;
-			qa( '.dgb-day' ).forEach( ( b ) => b.setAttribute( 'aria-pressed', b.getAttribute( 'data-date' ) === date ? 'true' : 'false' ) );
+			qa( '.dgb-day' ).forEach( ( b ) => {
+				const on = b.getAttribute( 'data-date' ) === date;
+				b.setAttribute( 'aria-pressed', on ? 'true' : 'false' );
+				b.classList.toggle( 'is-selected', on );
+			} );
+			q( '[data-dgb-selected]' ).textContent = sprintf( t.selected, shortDate.format( toDate( date ) ) );
 			showError( 'date', '' );
+			showError( 'session', '' );
 			const box = q( '[data-dgb-sessions]' );
 			box.setAttribute( 'aria-busy', 'true' );
 			box.textContent = '';
@@ -443,6 +460,7 @@
 		function update() {
 			syncCards();
 			syncPickup();
+			renderReview();
 			if ( cfg.product.onRequest ) {
 				return;
 			}
@@ -469,14 +487,25 @@
 			}
 		}
 
+		// Seat problems belong to the guests of step 1; other price problems are checked step by step, never in the price box.
+		const seatError = ( r ) => ( ( r && r.errors ) || [] ).find( ( e ) => 'too_many_guests' === e.code || 'no_guests' === e.code ) || null;
+
 		function renderBreakdown( r ) {
 			const box = q( '[data-dgb-breakdown]' );
-			const submit = q( '[data-dgb-submit]' );
+			const live = q( '[data-dgb-live]' );
+			const submitButton = q( '[data-dgb-submit]' );
 			box.textContent = '';
+			if ( live ) {
+				live.textContent = r ? sprintf( t.liveTotal, fmt( r.total ) + second( r.total ) ) : '';
+			}
 			if ( ! r ) {
-				submit.textContent = t.book;
+				submitButton.textContent = t.book;
 				return;
 			}
+			const seats = seatError( r );
+			showError( 'guests', seats ? seats.message || t.addGuest : '' );
+
+			const arrival = 'arrival' === radio( 'payment_method' );
 			const rows = r.lines.map( ( line ) => {
 				let amount = fmt( line.amount );
 				if ( 'quote' === line.type ) {
@@ -489,18 +518,21 @@
 			} );
 			const list = el( 'dl', { class: 'dgb-lines' }, rows );
 			list.appendChild( el( 'div', { class: 'dgb-line is-total' }, [ el( 'dt', { text: t.total } ), el( 'dd', { text: fmt( r.total ) + second( r.total ) } ) ] ) );
-			list.appendChild(
-				el( 'div', { class: 'dgb-line is-vat' }, [
-					el( 'dt', { text: sprintf( r.vat_inclusive ? t.includesVat : t.plusVat, r.vat_rate + '%' ) } ),
-					el( 'dd', { text: fmt( r.vat ) } ),
-				] )
-			);
-			if ( Number( r.due_on_arrival ) > 0 ) {
+			if ( Number( r.vat_rate ) > 0 ) {
+				list.appendChild(
+					r.vat_inclusive
+						? el( 'div', { class: 'dgb-line is-vat' }, [ el( 'dt', { text: sprintf( t.pricesIncludeVat, r.vat_rate + '%' ) } ) ] )
+						: el( 'div', { class: 'dgb-line is-vat' }, [ el( 'dt', { text: sprintf( t.plusVat, r.vat_rate + '%' ) } ), el( 'dd', { text: fmt( r.vat ) } ) ] )
+				);
+			}
+			if ( arrival ) {
+				list.appendChild( el( 'div', { class: 'dgb-line is-due' }, [ el( 'dt', { text: sprintf( t.payOnDay, fmt( r.total ) ) } ) ] ) );
+			} else if ( Number( r.due_on_arrival ) > 0 ) {
 				list.appendChild( el( 'div', { class: 'dgb-line' }, [ el( 'dt', { text: t.payNow } ), el( 'dd', { text: fmt( r.pay_now ) } ) ] ) );
 				list.appendChild( el( 'div', { class: 'dgb-line' }, [ el( 'dt', { text: t.dueOnArrival } ), el( 'dd', { text: fmt( r.due_on_arrival ) } ) ] ) );
 			}
 			box.appendChild( list );
-			( r.hint_texts || [] ).forEach( ( text ) => box.appendChild( el( 'p', { class: 'dgb-offer-hint', text } ) ) );
+			( r.hint_texts || [] ).forEach( ( hint ) => box.appendChild( el( 'p', { class: 'dgb-offer-hint', text: hint } ) ) );
 
 			const couponStatus = q( '[data-dgb-coupon-status]' );
 			if ( couponStatus && state.coupon ) {
@@ -512,10 +544,6 @@
 					state.coupon = '';
 					update();
 				}
-			}
-			const problems = ( r.errors || [] ).filter( ( e ) => e.message && ! couponCodes.includes( e.code ) );
-			if ( problems.length ) {
-				box.appendChild( el( 'ul', { class: 'dgb-price-errors' }, problems.map( ( e ) => el( 'li', { text: e.message } ) ) ) );
 			}
 
 			const amount = q( '[data-dgb-amount]' );
@@ -532,15 +560,59 @@
 			}
 
 			const method = radio( 'payment_method' );
-			if ( 'arrival' === method ) {
-				submit.textContent = t.bookArrival;
+			if ( arrival ) {
+				submitButton.textContent = t.bookArrival;
 			} else if ( 'bank_transfer' === method ) {
-				submit.textContent = sprintf( t.bookTransfer, fmt( r.pay_now ) );
+				submitButton.textContent = sprintf( t.bookTransfer, fmt( r.pay_now ) );
 			} else if ( method ) {
-				submit.textContent = sprintf( t.bookPay, fmt( r.pay_now ) );
+				submitButton.textContent = sprintf( t.bookPay, fmt( r.pay_now ) );
 			} else {
-				submit.textContent = t.book;
+				submitButton.textContent = t.book;
 			}
+		}
+
+		/* Review summary ------------------------------------------------------------ */
+
+		function renderReview() {
+			const box = q( '[data-dgb-review]' );
+			if ( ! box ) {
+				return;
+			}
+			const rows = [ [ t.tour, cfg.product.name ] ];
+			const v = variant();
+			if ( v && cfg.variants.length > 1 ) {
+				rows.push( [ t.option, v.label ] );
+			}
+			if ( state.date ) {
+				rows.push( [ t.date, shortDate.format( toDate( state.date ) ) ] );
+			}
+			const s = session();
+			if ( s ) {
+				rows.push( [ t.session, s.name + ( s.start_time ? ' · ' + sprintf( t.starts, fmtTime( s.start_time ) ) : '' ) ] );
+			}
+			const people = [];
+			if ( num( 'units' ) ) {
+				people.push( sprintf( t.nUnits, String( num( 'units' ) ) ) );
+			}
+			[ [ 'adults', t.nAdults ], [ 'children', t.nChildren ], [ 'infants', t.nInfants ] ].forEach( ( pair ) => {
+				if ( num( pair[ 0 ] ) ) {
+					people.push( sprintf( pair[ 1 ], String( num( pair[ 0 ] ) ) ) );
+				}
+			} );
+			rows.push( [ t.guests, people.join( ', ' ) ] );
+			if ( q( '[data-dgb-pickup-group]' ) ) {
+				if ( pickupOn() ) {
+					const z = zone();
+					rows.push( [ t.pickup, [ t.hotelPickup, z ? z.name : '', text( 'hotel' ) ].filter( Boolean ).join( ', ' ) ] );
+				} else {
+					rows.push( [ t.pickup, cfg.pointName ? sprintf( t.meetAt, cfg.pointName ) : t.meetPoint ] );
+				}
+			}
+			box.textContent = '';
+			rows.forEach( ( row ) => {
+				box.appendChild( el( 'dt', { text: row[ 0 ] } ) );
+				box.appendChild( el( 'dd', { text: row[ 1 ] } ) );
+			} );
 		}
 
 		/* UI sync ------------------------------------------------------------------ */
@@ -565,22 +637,25 @@
 			const select = field( 'zone_id' );
 			const note = q( '[data-dgb-zone-note]' );
 			if ( select && note ) {
-				const zone = cfg.zones.find( ( z ) => String( z.id ) === select.value );
-				const blocked = !! ( zone && ! zone.allowed );
+				const z = zone();
+				const blocked = !! ( z && ! z.allowed );
 				note.hidden = ! blocked;
-				note.textContent = blocked ? ( zone.notes || t.chooseZone ) : '';
+				note.textContent = blocked ? ( z.notes || t.chooseZone ) : '';
 				qa( '[data-dgb-hotel]' ).forEach( ( n ) => ( n.hidden = blocked ) );
 			}
 			const windowText = q( '[data-dgb-window]' );
-			const session = state.sessions.find( ( s ) => s.id === state.session );
+			const s = session();
 			if ( windowText ) {
-				windowText.textContent = session && session.pickup_window_start ? sprintf( t.pickupWindow, fmtTime( session.pickup_window_start ) + '–' + fmtTime( session.pickup_window_end ) ) : '';
+				windowText.textContent = s && s.pickup_window_start ? sprintf( t.pickupWindow, fmtTime( s.pickup_window_start ) + '–' + fmtTime( s.pickup_window_end ) ) : '';
 			}
+			// Pay on arrival: where the guest pays depends on pickup.
+			qa( '[data-dgb-method-note="arrival"]' ).forEach( ( n ) => ( n.textContent = on ? t.arrivalPickup : t.arrivalMeet ) );
 		}
 
-		/* Errors ---------------------------------------------------------------------- */
+		/* Errors (always under their field, only for the step being checked) ------------------- */
 
 		const fieldFor = { name: 'name', email: 'email', phone: 'phone', hotel: 'hotel', zone: 'zone_id', terms: 'terms' };
+		const ERROR_KEYS = [ 'variant', 'date', 'session', 'guests', 'zone', 'hotel', 'name', 'phone', 'email', 'payment_method', 'terms' ];
 
 		function showError( key, message ) {
 			const box = q( '[data-dgb-error="' + key + '"]' );
@@ -609,10 +684,9 @@
 			return step ? steps().indexOf( step ) : -1;
 		}
 
-		function validate( index ) {
-			const name = steps()[ index ].getAttribute( 'data-step' );
+		function check( name ) {
 			const errors = {};
-			if ( 'choose' === name ) {
+			if ( 'trip' === name ) {
 				if ( cfg.variants.length && ! variant() ) {
 					errors.variant = t.chooseOption;
 				}
@@ -621,34 +695,50 @@
 				} else if ( state.sessions.length && ! state.session ) {
 					errors.session = t.chooseSession;
 				}
-			} else if ( 'guests' === name ) {
+				const seats = seatError( state.quote );
 				if ( num( 'adults' ) + num( 'children' ) < 1 ) {
 					errors.guests = t.addGuest;
-				}
-			} else if ( 'pickup' === name && pickupOn() ) {
-				const zone = cfg.zones.find( ( z ) => String( z.id ) === ( field( 'zone_id' ) || {} ).value );
-				if ( ! zone || ! zone.allowed ) {
-					errors.zone = zone ? zone.notes || t.chooseZone : t.chooseZone;
-				} else if ( ! ( field( 'hotel' ).value || '' ).trim() ) {
-					errors.hotel = t.hotel;
+				} else if ( seats && ! cfg.product.onRequest ) {
+					errors.guests = seats.message || t.addGuest;
 				}
 			} else if ( 'details' === name ) {
-				if ( ( field( 'name' ).value || '' ).trim().length < 2 ) {
-					errors.name = t.required;
+				if ( pickupOn() && field( 'zone_id' ) ) {
+					const z = zone();
+					if ( ! z || ! z.allowed ) {
+						errors.zone = z ? z.notes || t.chooseZone : t.chooseZone;
+					}
+					if ( ( ! z || z.allowed ) && text( 'hotel' ).length < 3 ) {
+						errors.hotel = t.hotel;
+					}
 				}
-				if ( ! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test( ( field( 'email' ).value || '' ).trim() ) ) {
-					errors.email = t.required;
+				if ( text( 'name' ).length < 2 ) {
+					errors.name = t.nameRequired;
 				}
-				if ( ( field( 'phone' ).value || '' ).replace( /\D/g, '' ).length < 6 ) {
-					errors.phone = t.required;
+				const code = text( 'phone_code' ).replace( /\D/g, '' );
+				const phone = text( 'phone' ).replace( /\D/g, '' ).replace( /^0+/, '' );
+				if ( ! code ) {
+					errors.phone = t.phoneCode;
+				} else if ( phone.length < 6 || phone.length > 14 || ( code + phone ).length > 15 ) {
+					errors.phone = t.phoneDigits;
+				}
+				if ( ! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test( text( 'email' ) ) ) {
+					errors.email = t.emailInvalid;
+				}
+			} else if ( 'review' === name ) {
+				if ( ! cfg.product.onRequest && ! radio( 'payment_method' ) ) {
+					errors.payment_method = t.choosePayment;
 				}
 				if ( ! field( 'terms' ).checked ) {
 					errors.terms = t.terms;
 				}
-			} else if ( 'pay' === name && ! radio( 'payment_method' ) ) {
-				errors.payment_method = t.choosePayment;
 			}
-			[ 'variant', 'date', 'session', 'guests', 'zone', 'hotel', 'name', 'email', 'phone', 'terms', 'payment_method' ].forEach( ( key ) => {
+			return errors;
+		}
+
+		function validate( index ) {
+			const step = steps()[ index ];
+			const errors = check( step.getAttribute( 'data-step' ) );
+			ERROR_KEYS.forEach( ( key ) => {
 				if ( stepOf( key ) === index ) {
 					showError( key, errors[ key ] || '' );
 				}
@@ -658,14 +748,16 @@
 
 		function focusFirstError( index ) {
 			const step = steps()[ index ];
-			const target = step.querySelector( '[aria-invalid="true"]' ) || step.querySelector( '.dgb-field-error:not([hidden])' );
+			const box = Array.prototype.slice.call( step.querySelectorAll( '.dgb-field-error' ) ).find( ( n ) => ! n.hidden );
+			if ( ! box ) {
+				return;
+			}
+			const group = box.closest( '.dgb-field, .dgb-group' ) || step;
+			const target = step.querySelector( '[aria-invalid="true"]' ) ||
+				group.querySelector( '.dgb-day[tabindex="0"], input:not([type="hidden"]):not(:disabled), select, textarea' );
+			box.scrollIntoView( { block: 'center' } );
 			if ( target ) {
-				if ( target.classList.contains( 'dgb-field-error' ) ) {
-					const legend = step.querySelector( '.dgb-legend' );
-					legend.focus();
-				} else {
-					target.focus();
-				}
+				target.focus( { preventScroll: true } );
 			}
 		}
 
@@ -674,46 +766,83 @@
 			box.textContent = '';
 			box.hidden = ! messages.length;
 			if ( messages.length ) {
-				box.appendChild( el( 'p', { text: t.fix } ) );
 				box.appendChild( el( 'ul', {}, messages.map( ( m ) => el( 'li', { text: m } ) ) ) );
 				box.focus();
 			}
 		}
 
-		/* Steps (phones) and sheet ------------------------------------------------------------ */
+		/* Steps and sheet ------------------------------------------------------------ */
 
 		const steps = () => qa( '.dgb-step' );
 
 		function layout() {
 			state.mobile = window.matchMedia( MOBILE ).matches;
-			root.classList.toggle( 'is-stepped', state.mobile );
+			state.stepped = state.mobile || !! cfg.stepped;
+			[ root, panel.parentNode ].forEach( ( n ) => n.classList && n.classList.toggle( 'is-stepped', state.stepped ) );
+			if ( ! state.mobile ) {
+				close();
+			}
 			showStep( state.step, false );
 		}
 
 		function showStep( index, focus ) {
 			const all = steps();
 			state.step = Math.max( 0, Math.min( index, all.length - 1 ) );
-			all.forEach( ( s, i ) => s.classList.toggle( 'is-current', ! state.mobile || i === state.step ) );
+			all.forEach( ( s, i ) => s.classList.toggle( 'is-current', ! state.stepped || i === state.step ) );
 			const last = state.step === all.length - 1;
-			q( '[data-dgb-back]' ).hidden = ! state.mobile || 0 === state.step;
-			q( '[data-dgb-next]' ).hidden = ! state.mobile || last;
-			q( '[data-dgb-submit]' ).hidden = state.mobile && ! last;
-			q( '[data-dgb-progress]' ).textContent = state.mobile ? sprintf( t.stepOf, String( state.step + 1 ), String( all.length ) ) : '';
+			q( '[data-dgb-back]' ).hidden = ! state.stepped || 0 === state.step;
+			q( '[data-dgb-next]' ).hidden = ! state.stepped || last;
+			q( '[data-dgb-submit]' ).hidden = state.stepped && ! last;
+			q( '[data-dgb-progress]' ).textContent = state.stepped ? sprintf( t.stepOf, String( state.step + 1 ), String( all.length ), all[ state.step ].getAttribute( 'data-name' ) ) : '';
+			summary( [] );
 			if ( focus ) {
-				all[ state.step ].querySelector( '.dgb-legend' ).focus();
+				body.scrollTop = 0;
+				all[ state.step ].querySelector( '.dgb-legend' ).focus( { preventScroll: ! state.mobile } );
+				if ( ! state.mobile ) {
+					const rect = panel.getBoundingClientRect();
+					if ( rect.top < 0 ) {
+						panel.scrollIntoView( { block: 'start' } );
+					}
+				}
 			}
-			if ( 'details' === all[ state.step ].getAttribute( 'data-step' ) && state.mobile ) {
+			if ( 'details' === all[ state.step ].getAttribute( 'data-step' ) && state.stepped ) {
 				beginCheckout();
 			}
 		}
 
+		// The open sheet lives in a wrapper on <body>, so no theme container, transform or sticky bar sits above it.
+		const home = document.createComment( 'dgb-panel' );
+		let portal = null;
+
+		function fitViewport() {
+			const vv = window.visualViewport;
+			const height = vv ? vv.height : window.innerHeight;
+			const bottom = vv ? Math.max( 0, window.innerHeight - vv.height - vv.offsetTop ) : 0;
+			panel.style.setProperty( '--dgb-vvh', height + 'px' );
+			panel.style.setProperty( '--dgb-vvb', bottom + 'px' );
+		}
+
 		function open( opener ) {
+			if ( ! state.mobile || panel.classList.contains( 'is-open' ) ) {
+				return;
+			}
 			state.opener = opener || null;
+			if ( ! portal ) {
+				portal = el( 'div', { class: root.className + ' dgb-portal', style: root.getAttribute( 'style' ), dir: root.getAttribute( 'dir' ) || document.documentElement.getAttribute( 'dir' ) } );
+			}
+			portal.className = root.className + ' dgb-portal';
+			panel.parentNode.insertBefore( home, panel );
+			portal.appendChild( panel );
+			document.body.appendChild( portal );
+			// Lock the page where it is (no jump): the body is fixed at the current scroll position.
+			state.scrollY = window.scrollY;
+			document.documentElement.style.setProperty( '--dgb-scroll-y', -state.scrollY + 'px' );
+			document.documentElement.classList.add( 'dgb-lock' );
+			fitViewport();
 			panel.classList.add( 'is-open' );
 			panel.setAttribute( 'role', 'dialog' );
 			panel.setAttribute( 'aria-modal', 'true' );
 			panel.setAttribute( 'aria-labelledby', cfg.id + '-title' );
-			document.documentElement.classList.add( 'dgb-lock' );
 			q( '.dgb-title' ).focus();
 		}
 
@@ -724,10 +853,22 @@
 			panel.classList.remove( 'is-open' );
 			panel.removeAttribute( 'role' );
 			panel.removeAttribute( 'aria-modal' );
-			document.documentElement.classList.remove( 'dgb-lock' );
-			if ( state.opener ) {
-				state.opener.focus();
+			if ( home.parentNode ) {
+				home.parentNode.insertBefore( panel, home );
+				home.parentNode.removeChild( home );
 			}
+			if ( portal && portal.parentNode ) {
+				portal.parentNode.removeChild( portal );
+			}
+			document.documentElement.classList.remove( 'dgb-lock' );
+			window.scrollTo( 0, state.scrollY );
+			if ( state.opener ) {
+				state.opener.focus( { preventScroll: true } );
+			}
+		}
+
+		if ( window.visualViewport ) {
+			window.visualViewport.addEventListener( 'resize', () => panel.classList.contains( 'is-open' ) && fitViewport() );
 		}
 
 		function beginCheckout() {
@@ -749,8 +890,9 @@
 			for ( let i = 0; i < all.length; i++ ) {
 				const errors = validate( i );
 				if ( Object.keys( errors ).length ) {
-					showStep( i, false );
-					summary( Object.values( errors ) );
+					if ( state.stepped ) {
+						showStep( i, false );
+					}
 					focusFirstError( i );
 					return;
 				}
@@ -763,11 +905,10 @@
 			button.textContent = t.sending;
 			try {
 				const res = await api( cfg.product.onRequest ? 'enquiries' : 'bookings', collect() );
+				close();
 				const result = q( '[data-dgb-result]' );
 				result.innerHTML = res.html;
 				panel.hidden = true;
-				panel.classList.remove( 'is-open' );
-				document.documentElement.classList.remove( 'dgb-lock' );
 				qa( '.dgb-teaser, [data-dgb-sticky]' ).forEach( ( n ) => ( n.hidden = true ) );
 				document.body.classList.remove( 'dgb-has-sticky-bar' );
 				const confirmation = result.querySelector( '[data-dgb-confirmation]' );
@@ -789,19 +930,24 @@
 			} catch ( err ) {
 				const fields = ( err.data && err.data.data && err.data.data.fields ) || null;
 				const messages = [];
+				let first = -1;
 				if ( fields ) {
-					let firstStep = -1;
 					Object.keys( fields ).forEach( ( key ) => {
-						messages.push( fields[ key ] );
-						if ( showError( key, fields[ key ] ) && ( firstStep < 0 || stepOf( key ) < firstStep ) ) {
-							firstStep = stepOf( key );
+						const name = key.replace( /^price_/, '' );
+						if ( ERROR_KEYS.includes( name ) && showError( name, fields[ key ] ) ) {
+							first = first < 0 ? stepOf( name ) : Math.min( first, stepOf( name ) );
+						} else {
+							messages.push( fields[ key ] );
 						}
 					} );
-					if ( firstStep >= 0 ) {
-						showStep( firstStep, false );
-					}
 				} else {
 					messages.push( err.message || t.networkError );
+				}
+				if ( first >= 0 ) {
+					if ( state.stepped ) {
+						showStep( first, false );
+					}
+					focusFirstError( first );
 				}
 				summary( messages );
 			} finally {
@@ -838,17 +984,33 @@
 			}
 			if ( 'zone_id' === name || 'pickup' === name ) {
 				showError( 'zone', '' );
+				showError( 'hotel', '' );
+			}
+			if ( 'terms' === name ) {
+				showError( 'terms', '' );
 			}
 			update();
 		} );
 
 		form.addEventListener( 'input', ( e ) => {
+			const name = e.target.name;
+			if ( 'phone' === name || 'phone_code' === name ) {
+				// Digits only.
+				const clean = e.target.value.replace( /\D/g, '' );
+				if ( clean !== e.target.value ) {
+					e.target.value = clean;
+				}
+				showError( 'phone', '' );
+			}
 			if ( 'number' === e.target.type ) {
 				update();
 			}
-			const key = Object.keys( fieldFor ).find( ( k ) => fieldFor[ k ] === e.target.name );
-			if ( key && e.target.getAttribute( 'aria-invalid' ) ) {
+			const key = Object.keys( fieldFor ).find( ( k ) => fieldFor[ k ] === name );
+			if ( key ) {
 				showError( key, '' );
+			}
+			if ( 'hotel' === name ) {
+				renderReview();
 			}
 		} );
 
@@ -856,6 +1018,10 @@
 			const step = e.target.closest( '.dgb-step' );
 			if ( step && 'details' === step.getAttribute( 'data-step' ) ) {
 				beginCheckout();
+			}
+			// Phones: keep the focused field clear of the keyboard and the footer.
+			if ( panel.classList.contains( 'is-open' ) && e.target.matches( 'input, select, textarea' ) ) {
+				window.setTimeout( () => e.target.scrollIntoView( { block: 'center' } ), 300 );
 			}
 		} );
 
@@ -914,7 +1080,7 @@
 			}
 			if ( 'Tab' === e.key && panel.classList.contains( 'is-open' ) ) {
 				// Keep focus inside the sheet.
-				const focusables = Array.prototype.slice.call( panel.querySelectorAll( 'button:not([disabled]):not([hidden]), input:not([disabled]):not([type="hidden"]), select, textarea, a[href], [tabindex="0"]' ) ).filter( ( n ) => n.offsetParent !== null );
+				const focusables = Array.prototype.slice.call( panel.querySelectorAll( 'button:not([disabled]):not([hidden]), input:not([disabled]):not([type="hidden"]), select, textarea, summary, a[href], [tabindex="0"]' ) ).filter( ( n ) => n.offsetParent !== null );
 				const first = focusables[ 0 ];
 				const last = focusables[ focusables.length - 1 ];
 				if ( e.shiftKey && document.activeElement === first ) {
