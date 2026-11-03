@@ -10,6 +10,7 @@ namespace Digitum\Bookings\Services\Notifications;
 use Digitum\Bookings\Admin\Screens\BookingsScreen;
 use Digitum\Bookings\Frontend\Confirmation;
 use Digitum\Bookings\Frontend\Format;
+use Digitum\Bookings\Gateways\PayOnArrival;
 use Digitum\Bookings\Services\BookingDetails;
 use Digitum\Bookings\Services\PaymentService;
 use Digitum\Bookings\Settings\Settings;
@@ -101,10 +102,11 @@ final class MergeTags {
 					__( 'Date', 'digitum-bookings' )      => $d['date'],
 					__( 'Session', 'digitum-bookings' )   => $text['{session}'],
 					__( 'Guests', 'digitum-bookings' )    => $d['guests'] . ( in_array( $d['mode'], array( 'per_vehicle', 'per_group' ), true ) ? ' · ' . sprintf( /* translators: %d: number of vehicles. */ _n( '%d vehicle', '%d vehicles', $d['units'], 'digitum-bookings' ), $d['units'] ) : '' ),
-					__( 'Pickup', 'digitum-bookings' )    => $d['pickup'] ? trim( $d['pickup_text'] . ( '' !== $d['window'] ? ', ' . $d['window'] : '' ), ', ' ) : '',
+					__( 'Pickup', 'digitum-bookings' )    => self::pickup_row( $d ),
 					__( 'Total', 'digitum-bookings' )     => 'quote_requested' === $booking['status'] ? __( 'Price on request', 'digitum-bookings' ) : $money( $booking['total'] ),
 					__( 'Paid', 'digitum-bookings' )      => (float) $booking['amount_paid'] > 0 ? $money( $booking['amount_paid'] ) : '',
-					__( 'Still to pay', 'digitum-bookings' ) => 'quote_requested' !== $booking['status'] && (float) $booking['balance_due'] > 0 ? $money( $booking['balance_due'] ) : '',
+					__( 'Still to pay', 'digitum-bookings' ) => 'quote_requested' !== $booking['status'] && (float) $booking['balance_due'] > 0 && 'arrival' !== $booking['payment_method'] ? $money( $booking['balance_due'] ) : '',
+					__( 'Payment', 'digitum-bookings' )   => 'quote_requested' !== $booking['status'] && (float) $booking['balance_due'] > 0 && 'arrival' === $booking['payment_method'] ? PayOnArrival::line( $money( $booking['balance_due'] ), (bool) $d['pickup'] ) : '',
 				),
 				static fn( $v ) => '' !== $v
 			);
@@ -146,6 +148,20 @@ final class MergeTags {
 			'html' => $html,
 			'text' => $text,
 		);
+	}
+
+	/**
+	 * Pickup row of the booking summary, in the widget's words: "Hotel pickup, North Zone, Sample Hotel, 2:15 pm – 2:45 pm"
+	 * or "Meet us at Sample Meeting Point".
+	 *
+	 * @param array<string, mixed> $d Booking details.
+	 */
+	public static function pickup_row( array $d ): string {
+		if ( $d['pickup'] ) {
+			return implode( ', ', array_filter( array( (string) $d['pickup_line'], (string) $d['window'] ), static fn( $v ) => '' !== $v ) );
+		}
+		/* translators: %s: meeting point. */
+		return $d['meeting'] ? sprintf( __( 'Meet us at %s', 'digitum-bookings' ), (string) $d['meeting']['name'] ) : '';
 	}
 
 	/**

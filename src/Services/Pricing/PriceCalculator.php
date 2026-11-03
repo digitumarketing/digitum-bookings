@@ -117,13 +117,20 @@ final class PriceCalculator {
 				$lines[]   = self::line( 'addon_' . $addon->id, $addon->label, $quantity, null, 'quote' );
 				continue;
 			}
-			$lines[]                            = self::line( 'addon_' . $addon->id, $addon->label, $quantity, Money::to_minor( $addon->price, $d ) ?? 0, 'addon' );
+			// The pickup add-on names the zone: "Hotel pickup, North Zone".
+			$label                              = 'pickup' === $addon->condition_key ? self::with_zone( $addon->label, $request->zone->name ) : $addon->label;
+			$lines[]                            = self::line( 'addon_' . $addon->id, $label, $quantity, Money::to_minor( $addon->price, $d ) ?? 0, 'addon' );
 			$condition[ 'addon_' . $addon->id ] = $addon->condition_key;
 		}
 
-		$surcharge = $pickup && $request->zone ? Money::to_minor( $request->zone->surcharge, $d ) : null;
+		$surcharge = $pickup ? Money::to_minor( $request->zone->surcharge, $d ) : null;
+		$included  = $pickup && 'included' === $config->pickup_policy;
 		if ( $surcharge > 0 ) {
-			$lines[] = self::line( 'zone_' . $request->zone->id, $request->zone->name, 1, $surcharge, 'surcharge' );
+			$label   = $included ? self::with_zone( __( 'Hotel pickup', 'digitum-bookings' ), $request->zone->name ) : $request->zone->name;
+			$lines[] = self::line( 'zone_' . $request->zone->id, $label, 1, $surcharge, 'surcharge' );
+		} elseif ( $included ) {
+			// Pickup included in the price: shown as its own line, "Hotel pickup, North Zone — Included".
+			$lines[] = self::line( 'pickup', self::with_zone( __( 'Hotel pickup', 'digitum-bookings' ), $request->zone->name ), 1, 0, 'included' );
 		}
 
 		$subtotal = array_sum( array_map( static fn( $line ) => (int) $line['amount'], $lines ) );
@@ -461,6 +468,17 @@ final class PriceCalculator {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Pickup label with the zone, e.g. "Hotel pickup, North Zone".
+	 *
+	 * @param string $label Pickup label.
+	 * @param string $zone  Zone name.
+	 */
+	private static function with_zone( string $label, string $zone ): string {
+		/* translators: 1: "Hotel pickup" (or the pickup add-on's name), 2: pickup zone. */
+		return sprintf( __( '%1$s, %2$s', 'digitum-bookings' ), $label, $zone );
 	}
 
 	/**

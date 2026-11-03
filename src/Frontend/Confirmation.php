@@ -15,6 +15,7 @@ use Digitum\Bookings\Database\Repositories\ZoneRepository;
 use Digitum\Bookings\Database\Schema;
 use Digitum\Bookings\Domain\BookingStatus;
 use Digitum\Bookings\Domain\Product;
+use Digitum\Bookings\Gateways\PayOnArrival;
 use Digitum\Bookings\Database\Repositories\ProofRepository;
 use Digitum\Bookings\Services\Analytics;
 use Digitum\Bookings\Services\PaymentService;
@@ -180,6 +181,7 @@ final class Confirmation {
 			'deposit'      => (float) $booking['deposit_amount'] > 0 ? Format::money( $booking['deposit_amount'], $currency ) : '',
 			'due'          => Format::money( $booking['balance_due'], $currency ),
 			'method'       => (string) $booking['payment_method'],
+			'arrival_line' => 'arrival' === (string) $booking['payment_method'] && (float) $booking['balance_due'] > 0 ? PayOnArrival::line( Format::money( $booking['balance_due'], $currency ), $pickup ) : '',
 			'bank'         => BookingStatus::AWAITING_TRANSFER === $status ? array(
 				'amount'       => Format::money( (float) $booking['deposit_amount'] > 0 ? $booking['deposit_amount'] : $booking['total'], $currency ),
 				'account_name' => (string) $all['payments']['bank_account_name'],

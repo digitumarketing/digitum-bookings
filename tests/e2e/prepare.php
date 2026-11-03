@@ -82,6 +82,10 @@ if ( isset( $_COOKIE['dgb_test_theme_css'] ) ) {
 			. '.elementor-kit-6 input:not([type="button"]):not([type="submit"]),.elementor-kit-6 select{border:3px solid #c36;border-radius:0;padding:20px;background:#fde68a}</style>';
 	}, 99 );
 }
+// Pay on arrival as the only payment method on request (v0.8.3): cookie dgb_test_arrival_only = 1.
+if ( isset( $_COOKIE['dgb_test_arrival_only'] ) ) {
+	add_filter( 'dgb_payment_methods', static fn( $methods ) => array_intersect_key( $methods, array( 'arrival' => true ) ) );
+}
 // One-column desktop layout on request (v0.8.2): cookie dgb_test_flat = 1 switches "Stepped layout on desktop" off.
 if ( isset( $_COOKIE['dgb_test_flat'] ) ) {
 	add_filter(

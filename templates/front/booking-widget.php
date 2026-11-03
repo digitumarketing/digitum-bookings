@@ -294,7 +294,7 @@ $dgb_has_pickup = 'none' !== $view['policy'] || ! empty( $view['point'] );
 
 					<dl class="dgb-review" data-dgb-review></dl>
 					<div class="dgb-breakdown" data-dgb-breakdown aria-live="polite"<?php echo $dgb_enquiry ? ' hidden' : ''; ?>></div>
-					<?php if ( '' !== $view['cancellation'] ) : ?>
+					<?php if ( $dgb_enquiry && '' !== $view['cancellation'] ) : ?>
 						<p class="dgb-hint dgb-cancellation"><?php echo esc_html( $view['cancellation'] ); ?></p>
 					<?php endif; ?>
 
@@ -316,19 +316,23 @@ $dgb_has_pickup = 'none' !== $view['policy'] || ! empty( $view['point'] );
 							<?php elseif ( 1 === count( $view['methods'] ) ) : ?>
 								<?php $dgb_only = $view['methods'][0]; ?>
 								<input type="hidden" name="payment_method" value="<?php echo esc_attr( $dgb_only['id'] ); ?>">
-								<p class="dgb-pay-only">
-									<?php if ( 'arrival' === $dgb_only['id'] ) : ?>
-										<strong><?php esc_html_e( 'Pay on the day, cash or card. Nothing to pay now.', 'digitum-bookings' ); ?></strong>
-									<?php else : ?>
+								<?php if ( 'arrival' === $dgb_only['id'] ) : ?>
+									<?php // One line, with the live total and where the guest pays (filled in by the script). ?>
+									<p class="dgb-pay-only"><strong data-dgb-pay-line><?php esc_html_e( 'Pay on the day, cash or card. Nothing to pay now.', 'digitum-bookings' ); ?></strong></p>
+								<?php else : ?>
+									<p class="dgb-pay-only">
 										<strong><?php echo esc_html( $dgb_only['label'] ); ?></strong>
-									<?php endif; ?>
-									<span class="dgb-hint" data-dgb-method-note="<?php echo esc_attr( $dgb_only['id'] ); ?>"><?php echo esc_html( $dgb_only['description'] ); ?></span>
-								</p>
+										<span class="dgb-hint" data-dgb-method-note="<?php echo esc_attr( $dgb_only['id'] ); ?>"><?php echo esc_html( $dgb_only['description'] ); ?></span>
+									</p>
+								<?php endif; ?>
 							<?php else : ?>
 								<p class="dgb-hint"><?php esc_html_e( 'Online booking is not available right now. Please contact us.', 'digitum-bookings' ); ?></p>
 							<?php endif; ?>
 							<p class="dgb-field-error" data-dgb-error="payment_method" hidden></p>
 						</div>
+						<?php if ( '' !== $view['cancellation'] ) : ?>
+							<p class="dgb-hint dgb-cancellation"><?php echo esc_html( $view['cancellation'] ); ?></p>
+						<?php endif; ?>
 						<?php if ( ! empty( $view['coupons'] ) ) : ?>
 							<div class="dgb-field dgb-coupon">
 								<label for="<?php echo esc_attr( $dgb_id ); ?>-coupon"><?php esc_html_e( 'Coupon code (optional)', 'digitum-bookings' ); ?></label>

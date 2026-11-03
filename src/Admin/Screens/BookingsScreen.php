@@ -22,6 +22,7 @@ use Digitum\Bookings\Services\BookingDetails;
 use Digitum\Bookings\Services\Notifications\Events;
 use Digitum\Bookings\Services\Notifications\Listener;
 use Digitum\Bookings\Services\Notifications\Mailer;
+use Digitum\Bookings\Services\Notifications\MergeTags;
 use Digitum\Bookings\Services\Notifications\Scheduler;
 use Digitum\Bookings\Services\Pricing\Money;
 use Digitum\Bookings\Settings\Settings;
@@ -308,11 +309,8 @@ final class BookingsScreen {
 					<dt><?php esc_html_e( 'Pickup', 'digitum-bookings' ); ?></dt>
 					<dd>
 						<?php
-						if ( $d['pickup'] ) {
-							echo esc_html( trim( $d['pickup_text'] . ' · ' . $d['window'], ' ·' ) );
-						} elseif ( $d['meeting'] ) {
-							/* translators: %s: meeting point. */
-							echo esc_html( sprintf( __( 'Meets at %s', 'digitum-bookings' ), $d['meeting']['name'] ) );
+						if ( $d['pickup'] || $d['meeting'] ) {
+							echo esc_html( MergeTags::pickup_row( $d ) );
 						} else {
 							esc_html_e( 'Meeting point', 'digitum-bookings' );
 						}

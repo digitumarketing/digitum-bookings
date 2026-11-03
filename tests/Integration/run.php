@@ -673,6 +673,14 @@ if ( scenario( 'H' ) ) {
 	$a   = $find( $m, 'ops@example.com', 'New booking ' . $ref );
 	check( 2 === count( $m ) && $g && $a, 'pay on arrival: confirmation to the guest and one email to staff' );
 	check( $g && str_contains( $g['subject'], $ref ) && str_contains( $g['html'], 'Atlantis The Palm' ) && preg_match( '/2:15\s*pm\s*–\s*2:45\s*pm/', $g['html'] ), 'guest email: reference, hotel and the session’s pickup window' );
+	$shown = ( new DateTimeImmutable( $day( 3 ) ) )->format( 'D j M Y' );
+	check( $g && str_contains( $g['html'], $shown ) && str_contains( $a['html'], $shown ) && str_contains( $g['text'], $shown ), "dates in emails as “{$shown}” (0.8.3)" );
+	check( $g && str_contains( $g['html'], 'Hotel pickup, North Zone, Atlantis The Palm, 1204' ) && str_contains( $a['html'], 'Hotel pickup, North Zone, Atlantis The Palm, 1204' ), 'pickup row says “Hotel pickup, North Zone, …” like the widget review' );
+	check( $g && (bool) preg_match( '/Pay AED 1,199\.00 on the day, cash or card, when we pick you up\. Nothing to pay now\./', $g['text'] ) && ! str_contains( $g['text'], 'Still to pay' ), 'pay on arrival: the widget’s payment line in the email, not “Still to pay”' );
+	$admin = step( $site, 'render_admin', array( 'screen' => 'bookings', 'get' => array( 'booking' => $state( $ref )['booking']['id'] ), 'admin' => true ) );
+	check( str_contains( $admin['html'], 'Hotel pickup, North Zone, Atlantis The Palm, 1204' ) && str_contains( $admin['html'], $shown ), 'admin booking view: same pickup label and date' );
+	$list = step( $site, 'render_admin', array( 'screen' => 'bookings', 'admin' => true ) );
+	check( str_contains( $list['html'], $shown ), 'bookings list shows the date as “' . $shown . '”' );
 	check( $g && 'booking-' . $ref . '.ics' === ( $g['attachments'][0]['name'] ?? '' ) && str_contains( $g['attachments'][0]['body'], 'BEGIN:VEVENT' ), 'calendar file attached to the guest confirmation' );
 	check( $g && str_contains( $g['text'], $ref ) && ! str_contains( $g['text'], '<table' ) && str_contains( $g['text'], 'dgb_key=' ), 'plain-text part with the reference and the booking link' );
 	check( $a && in_array( 'boss@example.com', $a['to'], true ) && (bool) preg_grep( '/^Reply-To: Mail Guest <guest@example.com>$/', $a['headers'] ) && (bool) preg_grep( '/^From: Sample Tours <info@example.com>$/', $a['headers'] ), 'staff email to every staff address, From the business, Reply-To the guest' );

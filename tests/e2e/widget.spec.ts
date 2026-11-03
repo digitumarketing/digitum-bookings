@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { e2e, tours, path, axe, pickTomorrow, chooseRide, fillDetails, goTo } from './helpers';
+import { e2e, tours, tomorrow, path, axe, pickTomorrow, chooseRide, fillDetails, goTo } from './helpers';
 
 /*
  * Booking widget 0.8.2: three steps, step-by-step validation, calendar states, no theme CSS inside the widget,
@@ -165,7 +165,7 @@ test.describe( 'widget', () => {
 			await expect( w.locator( '[data-dgb-review]' ) ).toContainText( 'Meet us at Sample Meeting Point' );
 			await w.getByRole( 'radio', { name: /^Pay on arrival/ } ).check();
 			await expect( w.locator( '[data-dgb-method-note="arrival"]' ) ).toHaveText( 'Cash or card at the meeting point.' );
-			await expect( w.locator( '[data-dgb-breakdown]' ) ).toContainText( 'Pay on the day: AED 899.00' );
+			await expect( w.locator( '[data-dgb-breakdown]' ) ).not.toContainText( 'on the day' );
 			if ( phone ) {
 				// Close and reopen keep the step and the answers.
 				await page.keyboard.press( 'Escape' );
@@ -175,6 +175,77 @@ test.describe( 'widget', () => {
 			}
 			await w.locator( '[data-dgb-submit]' ).click();
 			await expect( page.locator( '[data-dgb-confirmation]' ) ).toContainText( 'Booking confirmed' );
+		} );
+	}
+
+	// 0.8.3: dates as "Fri 6 Nov 2026", one payment line when pay on arrival is the only method, pickup zone in the price.
+	for ( const width of [ 375, 1440 ] ) {
+		test( `pay on arrival only: one payment line, zone in the price, short dates at ${ width } px`, async ( { page } ) => {
+			await cookie( page, 'dgb_test_arrival_only' );
+			await page.setViewportSize( { width, height: 860 } );
+			const phone = width < 782;
+			const w = page.locator( '[data-dgb-widget], .dgb-portal' );
+			const open = async () => {
+				if ( phone ) {
+					await page.locator( '[data-dgb-sticky] [data-dgb-open]' ).click();
+				}
+			};
+			const [ y, m, d ] = tomorrow.split( '-' ).map( Number );
+			const day = new Date( Date.UTC( y, m - 1, d ) );
+			const shown = `${ [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ][ day.getUTCDay() ] } ${ d } ${ [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ][ m - 1 ] } ${ y }`;
+
+			// Several options, hotel pickup as a paid add-on (AED 300).
+			await page.goto( path( tours.buggy.url ) );
+			await open();
+			await chooseRide( w );
+			await expect( w.locator( '[data-dgb-selected]' ) ).toHaveText( `Selected: ${ shown }` );
+			await goTo( w, 'details' );
+			await w.getByRole( 'radio', { name: /^Hotel pickup/ } ).check();
+			await w.getByLabel( 'Pickup area' ).selectOption( { label: 'North Zone' } );
+			await w.getByLabel( 'Hotel or address' ).fill( 'Sample Hotel' );
+			await fillDetails( w );
+			const review = w.locator( '[data-step="review"]' );
+			await expect( w.locator( '[data-dgb-review]' ) ).toContainText( shown );
+			await expect( w.locator( '[data-dgb-review]' ) ).toContainText( 'Hotel pickup, North Zone, Sample Hotel' );
+			await expect( w.locator( '[data-dgb-breakdown] .is-addon' ) ).toHaveText( /^Hotel pickup, North Zone\s*AED\s300\.00$/ );
+			await expect( w.locator( '[data-dgb-breakdown]' ) ).toContainText( 'Prices include 5% VAT' );
+			await expect( w.locator( '[data-dgb-pay-line]' ) ).toHaveText( 'Pay AED 1,199.00 on the day, cash or card, when we pick you up. Nothing to pay now.' );
+			await expect( review.locator( '.dgb-pay-only' ) ).toHaveCount( 1 );
+			await expect( review.getByText( /on the day/ ) ).toHaveCount( 1 );
+			await expect( w.locator( '[data-dgb-breakdown]' ) ).not.toContainText( 'on the day' );
+			await expect( w.getByRole( 'radio', { name: /^Pay on arrival/ } ) ).toHaveCount( 0 );
+			// The cancellation text is its own line, under the payment box.
+			expect( await review.evaluate( ( n ) => {
+				const pay = n.querySelector( '[data-dgb-payment]' );
+				const cancel = n.querySelector( '.dgb-cancellation' );
+				return !! pay && !! cancel && !! ( pay.compareDocumentPosition( cancel ) & Node.DOCUMENT_POSITION_FOLLOWING ) && ! pay.contains( cancel );
+			} ) ).toBe( true );
+			await axe( page, phone ? '.dgb-portal' : '[data-dgb-widget]' );
+
+			// Back to the meeting point: the line follows (AED 899.00, at the meeting point).
+			await w.getByRole( 'button', { name: 'Back' } ).click();
+			await w.getByRole( 'radio', { name: /^Meet us at/ } ).check();
+			await goTo( w, 'review' );
+			await expect( w.locator( '[data-dgb-pay-line]' ) ).toHaveText( 'Pay AED 899.00 on the day, cash or card, at the meeting point. Nothing to pay now.' );
+			await expect( w.locator( '[data-dgb-breakdown]' ) ).not.toContainText( 'Hotel pickup' );
+			await w.locator( '[data-dgb-submit]' ).click();
+			const confirmation = page.locator( '[data-dgb-confirmation]' );
+			await expect( confirmation ).toContainText( 'Booking confirmed' );
+			await expect( confirmation ).toContainText( shown );
+			await expect( confirmation.locator( '.dgb-pay-line' ) ).toHaveText( 'Pay AED 899.00 on the day, cash or card, at the meeting point. Nothing to pay now.' );
+
+			// Pickup included (single-option safari): the zone is shown and the price says Included.
+			await page.goto( path( tours.safari.url ) );
+			await open();
+			await pickTomorrow( w );
+			await w.getByRole( 'radio', { name: /^Evening/ } ).check();
+			await goTo( w, 'details' );
+			await w.getByLabel( 'Pickup area' ).selectOption( { label: 'North Zone' } );
+			await w.getByLabel( 'Hotel or address' ).fill( 'Sample Hotel' );
+			await fillDetails( w );
+			await expect( w.locator( '[data-dgb-breakdown] .is-included' ) ).toHaveText( /^Hotel pickup, North Zone\s*Included$/ );
+			await expect( w.locator( '[data-dgb-pay-line]' ) ).toHaveText( 'Pay AED 99.00 on the day, cash or card, when we pick you up. Nothing to pay now.' );
+			await page.context().clearCookies( { name: 'dgb_test_arrival_only' } );
 		} );
 	}
 } );

@@ -27,7 +27,9 @@ test.describe( 'desktop', () => {
 		await expect( w.locator( '[data-dgb-review]' ) ).toContainText( 'Hotel pickup, North Zone, Test Hotel, Marina' );
 		await w.getByRole( 'radio', { name: /^Pay on arrival/ } ).check();
 		await expect( w.locator( '[data-dgb-method-note="arrival"]' ) ).toHaveText( 'Cash or card when we pick you up.' );
-		await expect( w.locator( '[data-dgb-breakdown]' ) ).toContainText( 'Pay on the day: AED 1,199.00' );
+		// Several payment methods: the selector stays, and the amount is not repeated as a "Pay on the day" row.
+		await expect( w.locator( '[data-dgb-breakdown]' ) ).toContainText( 'Hotel pickup, North Zone' );
+		await expect( w.locator( '[data-dgb-breakdown]' ) ).not.toContainText( 'on the day' );
 		await expect( w.locator( '[data-dgb-breakdown]' ) ).toContainText( 'Prices include 5% VAT' );
 		await expect( w.locator( '[data-dgb-breakdown]' ) ).not.toContainText( 'Pay now' );
 		await expect( w.locator( '[data-dgb-submit]' ) ).toHaveText( 'Confirm booking' );

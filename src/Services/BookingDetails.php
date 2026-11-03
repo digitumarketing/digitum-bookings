@@ -79,6 +79,9 @@ final class BookingDetails {
 		$hotel   = (string) ( $item['pickup_address'] ?? '' );
 		$room    = (string) ( $item['pickup_room'] ?? '' );
 
+		/* translators: 1: "Hotel pickup", 2: pickup zone. */
+		$label = $zone ? sprintf( __( '%1$s, %2$s', 'digitum-bookings' ), __( 'Hotel pickup', 'digitum-bookings' ), $zone['name'] ) : __( 'Hotel pickup', 'digitum-bookings' );
+
 		self::$cache[ $id ] = array(
 			'item'        => $item,
 			'product_id'  => $product_id,
@@ -98,6 +101,8 @@ final class BookingDetails {
 			'room'        => $room,
 			'zone'        => $zone ? (string) $zone['name'] : '',
 			'pickup_text' => $pickup ? trim( $hotel . ( '' !== $room ? ', ' . $room : '' ) . ( $zone ? ', ' . $zone['name'] : '' ), ', ' ) : '',
+			// Same words as the widget's review: "Hotel pickup, North Zone, Sample Hotel, 501".
+			'pickup_line' => $pickup ? implode( ', ', array_filter( array( $label, $hotel, $room ), static fn( $v ) => '' !== $v ) ) : '',
 			'window'      => $pickup && ! empty( $item['pickup_window_start'] ) ? sprintf( '%s – %s', Format::time( $item['pickup_window_start'] ), Format::time( $item['pickup_window_end'] ) ) : '',
 			'meeting'     => $meeting,
 			'vehicle'     => (string) ( $item['vehicle'] ?? '' ),

@@ -14,6 +14,7 @@ use Digitum\Bookings\Database\Repositories\VariantRepository;
 use Digitum\Bookings\Database\Repositories\ZoneRepository;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\Domain\Variant;
+use Digitum\Bookings\Gateways\PayOnArrival;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Services\PaymentMethods;
 use Digitum\Bookings\Services\Pricing\Money;
@@ -348,7 +349,11 @@ final class Widget {
 			/* translators: %s: VAT rate, e.g. 5%. */
 			'pricesIncludeVat' => __( 'Prices include %s VAT', 'digitum-bookings' ),
 			/* translators: %s: amount. */
-			'payOnDay'         => __( 'Pay on the day: %s', 'digitum-bookings' ),
+			'payLinePickup'    => PayOnArrival::line( '%s', true ),
+			'payLineMeet'      => PayOnArrival::line( '%s', false ),
+			/* translators: 1: "Hotel pickup", 2: pickup zone. */
+			'withZone'         => __( '%1$s, %2$s', 'digitum-bookings' ),
+			'included'         => __( 'Included', 'digitum-bookings' ),
 			'arrivalPickup'    => __( 'Cash or card when we pick you up.', 'digitum-bookings' ),
 			'arrivalMeet'      => __( 'Cash or card at the meeting point.', 'digitum-bookings' ),
 			'tour'             => __( 'Tour', 'digitum-bookings' ),

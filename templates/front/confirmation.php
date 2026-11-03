@@ -183,9 +183,14 @@ defined( 'ABSPATH' ) || exit;
 				<dt><?php esc_html_e( 'Deposit', 'digitum-bookings' ); ?></dt>
 				<dd><?php echo esc_html( $view['deposit'] ); ?></dd>
 			<?php endif; ?>
-			<dt><?php echo 'arrival' === $view['method'] ? esc_html__( 'To pay on arrival', 'digitum-bookings' ) : esc_html__( 'Still to pay', 'digitum-bookings' ); ?></dt>
-			<dd><?php echo esc_html( $view['due'] ); ?></dd>
+			<?php if ( '' === ( $view['arrival_line'] ?? '' ) ) : ?>
+				<dt><?php esc_html_e( 'Still to pay', 'digitum-bookings' ); ?></dt>
+				<dd><?php echo esc_html( $view['due'] ); ?></dd>
+			<?php endif; ?>
 		</dl>
+		<?php if ( '' !== ( $view['arrival_line'] ?? '' ) ) : ?>
+			<p class="dgb-pay-line"><strong><?php echo esc_html( $view['arrival_line'] ); ?></strong></p>
+		<?php endif; ?>
 	<?php endif; ?>
 
 	<?php if ( '' !== $view['cancellation'] ) : ?>

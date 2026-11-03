@@ -523,6 +523,8 @@
 					amount = t.onRequest;
 				} else if ( 'free' === line.type ) {
 					amount = t.free;
+				} else if ( 'included' === line.type ) {
+					amount = t.included;
 				}
 				const label = line.quantity > 1 ? line.label + ' × ' + line.quantity : line.label;
 				return el( 'div', { class: 'dgb-line is-' + line.type }, [ el( 'dt', { text: label } ), el( 'dd', { text: amount } ) ] );
@@ -536,13 +538,13 @@
 						: el( 'div', { class: 'dgb-line is-vat' }, [ el( 'dt', { text: sprintf( t.plusVat, r.vat_rate + '%' ) } ), el( 'dd', { text: fmt( r.vat ) } ) ] )
 				);
 			}
-			if ( arrival ) {
-				list.appendChild( el( 'div', { class: 'dgb-line is-due' }, [ el( 'dt', { text: sprintf( t.payOnDay, fmt( r.total ) ) } ) ] ) );
-			} else if ( Number( r.due_on_arrival ) > 0 ) {
+			// Pay on arrival: the amount is said once, in the payment line under the price.
+			if ( ! arrival && Number( r.due_on_arrival ) > 0 ) {
 				list.appendChild( el( 'div', { class: 'dgb-line' }, [ el( 'dt', { text: t.payNow } ), el( 'dd', { text: fmt( r.pay_now ) } ) ] ) );
 				list.appendChild( el( 'div', { class: 'dgb-line' }, [ el( 'dt', { text: t.dueOnArrival } ), el( 'dd', { text: fmt( r.due_on_arrival ) } ) ] ) );
 			}
 			box.appendChild( list );
+			payLine();
 			( r.hint_texts || [] ).forEach( ( hint ) => box.appendChild( el( 'p', { class: 'dgb-offer-hint', text: hint } ) ) );
 
 			const couponStatus = q( '[data-dgb-coupon-status]' );
@@ -614,7 +616,7 @@
 			if ( q( '[data-dgb-pickup-group]' ) ) {
 				if ( pickupOn() ) {
 					const z = zone();
-					rows.push( [ t.pickup, [ t.hotelPickup, z ? z.name : '', text( 'hotel' ) ].filter( Boolean ).join( ', ' ) ] );
+					rows.push( [ t.pickup, [ z ? sprintf( t.withZone, t.hotelPickup, z.name ) : t.hotelPickup, text( 'hotel' ), text( 'room' ) ].filter( Boolean ).join( ', ' ) ] );
 				} else {
 					rows.push( [ t.pickup, cfg.pointName ? sprintf( t.meetAt, cfg.pointName ) : t.meetPoint ] );
 				}
@@ -661,6 +663,16 @@
 			}
 			// Pay on arrival: where the guest pays depends on pickup.
 			qa( '[data-dgb-method-note="arrival"]' ).forEach( ( n ) => ( n.textContent = on ? t.arrivalPickup : t.arrivalMeet ) );
+			payLine();
+		}
+
+		// The one payment line when pay on arrival is the only method: "Pay AED 899 on the day, cash or card, …".
+		function payLine() {
+			const line = q( '[data-dgb-pay-line]' );
+			const r = state.quote;
+			if ( line && r && variant() && null !== r.total && undefined !== r.total ) {
+				line.textContent = sprintf( pickupOn() ? t.payLinePickup : t.payLineMeet, fmt( r.total ) );
+			}
 		}
 
 		/* Errors (always under their field, only for the step being checked) ------------------- */

@@ -36,6 +36,21 @@ final class PayOnArrival extends AbstractGateway {
 	}
 
 	/**
+	 * The one payment line for pay on arrival, used by the widget, the booking page and the emails:
+	 * "Pay AED 899 on the day, cash or card, when we pick you up. Nothing to pay now."
+	 *
+	 * @param string $amount Formatted amount.
+	 * @param bool   $pickup Whether the guest is picked up (otherwise they pay at the meeting point).
+	 */
+	public static function line( string $amount, bool $pickup ): string {
+		return $pickup
+			/* translators: %s: amount, e.g. AED 899. */
+			? sprintf( __( 'Pay %s on the day, cash or card, when we pick you up. Nothing to pay now.', 'digitum-bookings' ), $amount )
+			/* translators: %s: amount, e.g. AED 899. */
+			: sprintf( __( 'Pay %s on the day, cash or card, at the meeting point. Nothing to pay now.', 'digitum-bookings' ), $amount );
+	}
+
+	/**
 	 * Switched on in Settings › Payments.
 	 */
 	public function is_enabled(): bool {

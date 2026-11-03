@@ -247,10 +247,6 @@
 	grid-template-columns: minmax(0, 1fr);
 }
 
-.dgb-cancellation + .dgb-group {
-	margin-top: 12px;
-}
-
 .dgb-options-2 {
 	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
@@ -543,13 +539,8 @@
 	overflow-wrap: anywhere;
 }
 
-.dgb-line.is-due {
-	margin-top: 4px;
-	font-weight: 600;
-}
-
 .dgb-cancellation {
-	margin: 10px 0 0;
+	margin: 8px 0 0;
 }
 
 .dgb-pay-only {
@@ -560,6 +551,10 @@
 	padding: 10px 12px;
 	border: 1px solid var(--dgb-line);
 	border-radius: min(10px, var(--dgb-radius));
+}
+
+.dgb-pay-line {
+	margin: 10px 0 0;
 }
 
 .dgb-pay-only .dgb-hint {

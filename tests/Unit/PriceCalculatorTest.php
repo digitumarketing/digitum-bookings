@@ -210,6 +210,7 @@ final class PriceCalculatorTest extends TestCase {
 
 		$this->assertTrue( $b->is_valid() );
 		$this->assertSame( array( 'units', 'addon_7' ), array_column( $b->lines, 'key' ) );
+		$this->assertSame( 'Hotel pickup, North Zone', $b->lines[1]['label'] );
 		$this->assertSame( 119900, $b->total );
 		$this->assertSame( 5710, $b->vat );
 	}
@@ -234,7 +235,41 @@ final class PriceCalculatorTest extends TestCase {
 
 		$this->assertSame( array( 'adults', 'zone_3' ), array_column( $b->lines, 'key' ) );
 		$this->assertSame( 'surcharge', $b->lines[1]['type'] );
+		$this->assertSame( 'Hotel pickup, East Zone', $b->lines[1]['label'] );
 		$this->assertSame( 22300, $b->total );
+	}
+
+	public function test_included_pickup_without_surcharge_is_a_line_with_the_zone_and_no_charge(): void {
+		$b = $this->calc->calculate(
+			self::config( 'per_person', array( 'pickup_policy' => 'included' ) ),
+			self::request(
+				self::variant( '99.00' ),
+				array(
+					'pickup' => true,
+					'zone'   => new Zone( 1, 'North Zone', true ),
+				)
+			)
+		);
+
+		$this->assertSame( array( 'adults', 'pickup' ), array_column( $b->lines, 'key' ) );
+		$this->assertSame( array( 'Hotel pickup, North Zone', 'included', 0 ), array( $b->lines[1]['label'], $b->lines[1]['type'], $b->lines[1]['amount'] ) );
+		$this->assertSame( 19800, $b->total );
+	}
+
+	public function test_add_on_pickup_with_zone_surcharge_keeps_the_zone_line(): void {
+		$b = $this->calc->calculate(
+			self::config( 'per_vehicle' ),
+			self::request(
+				self::variant( '899.00' ),
+				array(
+					'pickup' => true,
+					'zone'   => new Zone( 3, 'East Zone', true, '25.00' ),
+					'addons' => array( self::pickup_addon() ),
+				)
+			)
+		);
+
+		$this->assertSame( array( 'Hotel pickup, East Zone', 'East Zone' ), array_column( array_slice( $b->lines, 1 ), 'label' ) );
 	}
 
 	public function test_pickup_problems(): void {
