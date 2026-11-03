@@ -11,7 +11,8 @@ export default defineConfig( {
 	workers: 1,
 	retries: 0,
 	timeout: 60_000,
-	reporter: [ [ 'list' ] ],
+	// On GitHub the failures also appear as annotations of the run.
+	reporter: process.env.CI ? [ [ 'list' ], [ 'github' ] ] : [ [ 'list' ] ],
 	use: {
 		baseURL,
 		trace: 'retain-on-failure',
