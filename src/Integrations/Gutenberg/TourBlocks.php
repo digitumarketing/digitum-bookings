@@ -7,6 +7,7 @@
 
 namespace Digitum\Bookings\Integrations\Gutenberg;
 
+use Digitum\Bookings\Frontend\BookingCard;
 use Digitum\Bookings\Frontend\TourOutputs;
 
 defined( 'ABSPATH' ) || exit;
@@ -16,14 +17,15 @@ defined( 'ABSPATH' ) || exit;
  */
 final class TourBlocks {
 
-	public const BLOCKS = array( 'from-price', 'price-table', 'tour-list', 'tour-facts' );
+	public const BLOCKS = array( 'from-price', 'price-table', 'tour-list', 'tour-facts', 'booking-card', 'price', 'gallery' );
 
 	/**
 	 * Constructor.
 	 *
-	 * @param TourOutputs $outputs Renderer.
+	 * @param TourOutputs      $outputs Renderer.
+	 * @param BookingCard|null $card    Booking card renderer.
 	 */
-	public function __construct( private TourOutputs $outputs ) {}
+	public function __construct( private TourOutputs $outputs, private ?BookingCard $card = null ) {}
 
 	/**
 	 * Hook into WordPress.
@@ -88,6 +90,50 @@ final class TourBlocks {
 	 * @param array<string, mixed> $a Attributes.
 	 */
 	public function render_tour_facts( $a ): string {
-		return $this->outputs->tour_facts( $this->outputs->tour_id( $a['productId'] ?? 0 ), TourOutputs::fields( (string) ( $a['fields'] ?? '' ) ) );
+		$chips = 'chips' === ( $a['style'] ?? 'list' );
+		return $this->outputs->tour_facts( $this->outputs->tour_id( $a['productId'] ?? 0 ), TourOutputs::fields( (string) ( $a['fields'] ?? '' ), $chips ), $chips ? 'chips' : 'list' );
+	}
+
+	/**
+	 * Booking card block.
+	 *
+	 * @param array<string, mixed> $a Attributes.
+	 */
+	public function render_booking_card( $a ): string {
+		return $this->card ? $this->card->render(
+			$this->outputs->tour_id( $a['productId'] ?? 0 ),
+			array(
+				'title'    => (string) ( $a['title'] ?? '' ),
+				'sticky'   => ! isset( $a['sticky'] ) || ! empty( $a['sticky'] ),
+				'whatsapp' => ! isset( $a['whatsapp'] ) || ! empty( $a['whatsapp'] ),
+				'trust'    => null,
+			)
+		) : '';
+	}
+
+	/**
+	 * Price block.
+	 *
+	 * @param array<string, mixed> $a Attributes.
+	 */
+	public function render_price( $a ): string {
+		return $this->outputs->price(
+			$this->outputs->tour_id( $a['productId'] ?? 0 ),
+			array(
+				'label'      => ! isset( $a['showLabel'] ) || ! empty( $a['showLabel'] ),
+				'basis'      => ! isset( $a['showBasis'] ) || ! empty( $a['showBasis'] ),
+				'basis_text' => (string) ( $a['basisText'] ?? '' ),
+				'second'     => ! isset( $a['secondCurrency'] ) || ! empty( $a['secondCurrency'] ),
+			)
+		);
+	}
+
+	/**
+	 * Gallery block.
+	 *
+	 * @param array<string, mixed> $a Attributes.
+	 */
+	public function render_gallery( $a ): string {
+		return $this->outputs->gallery( $this->outputs->tour_id( $a['productId'] ?? 0 ) );
 	}
 }

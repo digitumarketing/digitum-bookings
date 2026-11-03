@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "digitum-bookings/gallery",
+  "title": "Tour gallery",
+  "category": "widgets",
+  "icon": "format-gallery",
+  "description": "The tour’s gallery: a large image and four smaller ones, a swipe row on phones. Leave the tour empty to use the tour being viewed.",
+  "keywords": [
+    "tour",
+    "booking",
+    "digitum"
+  ],
+  "textdomain": "digitum-bookings",
+  "attributes": {
+    "productId": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "supports": {
+    "html": false
+  }
+}

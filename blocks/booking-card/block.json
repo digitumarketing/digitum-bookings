@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "digitum-bookings/booking-card",
+  "title": "Booking card",
+  "category": "widgets",
+  "icon": "calendar-alt",
+  "description": "Short booking form for a sidebar: date, option, quantity, pickup and total; opens the booking form filled in. Leave the tour empty to use the tour being viewed.",
+  "keywords": [
+    "tour",
+    "booking",
+    "digitum"
+  ],
+  "textdomain": "digitum-bookings",
+  "attributes": {
+    "productId": {
+      "type": "number",
+      "default": 0
+    },
+    "title": {
+      "type": "string",
+      "default": ""
+    },
+    "sticky": {
+      "type": "boolean",
+      "default": true
+    },
+    "whatsapp": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "supports": {
+    "html": false
+  }
+}

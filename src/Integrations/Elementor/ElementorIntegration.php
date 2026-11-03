@@ -33,14 +33,23 @@ final class ElementorIntegration {
 	private static ?TourOutputs $outputs = null;
 
 	/**
+	 * Tour page renderers (booking card, price, gallery) shared with the widget classes.
+	 *
+	 * @var array<string, object>
+	 */
+	private static array $parts = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Widget           $widget  Widget renderer.
 	 * @param TourOutputs|null $outputs Tour detail renderer.
+	 * @param array            $parts   Other renderers: card (BookingCard).
 	 */
-	public function __construct( Widget $widget, ?TourOutputs $outputs = null ) {
+	public function __construct( Widget $widget, ?TourOutputs $outputs = null, array $parts = array() ) {
 		self::$widget  = $widget;
 		self::$outputs = $outputs;
+		self::$parts   = $parts;
 	}
 
 	/**
@@ -64,6 +73,9 @@ final class ElementorIntegration {
 		$widgets_manager->register( new PriceTableWidget() );
 		$widgets_manager->register( new TourListWidget() );
 		$widgets_manager->register( new TourFactsWidget() );
+		$widgets_manager->register( new BookingCardWidget() );
+		$widgets_manager->register( new PriceWidget() );
+		$widgets_manager->register( new GalleryWidget() );
 	}
 
 	/**
@@ -96,5 +108,34 @@ final class ElementorIntegration {
 	 */
 	public static function render( int $product_id, string $display = '' ): string {
 		return self::$widget ? self::$widget->render( $product_id, $display ) : '';
+	}
+
+	/**
+	 * Render the booking card.
+	 *
+	 * @param int                  $product_id Tour post ID.
+	 * @param array<string, mixed> $options    Card options.
+	 */
+	public static function card( int $product_id, array $options ): string {
+		return isset( self::$parts['card'] ) ? self::$parts['card']->render( $product_id, $options ) : '';
+	}
+
+	/**
+	 * Render the price.
+	 *
+	 * @param int                  $product_id Tour post ID.
+	 * @param array<string, mixed> $options    Price options.
+	 */
+	public static function price( int $product_id, array $options ): string {
+		return self::$outputs ? self::$outputs->price( $product_id, $options ) : '';
+	}
+
+	/**
+	 * Render the gallery.
+	 *
+	 * @param int $product_id Tour post ID.
+	 */
+	public static function gallery( int $product_id ): string {
+		return self::$outputs ? self::$outputs->gallery( $product_id ) : '';
 	}
 }

@@ -269,6 +269,8 @@ final class Widget {
 			'cancellation' => (string) $all['general']['cancellation'],
 			'country_code' => (string) preg_replace( '/\D/', '', (string) $all['general']['country_code'] ),
 			'coupons'      => ! $on_req && ( new CouponRepository() )->any_active( $now ),
+			'sticky_line'  => self::sticky_line( $product ),
+			'whatsapp'     => (string) preg_replace( '/\D+/', '', (string) $all['general']['phone'] ),
 			'sticky'       => is_singular( $this->product_type->key() ) && get_queried_object_id() === $product_id && ( new StickyBar( $this->settings, $this->product_type ) )->enabled( $product_id ),
 			'accent'       => (string) $all['branding']['accent_color'],
 			'turnstile'    => $script['turnstile'],
@@ -286,6 +288,21 @@ final class Widget {
 			esc_html__( 'Booking by %s', 'digitum-bookings' ),
 			'<a href="https://digitum.marketing/" rel="nofollow">Digitum</a>'
 		) . '</p>';
+	}
+
+	/**
+	 * Small line above the price in the mobile bar: “2 seater, per buggy from”, “per person from”.
+	 *
+	 * @param Product $product Tour settings.
+	 */
+	public static function sticky_line( Product $product ): string {
+		$basis = TourWords::basis( $product );
+		if ( 'per_vehicle' === $product->get( 'pricing_mode' ) ) {
+			/* translators: 1: seats per vehicle, 2: price basis, e.g. per buggy. */
+			return sprintf( __( '%1$d seater, %2$s from', 'digitum-bookings' ), (int) $product->get( 'seats_per_unit' ), $basis );
+		}
+		/* translators: %s: price basis, e.g. per person. */
+		return '' === $basis ? __( 'From', 'digitum-bookings' ) : sprintf( __( '%s from', 'digitum-bookings' ), $basis );
 	}
 
 	/**

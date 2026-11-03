@@ -58,10 +58,31 @@
 				value: props.attributes.fields,
 				onChange: ( v ) => props.setAttributes( { fields: v } ),
 			} ),
+			el( SelectControl, {
+				key: 's',
+				label: __( 'Style', 'digitum-bookings' ),
+				value: props.attributes.style,
+				options: [
+					{ value: 'list', label: __( 'List', 'digitum-bookings' ) },
+					{ value: 'chips', label: __( 'Chips', 'digitum-bookings' ) },
+				],
+				onChange: ( v ) => props.setAttributes( { style: v } ),
+			} ),
+		],
+		'booking-card': ( props ) => [
+			el( TextControl, { key: 't', label: __( 'Title', 'digitum-bookings' ), value: props.attributes.title, onChange: ( v ) => props.setAttributes( { title: v } ) } ),
+			el( ToggleControl, { key: 's', label: __( 'Sticky in sidebar', 'digitum-bookings' ), checked: props.attributes.sticky, onChange: ( v ) => props.setAttributes( { sticky: v } ) } ),
+			el( ToggleControl, { key: 'w', label: __( '“Ask on WhatsApp” button', 'digitum-bookings' ), checked: props.attributes.whatsapp, onChange: ( v ) => props.setAttributes( { whatsapp: v } ) } ),
+		],
+		price: ( props ) => [
+			el( ToggleControl, { key: 'l', label: __( 'Show “From”', 'digitum-bookings' ), checked: props.attributes.showLabel, onChange: ( v ) => props.setAttributes( { showLabel: v } ) } ),
+			el( ToggleControl, { key: 'b', label: __( 'Show the basis line', 'digitum-bookings' ), checked: props.attributes.showBasis, onChange: ( v ) => props.setAttributes( { showBasis: v } ) } ),
+			el( TextControl, { key: 't', label: __( 'Basis text', 'digitum-bookings' ), value: props.attributes.basisText, onChange: ( v ) => props.setAttributes( { basisText: v } ) } ),
+			el( ToggleControl, { key: 's', label: __( 'Show the second currency', 'digitum-bookings' ), checked: props.attributes.secondCurrency, onChange: ( v ) => props.setAttributes( { secondCurrency: v } ) } ),
 		],
 	};
 
-	[ 'from-price', 'price-table', 'tour-list', 'tour-facts' ].forEach( ( name ) => {
+	[ 'from-price', 'price-table', 'tour-list', 'tour-facts', 'booking-card', 'price', 'gallery' ].forEach( ( name ) => {
 		wp.blocks.registerBlockType( 'digitum-bookings/' + name, {
 			edit( props ) {
 				return el(

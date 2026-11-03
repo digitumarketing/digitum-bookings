@@ -29,6 +29,11 @@ final class TourOutputs {
 	public const FACTS = array( 'duration', 'basis', 'capacity', 'age', 'licence', 'pickup', 'meeting_point', 'sessions' );
 
 	/**
+	 * Facts available as chips. No rating chip: ratings come only from a connected review source.
+	 */
+	public const CHIPS = array( 'duration', 'seats', 'age', 'licence', 'pickup' );
+
+	/**
 	 * Results for this request, by call.
 	 *
 	 * @var array<string, mixed>
@@ -59,6 +64,8 @@ final class TourOutputs {
 		add_shortcode( 'dgb_price_table', array( $this, 'shortcode_price_table' ) );
 		add_shortcode( 'dgb_tour_list', array( $this, 'shortcode_tour_list' ) );
 		add_shortcode( 'dgb_tour_facts', array( $this, 'shortcode_tour_facts' ) );
+		add_shortcode( 'dgb_price', array( $this, 'shortcode_price' ) );
+		add_shortcode( 'dgb_gallery', array( $this, 'shortcode_gallery' ) );
 	}
 
 	/**
@@ -137,15 +144,65 @@ final class TourOutputs {
 	 * @param array<string, string>|string $atts Attributes.
 	 */
 	public function shortcode_tour_facts( $atts ): string {
-		$atts = shortcode_atts(
+		$atts  = shortcode_atts(
 			array(
 				'id'     => '',
 				'fields' => '',
+				'style'  => '',
 			),
 			(array) $atts,
 			'dgb_tour_facts'
 		);
-		return $this->tour_facts( $this->tour_id( $atts['id'] ), self::fields( (string) $atts['fields'] ) );
+		$chips = 'chips' === strtolower( trim( (string) $atts['style'] ) );
+		return $this->tour_facts( $this->tour_id( $atts['id'] ), self::fields( (string) $atts['fields'], $chips ), $chips ? 'chips' : 'list' );
+	}
+
+	/**
+	 * [dgb_price id="" label="yes" amount="yes" basis="yes" basis_text="" second="yes"]
+	 *
+	 * @param array<string, string>|string $atts Attributes.
+	 */
+	public function shortcode_price( $atts ): string {
+		$atts = shortcode_atts(
+			array(
+				'id'         => '',
+				'product'    => '',
+				'label'      => 'yes',
+				'amount'     => 'yes',
+				'basis'      => 'yes',
+				'basis_text' => '',
+				'second'     => 'yes',
+			),
+			(array) $atts,
+			'dgb_price'
+		);
+		return $this->price(
+			$this->tour_id( '' !== $atts['product'] ? $atts['product'] : $atts['id'] ),
+			array(
+				'label'      => self::yes( $atts['label'] ),
+				'amount'     => self::yes( $atts['amount'] ),
+				'basis'      => self::yes( $atts['basis'] ),
+				'basis_text' => (string) $atts['basis_text'],
+				'second'     => self::yes( $atts['second'] ),
+			)
+		);
+	}
+
+	/**
+	 * [dgb_gallery id=""]
+	 *
+	 * @param array<string, string>|string $atts Attributes.
+	 */
+	public function shortcode_gallery( $atts ): string {
+		$atts = shortcode_atts(
+			array(
+				'id'      => '',
+				'product' => '',
+			),
+			(array) $atts,
+			'dgb_gallery'
+		);
+		return $this->gallery( $this->tour_id( '' !== $atts['product'] ? $atts['product'] : $atts['id'] ) );
 	}
 
 	/* Outputs ------------------------------------------------------------ */
@@ -173,6 +230,130 @@ final class TourOutputs {
 			$html .= ' <span class="dgb-from-price__basis">' . esc_html( $text['basis'] ) . '</span>';
 		}
 		return $this->wrap( $html . '</span>' );
+	}
+
+	/**
+	 * Hero price: a small “From” label, the amount, and the basis with the shortest option's duration and VAT
+	 * (“per buggy, 30 min · VAT included”). Same price as the booking widget and structured data.
+	 *
+	 * @param int                  $id      Tour post ID.
+	 * @param array<string, mixed> $options label, amount, basis (bool), basis_text (string, replaces the basis), second (bool).
+	 */
+	public function price( int $id, array $options = array() ): string {
+		if ( ! $id ) {
+			return '';
+		}
+		$options += array(
+			'label'      => true,
+			'amount'     => true,
+			'basis'      => true,
+			'basis_text' => '',
+			'second'     => true,
+		);
+		$points   = $this->quotes->price_points( $id );
+		$from     = 'on_request' === $points['mode'] ? null : $points['from'];
+		if ( null === $from ) {
+			return $this->wrap( '<div class="dgb-o dgb-price dgb-price--request"><span class="dgb-price__amount">' . esc_html__( 'Price on request', 'digitum-bookings' ) . '</span></div>' );
+		}
+		$html = '<div class="dgb-o dgb-price">';
+		if ( $options['label'] ) {
+			$html .= '<span class="dgb-price__label">' . esc_html__( 'From', 'digitum-bookings' ) . '</span>';
+		}
+		if ( $options['amount'] ) {
+			$html .= '<span class="dgb-price__amount">' . esc_html( Format::money( $from, $points['currency'] ) ) . '</span>';
+			if ( $options['second'] ) {
+				$html .= ( new SecondCurrency( $this->settings ) )->html( $from );
+			}
+		}
+		if ( $options['basis'] ) {
+			$basis = trim( (string) $options['basis_text'] );
+			if ( '' === $basis ) {
+				$basis = $this->price_basis( $id, $points );
+			}
+			if ( '' !== $basis ) {
+				$html .= '<span class="dgb-price__basis">' . esc_html( $basis ) . '</span>';
+			}
+		}
+		return $this->wrap( $html . '</div>' );
+	}
+
+	/**
+	 * “per buggy, 30 min · VAT included”: the price basis, the duration of the cheapest option and VAT.
+	 *
+	 * @param int                  $id     Tour post ID.
+	 * @param array<string, mixed> $points QuoteService::price_points().
+	 */
+	public function price_basis( int $id, array $points ): string {
+		$product = Product::find( $id );
+		$basis   = TourWords::basis( $product );
+		$minutes = null;
+		$lowest  = null;
+		foreach ( $points['options'] as $option ) {
+			if ( null !== $option['price'] && ( null === $lowest || (float) $option['price'] < $lowest ) ) {
+				$lowest  = (float) $option['price'];
+				$minutes = $option['duration'];
+			}
+		}
+		$duration = TourWords::duration( null === $minutes ? null : (int) $minutes );
+		if ( '' !== $duration ) {
+			/* translators: 1: price basis, e.g. per buggy, 2: duration, e.g. 30 min. */
+			$basis = '' === $basis ? $duration : sprintf( __( '%1$s, %2$s', 'digitum-bookings' ), $basis, $duration );
+		}
+		$config = $this->quotes->config( $product );
+		if ( $config->vat_rate > 0 ) {
+			$vat   = $config->vat_inclusive ? __( 'VAT included', 'digitum-bookings' ) : __( 'plus VAT', 'digitum-bookings' );
+			$basis = '' === $basis ? $vat : $basis . ' · ' . $vat;
+		}
+		return $basis;
+	}
+
+	/**
+	 * Tour gallery (Tour gallery box): one large image and four in a grid on computers, a swipe row on phones,
+	 * a lightbox on click. Falls back to the featured image; nothing when the tour has no image at all.
+	 *
+	 * @param int $id Tour post ID.
+	 */
+	public function gallery( int $id ): string {
+		if ( ! $id ) {
+			return '';
+		}
+		$images = Gallery::images( $id );
+		if ( array() === $images ) {
+			return '';
+		}
+		wp_enqueue_script(
+			'dgb-gallery',
+			DGB_PLUGIN_URL . 'assets/build/front/gallery.js',
+			array(),
+			DGB_VERSION,
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
+		$title = wp_strip_all_tags( get_the_title( $id ) );
+		$html  = '<div class="dgb-o dgb-gallery dgb-gallery--' . count( $images ) . '" data-dgb-gallery data-close="' . esc_attr__( 'Close', 'digitum-bookings' ) . '" data-prev="' . esc_attr__( 'Previous image', 'digitum-bookings' ) . '" data-next="' . esc_attr__( 'Next image', 'digitum-bookings' ) . '">';
+		foreach ( $images as $i => $image ) {
+			$full  = wp_get_attachment_image_url( $image['id'], 'full' );
+			$alt   = '' !== $image['alt'] ? $image['alt'] : ( '' !== $image['caption'] ? $image['caption'] : $title );
+			$img   = wp_get_attachment_image(
+				$image['id'],
+				0 === $i ? 'large' : 'medium_large',
+				false,
+				array(
+					'alt'      => $alt,
+					'loading'  => 0 === $i ? 'eager' : 'lazy',
+					'sizes'    => 0 === $i ? '(min-width: 768px) 60vw, 88vw' : '(min-width: 768px) 20vw, 88vw',
+					'decoding' => 'async',
+				)
+			);
+			$html .= '<figure class="dgb-gallery__item"><a href="' . esc_url( (string) $full ) . '" data-dgb-gallery-item aria-label="' . esc_attr( sprintf( /* translators: 1: image number, 2: total. */ __( 'Open image %1$d of %2$d', 'digitum-bookings' ), $i + 1, count( $images ) ) ) . '">' . $img . '</a>';
+			if ( '' !== $image['caption'] ) {
+				$html .= '<figcaption class="dgb-gallery__caption">' . esc_html( $image['caption'] ) . '</figcaption>';
+			}
+			$html .= '</figure>';
+		}
+		return $this->wrap( $html . '</div>' );
 	}
 
 	/**
@@ -283,10 +464,14 @@ final class TourOutputs {
 	 *
 	 * @param int      $id     Tour post ID.
 	 * @param string[] $fields Facts to show, in order (see FACTS); [] = all.
+	 * @param string   $style  list or chips.
 	 */
-	public function tour_facts( int $id, array $fields = array() ): string {
+	public function tour_facts( int $id, array $fields = array(), string $style = 'list' ): string {
 		if ( ! $id ) {
 			return '';
+		}
+		if ( 'chips' === $style ) {
+			return $this->chips( $id, $fields );
 		}
 		$facts = $this->facts( $id );
 		$html  = '';
@@ -305,6 +490,60 @@ final class TourOutputs {
 			$html .= '<div class="dgb-tour-facts__item dgb-tour-facts__item--' . esc_attr( str_replace( '_', '-', $key ) ) . '"><dt>' . esc_html( $facts[ $key ]['label'] ) . '</dt><dd>' . $value . '</dd></div>';
 		}
 		return '' === $html ? '' : $this->wrap( '<dl class="dgb-o dgb-tour-facts">' . $html . '</dl>' );
+	}
+
+	/**
+	 * Facts as small chips for a hero: “30 min to 2 h”, “2 seats”, “Driver 14+”, “No licence needed”, “Pickup included”.
+	 *
+	 * @param int      $id     Tour post ID.
+	 * @param string[] $fields duration, seats, age, licence, pickup; [] = all.
+	 */
+	public function chips( int $id, array $fields = array() ): string {
+		$product = Product::find( $id );
+		$points  = $this->quotes->price_points( $id );
+		$mode    = (string) $product->get( 'pricing_mode' );
+		$chips   = array();
+
+		$minutes = array_values( array_filter( array_map( static fn( $o ) => $o['duration'], $points['options'] ) ) );
+		if ( array() !== $minutes ) {
+			$low  = TourWords::duration( (int) min( $minutes ) );
+			$high = TourWords::duration( (int) max( $minutes ) );
+			/* translators: 1: shortest duration, 2: longest duration. */
+			$chips['duration'] = $low === $high ? $low : sprintf( __( '%1$s to %2$s', 'digitum-bookings' ), $low, $high );
+		}
+		if ( 'per_vehicle' === $mode ) {
+			$seats = (int) $product->get( 'seats_per_unit' );
+			/* translators: %d: seats per vehicle. */
+			$chips['seats'] = sprintf( _n( '%d seat', '%d seats', $seats, 'digitum-bookings' ), $seats );
+		} elseif ( 'per_group' === $mode ) {
+			$max = (int) $product->get( 'max_pax_per_unit' );
+			/* translators: 1: guests, 2: what one car is called. */
+			$chips['seats'] = sprintf( __( 'Up to %1$d per %2$s', 'digitum-bookings' ), $max, TourWords::one( $product ) );
+		}
+		$age = (int) $product->get( 'min_age' );
+		if ( $age > 0 ) {
+			/* translators: %d: minimum age. */
+			$chips['age'] = 'per_vehicle' === $mode ? sprintf( __( 'Driver %d+', 'digitum-bookings' ), $age ) : sprintf( __( 'Age %d+', 'digitum-bookings' ), $age );
+		}
+		if ( $product->get( 'licence_required' ) ) {
+			$chips['licence'] = __( 'Driving licence needed', 'digitum-bookings' );
+		} elseif ( 'per_vehicle' === $mode ) {
+			$chips['licence'] = __( 'No licence needed', 'digitum-bookings' );
+		}
+		$policy = (string) $product->get( 'pickup_policy' );
+		if ( 'included' === $policy ) {
+			$chips['pickup'] = __( 'Pickup included', 'digitum-bookings' );
+		} elseif ( 'addon' === $policy ) {
+			$chips['pickup'] = __( 'Hotel pickup available', 'digitum-bookings' );
+		}
+
+		$html = '';
+		foreach ( array() === $fields ? self::CHIPS : $fields as $key ) {
+			if ( ! empty( $chips[ $key ] ) ) {
+				$html .= '<li class="dgb-chip dgb-chip--' . esc_attr( $key ) . '">' . esc_html( $chips[ $key ] ) . '</li>';
+			}
+		}
+		return '' === $html ? '' : $this->wrap( '<ul class="dgb-o dgb-chips">' . $html . '</ul>' );
 	}
 
 	/**
@@ -549,11 +788,16 @@ final class TourOutputs {
 	/**
 	 * Fact keys from a comma-separated attribute.
 	 *
-	 * @param string $keys For example "duration, pickup".
+	 * @param string $keys  For example "duration, pickup".
+	 * @param bool   $chips Keys for the chips style (CHIPS; "capacity" means seats).
 	 * @return string[]
 	 */
-	public static function fields( string $keys ): array {
-		return array_values( array_intersect( array_map( 'trim', explode( ',', strtolower( $keys ) ) ), self::FACTS ) );
+	public static function fields( string $keys, bool $chips = false ): array {
+		$keys = array_map( 'trim', explode( ',', strtolower( $keys ) ) );
+		if ( $chips ) {
+			$keys = array_map( static fn( $k ) => 'capacity' === $k ? 'seats' : $k, $keys );
+		}
+		return array_values( array_intersect( $keys, $chips ? self::CHIPS : self::FACTS ) );
 	}
 
 	/**
@@ -604,6 +848,19 @@ final class TourOutputs {
 			. '.dgb-tour-list{list-style:none;padding:0;margin:0}.dgb-tour-list__item{position:relative;padding-inline-start:1.6em;margin:.3em 0}'
 			. '.dgb-tour-list__item:before{position:absolute;inset-inline-start:0;font-weight:700;content:"•"}'
 			. '.dgb-tour-list--check .dgb-tour-list__item:before{content:"✓";color:var(--dgb-accent,#b45309)}.dgb-tour-list--cross .dgb-tour-list__item:before{content:"✕"}'
-			. '.dgb-tour-facts{display:grid;gap:.6em;margin:0}.dgb-tour-facts dt{font-weight:600}.dgb-tour-facts dd{margin:0}';
+			. '.dgb-tour-facts{display:grid;gap:.6em;margin:0}.dgb-tour-facts dt{font-weight:600}.dgb-tour-facts dd{margin:0}'
+			. '.dgb-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none;color:inherit}.dgb-chip{margin:0;padding:.3em .85em;border:1px solid color-mix(in srgb,currentColor 20%,transparent);border-radius:999px;font-size:.85rem;line-height:1.4}'
+			. '.dgb-price{display:flex;flex-direction:column;gap:2px;color:inherit}.dgb-price__label{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8}.dgb-price__amount{font-size:2.25rem;font-weight:800;line-height:1.1}.dgb-price__basis{font-size:.9rem;opacity:.85}'
+			. '.dgb-gallery{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:repeat(2,minmax(0,1fr));gap:8px;aspect-ratio:2/1}'
+			. '.dgb-gallery__item{position:relative;margin:0;overflow:hidden;border-radius:16px;min-height:0}.dgb-gallery__item:first-child{grid-row:1/3}.dgb-gallery__item a{display:block;height:100%}'
+			. '.dgb-gallery__item img{display:block;width:100%;height:100%;object-fit:cover}.dgb-gallery__item a:focus-visible{outline:3px solid var(--dgb-accent,#b45309);outline-offset:-3px}'
+			. '.dgb-gallery__caption{position:absolute;inset-inline-start:12px;bottom:12px;max-width:calc(100% - 24px);padding:4px 10px;border-radius:999px;background:rgba(28,20,16,.7);color:#fff;font-size:.8rem}'
+			. '.dgb-gallery--1{grid-template-columns:1fr;grid-template-rows:1fr}.dgb-gallery--1 .dgb-gallery__item:first-child{grid-row:auto}'
+			. '.dgb-gallery--2{grid-template-columns:2fr 1fr;grid-template-rows:1fr}.dgb-gallery--2 .dgb-gallery__item:first-child{grid-row:auto}.dgb-gallery--3{grid-template-columns:2fr 1fr}.dgb-gallery--4{grid-template-columns:2fr 1fr 1fr}.dgb-gallery--4 .dgb-gallery__item:last-child{grid-column:2/4}'
+			. '@media (max-width:767px){.dgb-gallery,.dgb-gallery--1{display:flex;gap:8px;aspect-ratio:auto;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}.dgb-gallery::-webkit-scrollbar{display:none}.dgb-gallery__item{flex:0 0 88%;aspect-ratio:4/3;scroll-snap-align:start}.dgb-gallery--1 .dgb-gallery__item{flex-basis:100%}}'
+			. '.dgb-lightbox{position:fixed;inset:0;z-index:100002;display:flex;align-items:center;justify-content:center;background:rgba(10,8,6,.92)}.dgb-lightbox img{max-width:92vw;max-height:84vh;object-fit:contain}'
+			. '.dgb-lightbox figcaption{position:absolute;bottom:16px;inset-inline:0;color:#fff;text-align:center}'
+			. '.dgb-lightbox button:is(*,:hover,:focus,:active){position:absolute;width:48px;height:48px;min-height:0;margin:0;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.15);box-shadow:none;color:#fff;font:inherit;font-size:1.6rem;line-height:1;cursor:pointer}'
+			. '.dgb-lightbox button:focus-visible{outline:2px solid #fff;outline-offset:2px}.dgb-lightbox [data-close]{top:16px;inset-inline-end:16px}.dgb-lightbox [data-prev]{inset-inline-start:16px}.dgb-lightbox [data-next]{inset-inline-end:16px}';
 	}
 }

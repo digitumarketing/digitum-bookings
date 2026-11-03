@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "digitum-bookings/price",
+  "title": "Tour price",
+  "category": "widgets",
+  "icon": "money-alt",
+  "description": "“From”, the amount and its basis (per buggy, 30 min · VAT included). Leave the tour empty to use the tour being viewed.",
+  "keywords": [
+    "tour",
+    "booking",
+    "digitum"
+  ],
+  "textdomain": "digitum-bookings",
+  "attributes": {
+    "productId": {
+      "type": "number",
+      "default": 0
+    },
+    "showLabel": {
+      "type": "boolean",
+      "default": true
+    },
+    "showBasis": {
+      "type": "boolean",
+      "default": true
+    },
+    "basisText": {
+      "type": "string",
+      "default": ""
+    },
+    "secondCurrency": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "supports": {
+    "html": false
+  }
+}

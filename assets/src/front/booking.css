@@ -1235,3 +1235,413 @@ html.dgb-lock body {
 	justify-content: space-between;
 	gap: 12px;
 }
+
+/* Booking card ----------------------------------------------------------------------------------- */
+
+.dgb-w.dgb-bc {
+	--dgb-success: #15803d;
+	--dgb-whatsapp: #128c4a;
+
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	max-width: none;
+	margin-block: 0;
+	padding: 20px;
+	border: 1px solid var(--dgb-line);
+	border-top: 5px solid var(--dgb-accent);
+	border-radius: 16px;
+	background: var(--dgb-bg);
+	box-shadow: 0 10px 30px rgba(28, 20, 16, 0.08);
+}
+
+/* Sticky on computers. In Elementor the widget's own wrapper sticks, since the card fills it. */
+@media (min-width: 1025px) {
+	.dgb-w.dgb-bc.is-sticky,
+	.elementor-widget-dgb_booking_card:has(.dgb-bc.is-sticky) {
+		position: sticky;
+		top: var(--dgb-sticky-top, 104px);
+		align-self: flex-start;
+	}
+
+	.elementor-widget-dgb_booking_card .dgb-w.dgb-bc.is-sticky {
+		position: relative;
+		top: auto;
+	}
+}
+
+.dgb-bc-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.dgb-w .dgb-bc-title {
+	margin: 0;
+	color: var(--dgb-ink);
+	font-size: 1.25rem;
+	line-height: 1.25;
+}
+
+.dgb-bc-badge {
+	padding: 4px 10px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--dgb-success) 12%, #fff);
+	color: var(--dgb-success);
+	font-size: 0.8rem;
+	font-weight: 700;
+}
+
+.dgb-bc-form {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	margin: 0;
+}
+
+.dgb-bc-field {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.dgb-bc-label {
+	padding: 0;
+	color: var(--dgb-ink);
+	font-size: 0.85rem;
+	font-weight: 600;
+}
+
+/* Date field and its calendar popover. */
+.dgb-w button.dgb-bc-date:is(*, :hover, :focus, :active) {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	width: 100%;
+	min-height: 46px;
+	margin: 0;
+	padding: 0 14px;
+	border: 1px solid var(--dgb-line);
+	border-radius: 10px;
+	background: var(--dgb-bg);
+	box-shadow: none;
+	color: var(--dgb-muted);
+	font: inherit;
+	text-align: start;
+	text-transform: none;
+	cursor: pointer;
+}
+
+.dgb-w button.dgb-bc-date.has-value {
+	color: var(--dgb-ink);
+	font-weight: 600;
+}
+
+.dgb-w button.dgb-bc-date:hover {
+	border-color: var(--dgb-ink);
+}
+
+.dgb-w button.dgb-bc-date.is-missing {
+	border-color: var(--dgb-danger);
+}
+
+.dgb-w button.dgb-bc-date:focus-visible,
+.dgb-w button.dgb-bc-btn:focus-visible,
+.dgb-bc-pill:focus-within {
+	outline: 2px solid var(--dgb-accent);
+	outline-offset: 2px;
+}
+
+.dgb-bc-pop {
+	position: absolute;
+	top: calc(100% + 6px);
+	inset-inline: 0;
+	z-index: 50;
+	min-width: 280px;
+	padding: 12px;
+	border: 1px solid var(--dgb-line);
+	border-radius: 12px;
+	background: var(--dgb-bg);
+	box-shadow: 0 16px 40px rgba(28, 20, 16, 0.18);
+}
+
+.dgb-bc-pop .dgb-cal-grid {
+	min-height: 0;
+}
+
+/* Option pills. */
+.dgb-bc-pills {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+	gap: 8px;
+}
+
+.dgb-bc-pills legend {
+	float: left;
+	width: 100%;
+	margin-bottom: 6px;
+}
+
+.dgb-bc-pills legend + * {
+	clear: both;
+}
+
+.dgb-bc-pill {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 2px;
+	padding: 10px 12px;
+	border: 1px solid var(--dgb-line);
+	border-radius: 10px;
+	background: var(--dgb-bg);
+	cursor: pointer;
+}
+
+.dgb-bc-pill input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.dgb-bc-pill:hover {
+	border-color: var(--dgb-ink);
+}
+
+.dgb-bc-pill.is-selected,
+.dgb-bc-pill:has(input:checked) {
+	border: 2px solid var(--dgb-accent);
+	padding: 9px 11px;
+	background: color-mix(in srgb, var(--dgb-accent) 8%, #fff);
+}
+
+.dgb-bc-pill-name {
+	font-weight: 700;
+}
+
+.dgb-bc-pill-price {
+	color: var(--dgb-muted);
+	font-size: 0.85rem;
+}
+
+.dgb-bc-pill-badge {
+	position: absolute;
+	top: -9px;
+	inset-inline-end: 8px;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--dgb-accent);
+	color: var(--dgb-on-accent);
+	font-size: 0.7rem;
+	font-weight: 700;
+	line-height: 1.5;
+}
+
+/* Steppers: one compact row for adults and children. */
+.dgb-bc-steppers {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+	gap: 10px;
+}
+
+.dgb-bc-step {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 6px;
+	padding: 4px;
+	border: 1px solid var(--dgb-line);
+	border-radius: 10px;
+}
+
+.dgb-w button.dgb-bc-btn:is(*, :hover, :focus, :active) {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	min-width: 0;
+	height: 38px;
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 8px;
+	background: var(--dgb-soft);
+	box-shadow: none;
+	color: var(--dgb-ink);
+	font: inherit;
+	font-size: 1.2rem;
+	line-height: 1;
+	text-transform: none;
+	cursor: pointer;
+}
+
+.dgb-w button.dgb-bc-btn:hover {
+	background: color-mix(in srgb, var(--dgb-ink) 12%, #fff);
+}
+
+.dgb-w .dgb-bc-step input[type="number"]:is(*, :hover, :focus) {
+	width: 3em;
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+	color: var(--dgb-ink);
+	font: inherit;
+	font-weight: 700;
+	text-align: center;
+	-moz-appearance: textfield;
+}
+
+.dgb-w .dgb-bc-step input::-webkit-inner-spin-button,
+.dgb-w .dgb-bc-step input::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+.dgb-w .dgb-bc-form select:is(*, :hover, :focus) {
+	width: 100%;
+	min-height: 46px;
+	margin: 0;
+	padding: 0 12px;
+	border: 1px solid var(--dgb-line);
+	border-radius: 10px;
+	background-color: var(--dgb-bg);
+	box-shadow: none;
+	color: var(--dgb-ink);
+	font: inherit;
+}
+
+.dgb-w .dgb-bc-form select:focus-visible {
+	outline: 2px solid var(--dgb-accent);
+	outline-offset: 2px;
+}
+
+.dgb-bc-total {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 8px;
+	margin: 0;
+	padding-top: 12px;
+	border-top: 1px solid var(--dgb-line);
+	color: var(--dgb-muted);
+	font-size: 0.9rem;
+}
+
+.dgb-bc-total strong {
+	color: var(--dgb-ink);
+	font-size: 1.35rem;
+}
+
+.dgb-bc-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.dgb-w .dgb-bc-actions .dgb-btn {
+	width: 100%;
+}
+
+.dgb-w a.dgb-bc-wa:is(*, :hover, :focus, :active) {
+	gap: 8px;
+	border-color: var(--dgb-whatsapp);
+	background: var(--dgb-whatsapp);
+	color: #fff;
+}
+
+.dgb-w a.dgb-bc-wa:hover {
+	border-color: color-mix(in srgb, var(--dgb-whatsapp) 85%, #000);
+	background: color-mix(in srgb, var(--dgb-whatsapp) 85%, #000);
+}
+
+.dgb-bc-trust {
+	display: grid;
+	gap: 6px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	color: var(--dgb-muted);
+	font-size: 0.85rem;
+}
+
+.dgb-bc-trust li {
+	position: relative;
+	margin: 0;
+	padding-inline-start: 22px;
+}
+
+.dgb-bc-trust li::before {
+	content: "";
+	position: absolute;
+	top: 0.3em;
+	inset-inline-start: 2px;
+	width: 10px;
+	height: 6px;
+	border-bottom: 2px solid var(--dgb-success);
+	border-left: 2px solid var(--dgb-success);
+	transform: rotate(-45deg);
+}
+
+.dgb-bc + .dgb-credit {
+	margin-top: 8px;
+	text-align: center;
+}
+
+/* Mobile bar: price on the left, WhatsApp and Book now on the right. */
+.dgb-sticky-price {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	margin: 0;
+	line-height: 1.2;
+}
+
+.dgb-sticky-basis {
+	overflow: hidden;
+	color: var(--dgb-muted);
+	font-size: 0.75rem;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dgb-sticky-actions {
+	display: flex;
+	flex: none;
+	align-items: center;
+	gap: 8px;
+}
+
+.dgb-w a.dgb-sticky-wa:is(*, :hover, :focus, :active) {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	background: #128c4a;
+	color: #fff;
+	text-decoration: none;
+}
+
+.dgb-w a.dgb-sticky-wa:focus-visible {
+	outline: 2px solid var(--dgb-accent);
+	outline-offset: 2px;
+}
+
+.dgb-w .dgb-sticky .dgb-btn {
+	flex: none;
+}

@@ -113,6 +113,48 @@
 		}
 	}
 
+	/* Formatting shared by the widget and the booking card ------------------------------------------- */
+
+	const toDate = ( date ) => new Date( +date.slice( 0, 4 ), +date.slice( 5, 7 ) - 1, +date.slice( 8, 10 ) );
+
+	// Amounts in the site currency; the "whole units" setting drops the decimals of whole amounts.
+	function moneyFormatter( cfg ) {
+		const money = new Intl.NumberFormat( cfg.locale, {
+			style: 'currency',
+			currency: cfg.currency,
+			minimumFractionDigits: cfg.decimals,
+			maximumFractionDigits: cfg.decimals,
+		} );
+		const whole = cfg.wholeUnits && cfg.decimals > 0 && new Intl.NumberFormat( cfg.locale, {
+			style: 'currency',
+			currency: cfg.currency,
+			minimumFractionDigits: 0,
+			maximumFractionDigits: cfg.decimals,
+		} );
+		return ( v ) => {
+			if ( null === v || undefined === v ) {
+				return '';
+			}
+			const n = Number( v );
+			return ( whole && 0 === Math.round( n * 10 ** cfg.decimals ) % 10 ** cfg.decimals ? whole : money ).format( n );
+		};
+	}
+
+	// "Fri 6 Nov 2026" (or "Fri, Nov 6, 2026"), with the site's day and month names: the same text as the emails.
+	function dateFormatter( cfg ) {
+		const names = cfg.dates || {};
+		return {
+			format: ( d ) => {
+				const day = ( names.days || [] )[ d.getDay() ];
+				const month = ( names.months || [] )[ d.getMonth() ];
+				if ( ! day || ! month ) {
+					return new Intl.DateTimeFormat( 'en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' } ).format( d ).replace( /,/g, '' );
+				}
+				return 'us' === names.style ? `${ day }, ${ month } ${ d.getDate() }, ${ d.getFullYear() }` : `${ day } ${ d.getDate() } ${ month } ${ d.getFullYear() }`;
+			},
+		};
+	}
+
 	/* Widgets on the page, by tour: the booking card and the modal triggers open them. */
 	const widgets = [];
 	const findWidget = ( product ) => widgets.find( ( w ) => ! product || String( w.product ) === String( product ) ) || null;
@@ -157,26 +199,7 @@
 		const q = ( s ) => root.querySelector( s ) || ( root.contains( panel ) ? null : panel.querySelector( s ) );
 		const qa = ( s ) => Array.prototype.slice.call( root.querySelectorAll( s ) ).concat( root.contains( panel ) ? [] : Array.prototype.slice.call( panel.querySelectorAll( s ) ) );
 		const track = ( event, data ) => push( cfg.analytics.enabled, event, data );
-		const money = new Intl.NumberFormat( cfg.locale, {
-			style: 'currency',
-			currency: cfg.currency,
-			minimumFractionDigits: cfg.decimals,
-			maximumFractionDigits: cfg.decimals,
-		} );
-		// "Whole units" setting: whole amounts drop their decimals; amounts with a fraction keep them.
-		const whole = cfg.wholeUnits && cfg.decimals > 0 && new Intl.NumberFormat( cfg.locale, {
-			style: 'currency',
-			currency: cfg.currency,
-			minimumFractionDigits: 0,
-			maximumFractionDigits: cfg.decimals,
-		} );
-		const fmt = ( v ) => {
-			if ( null === v || undefined === v ) {
-				return '';
-			}
-			const n = Number( v );
-			return ( whole && 0 === Math.round( n * 10 ** cfg.decimals ) % 10 ** cfg.decimals ? whole : money ).format( n );
-		};
+		const fmt = moneyFormatter( cfg );
 		const couponCodes = [ 'coupon_invalid', 'coupon_not_combinable' ];
 		// Optional second currency, for display only: " (about USD 190)".
 		const sc = cfg.second;
@@ -190,19 +213,7 @@
 			const p = v.split( ':' );
 			return timeFmt.format( new Date( 2000, 0, 1, +p[ 0 ], +p[ 1 ] ) );
 		};
-		const toDate = ( date ) => new Date( +date.slice( 0, 4 ), +date.slice( 5, 7 ) - 1, +date.slice( 8, 10 ) );
-		// "Fri 6 Nov 2026" (or "Fri, Nov 6, 2026"), with the site's day and month names: the same text as the emails.
-		const names = cfg.dates || {};
-		const shortDate = {
-			format: ( d ) => {
-				const day = ( names.days || [] )[ d.getDay() ];
-				const month = ( names.months || [] )[ d.getMonth() ];
-				if ( ! day || ! month ) {
-					return new Intl.DateTimeFormat( 'en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' } ).format( d ).replace( /,/g, '' );
-				}
-				return 'us' === names.style ? `${ day }, ${ month } ${ d.getDate() }, ${ d.getFullYear() }` : `${ day } ${ d.getDate() } ${ month } ${ d.getFullYear() }`;
-			},
-		};
+		const shortDate = dateFormatter( cfg );
 		const longDate = new Intl.DateTimeFormat( cfg.locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' } );
 
 		const state = {
@@ -1228,8 +1239,272 @@
 		root.classList.add( 'is-ready' );
 	}
 
+	/* Booking card --------------------------------------------------------------------------------- */
+
+	function initCard( root ) {
+		const cfgNode = root.querySelector( '[data-dgb-card-config]' );
+		if ( ! cfgNode || root.classList.contains( 'is-ready' ) ) {
+			return;
+		}
+		const cfg = JSON.parse( cfgNode.textContent );
+		const t = cfg.i18n;
+		const form = root.querySelector( '[data-dgb-card-form]' );
+		const fmt = moneyFormatter( cfg );
+		const dateText = dateFormatter( cfg );
+		const longDate = new Intl.DateTimeFormat( cfg.locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' } );
+		const dateButton = root.querySelector( '[data-dgb-card-date]' );
+		const pop = root.querySelector( '[data-dgb-card-pop]' );
+		const grid = root.querySelector( '[data-dgb-card-days]' );
+		const state = { date: '', month: cfg.today.slice( 0, 7 ), seq: 0 };
+		const field = ( name ) => form.elements.namedItem( name );
+		const num = ( name ) => ( field( name ) ? Math.max( 0, parseInt( field( name ).value, 10 ) || 0 ) : 0 );
+		const variantId = () => {
+			const checked = form.querySelector( 'input[name="variant_id"]:checked' ) || form.querySelector( 'input[type="hidden"][name="variant_id"]' );
+			return checked ? Number( checked.value ) : 0;
+		};
+		const variantLabel = () => {
+			const checked = form.querySelector( 'input[name="variant_id"]:checked' );
+			const name = checked && checked.closest( 'label' ).querySelector( '.dgb-bc-pill-name' );
+			return name ? name.textContent.trim() : '';
+		};
+		const pickup = () => {
+			const select = form.querySelector( '[data-dgb-card-pickup]' );
+			return cfg.pickups[ select ? Number( select.value ) : 0 ] || null;
+		};
+
+		// Values for the booking form, as the modal expects them.
+		function values() {
+			const p = pickup();
+			const units = 'per_vehicle' === cfg.mode ? Math.max( 1, num( 'units' ) ) : 0;
+			return {
+				variant_id: variantId(),
+				date: state.date,
+				units: units || undefined,
+				// Per vehicle: full vehicles to start with; the guest can change the number of people in the form.
+				adults: units ? units * cfg.seats : Math.max( 1, num( 'adults' ) ),
+				children: units ? 0 : num( 'children' ),
+				pickup: !! ( p && 'zone' === p.value ),
+				zone_id: p && 'zone' === p.value ? p.zone : 0,
+			};
+		}
+
+		/* Live total, from the same calculator as the booking form. */
+		async function total() {
+			const out = root.querySelector( '[data-dgb-card-total]' );
+			if ( ! out || cfg.onRequest ) {
+				return;
+			}
+			const v = values();
+			const seq = ++state.seq;
+			try {
+				const res = await fetch( cfg.rest + 'quote', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					credentials: 'same-origin',
+					body: JSON.stringify( Object.assign( { product: cfg.product, units: v.units || 1 }, v ) ),
+				} );
+				const r = await res.json();
+				if ( seq !== state.seq || ! res.ok ) {
+					return;
+				}
+				out.textContent = null === r.total || undefined === r.total ? t.onRequest : fmt( r.total );
+				let label = t.total;
+				if ( Number( r.vat_rate ) > 0 ) {
+					label = r.vat_inclusive ? t.totalIncl : t.totalExcl;
+				}
+				root.querySelector( '[data-dgb-card-total-label]' ).textContent = label;
+			} catch ( e ) {}
+		}
+
+		/* WhatsApp link with the choices so far. */
+		function whatsapp() {
+			const link = root.querySelector( '[data-dgb-card-wa]' );
+			if ( ! link || ! cfg.whatsapp ) {
+				return;
+			}
+			const v = values();
+			const parts = [];
+			if ( state.date ) {
+				parts.push( sprintf( t.waDate, dateText.format( toDate( state.date ) ) ) );
+			}
+			if ( variantLabel() ) {
+				parts.push( sprintf( t.waOption, variantLabel() ) );
+			}
+			if ( v.units ) {
+				parts.push( sprintf( t.waQuantity, sprintf( 1 === v.units ? t.unit : t.units, String( v.units ) ) ) );
+			} else {
+				parts.push( sprintf( t.adults, String( v.adults ) ) + ( v.children ? ', ' + sprintf( t.children, String( v.children ) ) : '' ) );
+			}
+			const p = pickup();
+			if ( p ) {
+				parts.push( sprintf( t.waPickup, p.text ) );
+			}
+			const message = t.waText.replace( '{tour}', cfg.name ).replace( '{details}', parts.join( ', ' ) + '.' );
+			link.href = 'https://wa.me/' + cfg.whatsapp + '?text=' + encodeURIComponent( message );
+		}
+
+		function changed() {
+			root.querySelectorAll( '.dgb-bc-pill' ).forEach( ( pill ) => pill.classList.toggle( 'is-selected', pill.querySelector( 'input' ).checked ) );
+			whatsapp();
+			total();
+		}
+
+		/* Date popover: the plugin's calendar with the same day states as the booking form. */
+		async function month() {
+			const parts = state.month.split( '-' ).map( Number );
+			const first = new Date( parts[ 0 ], parts[ 1 ] - 1, 1 );
+			root.querySelector( '[data-dgb-card-month]' ).textContent = new Intl.DateTimeFormat( cfg.locale, { month: 'long', year: 'numeric' } ).format( first );
+			root.querySelector( '[data-dgb-card-prev]' ).disabled = state.month <= cfg.today.slice( 0, 7 );
+			let data = { days: {} };
+			try {
+				data = await fetch( cfg.rest + 'availability?product=' + cfg.product + '&month=' + state.month, { credentials: 'same-origin' } ).then( ( r ) => r.json() );
+			} catch ( e ) {}
+			grid.textContent = '';
+			t.weekdays.forEach( ( w ) => grid.appendChild( el( 'span', { class: 'dgb-cal-wd', 'aria-hidden': 'true', text: w } ) ) );
+			for ( let i = 0; i < ( first.getDay() + 6 ) % 7; i++ ) {
+				grid.appendChild( el( 'span', { class: 'dgb-cal-blank', 'aria-hidden': 'true' } ) );
+			}
+			let focusable = null;
+			Object.keys( data.days || {} ).forEach( ( date ) => {
+				const status = data.days[ date ];
+				const open = 'open' === status;
+				const chosen = date === state.date;
+				const today = date === cfg.today;
+				const btn = el(
+					'button',
+					{
+						type: 'button',
+						class: 'dgb-day is-' + status + ( chosen ? ' is-selected' : '' ) + ( today ? ' is-today' : '' ),
+						'data-date': date,
+						disabled: ! open,
+						'aria-pressed': chosen ? 'true' : 'false',
+						'aria-label': longDate.format( toDate( date ) ) + ( today ? ', ' + t.today : '' ) + ', ' + ( t.status[ status ] || status ),
+						tabindex: '-1',
+					},
+					[ String( toDate( date ).getDate() ) ]
+				);
+				grid.appendChild( btn );
+				if ( open && ( ! focusable || chosen ) ) {
+					focusable = btn;
+				}
+			} );
+			if ( focusable ) {
+				focusable.tabIndex = 0;
+			}
+			return focusable;
+		}
+
+		function closePop( focus ) {
+			if ( pop.hidden ) {
+				return;
+			}
+			pop.hidden = true;
+			dateButton.setAttribute( 'aria-expanded', 'false' );
+			if ( focus ) {
+				dateButton.focus();
+			}
+		}
+
+		async function openPop() {
+			pop.hidden = false;
+			dateButton.setAttribute( 'aria-expanded', 'true' );
+			const day = await month();
+			if ( day ) {
+				day.focus();
+			}
+		}
+
+		dateButton.addEventListener( 'click', () => ( pop.hidden ? openPop() : closePop( true ) ) );
+		root.querySelector( '[data-dgb-card-prev]' ).addEventListener( 'click', () => {
+			const p = state.month.split( '-' ).map( Number );
+			const d = new Date( p[ 0 ], p[ 1 ] - 2, 1 );
+			state.month = d.getFullYear() + '-' + String( d.getMonth() + 1 ).padStart( 2, '0' );
+			month();
+		} );
+		root.querySelector( '[data-dgb-card-next]' ).addEventListener( 'click', () => {
+			const p = state.month.split( '-' ).map( Number );
+			const d = new Date( p[ 0 ], p[ 1 ], 1 );
+			state.month = d.getFullYear() + '-' + String( d.getMonth() + 1 ).padStart( 2, '0' );
+			month();
+		} );
+		grid.addEventListener( 'click', ( e ) => {
+			const btn = e.target.closest( '.dgb-day' );
+			if ( ! btn || btn.disabled ) {
+				return;
+			}
+			state.date = btn.getAttribute( 'data-date' );
+			root.querySelector( '[data-dgb-card-date-text]' ).textContent = dateText.format( toDate( state.date ) );
+			dateButton.classList.add( 'has-value' );
+			dateButton.classList.remove( 'is-missing' );
+			closePop( true );
+			changed();
+		} );
+		grid.addEventListener( 'keydown', ( e ) => {
+			const rtl = 'rtl' === window.getComputedStyle( grid ).direction;
+			const moves = { ArrowLeft: rtl ? 1 : -1, ArrowRight: rtl ? -1 : 1, ArrowUp: -7, ArrowDown: 7 };
+			if ( ! ( e.key in moves ) ) {
+				return;
+			}
+			const all = Array.prototype.slice.call( grid.querySelectorAll( '.dgb-day' ) );
+			const current = all.indexOf( document.activeElement );
+			if ( current < 0 ) {
+				return;
+			}
+			e.preventDefault();
+			for ( let i = current + moves[ e.key ]; i >= 0 && i < all.length; i += moves[ e.key ] ) {
+				if ( ! all[ i ].disabled ) {
+					all.forEach( ( b ) => ( b.tabIndex = -1 ) );
+					all[ i ].tabIndex = 0;
+					all[ i ].focus();
+					break;
+				}
+			}
+		} );
+		pop.addEventListener( 'keydown', ( e ) => {
+			if ( 'Escape' === e.key ) {
+				e.stopPropagation();
+				closePop( true );
+			}
+		} );
+		document.addEventListener( 'click', ( e ) => {
+			if ( ! pop.hidden && ! pop.contains( e.target ) && ! dateButton.contains( e.target ) ) {
+				closePop( false );
+			}
+		} );
+
+		/* Steppers, options and pickup. */
+		form.addEventListener( 'click', ( e ) => {
+			const btn = e.target.closest( '[data-dgb-card-inc], [data-dgb-card-dec]' );
+			if ( ! btn ) {
+				return;
+			}
+			const input = field( btn.getAttribute( 'data-dgb-card-inc' ) || btn.getAttribute( 'data-dgb-card-dec' ) );
+			const min = parseInt( input.min, 10 ) || 0;
+			const max = parseInt( input.max, 10 ) || 50;
+			input.value = String( Math.max( min, Math.min( max, ( parseInt( input.value, 10 ) || 0 ) + ( btn.hasAttribute( 'data-dgb-card-inc' ) ? 1 : -1 ) ) ) );
+			changed();
+		} );
+		form.addEventListener( 'change', changed );
+
+		/* Check availability: the booking form opens with these values (step 2 when the trip is complete). */
+		form.addEventListener( 'submit', ( e ) => {
+			e.preventDefault();
+			const button = root.querySelector( '[data-dgb-card-book]' );
+			if ( ! state.date ) {
+				dateButton.classList.add( 'is-missing' );
+			}
+			if ( ! window.dgbBooking.open( cfg.product, values(), button ) ) {
+				window.location.href = cfg.url + ( cfg.url.indexOf( '?' ) < 0 ? '?' : '&' ) + 'book=1';
+			}
+		} );
+
+		changed();
+		root.classList.add( 'is-ready' );
+	}
+
 	function start() {
 		Array.prototype.forEach.call( document.querySelectorAll( '[data-dgb-widget]' ), init );
+		Array.prototype.forEach.call( document.querySelectorAll( '[data-dgb-card]' ), initCard );
 
 		// Triggers anywhere on the page: links to #book or #dgb-book, class dgb-open, data-dgb-open="{tour ID}".
 		document.addEventListener( 'click', ( e ) => {

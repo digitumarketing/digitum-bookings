@@ -20,6 +20,10 @@
     "fields": {
       "type": "string",
       "default": ""
+    },
+    "style": {
+      "type": "string",
+      "default": "list"
     }
   },
   "supports": {

@@ -71,7 +71,19 @@ final class TourFactsWidget extends \Elementor\Widget_Base {
 				'label'       => __( 'Facts', 'digitum-bookings' ),
 				'type'        => \Elementor\Controls_Manager::TEXT,
 				'default'     => '',
-				'description' => __( 'Comma-separated, in order: duration, basis, capacity, age, licence, pickup, meeting_point, sessions. Empty shows all.', 'digitum-bookings' ),
+				'description' => __( 'Comma-separated, in order: duration, basis, capacity, age, licence, pickup, meeting_point, sessions. Chips: duration, seats, age, licence, pickup. Empty shows all.', 'digitum-bookings' ),
+			)
+		);
+		$this->add_control(
+			'style',
+			array(
+				'label'   => __( 'Style', 'digitum-bookings' ),
+				'type'    => \Elementor\Controls_Manager::SELECT,
+				'default' => 'list',
+				'options' => array(
+					'list'  => __( 'List', 'digitum-bookings' ),
+					'chips' => __( 'Chips', 'digitum-bookings' ),
+				),
 			)
 		);
 		$this->end_controls_section();
@@ -84,6 +96,7 @@ final class TourFactsWidget extends \Elementor\Widget_Base {
 		$s       = $this->get_settings_for_display();
 		$outputs = ElementorIntegration::outputs();
 		$id      = $outputs ? $outputs->tour_id( $s['product_id'] ?? 0 ) : 0;
-		echo $outputs ? $outputs->tour_facts( $id, TourOutputs::fields( (string) ( $s['fields'] ?? '' ) ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- TourOutputs escapes its output.
+		$chips   = 'chips' === ( $s['style'] ?? 'list' );
+		echo $outputs ? $outputs->tour_facts( $id, TourOutputs::fields( (string) ( $s['fields'] ?? '' ), $chips ), $chips ? 'chips' : 'list' ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- TourOutputs escapes its output.
 	}
 }
