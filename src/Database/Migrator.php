@@ -15,6 +15,7 @@ use Digitum\Bookings\Database\Migrations\Migration_1_3_0;
 use Digitum\Bookings\Database\Migrations\Migration_1_4_0;
 use Digitum\Bookings\Database\Migrations\Migration_1_5_0;
 use Digitum\Bookings\Database\Migrations\Migration_1_6_0;
+use Digitum\Bookings\Database\Migrations\Migration_1_7_0;
 
 defined( 'ABSPATH' ) || exit;
 

@@ -1240,7 +1240,7 @@ html.dgb-lock body {
 
 .dgb-w.dgb-bc {
 	--dgb-success: #15803d;
-	--dgb-whatsapp: #128c4a;
+	--dgb-whatsapp: #0f7a40;
 
 	position: relative;
 	display: flex;
@@ -1254,6 +1254,11 @@ html.dgb-lock body {
 	border-radius: 16px;
 	background: var(--dgb-bg);
 	box-shadow: 0 10px 30px rgba(28, 20, 16, 0.08);
+	font-size: var(--dgb-card-size, 15px);
+}
+
+.dgb-w.dgb-bc :is(button, input, select, a) {
+	font-size: inherit;
 }
 
 /* Sticky on computers. In Elementor the widget's own wrapper sticks, since the card fills it. */
@@ -1282,7 +1287,7 @@ html.dgb-lock body {
 .dgb-w .dgb-bc-title {
 	margin: 0;
 	color: var(--dgb-ink);
-	font-size: 1.25rem;
+	font-size: 1.35em;
 	line-height: 1.25;
 }
 
@@ -1379,20 +1384,15 @@ html.dgb-lock body {
 }
 
 /* Option pills. */
-.dgb-bc-pills {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
-	gap: 8px;
-}
-
 .dgb-bc-pills legend {
-	float: left;
-	width: 100%;
 	margin-bottom: 6px;
 }
 
-.dgb-bc-pills legend + * {
-	clear: both;
+.dgb-bc-pill-row {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+	gap: 8px;
+	padding-top: 4px;
 }
 
 .dgb-bc-pill {
@@ -1543,7 +1543,7 @@ html.dgb-lock body {
 
 .dgb-bc-total strong {
 	color: var(--dgb-ink);
-	font-size: 1.35rem;
+	font-size: 1.45em;
 }
 
 .dgb-bc-actions {
@@ -1632,7 +1632,7 @@ html.dgb-lock body {
 	width: 48px;
 	height: 48px;
 	border-radius: 50%;
-	background: #128c4a;
+	background: #0f7a40;
 	color: #fff;
 	text-decoration: none;
 }

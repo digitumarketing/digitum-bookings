@@ -82,11 +82,8 @@ final class BookingCard {
 			is_array( $atts ) ? $atts : array(),
 			'dgb_booking_card'
 		);
-		$trust = null;
-		if ( null !== $atts['trust1'] || null !== $atts['trust2'] || null !== $atts['trust3'] ) {
-			$trust = array( (string) $atts['trust1'], (string) $atts['trust2'], (string) $atts['trust3'] );
-		}
-		$id = '' !== $atts['product'] ? absint( $atts['product'] ) : (int) get_the_ID();
+		$trust = array( $atts['trust1'], $atts['trust2'], $atts['trust3'] );
+		$id    = '' !== $atts['product'] ? absint( $atts['product'] ) : (int) get_the_ID();
 		return $this->render(
 			$id,
 			array(
@@ -204,12 +201,18 @@ final class BookingCard {
 		$methods  = array_keys( ( new PaymentMethods( $this->settings ) )->available() );
 		$arrival  = array( 'arrival' ) === $methods;
 		$deposits = null !== $config->deposit_percent;
-		$trust    = is_array( $options['trust'] ) ? $options['trust'] : array(
+		// Trust lines: each one given replaces its default; null keeps the default.
+		$defaults = array(
 			(string) $all['general']['cancellation'],
 			'',
 			in_array( 'arrival', $methods, true ) ? ( $deposits ? __( 'Cash or card on arrival', 'digitum-bookings' ) : __( 'Cash or card on arrival, no deposit', 'digitum-bookings' ) ) : '',
 		);
-		$trust    = array_values( array_filter( array_map( static fn( $l ) => trim( wp_strip_all_tags( (string) $l ) ), $trust ), static fn( $l ) => '' !== $l ) );
+		$given    = is_array( $options['trust'] ) ? array_values( $options['trust'] ) : array();
+		$trust    = array();
+		foreach ( $defaults as $i => $line ) {
+			$trust[] = isset( $given[ $i ] ) && null !== $given[ $i ] ? ( '-' === trim( (string) $given[ $i ] ) ? '' : (string) $given[ $i ] ) : $line;
+		}
+		$trust = array_values( array_filter( array_map( static fn( $l ) => trim( wp_strip_all_tags( (string) $l ) ), $trust ), static fn( $l ) => '' !== $l ) );
 
 		$title = trim( (string) $options['title'] );
 		if ( '' === $title ) {

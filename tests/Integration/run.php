@@ -1815,6 +1815,65 @@ if ( '' !== $site_reviews && scenario( 'O' ) ) {
 }
 
 /* -------------------------------------------------------------------- */
+if ( scenario( 'P' ) ) {
+	echo "\nScenario P: booking card, modal, tour price, gallery and chips (v0.9)\n";
+	$site = make_site( 'v09-card' );
+	step( $site, 'install' );
+	step( $site, 'activate' );
+	$demo  = step( $site, 'demo_setup' );
+	$buggy = $demo['tours']['buggy'];
+	$safari = $demo['tours']['safari'];
+
+	$p = step( $site, 'tour_parts', array( 'post' => $buggy['id'] ) );
+	check( '1.7.0' === $p['schema'], 'schema 1.7.0 (option badges)' );
+	check( 1 === $p['widgets'] && str_contains( $p['html'], 'class="dgb-w is-modal"' ) && ! str_contains( $p['footer'], 'data-dgb-widget' ), 'default display is the modal: the widget in the content is the teaser, nothing added in the footer' );
+	check( true === ( $p['config']['modal'] ?? null ), 'the widget script runs in modal mode' );
+
+	// Unit names and a badge, then a page built from the card (no widget in the content).
+	step( $site, 'set_meta', array( 'post' => $buggy['id'], 'meta' => array( '_dgb_unit_name' => 'buggy', '_dgb_unit_name_plural' => 'buggies' ) ) );
+	step( $site, 'variant_update', array( 'id' => $buggy['variants']['1 hour'], 'values' => array( 'badge' => 'Most picked' ) ) );
+	step( $site, 'settings_merge', array( 'values' => array( 'general' => array( 'auto_insert' => false ) ) ) );
+	$p = step( $site, 'tour_parts', array( 'post' => $buggy['id'], 'content' => '[dgb_booking_card][dgb_booking_card][dgb_price][dgb_tour_facts style="chips"][dgb_gallery]' ) );
+	check( 1 === $p['widgets'] && str_contains( $p['footer'], 'class="dgb-w is-modal is-hidden"' ), 'card only: the modal is printed once, in the footer' );
+	check( 2 === substr_count( $p['html'], 'data-dgb-card aria-labelledby' ), 'two cards on the page, still one modal' );
+	check( str_contains( $p['html'], 'Book this buggy' ) && str_contains( $p['html'], 'Buggies · 2 people each' ) && str_contains( $p['html'], 'Most picked' ), 'card: title, quantity label and option badge from the tour' );
+	$pickups = array_column( (array) ( $p['card_config']['pickups'] ?? array() ), 'label' );
+	check( array( 'Meet at Sample Meeting Point, free', 'Hotel pickup, North Zone, AED 300.00', 'Hotel pickup, East Zone, AED 300.00' ) === $pickups, 'card pickup choices: meeting point free, allowed zones with the pickup price (no Far Zone)' );
+	check( '15550100' === ( $p['card_config']['whatsapp'] ?? '' ) && str_contains( $p['html'], 'https://wa.me/15550100' ), 'WhatsApp link with the business phone' );
+	check( str_contains( $p['html'], 'Free cancellation up to 24 hours before the session.' ) && str_contains( $p['html'], 'Cash or card on arrival' ), 'trust lines default to the cancellation summary and how guests pay' );
+	check( str_contains( $p['html'], '<span class="dgb-price__amount">AED 699.00</span>' ) && str_contains( $p['html'], 'per buggy, 30 min · VAT included' ), 'tour price with basis, shortest duration and VAT' );
+	check( (bool) preg_match( '#<li class="dgb-chip dgb-chip--duration">30 min to 2 h</li><li class="dgb-chip dgb-chip--seats">2 seats</li><li class="dgb-chip dgb-chip--age">Driver 16\+</li><li class="dgb-chip dgb-chip--licence">No licence needed</li>#', $p['html'] ) && ! str_contains( $p['html'], 'dgb-chip--rating' ), 'fact chips, no rating chip' );
+	check( ! str_contains( $p['html'], 'data-dgb-gallery' ), 'gallery: nothing without images (no empty boxes)' );
+	check( 3 === substr_count( $p['html'] . $p['footer'], '<p class="dgb-credit">' ), '“Booking by Digitum” under both cards and the modal' );
+
+	// Gallery: featured image fallback, then five images with a caption.
+	step( $site, 'attach_image', array( 'post' => $safari['id'] ) );
+	$g = step( $site, 'tour_parts', array( 'post' => $safari['id'], 'content' => '[dgb_gallery][dgb_booking_card]' ) );
+	check( 1 === substr_count( $g['html'], 'dgb-gallery__item"' ) && str_contains( $g['html'], 'dgb-o dgb-gallery dgb-gallery--1"' ), 'gallery: only the featured image' );
+	check( str_contains( $g['html'], 'Book this tour' ) && str_contains( $g['html'], 'Hotel pickup, North Zone, included' ) && ! str_contains( $g['html'], 'dgb-bc-pill' ), 'per-person card: “Book this tour”, pickup included, no option pills for one option' );
+	$imgs = step( $site, 'gallery_setup', array( 'post' => $buggy['id'], 'images' => 6 ) )['ids'];
+	$g    = step( $site, 'tour_parts', array( 'post' => $buggy['id'], 'content' => '[dgb_gallery]' ) );
+	check( 5 === substr_count( $g['html'], 'dgb-gallery__item"' ) && str_contains( $g['html'], 'Sample caption' ) && str_contains( $g['html'], 'alt="Sample view 1"' ), 'gallery: first five images, caption and Media Library alt text' );
+
+	// CSV carries the badge and the unit names.
+	$csv = step( $site, 'csv_export', array( 'kind' => 'variants' ) )['rows'];
+	$col = array_search( 'badge', $csv[0], true );
+	check( false !== $col && in_array( 'Most picked', array_column( array_slice( $csv, 1 ), $col ), true ), 'CSV export of options has the badge' );
+	$csv = step( $site, 'csv_export', array( 'kind' => 'products' ) )['rows'];
+	check( in_array( 'unit_name', $csv[0], true ) && in_array( 'unit_name_plural', $csv[0], true ), 'CSV export of tours has the unit names' );
+
+	// Inline display: the form on the page, no modal; ?book=1 still gets one when the tour has no widget.
+	step( $site, 'settings_merge', array( 'values' => array( 'general' => array( 'booking_display' => 'inline', 'auto_insert' => true ) ) ) );
+	$p = step( $site, 'tour_parts', array( 'post' => $buggy['id'] ) );
+	check( 1 === $p['widgets'] && str_contains( $p['html'], 'class="dgb-w"' ) && false === ( $p['config']['modal'] ?? null ), 'inline display: the form is on the page' );
+	$p = step( $site, 'tour_parts', array( 'post' => $buggy['id'], 'content' => '[dgb_booking product="' . $buggy['id'] . '" display="teaser"]' ) );
+	check( 1 === $p['widgets'] && str_contains( $p['html'], 'is-modal' ), 'display="teaser" on the shortcode wins over the setting; still one widget' );
+	step( $site, 'settings_merge', array( 'values' => array( 'general' => array( 'auto_insert' => false ) ) ) );
+	$p = step( $site, 'tour_parts', array( 'post' => $buggy['id'], 'get' => array( 'book' => '1' ) ) );
+	check( 1 === $p['widgets'] && str_contains( $p['footer'], 'is-hidden' ), '?book=1 without a widget on the page: the modal comes from the footer' );
+}
+
+/* -------------------------------------------------------------------- */
 $stripe_mock = getenv( 'DGB_STRIPE_MOCK' ) ?: '';
 if ( '' !== $stripe_mock && scenario( 'G' ) ) {
 	echo "\nScenario G: Stripe requests match Stripe's API (stripe-mock at {$stripe_mock})\n";

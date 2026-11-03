@@ -51,6 +51,7 @@ $dgb_steps   = 'per_vehicle' === $view['mode']
 		<?php if ( count( $view['variants'] ) > 1 ) : ?>
 			<fieldset class="dgb-bc-field dgb-bc-pills">
 				<legend class="dgb-bc-label"><?php esc_html_e( 'Option', 'digitum-bookings' ); ?></legend>
+				<div class="dgb-bc-pill-row">
 				<?php foreach ( $view['variants'] as $dgb_i => $dgb_v ) : ?>
 					<label class="dgb-bc-pill">
 						<input type="radio" name="variant_id" value="<?php echo esc_attr( (string) $dgb_v['id'] ); ?>" <?php checked( 0, $dgb_i ); ?>>
@@ -63,6 +64,7 @@ $dgb_steps   = 'per_vehicle' === $view['mode']
 						<?php endif; ?>
 					</label>
 				<?php endforeach; ?>
+				</div>
 			</fieldset>
 		<?php elseif ( 1 === count( $view['variants'] ) ) : ?>
 			<input type="hidden" name="variant_id" value="<?php echo esc_attr( (string) $view['variants'][0]['id'] ); ?>">

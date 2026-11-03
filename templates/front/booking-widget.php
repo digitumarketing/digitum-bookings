@@ -53,7 +53,7 @@ $dgb_classes = 'dgb-w' . ( 'inline' !== $dgb_display ? ' is-modal' : '' ) . ( 'h
 
 	<div class="dgb-panel" id="<?php echo esc_attr( $dgb_id ); ?>-panel" data-dgb-panel>
 		<div class="dgb-head">
-			<h2 class="dgb-title" id="<?php echo esc_attr( $dgb_id ); ?>-title" tabindex="-1"><?php echo $dgb_enquiry ? esc_html__( 'Request a quote', 'digitum-bookings' ) : esc_html__( 'Book this tour', 'digitum-bookings' ); ?></h2>
+			<h2 class="dgb-title" id="<?php echo esc_attr( $dgb_id ); ?>-title" tabindex="-1"><?php echo $dgb_enquiry ? esc_html__( 'Request a quote', 'digitum-bookings' ) : esc_html( $view['heading'] ?? __( 'Book this tour', 'digitum-bookings' ) ); ?></h2>
 			<p class="dgb-from">
 				<?php if ( '' !== $view['from'] && ! $dgb_enquiry ) : ?>
 					<?php esc_html_e( 'From', 'digitum-bookings' ); ?> <strong><?php echo esc_html( $view['from'] ); ?></strong><?php echo $view['from_second'] ?? ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in SecondCurrency::html(). ?> <?php echo esc_html( $view['basis'] ); ?>

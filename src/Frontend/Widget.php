@@ -253,7 +253,9 @@ final class Widget {
 			'seats'        => $config->seats_per_unit,
 			'from'         => null === $from ? '' : Format::money( $from, $currency ),
 			'from_second'  => null === $from ? '' : ( new SecondCurrency( $this->settings ) )->html( $from ),
-			'basis'        => self::basis( $config->mode ),
+			'basis'        => '' !== TourWords::basis( $product ) ? TourWords::basis( $product ) : self::basis( $config->mode ),
+			/* translators: %s: what is booked, e.g. buggy or tour. */
+			'heading'      => sprintf( __( 'Book this %s', 'digitum-bookings' ), TourWords::noun( $product ) ),
 			'variants'     => $variants,
 			'currency'     => $currency,
 			'policy'       => $policy,

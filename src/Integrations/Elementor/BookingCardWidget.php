@@ -103,7 +103,7 @@ final class BookingCardWidget extends \Elementor\Widget_Base {
 					'label'       => sprintf( __( 'Trust line %d', 'digitum-bookings' ), $n ),
 					'type'        => \Elementor\Controls_Manager::TEXT,
 					'default'     => '',
-					'description' => 1 === $n ? __( 'Leave all three empty for the defaults: the cancellation summary (Settings › General) and how guests pay. Empty lines are hidden.', 'digitum-bookings' ) : '',
+					'description' => 1 === $n ? __( 'Empty: the default (line 1 the cancellation summary from Settings › General, line 3 how guests pay, line 2 none). Type - to hide a line.', 'digitum-bookings' ) : '',
 				)
 			);
 		}
@@ -121,16 +121,17 @@ final class BookingCardWidget extends \Elementor\Widget_Base {
 	 * Output.
 	 */
 	protected function render() {
-		$s     = $this->get_settings_for_display();
-		$id    = ! empty( $s['product_id'] ) ? absint( $s['product_id'] ) : (int) get_the_ID();
-		$trust = array( (string) ( $s['trust_1'] ?? '' ), (string) ( $s['trust_2'] ?? '' ), (string) ( $s['trust_3'] ?? '' ) );
+		$s  = $this->get_settings_for_display();
+		$id = ! empty( $s['product_id'] ) ? absint( $s['product_id'] ) : (int) get_the_ID();
+		// An empty control keeps that line's default.
+		$trust = array_map( static fn( $n ) => '' === trim( (string) ( $s[ 'trust_' . $n ] ?? '' ) ) ? null : (string) $s[ 'trust_' . $n ], array( 1, 2, 3 ) );
 		$html  = ElementorIntegration::card(
 			$id,
 			array(
 				'title'    => (string) ( $s['title'] ?? '' ),
 				'sticky'   => 'yes' === ( $s['sticky'] ?? 'yes' ),
 				'whatsapp' => 'yes' === ( $s['whatsapp'] ?? 'yes' ),
-				'trust'    => '' === implode( '', $trust ) ? null : $trust,
+				'trust'    => $trust,
 			)
 		);
 		echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the templates escape their output.

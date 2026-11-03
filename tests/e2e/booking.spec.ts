@@ -201,7 +201,7 @@ test.describe( 'phone', () => {
 		const scrolled = await page.evaluate( () => window.scrollY );
 
 		await sticky.click();
-		const sheet = page.getByRole( 'dialog', { name: 'Book this tour' } );
+		const sheet = page.getByRole( 'dialog', { name: 'Book this buggy' } );
 		await expect( sheet ).toBeVisible();
 		await expect( w.locator( '[data-dgb-progress]' ) ).toHaveText( 'Step 1 of 3: Your trip' );
 		await expect( w.locator( '[data-step="details"]' ) ).toBeHidden();

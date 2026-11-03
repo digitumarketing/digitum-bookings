@@ -47,6 +47,40 @@ if ( isset( $_COOKIE['dgb_test_locale'] ) && 'ar' === $_COOKIE['dgb_test_locale'
 		0
 	);
 }
+// Booking form in a modal (v0.9): cookie dgb_test_modal = 1.
+if ( isset( $_COOKIE['dgb_test_modal'] ) || isset( $_COOKIE['dgb_test_card'] ) ) {
+	add_filter(
+		'option_dgb_settings',
+		static function ( $value ) {
+			$value            = is_array( $value ) ? $value : array();
+			$value['general'] = array_merge( (array) ( $value['general'] ?? array() ), array( 'booking_display' => 'modal' ) );
+			if ( isset( $_COOKIE['dgb_test_card'] ) ) {
+				$value['general']['auto_insert'] = false;
+			}
+			return $value;
+		},
+		20
+	);
+}
+// A tour page built like the approved design (v0.9): cookie dgb_test_card = 1. Hero with price, chips and
+// trigger buttons, a header "Book now" link, the gallery, and the booking card in a sidebar. No booking widget in
+// the content, so the modal comes from the footer.
+if ( isset( $_COOKIE['dgb_test_card'] ) ) {
+	add_filter(
+		'the_content',
+		static function ( $content ) {
+			if ( ! is_singular() || ! in_the_loop() ) {
+				return $content;
+			}
+			return '<style>.qa-layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:32px;align-items:start}.qa-hero{padding:24px;border-radius:16px;background:#1c1410;color:#fff}@media (max-width:1024px){.qa-layout{grid-template-columns:1fr}}</style>'
+				. '<p><a class="qa-header-book" href="#book">Book now</a> <button type="button" class="dgb-open qa-class-open">Open by class</button> <span data-dgb-open="' . get_the_ID() . '" class="qa-data-open" role="button" tabindex="0">Open by data</span></p>'
+				. '<div class="qa-hero">' . do_shortcode( '[dgb_price]' ) . do_shortcode( '[dgb_tour_facts style="chips"]' ) . '<p><a class="qa-hero-book" href="#dgb-book">Check availability</a></p></div>'
+				. do_shortcode( '[dgb_gallery]' )
+				. '<div class="qa-layout"><div class="qa-main">' . $content . str_repeat( '<p>Tour description paragraph for scrolling.</p>', 30 ) . '</div><aside id="book" class="qa-side">' . do_shortcode( '[dgb_booking_card trust2="Confirmed in minutes"]' ) . '</aside></div>';
+		},
+		12 // After wpautop and do_shortcode, like shortcodes placed in the content.
+	);
+}
 // Second display currency on request (v0.8): cookie dgb_test_second = "CODE:rate".
 if ( isset( $_COOKIE['dgb_test_second'] ) && preg_match( '/^([A-Z]{3}):([0-9.]+)$/', (string) $_COOKIE['dgb_test_second'], $dgb_m ) ) {
 	add_filter(
@@ -116,6 +150,16 @@ step(
 		),
 	)
 );
+
+// The browser tests of 0.8 run with the form on the page; the modal, card and tour page widgets (0.9) are
+// switched on per browser with cookies (dgb_test_modal, dgb_test_card).
+step( $site, 'settings_merge', array( 'values' => array( 'general' => array( 'booking_display' => 'inline' ) ) ) );
+$buggy_id = $demo['tours']['buggy']['id'];
+step( $site, 'set_meta', array( 'post' => $buggy_id, 'meta' => array( '_dgb_unit_name' => 'buggy', '_dgb_unit_name_plural' => 'buggies' ) ) );
+step( $site, 'variant_update', array( 'id' => $demo['tours']['buggy']['variants']['1 hour'], 'values' => array( 'badge' => 'Most picked' ) ) );
+step( $site, 'gallery_setup', array( 'post' => $buggy_id, 'images' => 5 ) );
+// One session for the sample safari, so a complete trip from the card opens the modal on step 2.
+step( $site, 'variant_update', array( 'table' => 'sessions', 'id' => $demo['tours']['safari']['sessions']['Morning'], 'values' => array( 'active' => 0 ) ) );
 
 write_router( $site );
 

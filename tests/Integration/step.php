@@ -363,6 +363,28 @@ switch ( $dgb_action ) {
 		$dgb_out['html']        = $dgb_html;
 		break;
 
+	case 'tour_parts':
+		// A tour page with extra content (shortcodes), and what the footer adds (the booking modal).
+		global $wp_query, $wp_the_query;
+		$_GET         = $dgb_args['get'] ?? array();
+		$dgb_id       = (int) $dgb_args['post'];
+		$wp_query     = new WP_Query( array( 'p' => $dgb_id, 'post_type' => 'any' ) );
+		$wp_the_query = $wp_query;
+		do_action( 'wp', $GLOBALS['wp'] );
+		do_action( 'wp_enqueue_scripts' );
+		$wp_query->the_post();
+		$dgb_html = apply_filters( 'the_content', get_the_content() . ( $dgb_args['content'] ?? '' ) );
+		ob_start();
+		do_action( 'wp_footer' );
+		$dgb_footer             = (string) ob_get_clean();
+		$dgb_out['html']        = $dgb_html;
+		$dgb_out['footer']      = $dgb_footer;
+		$dgb_out['widgets']     = substr_count( $dgb_html . $dgb_footer, 'data-dgb-widget' );
+		$dgb_out['card_config'] = preg_match( '#<script type="application/json" data-dgb-card-config>(.*?)</script>#s', $dgb_html, $dgb_m ) ? json_decode( $dgb_m[1], true ) : null;
+		$dgb_out['config']      = preg_match( '#<script type="application/json" data-dgb-config>(.*?)</script>#s', $dgb_html . $dgb_footer, $dgb_m ) ? json_decode( $dgb_m[1], true ) : null;
+		$dgb_out['schema']      = get_option( 'dgb_db_version' );
+		break;
+
 	case 'payments_setup':
 		$dgb_settings = \Digitum\Bookings\Plugin::instance()->settings();
 		$dgb_all      = $dgb_settings->all();
@@ -779,6 +801,11 @@ switch ( $dgb_action ) {
 		$dgb_out['text'] = ( new \Digitum\Bookings\Services\LlmsTxt( $dgb_plugin->settings(), $dgb_plugin->product_type(), $dgb_plugin->quotes() ) )->content();
 		break;
 
+	case 'variant_update':
+		global $wpdb;
+		$wpdb->update( \Digitum\Bookings\Database\Schema::table( $dgb_args['table'] ?? 'variants' ), $dgb_args['values'], array( 'id' => (int) $dgb_args['id'] ) );
+		break;
+
 	case 'set_meta':
 		foreach ( $dgb_args['meta'] as $dgb_key => $dgb_value ) {
 			update_post_meta( (int) $dgb_args['post'], $dgb_key, $dgb_value );
@@ -792,6 +819,31 @@ switch ( $dgb_action ) {
 		set_post_thumbnail( (int) $dgb_args['post'], $dgb_att );
 		$dgb_out['id']  = $dgb_att;
 		$dgb_out['url'] = wp_get_attachment_image_url( $dgb_att, 'full' );
+		break;
+
+	case 'gallery_setup':
+		// Gallery images (coloured, 800 × 600 when GD is there) with captions and alt text; images: count.
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+		$dgb_ids   = array();
+		$dgb_count = (int) ( $dgb_args['images'] ?? 5 );
+		for ( $dgb_i = 0; $dgb_i < $dgb_count; $dgb_i++ ) {
+			$dgb_png = base64_decode( 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=' );
+			if ( function_exists( 'imagecreatetruecolor' ) ) {
+				$dgb_img = imagecreatetruecolor( 800, 600 );
+				imagefill( $dgb_img, 0, 0, imagecolorallocate( $dgb_img, 180 - $dgb_i * 25, 100 + $dgb_i * 20, 60 + $dgb_i * 30 ) );
+				ob_start();
+				imagepng( $dgb_img );
+				$dgb_png = (string) ob_get_clean();
+			}
+			$dgb_upload = wp_upload_bits( 'gallery-' . (int) $dgb_args['post'] . '-' . $dgb_i . '.png', null, $dgb_png );
+			$dgb_att    = wp_insert_attachment( array( 'post_mime_type' => 'image/png', 'post_title' => 'Gallery ' . ( $dgb_i + 1 ), 'post_status' => 'inherit' ), $dgb_upload['file'], (int) $dgb_args['post'] );
+			wp_update_attachment_metadata( $dgb_att, wp_generate_attachment_metadata( $dgb_att, $dgb_upload['file'] ) );
+			update_post_meta( $dgb_att, '_wp_attachment_image_alt', 'Sample view ' . ( $dgb_i + 1 ) );
+			$dgb_ids[] = $dgb_att;
+		}
+		update_post_meta( (int) $dgb_args['post'], \Digitum\Bookings\Domain\Product::META_PREFIX . 'gallery', implode( ',', $dgb_ids ) );
+		\Digitum\Bookings\Frontend\Gallery::save_captions( (int) $dgb_args['post'], array( $dgb_ids[0] => 'Sample caption' ) );
+		$dgb_out['ids'] = $dgb_ids;
 		break;
 
 	case 'traveler_scan':
