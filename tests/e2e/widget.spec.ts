@@ -39,9 +39,9 @@ test.describe( 'widget', () => {
 				expect( d.shadow ).toBe( 'none' );
 				expect( d.padding ).toBe( '0px' );
 			}
-			const [ selected ] = await look( '.dgb-day.is-selected' );
-			expect( selected.bg ).toBe( 'rgb(180, 83, 9)' );
-			expect( selected.color ).toBe( 'rgb(255, 255, 255)' );
+			// Colours change with a short transition: wait until it has finished.
+			await expect.poll( async () => ( await look( '.dgb-day.is-selected' ) )[ 0 ].bg ).toBe( 'rgb(180, 83, 9)' );
+			await expect.poll( async () => ( await look( '.dgb-day.is-selected' ) )[ 0 ].color ).toBe( 'rgb(255, 255, 255)' );
 
 			for ( const sel of [ '[data-dgb-prev]', '[data-dgb-next-month]', '[data-dgb-inc="adults"]', '[data-dgb-dec="adults"]', '[data-dgb-next]' ] ) {
 				const [ b ] = await look( sel );
@@ -53,12 +53,14 @@ test.describe( 'widget', () => {
 			// Hover and focus keep the plugin's look too.
 			const inc = scope.locator( '[data-dgb-inc="adults"]' );
 			await inc.hover();
+			await page.waitForTimeout( 300 );
 			const [ hovered ] = await look( '[data-dgb-inc="adults"]' );
 			expect( hovered.bg ).not.toBe( PINK );
 			expect( hovered.bg ).not.toBe( 'rgb(124, 45, 18)' );
 			expect( hovered.border ).not.toBe( PINK );
 			const day = scope.locator( '.dgb-day:not(:disabled):not(.is-selected)' ).first();
 			await day.hover();
+			await page.waitForTimeout( 300 );
 			const hoverBg = await day.evaluate( ( n ) => getComputedStyle( n ).backgroundColor );
 			expect( [ PINK, 'rgb(124, 45, 18)', 'rgb(194, 65, 12)' ] ).not.toContain( hoverBg );
 
