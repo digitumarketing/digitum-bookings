@@ -196,6 +196,7 @@ test.describe( 'phone', () => {
 		const sticky = page.locator( '[data-dgb-sticky] [data-dgb-open]' );
 		await expect( sticky ).toBeVisible();
 		await page.evaluate( () => window.scrollTo( 0, 300 ) );
+		const scrolled = await page.evaluate( () => window.scrollY );
 
 		await sticky.click();
 		const sheet = page.getByRole( 'dialog', { name: 'Book this tour' } );
@@ -210,7 +211,7 @@ test.describe( 'phone', () => {
 		await page.keyboard.press( 'Escape' );
 		await expect( sheet ).toBeHidden();
 		await expect( sticky ).toBeFocused();
-		expect( await page.evaluate( () => window.scrollY ) ).toBe( 300 );
+		expect( await page.evaluate( () => window.scrollY ) ).toBe( scrolled );
 		await sticky.click();
 
 		const next = w.locator( '[data-dgb-next]' );
