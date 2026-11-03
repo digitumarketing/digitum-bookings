@@ -28,10 +28,15 @@ if ( 'per_vehicle' === $view['mode'] ) {
 }
 $dgb_has_pickup = 'none' !== $view['policy'] || ! empty( $view['point'] );
 ?>
-<section class="dgb-w" id="<?php echo esc_attr( $dgb_id ); ?>" data-dgb-widget aria-labelledby="<?php echo esc_attr( $dgb_id ); ?>-title" style="--dgb-accent: <?php echo esc_attr( $view['accent'] ); ?>">
+<?php
+$dgb_display = $view['display'] ?? 'inline';
+$dgb_classes = 'dgb-w' . ( 'inline' !== $dgb_display ? ' is-modal' : '' ) . ( 'hidden' === $dgb_display ? ' is-hidden' : '' );
+?>
+<section class="<?php echo esc_attr( $dgb_classes ); ?>" id="<?php echo esc_attr( $dgb_id ); ?>" data-dgb-widget data-dgb-product="<?php echo esc_attr( (string) $view['product_id'] ); ?>" aria-labelledby="<?php echo esc_attr( $dgb_id ); ?>-title" style="--dgb-accent: <?php echo esc_attr( $view['accent'] ); ?>">
 	<style>
 		.dgb-w{--dgb-accent:#B45309}.dgb-sticky,.dgb-teaser{display:none}.dgb-cal-grid{min-height:300px}.dgb-sessions{min-height:72px}
 		@media (max-width:781px){.dgb-teaser{display:flex}.dgb-w .dgb-panel{display:none}.dgb-w .dgb-panel.is-open{display:flex}.dgb-sticky{display:flex}}
+		.dgb-w.is-modal .dgb-teaser{display:flex}.dgb-w.is-modal .dgb-panel{display:none}.dgb-w.is-modal .dgb-panel.is-open{display:flex}.dgb-w.is-hidden .dgb-teaser{display:none}html.dgb-modal-open .dgb-sticky{display:none}
 	</style>
 	<script type="application/json" data-dgb-config><?php echo wp_json_encode( $view['script'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE ); ?></script>
 

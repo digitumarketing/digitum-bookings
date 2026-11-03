@@ -117,6 +117,16 @@ final class Settings {
 					'text'    => __( 'Add the booking widget to single tour pages automatically', 'digitum-bookings' ),
 					'default' => true,
 				),
+				'booking_display'  => array(
+					'type'    => 'select',
+					'label'   => __( 'Booking form display', 'digitum-bookings' ),
+					'options' => array(
+						'modal'  => __( 'Modal on all devices: the form opens over the page (bottom sheet on phones)', 'digitum-bookings' ),
+						'inline' => __( 'Inline: the form sits on the page', 'digitum-bookings' ),
+					),
+					'help'    => __( 'With the modal, the booking card, the price button of the booking widget, any link to #book and the mobile bar open the form.', 'digitum-bookings' ),
+					'default' => 'modal',
+				),
 				'stepped_desktop'  => array(
 					'type'    => 'checkbox',
 					'label'   => __( 'Stepped layout on desktop', 'digitum-bookings' ),

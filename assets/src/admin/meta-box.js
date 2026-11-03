@@ -72,7 +72,7 @@
 		const checked = modeInputs.find( ( input ) => input.checked );
 		const mode = checked ? checked.value : '';
 		modeFields.forEach( ( field ) => {
-			field.hidden = field.getAttribute( 'data-dgb-show-when' ) !== mode;
+			field.hidden = ! field.getAttribute( 'data-dgb-show-when' ).split( ' ' ).includes( mode );
 		} );
 		modeInputs.forEach( ( input ) => {
 			input.closest( '.dgb-card' ).classList.toggle( 'is-selected', input.checked );
@@ -119,6 +119,88 @@
 			}
 		} );
 	} );
+
+	/* Tour gallery box: add from the Media Library, captions, order, remove. */
+	const gallery = document.querySelector( '[data-dgb-gallery-box]' );
+	if ( gallery ) {
+		const list = gallery.querySelector( '[data-dgb-gallery-list]' );
+		const ids = gallery.querySelector( '[data-dgb-gallery-ids]' );
+		const add = gallery.querySelector( '[data-dgb-gallery-add]' );
+		const max = Number( gallery.getAttribute( 'data-max' ) ) || 5;
+		const sync = () => {
+			ids.value = Array.from( list.children ).map( ( li ) => li.getAttribute( 'data-id' ) ).join( ',' );
+			add.disabled = list.children.length >= max;
+		};
+		const item = ( attachment ) => {
+			const li = document.createElement( 'li' );
+			li.setAttribute( 'data-id', String( attachment.id ) );
+			const sizes = attachment.sizes || {};
+			const img = document.createElement( 'img' );
+			img.src = ( sizes.thumbnail || sizes.full || {} ).url || attachment.url;
+			img.alt = attachment.alt || '';
+			img.width = 150;
+			img.height = 150;
+			const label = document.createElement( 'label' );
+			const input = document.createElement( 'input' );
+			input.type = 'text';
+			input.name = 'dgb[gallery_captions][' + attachment.id + ']';
+			input.maxLength = 80;
+			input.placeholder = gallery.getAttribute( 'data-caption-label' );
+			input.setAttribute( 'aria-label', gallery.getAttribute( 'data-caption-label' ) );
+			input.value = attachment.caption || '';
+			label.appendChild( input );
+			const up = document.createElement( 'button' );
+			up.type = 'button';
+			up.className = 'button-link';
+			up.setAttribute( 'data-dgb-gallery-up', '' );
+			up.textContent = gallery.getAttribute( 'data-up-label' );
+			const remove = document.createElement( 'button' );
+			remove.type = 'button';
+			remove.className = 'button-link button-link-delete';
+			remove.setAttribute( 'data-dgb-gallery-remove', '' );
+			remove.textContent = gallery.getAttribute( 'data-remove-label' );
+			li.append( img, label, up, remove );
+			return li;
+		};
+		list.addEventListener( 'click', ( e ) => {
+			const li = e.target.closest( 'li' );
+			if ( ! li ) {
+				return;
+			}
+			if ( e.target.closest( '[data-dgb-gallery-remove]' ) ) {
+				li.remove();
+				add.focus();
+			} else if ( e.target.closest( '[data-dgb-gallery-up]' ) && li.previousElementSibling ) {
+				list.insertBefore( li, li.previousElementSibling );
+				e.target.focus();
+			}
+			sync();
+		} );
+		if ( window.wp && window.wp.media ) {
+			add.addEventListener( 'click', () => {
+				const frame = window.wp.media( {
+					title: gallery.getAttribute( 'data-title' ),
+					button: { text: gallery.getAttribute( 'data-button' ) },
+					library: { type: 'image' },
+					multiple: 'add',
+				} );
+				frame.on( 'select', () => {
+					const have = Array.from( list.children ).map( ( li ) => li.getAttribute( 'data-id' ) );
+					frame.state().get( 'selection' ).toJSON().forEach( ( a ) => {
+						if ( list.children.length < max && ! have.includes( String( a.id ) ) ) {
+							list.appendChild( item( a ) );
+						}
+					} );
+					sync();
+					add.focus();
+				} );
+				frame.open();
+			} );
+		} else {
+			add.hidden = true;
+		}
+		sync();
+	}
 
 	/* Gallery picker (the IDs field works without it). */
 	box.querySelectorAll( '[data-dgb-gallery]' ).forEach( ( button ) => {

@@ -58,7 +58,8 @@ final class BookingBlock {
 	 * @param array<string, mixed> $attributes Block attributes.
 	 */
 	public function render( $attributes ): string {
-		$id = isset( $attributes['productId'] ) ? absint( $attributes['productId'] ) : 0;
-		return $this->widget->render( $id ? $id : (int) get_the_ID() );
+		$id      = isset( $attributes['productId'] ) ? absint( $attributes['productId'] ) : 0;
+		$display = isset( $attributes['display'] ) ? sanitize_key( (string) $attributes['display'] ) : '';
+		return $this->widget->render( $id ? $id : (int) get_the_ID(), $display );
 	}
 }

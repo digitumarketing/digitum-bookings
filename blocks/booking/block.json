@@ -12,6 +12,10 @@
     "productId": {
       "type": "number",
       "default": 0
+    },
+    "display": {
+      "type": "string",
+      "default": ""
     }
   },
   "supports": {

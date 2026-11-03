@@ -162,6 +162,15 @@ final class Product {
 				'type'    => 'ids',
 				'default' => '',
 			),
+			// What one unit is called: "buggy" / "buggies". Empty: vehicle (per vehicle) or car (per group).
+			'unit_name'        => array(
+				'type'    => 'line',
+				'default' => '',
+			),
+			'unit_name_plural' => array(
+				'type'    => 'line',
+				'default' => '',
+			),
 		);
 	}
 
@@ -226,6 +235,9 @@ final class Product {
 				$ids = is_array( $value ) ? $value : preg_split( '/[\s,]+/', is_scalar( $value ) ? (string) $value : '' );
 				$ids = array_values( array_unique( array_filter( array_map( 'absint', (array) $ids ) ) ) );
 				return implode( ',', array_slice( $ids, 0, 50 ) );
+
+			case 'line':
+				return is_string( $value ) ? mb_substr( sanitize_text_field( $value ), 0, 40 ) : $field['default'];
 
 			default:
 				return is_string( $value ) ? sanitize_textarea_field( $value ) : $field['default'];

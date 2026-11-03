@@ -27,6 +27,7 @@ final class Variant {
 	 * @param string|null $promo_start      Promotion start, Y-m-d H:i:s.
 	 * @param string|null $promo_end        Promotion end, Y-m-d H:i:s.
 	 * @param bool        $active           Whether guests can choose it.
+	 * @param string      $badge            Optional badge, e.g. "Most picked".
 	 */
 	public function __construct(
 		public readonly int $id,
@@ -38,7 +39,8 @@ final class Variant {
 		public readonly ?string $compare_at_price = null,
 		public readonly ?string $promo_start = null,
 		public readonly ?string $promo_end = null,
-		public readonly bool $active = true
+		public readonly bool $active = true,
+		public readonly string $badge = ''
 	) {}
 
 	/**
@@ -57,7 +59,8 @@ final class Variant {
 			self::nullable( $row['compare_at_price'] ?? null ),
 			self::nullable( $row['promo_start'] ?? null ),
 			self::nullable( $row['promo_end'] ?? null ),
-			! empty( $row['active'] )
+			! empty( $row['active'] ),
+			(string) ( $row['badge'] ?? '' )
 		);
 	}
 

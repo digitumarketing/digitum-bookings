@@ -1141,3 +1141,97 @@
 	padding: 4px;
 	text-align: center;
 }
+
+/* Modal (Settings › General › Booking form display) ------------------------------------------------ */
+
+/* Page held in place while the form is open, on every screen size. */
+html.dgb-lock {
+	overflow: hidden;
+}
+
+html.dgb-lock body {
+	position: fixed;
+	top: var(--dgb-scroll-y, 0px);
+	inset-inline: 0;
+	overflow: hidden;
+}
+
+/* The wrapper on <body> is the backdrop: a click on it closes the form. */
+.dgb-portal.is-modal-open {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	background: rgba(28, 20, 16, 0.55);
+}
+
+.dgb-w.is-modal .dgb-panel.is-open {
+	box-shadow: none;
+}
+
+.dgb-w.is-modal .dgb-panel.is-open button.dgb-close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.dgb-modal-result {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	padding: 16px 20px 20px;
+	overscroll-behavior: contain;
+}
+
+.dgb-modal-result .dgb-confirm {
+	padding: 0;
+	border: 0;
+}
+
+@media (min-width: 768px) {
+	/* Centred dialog: header and footer stay put, only the middle scrolls. */
+	.dgb-w.is-modal .dgb-panel.is-open {
+		position: fixed;
+		inset: auto;
+		top: 50%;
+		left: 50%;
+		z-index: 100001;
+		width: min(560px, calc(100vw - 32px));
+		max-width: 560px;
+		max-height: 90vh;
+		margin: 0;
+		overflow: hidden;
+		border-radius: 16px;
+		box-shadow: 0 24px 64px rgba(28, 20, 16, 0.35);
+		transform: translate(-50%, -50%);
+	}
+
+	.dgb-w.is-modal .dgb-panel.is-open .dgb-head {
+		flex: none;
+		padding-inline-end: 56px;
+	}
+
+	.dgb-w.is-modal .dgb-panel.is-open .dgb-form {
+		flex: 1 1 auto;
+		min-height: 0;
+	}
+
+	.dgb-w.is-modal .dgb-panel.is-open .dgb-body {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+
+	.dgb-w.is-modal .dgb-panel.is-open .dgb-foot {
+		padding-top: 12px;
+		border-top: 1px solid var(--dgb-line);
+		background: var(--dgb-bg);
+	}
+}
+
+/* Teaser (price and Book button) on every screen size when the form opens in a modal. */
+.dgb-w.is-modal .dgb-teaser {
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}

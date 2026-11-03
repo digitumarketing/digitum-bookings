@@ -67,6 +67,7 @@ final class Schema {
 				"price {$money} DEFAULT NULL",
 				"child_price {$money} DEFAULT NULL",
 				"compare_at_price {$money} DEFAULT NULL",
+				"badge varchar(40) NOT NULL DEFAULT ''",
 				'promo_start datetime DEFAULT NULL',
 				'promo_end datetime DEFAULT NULL',
 				'active tinyint(1) NOT NULL DEFAULT 1',

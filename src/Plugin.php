@@ -24,6 +24,7 @@ use Digitum\Bookings\Admin\Screens\ZonesScreen;
 use Digitum\Bookings\Database\Migrator;
 use Digitum\Bookings\Database\Repositories\BookingRepository;
 use Digitum\Bookings\Frontend\Assets;
+use Digitum\Bookings\Frontend\BookingModal;
 use Digitum\Bookings\Frontend\Placement;
 use Digitum\Bookings\Frontend\ProofForm;
 use Digitum\Bookings\Frontend\SchemaOutput;
@@ -156,6 +157,7 @@ final class Plugin {
 		$assets->register_hooks();
 		( new StickyBar( $this->settings, $this->product_type ) )->register_hooks();
 		( new Placement( $this->settings, $this->product_type, $widget ) )->register_hooks();
+		( new BookingModal( $this->settings, $this->product_type, $widget ) )->register_hooks();
 		$outputs = new TourOutputs( $this->settings, $this->product_type, $quotes );
 		$outputs->register_hooks();
 		( new BookingBlock( $widget ) )->register_hooks();

@@ -91,9 +91,10 @@ final class ElementorIntegration {
 	/**
 	 * Render the booking widget for a tour.
 	 *
-	 * @param int $product_id Tour post ID.
+	 * @param int    $product_id Tour post ID.
+	 * @param string $display    inline, teaser, hidden or '' (site setting).
 	 */
-	public static function render( int $product_id ): string {
-		return self::$widget ? self::$widget->render( $product_id ) : '';
+	public static function render( int $product_id, string $display = '' ): string {
+		return self::$widget ? self::$widget->render( $product_id, $display ) : '';
 	}
 }

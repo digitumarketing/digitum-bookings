@@ -7,7 +7,7 @@
 	const el = wp.element.createElement;
 	const __ = wp.i18n.__;
 	const { InspectorControls, useBlockProps } = wp.blockEditor;
-	const { PanelBody, TextControl } = wp.components;
+	const { PanelBody, TextControl, SelectControl } = wp.components;
 	const ServerSideRender = wp.serverSideRender;
 
 	wp.blocks.registerBlockType( 'digitum-bookings/booking', {
@@ -29,6 +29,19 @@
 							value: id || '',
 							onChange( value ) {
 								props.setAttributes( { productId: parseInt( value, 10 ) || 0 } );
+							},
+						} ),
+						el( SelectControl, {
+							label: __( 'Display', 'digitum-bookings' ),
+							value: props.attributes.display || '',
+							options: [
+								{ value: '', label: __( 'Site setting (Settings › General)', 'digitum-bookings' ) },
+								{ value: 'inline', label: __( 'Inline form', 'digitum-bookings' ) },
+								{ value: 'teaser', label: __( 'Teaser button (opens modal)', 'digitum-bookings' ) },
+								{ value: 'hidden', label: __( 'Hidden (modal only)', 'digitum-bookings' ) },
+							],
+							onChange( value ) {
+								props.setAttributes( { display: value } );
 							},
 						} )
 					)

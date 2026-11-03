@@ -40,6 +40,10 @@ final class VariantRepository extends ProductRowsRepository {
 			'promo_start'      => array( 'type' => 'datetime' ),
 			'promo_end'        => array( 'type' => 'datetime' ),
 			'active'           => array( 'type' => 'bool' ),
+			'badge'            => array(
+				'type' => 'string',
+				'max'  => 40,
+			),
 		);
 	}
 }

@@ -40,9 +40,16 @@ final class Placement {
 	 * @param array<string, string>|string $atts Attributes.
 	 */
 	public function shortcode( $atts ): string {
-		$atts = shortcode_atts( array( 'product' => '' ), is_array( $atts ) ? $atts : array(), 'dgb_booking' );
+		$atts = shortcode_atts(
+			array(
+				'product' => '',
+				'display' => '',
+			),
+			is_array( $atts ) ? $atts : array(),
+			'dgb_booking'
+		);
 		$id   = '' !== $atts['product'] ? absint( $atts['product'] ) : get_the_ID();
-		return $this->widget->render( (int) $id );
+		return $this->widget->render( (int) $id, sanitize_key( $atts['display'] ) );
 	}
 
 	/**

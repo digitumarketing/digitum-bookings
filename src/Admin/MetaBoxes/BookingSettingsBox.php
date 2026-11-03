@@ -13,6 +13,7 @@ use Digitum\Bookings\Database\Repositories\OverrideRepository;
 use Digitum\Bookings\Database\Repositories\SessionRepository;
 use Digitum\Bookings\Database\Repositories\VariantRepository;
 use Digitum\Bookings\Domain\Product;
+use Digitum\Bookings\Frontend\Gallery;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Services\QuoteService;
 
@@ -80,6 +81,45 @@ final class BookingSettingsBox {
 			'normal',
 			'high'
 		);
+		add_meta_box(
+			'dgb-tour-gallery',
+			__( 'Tour gallery', 'digitum-bookings' ),
+			array( $this, 'render_gallery' ),
+			$this->product_type->key(),
+			'normal',
+			'high'
+		);
+	}
+
+	/**
+	 * “Tour gallery” box: images in order, each with a caption. The first five are shown by the gallery widget;
+	 * all of them are used in structured data. Saved with the booking settings (same form and nonce).
+	 *
+	 * @param \WP_Post $post Tour.
+	 */
+	public function render_gallery( \WP_Post $post ): void {
+		$product  = Product::find( $post->ID );
+		$ids      = array_filter( array_map( 'absint', explode( ',', (string) $product->get( 'gallery' ) ) ) );
+		$captions = Gallery::captions( $post->ID );
+		?>
+		<div class="dgb-gallery-box" data-dgb-gallery-box data-max="<?php echo esc_attr( (string) Gallery::MAX ); ?>" data-title="<?php esc_attr_e( 'Tour gallery', 'digitum-bookings' ); ?>" data-button="<?php esc_attr_e( 'Add to gallery', 'digitum-bookings' ); ?>" data-caption-label="<?php esc_attr_e( 'Caption', 'digitum-bookings' ); ?>" data-remove-label="<?php esc_attr_e( 'Remove', 'digitum-bookings' ); ?>" data-up-label="<?php esc_attr_e( 'Move up', 'digitum-bookings' ); ?>">
+			<p class="description"><?php esc_html_e( 'Up to 5 images for the gallery on the tour page, in this order (the first is the large one). The alt text comes from the Media Library. Without images the featured image is shown.', 'digitum-bookings' ); ?></p>
+			<input type="hidden" name="dgb[product][gallery]" value="<?php echo esc_attr( implode( ',', $ids ) ); ?>" data-dgb-gallery-ids>
+			<ol class="dgb-gallery-list" data-dgb-gallery-list>
+				<?php foreach ( $ids as $id ) : ?>
+					<li data-id="<?php echo esc_attr( (string) $id ); ?>">
+						<?php echo wp_get_attachment_image( $id, 'thumbnail' ); ?>
+						<label><span class="screen-reader-text"><?php esc_html_e( 'Caption', 'digitum-bookings' ); ?></span>
+							<input type="text" name="dgb[gallery_captions][<?php echo esc_attr( (string) $id ); ?>]" value="<?php echo esc_attr( $captions[ $id ] ?? '' ); ?>" maxlength="80" placeholder="<?php esc_attr_e( 'Caption', 'digitum-bookings' ); ?>">
+						</label>
+						<button type="button" class="button-link" data-dgb-gallery-up><?php esc_html_e( 'Move up', 'digitum-bookings' ); ?></button>
+						<button type="button" class="button-link button-link-delete" data-dgb-gallery-remove><?php esc_html_e( 'Remove', 'digitum-bookings' ); ?></button>
+					</li>
+				<?php endforeach; ?>
+			</ol>
+			<button type="button" class="button" data-dgb-gallery-add><?php esc_html_e( 'Add images', 'digitum-bookings' ); ?></button>
+		</div>
+		<?php
 	}
 
 	/**
@@ -181,6 +221,15 @@ final class BookingSettingsBox {
 				<label for="dgb-seats"><?php esc_html_e( 'Seats per vehicle', 'digitum-bookings' ); ?></label>
 				<input type="number" id="dgb-seats" name="dgb[product][seats_per_unit]" min="1" max="50" value="<?php echo esc_attr( (string) $product->get( 'seats_per_unit' ) ); ?>">
 			</p>
+			<p class="dgb-field" data-dgb-show-when="per_vehicle per_group">
+				<label for="dgb-unit-name"><?php esc_html_e( 'One vehicle is called', 'digitum-bookings' ); ?></label>
+				<input type="text" id="dgb-unit-name" name="dgb[product][unit_name]" maxlength="40" value="<?php echo esc_attr( (string) $product->get( 'unit_name' ) ); ?>" placeholder="<?php esc_attr_e( 'e.g. buggy', 'digitum-bookings' ); ?>">
+			</p>
+			<p class="dgb-field" data-dgb-show-when="per_vehicle per_group">
+				<label for="dgb-unit-plural"><?php esc_html_e( 'Several are called', 'digitum-bookings' ); ?></label>
+				<input type="text" id="dgb-unit-plural" name="dgb[product][unit_name_plural]" maxlength="40" value="<?php echo esc_attr( (string) $product->get( 'unit_name_plural' ) ); ?>" placeholder="<?php esc_attr_e( 'e.g. buggies', 'digitum-bookings' ); ?>" aria-describedby="dgb-unit-help">
+				<span class="description" id="dgb-unit-help"><?php esc_html_e( 'Used in the booking card: “Book this buggy”, “Buggies · 2 people each”, “per buggy”. Empty: vehicle or car.', 'digitum-bookings' ); ?></span>
+			</p>
 			<p class="dgb-field" data-dgb-show-when="per_group">
 				<label for="dgb-max-pax"><?php esc_html_e( 'Maximum guests per car', 'digitum-bookings' ); ?></label>
 				<input type="number" id="dgb-max-pax" name="dgb[product][max_pax_per_unit]" min="1" max="100" value="<?php echo esc_attr( (string) $product->get( 'max_pax_per_unit' ) ); ?>">
@@ -256,7 +305,7 @@ final class BookingSettingsBox {
 	 */
 	private function panel_options( Product $product ): void {
 		$rows = ( new VariantRepository() )->for_product( $product->id() );
-		echo '<p class="description">' . esc_html__( 'Each option is a duration or seat variant. “Compare-at” only shows while the promotion dates are running.', 'digitum-bookings' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Each option is a duration or seat variant. “Compare-at” only shows while the promotion dates are running. A badge (optional, e.g. “Most picked”) is shown on the option in the booking card.', 'digitum-bookings' ) . '</p>';
 		$this->repeater(
 			'variants',
 			array(
@@ -268,6 +317,7 @@ final class BookingSettingsBox {
 				'promo_start'      => __( 'Promotion from', 'digitum-bookings' ),
 				'promo_end'        => __( 'Promotion to', 'digitum-bookings' ),
 				'active'           => __( 'Active', 'digitum-bookings' ),
+				'badge'            => __( 'Badge', 'digitum-bookings' ),
 			),
 			$rows,
 			array( $this, 'variant_cells' ),
@@ -320,6 +370,17 @@ final class BookingSettingsBox {
 		$this->cell_input( $name, 'promo_start', $row, 'datetime-local', __( 'Promotion from', 'digitum-bookings' ) );
 		$this->cell_input( $name, 'promo_end', $row, 'datetime-local', __( 'Promotion to', 'digitum-bookings' ) );
 		$this->cell_checkbox( $name, 'active', $row, __( 'Active', 'digitum-bookings' ) );
+		$this->cell_input(
+			$name,
+			'badge',
+			$row,
+			'text',
+			__( 'Badge', 'digitum-bookings' ),
+			array(
+				'placeholder' => __( 'e.g. Most picked', 'digitum-bookings' ),
+				'maxlength'   => '40',
+			)
+		);
 	}
 
 	/**
@@ -404,6 +465,17 @@ final class BookingSettingsBox {
 		$this->cell_input( $name, 'season_start', $row, 'date', __( 'Season from', 'digitum-bookings' ) );
 		$this->cell_input( $name, 'season_end', $row, 'date', __( 'Season to', 'digitum-bookings' ) );
 		$this->cell_checkbox( $name, 'active', $row, __( 'Active', 'digitum-bookings' ) );
+		$this->cell_input(
+			$name,
+			'badge',
+			$row,
+			'text',
+			__( 'Badge', 'digitum-bookings' ),
+			array(
+				'placeholder' => __( 'e.g. Most picked', 'digitum-bookings' ),
+				'maxlength'   => '40',
+			)
+		);
 	}
 
 	/**
@@ -472,6 +544,17 @@ final class BookingSettingsBox {
 		);
 		$this->cell_checkbox( $name, 'required', $row, __( 'Required', 'digitum-bookings' ) );
 		$this->cell_checkbox( $name, 'active', $row, __( 'Active', 'digitum-bookings' ) );
+		$this->cell_input(
+			$name,
+			'badge',
+			$row,
+			'text',
+			__( 'Badge', 'digitum-bookings' ),
+			array(
+				'placeholder' => __( 'e.g. Most picked', 'digitum-bookings' ),
+				'maxlength'   => '40',
+			)
+		);
 	}
 
 	/**
@@ -652,12 +735,7 @@ final class BookingSettingsBox {
 			</select>
 			<span class="description"><?php esc_html_e( 'Price in structured data always matches the price shown on the page. Tours with a price on request, or without any image, are marked up as TouristTrip.', 'digitum-bookings' ); ?></span>
 		</p>
-		<p class="dgb-field">
-			<label for="dgb-gallery"><?php esc_html_e( 'Gallery images', 'digitum-bookings' ); ?></label>
-			<input type="text" id="dgb-gallery" name="dgb[product][gallery]" value="<?php echo esc_attr( (string) $product->get( 'gallery' ) ); ?>" class="regular-text" inputmode="numeric" pattern="[0-9, ]*" aria-describedby="dgb-gallery-help">
-			<button type="button" class="button" data-dgb-gallery="dgb-gallery" data-title="<?php esc_attr_e( 'Gallery images', 'digitum-bookings' ); ?>" data-button="<?php esc_attr_e( 'Use these images', 'digitum-bookings' ); ?>"><?php esc_html_e( 'Choose images', 'digitum-bookings' ); ?></button>
-			<span class="description" id="dgb-gallery-help"><?php esc_html_e( 'Media Library image IDs, comma separated. Used with the featured image in structured data.', 'digitum-bookings' ); ?></span>
-		</p>
+		<p class="description"><?php esc_html_e( 'Gallery images (Tour gallery box) are used with the featured image in structured data.', 'digitum-bookings' ); ?></p>
 		<?php
 	}
 
@@ -816,6 +894,9 @@ final class BookingSettingsBox {
 		$input = isset( $_POST['dgb'] ) && is_array( $_POST['dgb'] ) ? wp_unslash( $_POST['dgb'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		Product::save( $post_id, isset( $input['product'] ) && is_array( $input['product'] ) ? $input['product'] : array() );
+		if ( isset( $input['gallery_captions'] ) && is_array( $input['gallery_captions'] ) ) {
+			Gallery::save_captions( $post_id, $input['gallery_captions'] );
+		}
 		( new VariantRepository() )->sync( $post_id, $this->rows( $input, 'variants' ) );
 		( new SessionRepository() )->sync( $post_id, $this->rows( $input, 'sessions' ) );
 		( new AddonRepository() )->sync( $post_id, $this->rows( $input, 'addons' ) );

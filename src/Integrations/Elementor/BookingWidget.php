@@ -63,6 +63,21 @@ final class BookingWidget extends \Elementor\Widget_Base {
 				'description' => __( 'Leave empty to use the tour being viewed.', 'digitum-bookings' ),
 			)
 		);
+		$this->add_control(
+			'display',
+			array(
+				'label'       => __( 'Display', 'digitum-bookings' ),
+				'type'        => \Elementor\Controls_Manager::SELECT,
+				'default'     => '',
+				'options'     => array(
+					''       => __( 'Site setting (Settings › General)', 'digitum-bookings' ),
+					'inline' => __( 'Inline form', 'digitum-bookings' ),
+					'teaser' => __( 'Teaser button (opens modal)', 'digitum-bookings' ),
+					'hidden' => __( 'Hidden (modal only)', 'digitum-bookings' ),
+				),
+				'description' => __( 'Hidden: nothing shows here; the booking card, links to #book and the mobile bar open the form.', 'digitum-bookings' ),
+			)
+		);
 		$this->end_controls_section();
 	}
 
@@ -72,6 +87,6 @@ final class BookingWidget extends \Elementor\Widget_Base {
 	protected function render() {
 		$settings = $this->get_settings_for_display();
 		$id       = ! empty( $settings['product_id'] ) ? absint( $settings['product_id'] ) : (int) get_the_ID();
-		echo ElementorIntegration::render( $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the widget template escapes its output.
+		echo ElementorIntegration::render( $id, (string) ( $settings['display'] ?? '' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the widget template escapes its output.
 	}
 }

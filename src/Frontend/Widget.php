@@ -52,11 +52,39 @@ final class Widget {
 	) {}
 
 	/**
-	 * Widget HTML for a tour ('' when the tour does not take bookings).
+	 * Display modes of the widget: the form on the page, a price and Book button that opens the form in a modal,
+	 * or nothing on the page (the modal opens from the booking card, links to #book and the mobile bar).
+	 */
+	public const DISPLAYS = array( 'inline', 'teaser', 'hidden' );
+
+	/**
+	 * Whether a tour's widget (and so its modal) is already on this page.
 	 *
 	 * @param int $product_id Tour post ID.
 	 */
-	public function render( int $product_id ): string {
+	public static function rendered( int $product_id ): bool {
+		return isset( self::$rendered[ $product_id ] );
+	}
+
+	/**
+	 * Display mode: the one asked for, else from Settings › General › Booking form display.
+	 *
+	 * @param string $display inline, teaser, hidden or ''.
+	 */
+	public function display( string $display = '' ): string {
+		if ( in_array( $display, self::DISPLAYS, true ) ) {
+			return $display;
+		}
+		return 'inline' === $this->settings->get( 'general', 'booking_display' ) ? 'inline' : 'teaser';
+	}
+
+	/**
+	 * Widget HTML for a tour ('' when the tour does not take bookings).
+	 *
+	 * @param int    $product_id Tour post ID.
+	 * @param string $display    inline, teaser or hidden; '' follows the setting.
+	 */
+	public function render( int $product_id, string $display = '' ): string {
 		$post = get_post( $product_id );
 		if ( ! $post || ! $this->product_type->is_product( $post ) || isset( self::$rendered[ $product_id ] ) ) {
 			return '';
@@ -87,7 +115,11 @@ final class Widget {
 			}
 		}
 
-		return $this->assets->late_styles() . Template::render( 'front/booking-widget', $this->view( $product_id, $product ) ) . self::credit();
+		$view                    = $this->view( $product_id, $product );
+		$view['display']         = $this->display( $display );
+		$view['modal']           = 'inline' !== $view['display'];
+		$view['script']['modal'] = $view['modal'];
+		return $this->assets->late_styles() . Template::render( 'front/booking-widget', $view ) . self::credit();
 	}
 
 	/**
@@ -118,6 +150,8 @@ final class Widget {
 				'label'     => $variant->label,
 				'price'     => null !== ( $point['regular'] ?? null ) ? $point['price'] : $variant->price,
 				'compareAt' => $point['regular'] ?? ( $variant->promotion_running( $now ) ? $variant->compare_at_price : null ),
+				'badge'     => $variant->badge,
+				'minutes'   => $variant->duration_minutes,
 			);
 		}
 

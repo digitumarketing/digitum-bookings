@@ -113,6 +113,27 @@
 		}
 	}
 
+	/* Widgets on the page, by tour: the booking card and the modal triggers open them. */
+	const widgets = [];
+	const findWidget = ( product ) => widgets.find( ( w ) => ! product || String( w.product ) === String( product ) ) || null;
+	window.dgbBooking = {
+		/**
+		 * Open the booking form of a tour (the first one on the page when none is given), optionally filled in.
+		 *
+		 * @param {number|string} product Tour ID.
+		 * @param {Object}        values  variant_id, date, units, adults, children, pickup, zone_id.
+		 * @param {Element}       opener  Element that gets the focus back on close.
+		 * @return {boolean} Whether a booking form was found.
+		 */
+		open( product, values, opener ) {
+			const w = findWidget( product );
+			if ( w ) {
+				w.start( values || null, opener || null );
+			}
+			return !! w;
+		},
+	};
+
 	/* Widget -------------------------------------------------------------------- */
 
 	function init( root ) {
@@ -800,9 +821,9 @@
 
 		function layout() {
 			state.mobile = window.matchMedia( MOBILE ).matches;
-			state.stepped = state.mobile || !! cfg.stepped;
+			state.stepped = state.mobile || !! cfg.stepped || !! cfg.modal;
 			[ root, panel.parentNode ].forEach( ( n ) => n.classList && n.classList.toggle( 'is-stepped', state.stepped ) );
-			if ( ! state.mobile ) {
+			if ( ! state.mobile && ! cfg.modal ) {
 				close();
 			}
 			showStep( state.step, false );
@@ -846,14 +867,16 @@
 		}
 
 		function open( opener ) {
-			if ( ! state.mobile || panel.classList.contains( 'is-open' ) ) {
+			if ( ( ! state.mobile && ! cfg.modal ) || panel.classList.contains( 'is-open' ) ) {
 				return;
 			}
 			state.opener = opener || null;
 			if ( ! portal ) {
 				portal = el( 'div', { class: root.className + ' dgb-portal', style: root.getAttribute( 'style' ), dir: root.getAttribute( 'dir' ) || document.documentElement.getAttribute( 'dir' ) } );
+				// In modal mode the wrapper is the backdrop: a click outside the dialog closes it.
+				portal.addEventListener( 'click', ( e ) => e.target === portal && close() );
 			}
-			portal.className = root.className + ' dgb-portal';
+			portal.className = root.className + ' dgb-portal' + ( cfg.modal ? ' is-modal-open' : '' );
 			panel.parentNode.insertBefore( home, panel );
 			portal.appendChild( panel );
 			document.body.appendChild( portal );
@@ -867,6 +890,7 @@
 			panel.setAttribute( 'aria-modal', 'true' );
 			panel.setAttribute( 'aria-labelledby', cfg.id + '-title' );
 			q( '.dgb-title' ).focus();
+			document.documentElement.classList.add( 'dgb-modal-open' );
 		}
 
 		function close() {
@@ -883,7 +907,7 @@
 			if ( portal && portal.parentNode ) {
 				portal.parentNode.removeChild( portal );
 			}
-			document.documentElement.classList.remove( 'dgb-lock' );
+			document.documentElement.classList.remove( 'dgb-lock', 'dgb-modal-open' );
 			window.scrollTo( 0, state.scrollY );
 			if ( state.opener ) {
 				state.opener.focus( { preventScroll: true } );
@@ -928,10 +952,19 @@
 			button.textContent = t.sending;
 			try {
 				const res = await api( cfg.product.onRequest ? 'enquiries' : 'bookings', collect() );
-				close();
-				const result = q( '[data-dgb-result]' );
-				result.innerHTML = res.html;
-				panel.hidden = true;
+				let result = q( '[data-dgb-result]' );
+				if ( cfg.modal && panel.classList.contains( 'is-open' ) ) {
+					// Modal: the confirmation (and any payment box) replaces the form inside the dialog.
+					result = el( 'div', { class: 'dgb-modal-result', 'data-dgb-modal-result': '' } );
+					form.hidden = true;
+					q( '[data-dgb-progress]' ).textContent = '';
+					panel.appendChild( result );
+					result.innerHTML = res.html;
+				} else {
+					close();
+					result.innerHTML = res.html;
+					panel.hidden = true;
+				}
 				qa( '.dgb-teaser, [data-dgb-sticky]' ).forEach( ( n ) => ( n.hidden = true ) );
 				document.body.classList.remove( 'dgb-has-sticky-bar' );
 				const confirmation = result.querySelector( '[data-dgb-confirmation]' );
@@ -1117,6 +1150,76 @@
 		} );
 		window.matchMedia( MOBILE ).addEventListener( 'change', layout );
 
+		/* Modal: open from the card, a trigger or ?book=1, optionally filled in --------------- */
+
+		async function prefill( values ) {
+			const set = ( name, value ) => {
+				const input = field( name );
+				if ( input && undefined !== value && null !== value && '' !== value ) {
+					const min = parseInt( input.min, 10 ) || 0;
+					const max = parseInt( input.max, 10 ) || 50;
+					input.value = String( Math.max( min, Math.min( max, parseInt( value, 10 ) || 0 ) ) );
+				}
+			};
+			if ( values.variant_id ) {
+				const option = form.querySelector( 'input[name="variant_id"][value="' + Number( values.variant_id ) + '"]' );
+				if ( option ) {
+					option.checked = true;
+				}
+			}
+			set( 'units', values.units );
+			set( 'adults', values.adults );
+			set( 'children', values.children );
+			if ( undefined !== values.pickup ) {
+				const choice = form.querySelector( 'input[name="pickup"][value="' + ( values.pickup ? '1' : '0' ) + '"]' );
+				if ( choice ) {
+					choice.checked = true;
+				}
+				if ( values.pickup && values.zone_id && field( 'zone_id' ) ) {
+					field( 'zone_id' ).value = String( values.zone_id );
+				}
+			}
+			syncCards();
+			if ( values.date && /^\d{4}-\d{2}-\d{2}$/.test( values.date ) && values.date !== state.date ) {
+				if ( state.month !== values.date.slice( 0, 7 ) ) {
+					state.month = values.date.slice( 0, 7 );
+					await loadMonth();
+				}
+				const day = q( '.dgb-day[data-date="' + values.date + '"]' );
+				if ( day && ! day.disabled ) {
+					await chooseDate( values.date );
+				}
+			}
+			update();
+			if ( ! cfg.product.onRequest && variant() ) {
+				window.clearTimeout( timer );
+				await quote();
+			}
+		}
+
+		// Called by window.dgbBooking.open(): fill in, open, and go to step 2 when step 1 is complete.
+		async function start( values, opener ) {
+			if ( values ) {
+				await prefill( values );
+			}
+			if ( ! state.mobile && ! cfg.modal ) {
+				root.scrollIntoView( { block: 'start' } );
+				return;
+			}
+			open( opener );
+			if ( values ) {
+				if ( 0 === Object.keys( check( 'trip' ) ).length ) {
+					showStep( 1, true );
+				} else {
+					showStep( 0, false );
+					validate( 0 );
+					focusFirstError( 0 );
+				}
+			}
+		}
+
+		widgets.push( { product: cfg.product.id, start } );
+
 		layout();
 		loadMonth();
 		update();
@@ -1127,6 +1230,27 @@
 
 	function start() {
 		Array.prototype.forEach.call( document.querySelectorAll( '[data-dgb-widget]' ), init );
+
+		// Triggers anywhere on the page: links to #book or #dgb-book, class dgb-open, data-dgb-open="{tour ID}".
+		document.addEventListener( 'click', ( e ) => {
+			if ( e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey ) {
+				return;
+			}
+			const trigger = e.target.closest( 'a[href="#book"], a[href="#dgb-book"], .dgb-open, [data-dgb-open]' );
+			if ( ! trigger || trigger.closest( '[data-dgb-widget], .dgb-portal' ) ) {
+				return;
+			}
+			const product = trigger.getAttribute( 'data-dgb-open' ) || '';
+			if ( window.dgbBooking.open( product, null, trigger ) ) {
+				e.preventDefault();
+			}
+		} );
+		try {
+			if ( '1' === new URLSearchParams( window.location.search ).get( 'book' ) ) {
+				window.dgbBooking.open( '', null, null );
+			}
+		} catch ( e ) {}
+		document.dispatchEvent( new CustomEvent( 'dgb:ready' ) );
 	}
 
 	if ( 'loading' === document.readyState ) {
