@@ -48,6 +48,13 @@ final class TourOutputs {
 	private static bool $styled = false;
 
 	/**
+	 * Whether the gallery stylesheet was printed.
+	 *
+	 * @var bool
+	 */
+	private static bool $gallery_styled = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Settings     $settings     Settings service.
@@ -72,8 +79,9 @@ final class TourOutputs {
 	 * Forget cached results (tests, or after a change in the same request).
 	 */
 	public static function reset(): void {
-		self::$cache  = array();
-		self::$styled = false;
+		self::$cache          = array();
+		self::$styled         = false;
+		self::$gallery_styled = false;
 	}
 
 	/**
@@ -353,7 +361,12 @@ final class TourOutputs {
 			}
 			$html .= '</figure>';
 		}
-		return $this->wrap( $html . '</div>' );
+		$css = '';
+		if ( ! self::$gallery_styled ) {
+			self::$gallery_styled = true;
+			$css                  = '<style id="dgb-gallery-css">' . self::gallery_css() . '</style>';
+		}
+		return $this->wrap( $css . $html . '</div>' );
 	}
 
 	/**
@@ -837,7 +850,25 @@ final class TourOutputs {
 	}
 
 	/**
-	 * Inline stylesheet (under 1 KB). Colours come from the widget's CSS variables, so Settings › Branding and
+	 * Gallery and lightbox styles, printed with the first gallery on a page only.
+	 */
+	public static function gallery_css(): string {
+		return ''
+			. '.dgb-gallery{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:repeat(2,minmax(0,1fr));gap:8px;aspect-ratio:2/1}'
+			. '.dgb-gallery__item{position:relative;margin:0;overflow:hidden;border-radius:16px;min-height:0}.dgb-gallery__item:first-child{grid-row:1/3}.dgb-gallery__item a{display:block;height:100%}'
+			. '.dgb-gallery__item img{display:block;width:100%;height:100%;object-fit:cover}.dgb-gallery__item a:focus-visible{outline:3px solid var(--dgb-accent,#b45309);outline-offset:-3px}'
+			. '.dgb-gallery__caption{position:absolute;inset-inline-start:12px;bottom:12px;max-width:calc(100% - 24px);padding:4px 10px;border-radius:999px;background:rgba(28,20,16,.7);color:#fff;font-size:.8rem}'
+			. '.dgb-gallery--1{grid-template-columns:1fr;grid-template-rows:1fr}.dgb-gallery--1 .dgb-gallery__item:first-child{grid-row:auto}'
+			. '.dgb-gallery--2{grid-template-columns:2fr 1fr;grid-template-rows:1fr}.dgb-gallery--2 .dgb-gallery__item:first-child{grid-row:auto}.dgb-gallery--3{grid-template-columns:2fr 1fr}.dgb-gallery--4{grid-template-columns:2fr 1fr 1fr}.dgb-gallery--4 .dgb-gallery__item:last-child{grid-column:2/4}'
+			. '@media (max-width:767px){.dgb-gallery,.dgb-gallery--1{display:flex;gap:8px;aspect-ratio:auto;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}.dgb-gallery::-webkit-scrollbar{display:none}.dgb-gallery__item{flex:0 0 88%;aspect-ratio:4/3;scroll-snap-align:start}.dgb-gallery--1 .dgb-gallery__item{flex-basis:100%}}'
+			. '.dgb-lightbox{position:fixed;inset:0;z-index:100002;display:flex;align-items:center;justify-content:center;background:rgba(10,8,6,.92)}.dgb-lightbox img{max-width:92vw;max-height:84vh;object-fit:contain}'
+			. '.dgb-lightbox figcaption{position:absolute;bottom:16px;inset-inline:0;color:#fff;text-align:center}'
+			. '.dgb-lightbox button:is(*,:hover,:focus,:active){position:absolute;width:48px;height:48px;min-height:0;margin:0;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.15);box-shadow:none;color:#fff;font:inherit;font-size:1.6rem;line-height:1;cursor:pointer}'
+			. '.dgb-lightbox button:focus-visible{outline:2px solid #fff;outline-offset:2px}.dgb-lightbox [data-close]{top:16px;inset-inline-end:16px}.dgb-lightbox [data-prev]{inset-inline-start:16px}.dgb-lightbox [data-next]{inset-inline-end:16px}';
+	}
+
+	/**
+	 * Inline stylesheet (under 2 KB). Colours come from the widget's CSS variables, so Settings › Branding and
 	 * themes style both the same way.
 	 */
 	public static function css(): string {
@@ -850,17 +881,6 @@ final class TourOutputs {
 			. '.dgb-tour-list--check .dgb-tour-list__item:before{content:"✓";color:var(--dgb-accent,#b45309)}.dgb-tour-list--cross .dgb-tour-list__item:before{content:"✕"}'
 			. '.dgb-tour-facts{display:grid;gap:.6em;margin:0}.dgb-tour-facts dt{font-weight:600}.dgb-tour-facts dd{margin:0}'
 			. '.dgb-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none;color:inherit}.dgb-chip{margin:0;padding:.3em .85em;border:1px solid color-mix(in srgb,currentColor 20%,transparent);border-radius:999px;font-size:.85rem;line-height:1.4}'
-			. '.dgb-price{display:flex;flex-direction:column;gap:2px;color:inherit}.dgb-price__label{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8}.dgb-price__amount{font-size:2.25rem;font-weight:800;line-height:1.1}.dgb-price__basis{font-size:.9rem;opacity:.85}'
-			. '.dgb-gallery{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:repeat(2,minmax(0,1fr));gap:8px;aspect-ratio:2/1}'
-			. '.dgb-gallery__item{position:relative;margin:0;overflow:hidden;border-radius:16px;min-height:0}.dgb-gallery__item:first-child{grid-row:1/3}.dgb-gallery__item a{display:block;height:100%}'
-			. '.dgb-gallery__item img{display:block;width:100%;height:100%;object-fit:cover}.dgb-gallery__item a:focus-visible{outline:3px solid var(--dgb-accent,#b45309);outline-offset:-3px}'
-			. '.dgb-gallery__caption{position:absolute;inset-inline-start:12px;bottom:12px;max-width:calc(100% - 24px);padding:4px 10px;border-radius:999px;background:rgba(28,20,16,.7);color:#fff;font-size:.8rem}'
-			. '.dgb-gallery--1{grid-template-columns:1fr;grid-template-rows:1fr}.dgb-gallery--1 .dgb-gallery__item:first-child{grid-row:auto}'
-			. '.dgb-gallery--2{grid-template-columns:2fr 1fr;grid-template-rows:1fr}.dgb-gallery--2 .dgb-gallery__item:first-child{grid-row:auto}.dgb-gallery--3{grid-template-columns:2fr 1fr}.dgb-gallery--4{grid-template-columns:2fr 1fr 1fr}.dgb-gallery--4 .dgb-gallery__item:last-child{grid-column:2/4}'
-			. '@media (max-width:767px){.dgb-gallery,.dgb-gallery--1{display:flex;gap:8px;aspect-ratio:auto;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}.dgb-gallery::-webkit-scrollbar{display:none}.dgb-gallery__item{flex:0 0 88%;aspect-ratio:4/3;scroll-snap-align:start}.dgb-gallery--1 .dgb-gallery__item{flex-basis:100%}}'
-			. '.dgb-lightbox{position:fixed;inset:0;z-index:100002;display:flex;align-items:center;justify-content:center;background:rgba(10,8,6,.92)}.dgb-lightbox img{max-width:92vw;max-height:84vh;object-fit:contain}'
-			. '.dgb-lightbox figcaption{position:absolute;bottom:16px;inset-inline:0;color:#fff;text-align:center}'
-			. '.dgb-lightbox button:is(*,:hover,:focus,:active){position:absolute;width:48px;height:48px;min-height:0;margin:0;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.15);box-shadow:none;color:#fff;font:inherit;font-size:1.6rem;line-height:1;cursor:pointer}'
-			. '.dgb-lightbox button:focus-visible{outline:2px solid #fff;outline-offset:2px}.dgb-lightbox [data-close]{top:16px;inset-inline-end:16px}.dgb-lightbox [data-prev]{inset-inline-start:16px}.dgb-lightbox [data-next]{inset-inline-end:16px}';
+			. '.dgb-price{display:flex;flex-direction:column;gap:2px;color:inherit}.dgb-price__label{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8}.dgb-price__amount{font-size:2.25rem;font-weight:800;line-height:1.1}.dgb-price__basis{font-size:.9rem;opacity:.85}';
 	}
 }

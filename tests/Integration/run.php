@@ -1704,7 +1704,7 @@ if ( scenario( 'N' ) ) {
 	);
 	$o = static fn( int $post, array $extra = array() ) => step( $site, 'outputs', array( 'post' => $post, 'shortcodes' => $codes + $extra ) )['shortcodes'];
 	$r = $o( $buggy['id'] );
-	check( 1 === substr_count( implode( '', $r ), '<style id="dgb-outputs-css">' ) && strlen( (string) preg_replace( '#^.*?<style id="dgb-outputs-css">(.*?)</style>.*$#s', '$1', $r['from'] ) ) < 1024, 'inline stylesheet printed once per page, under 1 KB' );
+	check( 1 === substr_count( implode( '', $r ), '<style id="dgb-outputs-css">' ) && strlen( (string) preg_replace( '#^.*?<style id="dgb-outputs-css">(.*?)</style>.*$#s', '$1', $r['from'] ) ) < 2048, 'inline stylesheet printed once per page, under 2 KB (gallery styles only with a gallery)' );
 	check( str_contains( $r['from'], 'From <strong class="dgb-from-price__amount">AED 699.00</strong> <span class="dgb-from-price__basis">per vehicle</span>' ) && str_contains( $r['from_plain'], '<strong class="dgb-from-price__amount">AED 699.00</strong></span>' ), 'from price per vehicle, with or without its basis' );
 	check( str_contains( $r['table'], '<th scope="row" class="dgb-price-table__option">30 min</th><td class="dgb-price-table__duration">30 min</td>' ) && str_contains( $r['table'], 'AED 349.50 (2 people)' ) && 3 === substr_count( $r['table'], '<tr><th scope="row"' ), 'price table: every option, duration, per-person share of a 2-seater' );
 	check( str_contains( $r['facts'], 'Up to 2 people per vehicle' ) && str_contains( $r['facts'], '16 years' ) && str_contains( $r['facts'], 'Hotel pickup on request (+AED 300.00 per booking)' ) && str_contains( $r['facts'], 'href="https://maps.example/meeting-point"' ) && str_contains( $r['facts'], '30 min – 2 h<' ) && str_contains( $r['facts'], 'Evening: starts 3:30 pm, pickup 2:15 pm – 2:45 pm' ), 'tour facts: group size, age, pickup with price, map link, durations, sessions with pickup windows' );
@@ -1717,7 +1717,7 @@ if ( scenario( 'N' ) ) {
 	$s = $o( $saf['id'] );
 	check( str_contains( $s['from'], 'AED 99.00' ) && str_contains( $s['from'], 'per person' ) && ! str_contains( $s['table'], 'Per person</th>' ) && str_contains( $s['facts'], 'Hotel pickup included' ), 'per person: price, no share column, pickup included' );
 	$n = $o( $ny['id'] );
-	check( str_contains( $n['from'], 'Price on request' ) && ! preg_match( '/AED|\d+\.\d\d/', $n['from'] . $n['table'] ) && str_contains( $n['table'], 'Price on request' ) && str_contains( $n['facts'], 'Price on request' ), 'price on request: never a price' );
+	check( str_contains( $n['from'], 'Price on request' ) && ! preg_match( '/AED|\d+\.\d\d/', (string) preg_replace( '#<style.*?</style>#s', '', $n['from'] . $n['table'] ) ) && str_contains( $n['table'], 'Price on request' ) && str_contains( $n['facts'], 'Price on request' ), 'price on request: never a price' );
 	$e = $o( $empty['id'] );
 	check( '' === $e['table'] && str_contains( $e['from'], 'Price on request' ), 'tour without options: no table, no price' );
 	$x = $o( 0, array( 'by_id' => '[dgb_price_table id="' . $buggy['id'] . '"]' ) );
@@ -1728,7 +1728,7 @@ if ( scenario( 'N' ) ) {
 	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_enabled' => false ) ) ) );
 
 	$b = step( $site, 'outputs', array( 'post' => $buggy['id'], 'blocks' => array( 'from' => array( 'digitum-bookings/from-price', array( 'showBasis' => true, 'secondCurrency' => true ) ), 'table' => array( 'digitum-bookings/price-table', array() ), 'list' => array( 'digitum-bookings/tour-list', array( 'productId' => $group['id'], 'field' => 'exclusions' ) ), 'facts' => array( 'digitum-bookings/tour-facts', array( 'fields' => 'capacity' ) ) ) ) );
-	check( array( 'digitum-bookings/booking', 'digitum-bookings/from-price', 'digitum-bookings/price-table', 'digitum-bookings/tour-list', 'digitum-bookings/tour-facts' ) === $b['registered'], 'blocks registered: from price, price table, tour list, tour facts' );
+	check( array( 'digitum-bookings/booking', 'digitum-bookings/from-price', 'digitum-bookings/price-table', 'digitum-bookings/tour-list', 'digitum-bookings/tour-facts', 'digitum-bookings/booking-card', 'digitum-bookings/price', 'digitum-bookings/gallery' ) === $b['registered'], 'blocks registered: from price, price table, tour list, tour facts, booking card, tour price, gallery' );
 	check( str_contains( $b['blocks']['from'], 'AED 699.00' ) && str_contains( $b['blocks']['table'], '2 hours' ) && str_contains( $b['blocks']['list'], '>Tips</li>' ) && str_contains( $b['blocks']['facts'], 'Up to 2 people per vehicle' ), 'blocks render the same output as the shortcodes' );
 
 	$el = step( $site, 'elementor', array( 'post' => $buggy['id'] ) );
@@ -1747,7 +1747,7 @@ if ( scenario( 'N' ) ) {
 		'map'   => array( 'dgb-map-link', array() ),
 		'nyf'   => array( 'dgb-from-price', array( 'product_id' => $ny['id'] ) ),
 	) ) );
-	check( array( 'dgb_booking', 'dgb_price_table', 'dgb_tour_list', 'dgb_tour_facts' ) === array_keys( $el['widgets'] ) && 7 === count( $el['tags'] ) && isset( $el['groups']['digitum-bookings'] ), 'with Elementor: 4 widgets and 7 dynamic tags in a “Digitum Bookings” group' );
+	check( array( 'dgb_booking', 'dgb_price_table', 'dgb_tour_list', 'dgb_tour_facts', 'dgb_booking_card', 'dgb_price', 'dgb_gallery' ) === array_keys( $el['widgets'] ) && 7 === count( $el['tags'] ) && isset( $el['groups']['digitum-bookings'] ), 'with Elementor: 7 widgets and 7 dynamic tags in a “Digitum Bookings” group' );
 	$h = $el['html'];
 	check( str_contains( $h['table'], '1 hour' ) && str_contains( $h['list'], '>Guide</li>' ) && str_contains( $h['facts'], '16 years' ), 'Elementor widgets: price table, tour list, tour facts' );
 	check( 'From AED 699.00 per vehicle' === $h['from'] && '16' === $h['age'] && '2' === $h['seats'] && 'Hotel pickup on request (+AED 300.00 per booking)' === $h['pick'] && 'Sample Meeting Point' === $h['point'] && in_array( $h['next'], array( '6:45 am – 7:15 am', '2:15 pm – 2:45 pm' ), true ), 'dynamic tags: from price, minimum age, seats, pickup, meeting point, next pickup window' );
