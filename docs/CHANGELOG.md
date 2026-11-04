@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.3 (sticky card fix, polish)
+
+- **Sticky booking card no longer runs below the screen**: when the card is taller than the screen below the sticky offset (104 px), it scrolls until its bottom edge is 16 px above the bottom of the screen and sticks there, so Check availability and Ask on WhatsApp stay visible. Works for the shortcode and the Elementor widget (`--dgb-sticky-fit`, set by the script and on resize).
+- The card's date calendar opens above the field when there is no room below.
+- Booking card polish: bold title and total, small uppercase labels like the fact cards, tighter spacing (a shorter card), a softer two-layer shadow. Fact cards get a light shadow (`--dgb-fc-shadow`).
+
 ## 0.9.2 (facts as cards)
 
 - **Tour facts, style Cards** (`[dgb_tour_facts style="cards"]`, Elementor Tour facts › Style “Cards”, block): one tile per fact that has a value (never an empty tile), with a line icon in a circle (duration clock, price tag, group people, age card, licence card, pickup van, meeting point pin, sessions sun). Tiles: white, 1 px border #E2CFB6, 14 px radius, 16 px padding; label small, uppercase and muted; value 16 px, semibold. Grid of 3 columns from 1025 px and 2 below (12 px gap, 10 px on phones), with fewer columns when a tile would be too narrow; on phones the icon sits on top and the value is 15 px. The meeting point links to its map; sessions take the full row and list every session. Elementor Style › Cards: columns, gap, tile background, border colour, radius and padding, icon circle and icon colours and size, label and value colours and typography, link colour (CSS variables `--dgb-fc-*`). The card styles are printed only on pages with cards.

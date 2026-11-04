@@ -595,7 +595,7 @@ final class TourOutputs {
 	public static function cards_css(): string {
 		return '.dgb-fact-cards{--dgb-fc-cols:2;display:grid;grid-template-columns:repeat(auto-fill,minmax(max(var(--dgb-fc-min,180px),calc((100% - (var(--dgb-fc-cols) - 1) * var(--dgb-fc-gap,12px)) / var(--dgb-fc-cols))),1fr));gap:var(--dgb-fc-gap,12px);margin:0;padding:0;list-style:none}'
 			. '@media (min-width:1025px){.dgb-fact-cards{--dgb-fc-cols:3}}'
-			. '.dgb-fact-card{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;row-gap:2px;align-items:center;margin:0;padding:var(--dgb-fc-pad,16px);border:1px solid var(--dgb-fc-border,#E2CFB6);border-radius:var(--dgb-fc-radius,14px);background:var(--dgb-fc-bg,#fff)}'
+			. '.dgb-fact-card{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;row-gap:2px;align-items:center;margin:0;padding:var(--dgb-fc-pad,16px);border:1px solid var(--dgb-fc-border,#E2CFB6);border-radius:var(--dgb-fc-radius,14px);background:var(--dgb-fc-bg,#fff);box-shadow:var(--dgb-fc-shadow,0 1px 2px rgba(28,20,16,.04))}'
 			. '.dgb-fact-card__icon{display:flex;grid-row:1/3;align-items:center;justify-content:center;width:var(--dgb-fc-icon-size,38px);height:var(--dgb-fc-icon-size,38px);border-radius:50%;background:var(--dgb-fc-icon-bg,#FBEADF);color:var(--dgb-fc-icon,#C2410C)}'
 			. '.dgb-fact-card__icon svg{width:52%;height:52%}'
 			. '.dgb-fact-card__label{align-self:end;color:var(--dgb-fc-label,#6B5A4E);font-size:.72rem;font-weight:600;letter-spacing:.08em;line-height:1.3;text-transform:uppercase}'

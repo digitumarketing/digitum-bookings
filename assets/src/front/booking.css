@@ -1253,7 +1253,7 @@ html.dgb-lock body {
 	border-top: 5px solid var(--dgb-accent);
 	border-radius: 16px;
 	background: var(--dgb-bg);
-	box-shadow: 0 10px 30px rgba(28, 20, 16, 0.08);
+	box-shadow: 0 1px 2px rgba(28, 20, 16, 0.04), 0 12px 32px rgba(28, 20, 16, 0.08);
 	font-size: var(--dgb-card-size, 15px);
 }
 
@@ -1263,10 +1263,12 @@ html.dgb-lock body {
 
 /* Sticky on computers. In Elementor the widget's own wrapper sticks, since the card fills it. */
 @media (min-width: 1025px) {
+	/* A card taller than the screen sticks by its bottom edge (--dgb-sticky-fit, set by the script), so the
+	   buttons never end up below the screen. */
 	.dgb-w.dgb-bc.is-sticky,
 	.elementor-widget-dgb_booking_card:has(.dgb-bc.is-sticky) {
 		position: sticky;
-		top: var(--dgb-sticky-top, 104px);
+		top: min(var(--dgb-sticky-top, 104px), var(--dgb-sticky-fit, 100vh));
 		align-self: flex-start;
 	}
 
@@ -1288,6 +1290,8 @@ html.dgb-lock body {
 	margin: 0;
 	color: var(--dgb-ink);
 	font-size: 1.35em;
+	font-weight: 700;
+	letter-spacing: -0.01em;
 	line-height: 1.25;
 }
 
@@ -1303,7 +1307,7 @@ html.dgb-lock body {
 .dgb-bc-form {
 	display: flex;
 	flex-direction: column;
-	gap: 14px;
+	gap: 12px;
 	margin: 0;
 }
 
@@ -1320,9 +1324,11 @@ html.dgb-lock body {
 
 .dgb-bc-label {
 	padding: 0;
-	color: var(--dgb-ink);
-	font-size: 0.85rem;
-	font-weight: 600;
+	color: var(--dgb-muted);
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
 }
 
 /* Date field and its calendar popover. */
@@ -1377,6 +1383,12 @@ html.dgb-lock body {
 	border-radius: 12px;
 	background: var(--dgb-bg);
 	box-shadow: 0 16px 40px rgba(28, 20, 16, 0.18);
+}
+
+/* Not enough room below (sticky card near the bottom of the screen): the calendar opens above the field. */
+.dgb-bc-pop.is-up {
+	top: auto;
+	bottom: calc(100% - 22px);
 }
 
 .dgb-bc-pop .dgb-cal-grid {
@@ -1544,6 +1556,8 @@ html.dgb-lock body {
 .dgb-bc-total strong {
 	color: var(--dgb-ink);
 	font-size: 1.45em;
+	font-weight: 800;
+	letter-spacing: -0.01em;
 }
 
 .dgb-bc-actions {

@@ -1406,9 +1406,16 @@
 		}
 
 		async function openPop() {
+			pop.classList.remove( 'is-up' );
 			pop.hidden = false;
 			dateButton.setAttribute( 'aria-expanded', 'true' );
 			const day = await month();
+			// Open above the field when the calendar would end below the screen and there is room above.
+			const field = dateButton.getBoundingClientRect();
+			const height = pop.getBoundingClientRect().height;
+			if ( field.bottom + height + 8 > window.innerHeight && field.top - height - 8 > 0 ) {
+				pop.classList.add( 'is-up' );
+			}
 			if ( day ) {
 				day.focus();
 			}
@@ -1497,6 +1504,20 @@
 				window.location.href = cfg.url + ( cfg.url.indexOf( '?' ) < 0 ? '?' : '&' ) + 'book=1';
 			}
 		} );
+
+		// Sticky card: when it is taller than the screen below the sticky offset, it sticks by its bottom edge.
+		const holder = root.closest( '.elementor-widget-dgb_booking_card' ) || root;
+		const fit = () => {
+			if ( ! root.classList.contains( 'is-sticky' ) ) {
+				return;
+			}
+			holder.style.setProperty( '--dgb-sticky-fit', Math.round( window.innerHeight - holder.getBoundingClientRect().height - 16 ) + 'px' );
+		};
+		fit();
+		window.addEventListener( 'resize', fit );
+		if ( window.ResizeObserver ) {
+			new window.ResizeObserver( fit ).observe( holder );
+		}
 
 		changed();
 		root.classList.add( 'is-ready' );

@@ -4,7 +4,7 @@ Tags: bookings, tours, activities, reservations, deposits
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.9.2
+Stable tag: 0.9.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -121,6 +121,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 
 == Changelog ==
 
+= 0.9.3 =
+* The sticky booking card no longer runs below the screen on short screens; the date calendar opens upwards when needed; booking card and fact card polish.
+
 = 0.9.2 =
 * Tour facts as cards with icons (new Cards style with Elementor style controls); facts use the tour's noun.
 
@@ -191,6 +194,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 * Foundation: settings, tour post type (attach or own), booking settings box, database tables, roles.
 
 == Upgrade Notice ==
+
+= 0.9.3 =
+Fixes the sticky booking card running below short screens.
 
 = 0.9.2 =
 New Cards style for Tour facts. Existing List and Chips widgets are unchanged.

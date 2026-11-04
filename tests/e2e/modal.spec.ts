@@ -312,6 +312,37 @@ test.describe( 'booking card and modal', () => {
 		expect( await page.locator( '.qa-facts .dgb-fact-card__value' ).evaluateAll( ( n ) => n.every( ( v ) => '' !== ( v.textContent || '' ).trim() ) ) ).toBe( true );
 	} );
 
+	test( 'sticky card never runs below the screen while scrolling', async ( { page } ) => {
+		await cookies( page, [ 'dgb_test_card' ] );
+		for ( const [ width, height ] of [ [ 1440, 1000 ], [ 1440, 700 ], [ 1280, 640 ] ] ) {
+			await page.setViewportSize( { width, height } );
+			await page.goto( path( tours.buggy.url ) );
+			const card = page.locator( '[data-dgb-card]' );
+			const aside = await page.locator( '.qa-side' ).boundingBox();
+			const pageTop = await page.evaluate( () => window.scrollY );
+			// Scroll to the middle of the sidebar.
+			await page.evaluate( ( y ) => window.scrollTo( 0, y ), Math.round( pageTop + aside!.y + aside!.height / 2 - 300 ) );
+			await page.waitForTimeout( 200 );
+			const box = ( await card.boundingBox() )!;
+			expect( box.y + box.height ).toBeLessThanOrEqual( height + 1 );
+			if ( box.height + 104 + 16 <= height ) {
+				expect( Math.round( box.y ) ).toBe( 104 );
+			} else {
+				expect( Math.round( box.y + box.height ) ).toBe( height - 16 );
+			}
+			await expect( card.locator( '[data-dgb-card-book]' ) ).toBeInViewport();
+			await expect( card.locator( '[data-dgb-card-wa]' ) ).toBeInViewport();
+			// The calendar stays on the screen.
+			await card.locator( '[data-dgb-card-date]' ).click();
+			const pop = card.locator( '[data-dgb-card-pop]' );
+			await expect( pop.locator( '.dgb-day' ).first() ).toBeVisible();
+			const popBox = ( await pop.boundingBox() )!;
+			expect( popBox.y ).toBeGreaterThanOrEqual( 0 );
+			expect( popBox.y + popBox.height ).toBeLessThanOrEqual( height + 1 );
+			await page.keyboard.press( 'Escape' );
+		}
+	} );
+
 	test( 'theme and kit button styles do not reach the card', async ( { page } ) => {
 		await cookies( page, [ 'dgb_test_card', 'dgb_test_theme_css' ] );
 		await page.setViewportSize( { width: 1440, height: 900 } );
