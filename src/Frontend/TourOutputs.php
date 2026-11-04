@@ -526,14 +526,27 @@ final class TourOutputs {
 
 	/**
 	 * Facts as tiles with an icon: one tile per fact that has a value (never an empty tile). The meeting point
-	 * links to its map; sessions take the full row and list every session.
+	 * links to its map; the sessions tile shows the pickup time of each session. Columns follow the number of tiles.
 	 *
 	 * @param int      $id     Tour post ID.
 	 * @param string[] $fields Facts to show, in order (see FACTS); [] = all.
 	 */
 	public function cards( int $id, array $fields = array() ): string {
 		$facts = $this->facts( $id );
+		// Sessions as cards show only when guests are picked up (or start, without a pickup window).
+		if ( isset( $facts['sessions'] ) ) {
+			$times = $this->pickup_times( $id );
+			if ( array() === $times['lines'] ) {
+				unset( $facts['sessions'] );
+			} else {
+				$facts['sessions'] = array(
+					'label' => $times['label'],
+					'value' => $times['lines'],
+				);
+			}
+		}
 		$html  = '';
+		$count = 0;
 		foreach ( array() === $fields ? self::FACTS : $fields as $key ) {
 			if ( empty( $facts[ $key ] ) ) {
 				continue;
@@ -552,6 +565,7 @@ final class TourOutputs {
 			} else {
 				$value = esc_html( $value );
 			}
+			++$count;
 			$html .= '<li class="dgb-fact-card dgb-fact-card--' . esc_attr( str_replace( '_', '-', $key ) ) . '">'
 				. '<span class="dgb-fact-card__icon" aria-hidden="true">' . self::icon( $key ) . '</span>'
 				. '<span class="dgb-fact-card__label">' . esc_html( $facts[ $key ]['label'] ) . '</span>'
@@ -565,7 +579,47 @@ final class TourOutputs {
 			self::$cards_styled = true;
 			$css                = '<style id="dgb-fact-cards-css">' . self::cards_css() . '</style>';
 		}
-		return $this->wrap( $css . '<ul class="dgb-o dgb-fact-cards">' . $html . '</ul>' );
+		// Columns on computers follow the number of tiles: up to 4 in one row, 5–6 in rows of 3, more in rows of 4.
+		$columns = $count <= 4 ? $count : ( $count <= 6 ? 3 : 4 );
+		return $this->wrap( $css . '<ul class="dgb-o dgb-fact-cards" style="--dgb-fc-auto:' . (int) $columns . '">' . $html . '</ul>' );
+	}
+
+	/**
+	 * Pickup time of each active session (“9:00 am – 9:30 am”), or its start time when it has no pickup window.
+	 * With several sessions each line starts with the session name.
+	 *
+	 * @param int $id Tour post ID.
+	 * @return array{label: string, lines: string[]}
+	 */
+	private function pickup_times( int $id ): array {
+		$sessions = array_values( array_filter( ( new SessionRepository() )->for_product( $id ), static fn( $s ) => ! empty( $s['active'] ) ) );
+		$lines    = array();
+		$windows  = 0;
+		foreach ( $sessions as $session ) {
+			$window = self::window( $session );
+			if ( '' !== $window ) {
+				++$windows;
+				$time = $window;
+			} elseif ( ! empty( $session['start_time'] ) ) {
+				/* translators: %s: time. */
+				$time = sprintf( __( 'Starts %s', 'digitum-bookings' ), Format::time( (string) $session['start_time'] ) );
+			} else {
+				continue;
+			}
+			// Keep "7:15 am" together when the tile wraps.
+			$time = (string) preg_replace( '/(\d) (?=\S)/u', "$1\u{00A0}", $time );
+			/* translators: 1: session name, 2: time. */
+			$lines[] = count( $sessions ) > 1 ? sprintf( __( '%1$s: %2$s', 'digitum-bookings' ), (string) $session['name'], $time ) : $time;
+		}
+		if ( count( $lines ) === $windows && $windows > 0 ) {
+			$label = 1 === $windows ? __( 'Pickup time', 'digitum-bookings' ) : __( 'Pickup times', 'digitum-bookings' );
+		} else {
+			$label = __( 'Session times', 'digitum-bookings' );
+		}
+		return array(
+			'label' => $label,
+			'lines' => $lines,
+		);
 	}
 
 	/**
@@ -589,19 +643,22 @@ final class TourOutputs {
 
 	/**
 	 * Styles of the Cards facts, printed with the first set of cards on a page. Every value is a CSS variable
-	 * on `.dgb-fact-cards`, set by the Tour facts widget's Style › Cards controls. Columns: at most 3 from
-	 * 1025 px and 2 below, fewer when a tile would be narrower than 180 px (130 px on phones).
+	 * on `.dgb-fact-cards`, set by the Tour facts widget's Style › Cards controls. Columns: from the
+	 * number of tiles on computers (1–4 in one row, 5–6 in rows of 3, more in rows of 4), 2 below 1025 px; the
+	 * last row fills the width; tiles are never narrower than 180 px (130 px on phones).
 	 */
 	public static function cards_css(): string {
-		return '.dgb-fact-cards{--dgb-fc-cols:2;display:grid;grid-template-columns:repeat(auto-fill,minmax(max(var(--dgb-fc-min,180px),calc((100% - (var(--dgb-fc-cols) - 1) * var(--dgb-fc-gap,12px)) / var(--dgb-fc-cols))),1fr));gap:var(--dgb-fc-gap,12px);margin:0;padding:0;list-style:none}'
-			. '@media (min-width:1025px){.dgb-fact-cards{--dgb-fc-cols:3}}'
-			. '.dgb-fact-card{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;row-gap:2px;align-items:center;margin:0;padding:var(--dgb-fc-pad,16px);border:1px solid var(--dgb-fc-border,#E2CFB6);border-radius:var(--dgb-fc-radius,14px);background:var(--dgb-fc-bg,#fff);box-shadow:var(--dgb-fc-shadow,0 1px 2px rgba(28,20,16,.04))}'
+		// Flex rows: each tile is 1/columns wide and the tiles of the last row grow to fill it, so the grid
+		// adapts when facts are added or removed. Tiles never get narrower than --dgb-fc-min.
+		return '.dgb-fact-cards{--dgb-fc-cols:min(2,var(--dgb-fc-auto,2));display:flex;flex-wrap:wrap;gap:var(--dgb-fc-gap,12px);margin:0;padding:0;list-style:none}'
+			. '@media (min-width:1025px){.dgb-fact-cards{--dgb-fc-cols:var(--dgb-fc-auto,3)}}'
+			. '.dgb-fact-card{box-sizing:border-box;flex:1 1 calc((100% - (var(--dgb-fc-cols) - 1) * var(--dgb-fc-gap,12px)) / var(--dgb-fc-cols) - .5px);min-width:min(100%,var(--dgb-fc-min,180px));display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;row-gap:2px;align-items:center;margin:0;padding:var(--dgb-fc-pad,16px);border:1px solid var(--dgb-fc-border,#E2CFB6);border-radius:var(--dgb-fc-radius,14px);background:var(--dgb-fc-bg,#fff);box-shadow:var(--dgb-fc-shadow,0 1px 2px rgba(28,20,16,.04))}'
 			. '.dgb-fact-card__icon{display:flex;grid-row:1/3;align-items:center;justify-content:center;width:var(--dgb-fc-icon-size,38px);height:var(--dgb-fc-icon-size,38px);border-radius:50%;background:var(--dgb-fc-icon-bg,#FBEADF);color:var(--dgb-fc-icon,#C2410C)}'
 			. '.dgb-fact-card__icon svg{width:52%;height:52%}'
 			. '.dgb-fact-card__label{align-self:end;color:var(--dgb-fc-label,#6B5A4E);font-size:.72rem;font-weight:600;letter-spacing:.08em;line-height:1.3;text-transform:uppercase}'
-			. '.dgb-fact-card__value{align-self:start;color:var(--dgb-fc-value,#1C1410);font-size:16px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}'
+			. '.dgb-fact-card__value{align-self:start;color:var(--dgb-fc-value,#1C1410);font-size:16px;font-weight:600;line-height:1.35;overflow-wrap:break-word}'
 			. '.dgb-fact-card__value a{color:var(--dgb-fc-link,var(--dgb-accent,#C2410C));text-decoration:underline;text-underline-offset:2px}'
-			. '.dgb-fact-card--sessions{grid-column:1/-1}.dgb-fact-card__list{margin:0;padding:0;list-style:none}.dgb-fact-card__list li{margin:0}.dgb-fact-card__list li+li{margin-top:2px}'
+			. '.dgb-fact-card__list{margin:0;padding:0;list-style:none}.dgb-fact-card__list li{margin:0}.dgb-fact-card__list li+li{margin-top:2px}'
 			. '@media (max-width:767px){.dgb-fact-cards{--dgb-fc-min:130px;gap:var(--dgb-fc-gap,10px)}.dgb-fact-card{grid-template-columns:minmax(0,1fr);grid-template-rows:auto;row-gap:6px;align-items:start;padding:var(--dgb-fc-pad,14px)}.dgb-fact-card__icon{grid-row:auto}.dgb-fact-card__value{font-size:15px}}';
 	}
 

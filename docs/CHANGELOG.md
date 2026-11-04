@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.4 (fact cards adapt to the number of facts)
+
+- **Fact cards follow the number of facts**: on computers 1 to 4 tiles sit in one row, 5 or 6 in rows of 3, 7 or more in rows of 4; on phones 2 per row. The tiles of the last row grow to fill it, so adding or removing a fact never leaves a gap or a lone tile. The Elementor Columns control still overrides this.
+- **Sessions tile shows only the pickup time**: “Pickup time · 2:15 pm – 2:45 pm”; with several sessions “Morning: 6:45 am – 7:15 am”, one per line. A session without a pickup window shows its start time (“Session times”). It no longer takes a full row; times do not break in the middle.
+
 ## 0.9.3 (sticky card fix, polish)
 
 - **Sticky booking card no longer runs below the screen**: when the card is taller than the screen below the sticky offset (104 px), it scrolls until its bottom edge is 16 px above the bottom of the screen and sticks there, so Check availability and Ask on WhatsApp stay visible. Works for the shortcode and the Elementor widget (`--dgb-sticky-fit`, set by the script and on resize).

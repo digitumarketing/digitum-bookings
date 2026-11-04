@@ -76,7 +76,7 @@ if ( isset( $_COOKIE['dgb_test_card'] ) ) {
 				. '<p><a class="qa-header-book" href="#book">Book now</a> <button type="button" class="dgb-open qa-class-open">Open by class</button> <span data-dgb-open="' . get_the_ID() . '" class="qa-data-open" role="button" tabindex="0">Open by data</span></p>'
 				. '<div class="qa-hero">' . do_shortcode( '[dgb_price]' ) . do_shortcode( '[dgb_tour_facts style="chips"]' ) . '<p><a class="qa-hero-book" href="#dgb-book" style="color:#fff">Check availability</a></p></div><div class="qa-light">' . do_shortcode( '[dgb_tour_facts style="chips"]' ) . '</div>'
 				. do_shortcode( '[dgb_gallery]' )
-				. '<div class="qa-facts"><h2>Key facts</h2>' . do_shortcode( '[dgb_tour_facts style="cards"]' ) . '</div><div class="qa-layout"><div class="qa-main">' . $content . str_repeat( '<p>Tour description paragraph for scrolling.</p>', 30 ) . '</div><aside id="book" class="qa-side">' . do_shortcode( '[dgb_booking_card trust2="Confirmed in minutes"]' ) . '</aside></div>';
+				. '<div class="qa-facts alignwide" style="max-width:820px"><h2>Key facts</h2>' . do_shortcode( '[dgb_tour_facts style="cards"]' ) . '</div><div class="qa-layout"><div class="qa-main">' . $content . str_repeat( '<p>Tour description paragraph for scrolling.</p>', 30 ) . '</div><aside id="book" class="qa-side">' . do_shortcode( '[dgb_booking_card trust2="Confirmed in minutes"]' ) . '</aside></div>';
 		},
 		12 // After wpautop and do_shortcode, like shortcodes placed in the content.
 	);

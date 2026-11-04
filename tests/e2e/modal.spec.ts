@@ -289,13 +289,19 @@ test.describe( 'booking card and modal', () => {
 				return { x: Math.round( r.x ), y: Math.round( r.y ), w: Math.round( r.width ), iconLeft: icon.right <= label.left + 1, iconTop: icon.bottom <= label.top + 1, value: n.querySelector( '.dgb-fact-card__value' )!.textContent!.trim() };
 			} ) );
 			expect( boxes.every( ( b ) => '' !== b.value ) ).toBe( true );
+			// 7 tiles: rows of 4 on computers, 2 on phones; the last row fills the width.
 			const firstRow = boxes.filter( ( b ) => b.y === boxes[ 0 ].y ).length;
-			expect( firstRow ).toBe( width >= 1025 ? 3 : 2 );
-			// Sessions take the full row.
+			expect( firstRow ).toBe( width >= 1025 ? 4 : 2 );
+			const grid = ( await page.locator( '.qa-facts .dgb-fact-cards' ).boundingBox() )!;
+			const last = boxes[ boxes.length - 1 ];
+			expect( Math.abs( last.x + last.w - ( grid.x + grid.width ) ) ).toBeLessThan( 2 );
+			// Sessions: only the pickup time of each session, in the same rows as the other facts.
 			const sessions = page.locator( '.qa-facts .dgb-fact-card--sessions' );
-			const grid = await page.locator( '.qa-facts .dgb-fact-cards' ).boundingBox();
-			expect( Math.abs( ( await sessions.boundingBox() )!.width - grid!.width ) ).toBeLessThan( 2 );
-			await expect( sessions.locator( 'li' ) ).toHaveCount( 2 );
+			await expect( sessions.locator( '.dgb-fact-card__label' ) ).toHaveText( 'Pickup times' );
+			await expect( sessions.locator( 'li' ) ).toHaveText( [ 'Morning: 6:45 am – 7:15 am', 'Evening: 2:15 pm – 2:45 pm' ] );
+			if ( width >= 1025 ) {
+				expect( Math.round( ( await sessions.boundingBox() )!.width ) ).toBeLessThan( grid.width / 2 );
+			}
 			// Icon on the left on computers, on top on phones.
 			expect( boxes[ 0 ][ width >= 768 ? 'iconLeft' : 'iconTop' ] ).toBe( true );
 			const link = page.locator( '.qa-facts .dgb-fact-card--meeting-point a' );

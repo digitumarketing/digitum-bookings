@@ -8,7 +8,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2026-10-22T16:32:13+00:00\n"
-"PO-Revision-Date: 2026-11-04T10:09:51+00:00\n"
+"PO-Revision-Date: 2026-11-04T12:04:53+00:00\n"
 "Language: ar\n"
 "Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5);\n"
 "X-Domain: digitum-bookings\n"
@@ -350,7 +350,7 @@ msgid "Options"
 msgstr "الخيارات"
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:152
-#: src/Frontend/TourOutputs.php:791
+#: src/Frontend/TourOutputs.php:848
 msgid "Sessions"
 msgstr "الفترات"
 
@@ -525,7 +525,7 @@ msgstr "المدة (دقيقة)"
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:342
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:492
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:517
-#: src/Frontend/TourOutputs.php:740
+#: src/Frontend/TourOutputs.php:797
 msgid "Price"
 msgstr "السعر"
 
@@ -803,7 +803,7 @@ msgid "Preselected choice"
 msgstr "الخيار المحدد مسبقاً"
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:593
-#: src/Frontend/TourOutputs.php:820
+#: src/Frontend/TourOutputs.php:877
 msgid "Meet at the meeting point"
 msgstr "الالتقاء عند نقطة الالتقاء"
 
@@ -815,7 +815,7 @@ msgstr "الالتقاء عند نقطة الالتقاء"
 #: src/Admin/Screens/ManifestScreen.php:377
 #: src/Admin/Screens/ZonesScreen.php:101
 #: src/Frontend/BookingCard.php:177
-#: src/Frontend/TourOutputs.php:778
+#: src/Frontend/TourOutputs.php:835
 #: src/Integrations/Elementor/Tags/MeetingPointTag.php:28
 #: src/Services/Notifications/Listener.php:204
 msgid "Meeting point"
@@ -851,7 +851,7 @@ msgid "days ahead"
 msgstr "يوماً مقدماً"
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:624
-#: src/Frontend/TourOutputs.php:760
+#: src/Frontend/TourOutputs.php:817
 #: src/Integrations/Elementor/Tags/MinAgeTag.php:28
 msgid "Minimum age"
 msgstr "الحد الأدنى للعمر"
@@ -1105,7 +1105,7 @@ msgstr "الرحلة"
 #: src/Admin/Screens/ManifestScreen.php:364
 #: src/Admin/Screens/ZonesScreen.php:76
 #: src/Admin/Screens/ZonesScreen.php:146
-#: src/Frontend/TourOutputs.php:772
+#: src/Frontend/TourOutputs.php:829
 #: src/Frontend/Widget.php:434
 #: src/Services/Notifications/MergeTags.php:107
 #: templates/front/booking-card.php:88
@@ -2743,7 +2743,7 @@ msgstr "تم استيرادها سابقاً"
 #: src/Frontend/TourOutputs.php:273
 #: src/Frontend/TourOutputs.php:401
 #: src/Frontend/TourOutputs.php:423
-#: src/Frontend/TourOutputs.php:741
+#: src/Frontend/TourOutputs.php:798
 #: src/Services/Notifications/MergeTags.php:108
 #: src/Services/Schema.php:130
 #: templates/front/booking-widget.php:48
@@ -3556,7 +3556,7 @@ msgid "Option"
 msgstr "الخيار"
 
 #: src/Frontend/TourOutputs.php:434
-#: src/Frontend/TourOutputs.php:735
+#: src/Frontend/TourOutputs.php:792
 msgid "Duration"
 msgstr "المدة"
 
@@ -3598,14 +3598,39 @@ msgstr "غير مشمول"
 msgid "Requirements"
 msgstr "المتطلبات"
 
+#. translators: %s: time.
+#: src/Frontend/TourOutputs.php:605
+#: src/Frontend/Widget.php:395
+#, php-format
+msgid "Starts %s"
+msgstr "تبدأ %s"
+
+#. translators: 1: session name, 2: time.
+#: src/Frontend/TourOutputs.php:612
+#, php-format
+msgid "%1$s: %2$s"
+msgstr "%1$s: %2$s"
+
+#: src/Frontend/TourOutputs.php:615
+msgid "Pickup time"
+msgstr "وقت الاصطحاب"
+
+#: src/Frontend/TourOutputs.php:615
+msgid "Pickup times"
+msgstr "أوقات الاصطحاب"
+
+#: src/Frontend/TourOutputs.php:617
+msgid "Session times"
+msgstr "أوقات الجلسات"
+
 #. translators: 1: shortest duration, 2: longest duration.
-#: src/Frontend/TourOutputs.php:625
+#: src/Frontend/TourOutputs.php:682
 #, php-format
 msgid "%1$s to %2$s"
 msgstr "من %1$s إلى %2$s"
 
 #. translators: %d: seats per vehicle.
-#: src/Frontend/TourOutputs.php:630
+#: src/Frontend/TourOutputs.php:687
 #, php-format
 msgid "%d seat"
 msgid_plural "%d seats"
@@ -3617,46 +3642,46 @@ msgstr[4] "%d مقعد"
 msgstr[5] "%d مقعد"
 
 #. translators: 1: guests, 2: what one car is called.
-#: src/Frontend/TourOutputs.php:634
+#: src/Frontend/TourOutputs.php:691
 #, php-format
 msgid "Up to %1$d per %2$s"
 msgstr "حتى %1$d لكل %2$s"
 
 #. translators: %d: minimum age.
-#: src/Frontend/TourOutputs.php:639
+#: src/Frontend/TourOutputs.php:696
 #, php-format
 msgid "Driver %d+"
 msgstr "السائق %d+"
 
 #. translators: %d: minimum age.
-#: src/Frontend/TourOutputs.php:639
+#: src/Frontend/TourOutputs.php:696
 #, php-format
 msgid "Age %d+"
 msgstr "العمر %d+"
 
-#: src/Frontend/TourOutputs.php:642
+#: src/Frontend/TourOutputs.php:699
 msgid "Driving licence needed"
 msgstr "رخصة القيادة مطلوبة"
 
-#: src/Frontend/TourOutputs.php:644
+#: src/Frontend/TourOutputs.php:701
 msgid "No licence needed"
 msgstr "لا حاجة لرخصة"
 
-#: src/Frontend/TourOutputs.php:648
+#: src/Frontend/TourOutputs.php:705
 msgid "Pickup included"
 msgstr "الاصطحاب مشمول"
 
-#: src/Frontend/TourOutputs.php:650
+#: src/Frontend/TourOutputs.php:707
 msgid "Hotel pickup available"
 msgstr "الاصطحاب من الفندق متاح"
 
-#: src/Frontend/TourOutputs.php:746
-#: src/Frontend/TourOutputs.php:753
+#: src/Frontend/TourOutputs.php:803
+#: src/Frontend/TourOutputs.php:810
 msgid "Group size"
 msgstr "حجم المجموعة"
 
 #. translators: 1: seats, 2: what one vehicle is called, e.g. buggy.
-#: src/Frontend/TourOutputs.php:748
+#: src/Frontend/TourOutputs.php:805
 #, php-format
 msgid "Up to %1$d person per %2$s"
 msgid_plural "Up to %1$d people per %2$s"
@@ -3668,7 +3693,7 @@ msgstr[4] "حتى %1$d شخص لكل %2$s"
 msgstr[5] "حتى %1$d شخص لكل %2$s"
 
 #. translators: 1: guests, 2: what one car is called.
-#: src/Frontend/TourOutputs.php:755
+#: src/Frontend/TourOutputs.php:812
 #, php-format
 msgid "Up to %1$d guest per %2$s"
 msgid_plural "Up to %1$d guests per %2$s"
@@ -3680,7 +3705,7 @@ msgstr[4] "حتى %1$d ضيف لكل %2$s"
 msgstr[5] "حتى %1$d ضيف لكل %2$s"
 
 #. translators: %d: age in years.
-#: src/Frontend/TourOutputs.php:762
+#: src/Frontend/TourOutputs.php:819
 #, php-format
 msgid "%d year"
 msgid_plural "%d years"
@@ -3691,37 +3716,37 @@ msgstr[3] "%d سنوات"
 msgstr[4] "%d سنة"
 msgstr[5] "%d سنة"
 
-#: src/Frontend/TourOutputs.php:767
+#: src/Frontend/TourOutputs.php:824
 msgid "Licence"
 msgstr "الرخصة"
 
-#: src/Frontend/TourOutputs.php:768
+#: src/Frontend/TourOutputs.php:825
 msgid "A driving licence is required"
 msgstr "تلزم رخصة قيادة"
 
-#: src/Frontend/TourOutputs.php:809
+#: src/Frontend/TourOutputs.php:866
 msgid "Hotel pickup included"
 msgstr "التوصيل من الفندق مشمول"
 
 #. translators: %s: price.
-#: src/Frontend/TourOutputs.php:815
+#: src/Frontend/TourOutputs.php:872
 #, php-format
 msgid "Hotel pickup on request (+%s per booking)"
 msgstr "التوصيل من الفندق عند الطلب (+%s لكل حجز)"
 
-#: src/Frontend/TourOutputs.php:818
+#: src/Frontend/TourOutputs.php:875
 msgid "Hotel pickup on request"
 msgstr "التوصيل من الفندق عند الطلب"
 
 #. translators: %s: time.
-#: src/Frontend/TourOutputs.php:843
+#: src/Frontend/TourOutputs.php:900
 #: src/Services/LlmsTxt.php:303
 #, php-format
 msgid "starts %s"
 msgstr "تبدأ %s"
 
 #. translators: %s: time range.
-#: src/Frontend/TourOutputs.php:848
+#: src/Frontend/TourOutputs.php:905
 #: src/Services/LlmsTxt.php:309
 #, php-format
 msgid "pickup %s"
@@ -3828,12 +3853,6 @@ msgstr "لا توجد جولات في هذا اليوم. يرجى اختيار �
 #: src/Frontend/Widget.php:393
 msgid "Loading…"
 msgstr "جارٍ التحميل…"
-
-#. translators: %s: time.
-#: src/Frontend/Widget.php:395
-#, php-format
-msgid "Starts %s"
-msgstr "تبدأ %s"
 
 #. translators: %s: time range.
 #: src/Frontend/Widget.php:397

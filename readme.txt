@@ -4,7 +4,7 @@ Tags: bookings, tours, activities, reservations, deposits
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.9.3
+Stable tag: 0.9.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -121,6 +121,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 
 == Changelog ==
 
+= 0.9.4 =
+* Fact cards adapt their columns to the number of facts and fill the last row; the sessions tile shows only the pickup time.
+
 = 0.9.3 =
 * The sticky booking card no longer runs below the screen on short screens; the date calendar opens upwards when needed; booking card and fact card polish.
 
@@ -194,6 +197,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 * Foundation: settings, tour post type (attach or own), booking settings box, database tables, roles.
 
 == Upgrade Notice ==
+
+= 0.9.4 =
+Fact cards now size themselves to the number of facts.
 
 = 0.9.3 =
 Fixes the sticky booking card running below short screens.
