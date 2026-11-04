@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.2 (facts as cards)
+
+- **Tour facts, style Cards** (`[dgb_tour_facts style="cards"]`, Elementor Tour facts › Style “Cards”, block): one tile per fact that has a value (never an empty tile), with a line icon in a circle (duration clock, price tag, group people, age card, licence card, pickup van, meeting point pin, sessions sun). Tiles: white, 1 px border #E2CFB6, 14 px radius, 16 px padding; label small, uppercase and muted; value 16 px, semibold. Grid of 3 columns from 1025 px and 2 below (12 px gap, 10 px on phones), with fewer columns when a tile would be too narrow; on phones the icon sits on top and the value is 15 px. The meeting point links to its map; sessions take the full row and list every session. Elementor Style › Cards: columns, gap, tile background, border colour, radius and padding, icon circle and icon colours and size, label and value colours and typography, link colour (CSS variables `--dgb-fc-*`). The card styles are printed only on pages with cards.
+- Facts use the tour's noun: “Per buggy”, “Up to 2 people per buggy”.
+- List and Chips styles are unchanged.
+
 ## 0.9.1 (dark hero fixes)
 
 - **Tour price** (`dgb_price`): the colour controls now apply. The label and the basis use `--dgb-muted`, the amount `--dgb-ink`; `.dgb-price` no longer forces `color: inherit`, which overrode the widget's colours (on a dark hero the price inherited the page's dark text).

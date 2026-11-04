@@ -55,6 +55,13 @@ final class TourOutputs {
 	private static bool $gallery_styled = false;
 
 	/**
+	 * Whether the fact cards stylesheet was printed.
+	 *
+	 * @var bool
+	 */
+	private static bool $cards_styled = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Settings     $settings     Settings service.
@@ -82,6 +89,7 @@ final class TourOutputs {
 		self::$cache          = array();
 		self::$styled         = false;
 		self::$gallery_styled = false;
+		self::$cards_styled   = false;
 	}
 
 	/**
@@ -161,8 +169,9 @@ final class TourOutputs {
 			(array) $atts,
 			'dgb_tour_facts'
 		);
-		$chips = 'chips' === strtolower( trim( (string) $atts['style'] ) );
-		return $this->tour_facts( $this->tour_id( $atts['id'] ), self::fields( (string) $atts['fields'], $chips ), $chips ? 'chips' : 'list' );
+		$style = strtolower( trim( (string) $atts['style'] ) );
+		$style = in_array( $style, array( 'chips', 'cards' ), true ) ? $style : 'list';
+		return $this->tour_facts( $this->tour_id( $atts['id'] ), self::fields( (string) $atts['fields'], 'chips' === $style ), $style );
 	}
 
 	/**
@@ -484,7 +493,7 @@ final class TourOutputs {
 	 *
 	 * @param int      $id     Tour post ID.
 	 * @param string[] $fields Facts to show, in order (see FACTS); [] = all.
-	 * @param string   $style  list or chips.
+	 * @param string   $style  list, chips or cards.
 	 */
 	public function tour_facts( int $id, array $fields = array(), string $style = 'list' ): string {
 		if ( ! $id ) {
@@ -492,6 +501,9 @@ final class TourOutputs {
 		}
 		if ( 'chips' === $style ) {
 			return $this->chips( $id, $fields );
+		}
+		if ( 'cards' === $style ) {
+			return $this->cards( $id, $fields );
 		}
 		$facts = $this->facts( $id );
 		$html  = '';
@@ -510,6 +522,87 @@ final class TourOutputs {
 			$html .= '<div class="dgb-tour-facts__item dgb-tour-facts__item--' . esc_attr( str_replace( '_', '-', $key ) ) . '"><dt>' . esc_html( $facts[ $key ]['label'] ) . '</dt><dd>' . $value . '</dd></div>';
 		}
 		return '' === $html ? '' : $this->wrap( '<dl class="dgb-o dgb-tour-facts">' . $html . '</dl>' );
+	}
+
+	/**
+	 * Facts as tiles with an icon: one tile per fact that has a value (never an empty tile). The meeting point
+	 * links to its map; sessions take the full row and list every session.
+	 *
+	 * @param int      $id     Tour post ID.
+	 * @param string[] $fields Facts to show, in order (see FACTS); [] = all.
+	 */
+	public function cards( int $id, array $fields = array() ): string {
+		$facts = $this->facts( $id );
+		$html  = '';
+		foreach ( array() === $fields ? self::FACTS : $fields as $key ) {
+			if ( empty( $facts[ $key ] ) ) {
+				continue;
+			}
+			$value = $facts[ $key ]['value'];
+			if ( is_array( $value ) ) {
+				$value = array_values( array_filter( array_map( 'trim', $value ), static fn( $line ) => '' !== $line ) );
+				if ( array() === $value ) {
+					continue;
+				}
+				$value = '<ul class="dgb-fact-card__list">' . implode( '', array_map( static fn( $line ) => '<li>' . esc_html( $line ) . '</li>', $value ) ) . '</ul>';
+			} elseif ( '' === trim( (string) $value ) ) {
+				continue;
+			} elseif ( ! empty( $facts[ $key ]['url'] ) ) {
+				$value = '<a href="' . esc_url( $facts[ $key ]['url'] ) . '" rel="noopener" target="_blank">' . esc_html( $value ) . '</a>';
+			} else {
+				$value = esc_html( $value );
+			}
+			$html .= '<li class="dgb-fact-card dgb-fact-card--' . esc_attr( str_replace( '_', '-', $key ) ) . '">'
+				. '<span class="dgb-fact-card__icon" aria-hidden="true">' . self::icon( $key ) . '</span>'
+				. '<span class="dgb-fact-card__label">' . esc_html( $facts[ $key ]['label'] ) . '</span>'
+				. '<span class="dgb-fact-card__value">' . $value . '</span></li>';
+		}
+		if ( '' === $html ) {
+			return '';
+		}
+		$css = '';
+		if ( ! self::$cards_styled ) {
+			self::$cards_styled = true;
+			$css                = '<style id="dgb-fact-cards-css">' . self::cards_css() . '</style>';
+		}
+		return $this->wrap( $css . '<ul class="dgb-o dgb-fact-cards">' . $html . '</ul>' );
+	}
+
+	/**
+	 * Line icon for a fact (inline SVG, inherits the icon colour).
+	 *
+	 * @param string $key Fact.
+	 */
+	private static function icon( string $key ): string {
+		$paths = array(
+			'duration'      => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+			'basis'         => '<path d="M3 12V4h8l9 9-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>',
+			'capacity'      => '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14a6.5 6.5 0 0 1 3.5 6"/>',
+			'age'           => '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16a3 3 0 0 1 6 0M14 10h4M14 14h4"/>',
+			'licence'       => '<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6.5 15h4"/>',
+			'pickup'        => '<path d="M3 16V7a2 2 0 0 1 2-2h10l4 5h1a1 1 0 0 1 1 1v5h-2"/><path d="M3 16h2M9 16h6M3 10h16"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
+			'meeting_point' => '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+			'sessions'      => '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+		);
+		return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false">' . ( $paths[ $key ] ?? $paths['basis'] ) . '</svg>';
+	}
+
+	/**
+	 * Styles of the Cards facts, printed with the first set of cards on a page. Every value is a CSS variable
+	 * on `.dgb-fact-cards`, set by the Tour facts widget's Style › Cards controls. Columns: at most 3 from
+	 * 1025 px and 2 below, fewer when a tile would be narrower than 180 px (130 px on phones).
+	 */
+	public static function cards_css(): string {
+		return '.dgb-fact-cards{--dgb-fc-cols:2;display:grid;grid-template-columns:repeat(auto-fill,minmax(max(var(--dgb-fc-min,180px),calc((100% - (var(--dgb-fc-cols) - 1) * var(--dgb-fc-gap,12px)) / var(--dgb-fc-cols))),1fr));gap:var(--dgb-fc-gap,12px);margin:0;padding:0;list-style:none}'
+			. '@media (min-width:1025px){.dgb-fact-cards{--dgb-fc-cols:3}}'
+			. '.dgb-fact-card{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;row-gap:2px;align-items:center;margin:0;padding:var(--dgb-fc-pad,16px);border:1px solid var(--dgb-fc-border,#E2CFB6);border-radius:var(--dgb-fc-radius,14px);background:var(--dgb-fc-bg,#fff)}'
+			. '.dgb-fact-card__icon{display:flex;grid-row:1/3;align-items:center;justify-content:center;width:var(--dgb-fc-icon-size,38px);height:var(--dgb-fc-icon-size,38px);border-radius:50%;background:var(--dgb-fc-icon-bg,#FBEADF);color:var(--dgb-fc-icon,#C2410C)}'
+			. '.dgb-fact-card__icon svg{width:52%;height:52%}'
+			. '.dgb-fact-card__label{align-self:end;color:var(--dgb-fc-label,#6B5A4E);font-size:.72rem;font-weight:600;letter-spacing:.08em;line-height:1.3;text-transform:uppercase}'
+			. '.dgb-fact-card__value{align-self:start;color:var(--dgb-fc-value,#1C1410);font-size:16px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}'
+			. '.dgb-fact-card__value a{color:var(--dgb-fc-link,var(--dgb-accent,#C2410C));text-decoration:underline;text-underline-offset:2px}'
+			. '.dgb-fact-card--sessions{grid-column:1/-1}.dgb-fact-card__list{margin:0;padding:0;list-style:none}.dgb-fact-card__list li{margin:0}.dgb-fact-card__list li+li{margin-top:2px}'
+			. '@media (max-width:767px){.dgb-fact-cards{--dgb-fc-min:130px;gap:var(--dgb-fc-gap,10px)}.dgb-fact-card{grid-template-columns:minmax(0,1fr);grid-template-rows:auto;row-gap:6px;align-items:start;padding:var(--dgb-fc-pad,14px)}.dgb-fact-card__icon{grid-row:auto}.dgb-fact-card__value{font-size:15px}}';
 	}
 
 	/**
@@ -645,21 +738,21 @@ final class TourOutputs {
 				}
 				$facts['basis'] = array(
 					'label' => __( 'Price', 'digitum-bookings' ),
-					'value' => 'on_request' === $mode ? __( 'Price on request', 'digitum-bookings' ) : ucfirst( Widget::basis( $mode ) ),
+					'value' => 'on_request' === $mode ? __( 'Price on request', 'digitum-bookings' ) : ucfirst( '' !== TourWords::basis( $product ) ? TourWords::basis( $product ) : Widget::basis( $mode ) ),
 				);
 				if ( 'per_vehicle' === $mode ) {
 					$seats             = (int) $product->get( 'seats_per_unit' );
 					$facts['capacity'] = array(
 						'label' => __( 'Group size', 'digitum-bookings' ),
-						/* translators: %d: seats. */
-						'value' => sprintf( _n( 'Up to %d person per vehicle', 'Up to %d people per vehicle', $seats, 'digitum-bookings' ), $seats ),
+						/* translators: 1: seats, 2: what one vehicle is called, e.g. buggy. */
+						'value' => sprintf( _n( 'Up to %1$d person per %2$s', 'Up to %1$d people per %2$s', $seats, 'digitum-bookings' ), $seats, TourWords::one( $product ) ),
 					);
 				} elseif ( 'per_group' === $mode ) {
 					$max               = (int) $product->get( 'max_pax_per_unit' );
 					$facts['capacity'] = array(
 						'label' => __( 'Group size', 'digitum-bookings' ),
-						/* translators: %d: guests. */
-						'value' => sprintf( _n( 'Up to %d guest per car', 'Up to %d guests per car', $max, 'digitum-bookings' ), $max ),
+						/* translators: 1: guests, 2: what one car is called. */
+						'value' => sprintf( _n( 'Up to %1$d guest per %2$s', 'Up to %1$d guests per %2$s', $max, 'digitum-bookings' ), $max, TourWords::one( $product ) ),
 					);
 				}
 				if ( (int) $product->get( 'min_age' ) > 0 ) {

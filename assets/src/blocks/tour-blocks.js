@@ -65,6 +65,7 @@
 				options: [
 					{ value: 'list', label: __( 'List', 'digitum-bookings' ) },
 					{ value: 'chips', label: __( 'Chips', 'digitum-bookings' ) },
+					{ value: 'cards', label: __( 'Cards', 'digitum-bookings' ) },
 				],
 				onChange: ( v ) => props.setAttributes( { style: v } ),
 			} ),

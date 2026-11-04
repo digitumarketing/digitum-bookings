@@ -71,7 +71,7 @@ final class TourFactsWidget extends \Elementor\Widget_Base {
 				'label'       => __( 'Facts', 'digitum-bookings' ),
 				'type'        => \Elementor\Controls_Manager::TEXT,
 				'default'     => '',
-				'description' => __( 'Comma-separated, in order: duration, basis, capacity, age, licence, pickup, meeting_point, sessions. Chips: duration, seats, age, licence, pickup. Empty shows all.', 'digitum-bookings' ),
+				'description' => __( 'Comma-separated, in order: duration, basis, capacity, age, licence, pickup, meeting_point, sessions. Chips: duration, seats, age, licence, pickup. Empty shows all. Cards use the same facts as the list.', 'digitum-bookings' ),
 			)
 		);
 		$this->add_control(
@@ -83,6 +83,7 @@ final class TourFactsWidget extends \Elementor\Widget_Base {
 				'options' => array(
 					'list'  => __( 'List', 'digitum-bookings' ),
 					'chips' => __( 'Chips', 'digitum-bookings' ),
+					'cards' => __( 'Cards', 'digitum-bookings' ),
 				),
 			)
 		);
@@ -144,6 +145,102 @@ final class TourFactsWidget extends \Elementor\Widget_Base {
 			)
 		);
 		$this->end_controls_section();
+		$this->card_controls();
+	}
+
+	/**
+	 * Style › Cards: columns, gap, tiles, icon, label and value. Each control sets a CSS variable (or the text
+	 * style) on the cards, so the defaults of the plugin stylesheet apply until a value is chosen.
+	 */
+	private function card_controls(): void {
+		$this->start_controls_section(
+			'dgb_card_style',
+			array(
+				'label'     => __( 'Cards', 'digitum-bookings' ),
+				'tab'       => \Elementor\Controls_Manager::TAB_STYLE,
+				'condition' => array( 'style' => 'cards' ),
+			)
+		);
+		$px = static fn( int $max ) => array(
+			'px' => array(
+				'min' => 0,
+				'max' => $max,
+			),
+		);
+		$this->add_responsive_control(
+			'card_columns',
+			array(
+				'label'     => __( 'Columns', 'digitum-bookings' ),
+				'type'      => \Elementor\Controls_Manager::SLIDER,
+				'range'     => array(
+					'px' => array(
+						'min' => 1,
+						'max' => 4,
+					),
+				),
+				'selectors' => array( '{{WRAPPER}} .dgb-fact-cards' => '--dgb-fc-cols: {{SIZE}};' ),
+			)
+		);
+		foreach ( array(
+			'card_gap'       => array( __( 'Gap', 'digitum-bookings' ), '--dgb-fc-gap', 40 ),
+			'card_radius'    => array( __( 'Corner radius', 'digitum-bookings' ), '--dgb-fc-radius', 40 ),
+			'card_icon_size' => array( __( 'Icon size', 'digitum-bookings' ), '--dgb-fc-icon-size', 80 ),
+		) as $id => $control ) {
+			$this->add_responsive_control(
+				$id,
+				array(
+					'label'      => $control[0],
+					'type'       => \Elementor\Controls_Manager::SLIDER,
+					'size_units' => array( 'px' ),
+					'range'      => $px( $control[2] ),
+					'selectors'  => array( '{{WRAPPER}} .dgb-fact-cards' => $control[1] . ': {{SIZE}}{{UNIT}};' ),
+				)
+			);
+		}
+		$this->add_responsive_control(
+			'card_padding',
+			array(
+				'label'      => __( 'Tile padding', 'digitum-bookings' ),
+				'type'       => \Elementor\Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em' ),
+				'selectors'  => array( '{{WRAPPER}} .dgb-fact-cards .dgb-fact-card' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ),
+			)
+		);
+		foreach ( array(
+			'card_bg'      => array( __( 'Tile background', 'digitum-bookings' ), '--dgb-fc-bg' ),
+			'card_border'  => array( __( 'Tile border colour', 'digitum-bookings' ), '--dgb-fc-border' ),
+			'card_icon_bg' => array( __( 'Icon circle colour', 'digitum-bookings' ), '--dgb-fc-icon-bg' ),
+			'card_icon'    => array( __( 'Icon colour', 'digitum-bookings' ), '--dgb-fc-icon' ),
+			'card_label'   => array( __( 'Label colour', 'digitum-bookings' ), '--dgb-fc-label' ),
+			'card_value'   => array( __( 'Value colour', 'digitum-bookings' ), '--dgb-fc-value' ),
+			'card_link'    => array( __( 'Link colour (meeting point)', 'digitum-bookings' ), '--dgb-fc-link' ),
+		) as $id => $control ) {
+			$this->add_control(
+				$id,
+				array(
+					'label'     => $control[0],
+					'type'      => \Elementor\Controls_Manager::COLOR,
+					'selectors' => array( '{{WRAPPER}} .dgb-fact-cards' => $control[1] . ': {{VALUE}};' ),
+				)
+			);
+		}
+		$this->add_group_control(
+			\Elementor\Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'card_label_type',
+				'label'    => __( 'Label typography', 'digitum-bookings' ),
+				'selector' => '{{WRAPPER}} .dgb-fact-cards .dgb-fact-card__label',
+			)
+		);
+		$this->add_group_control(
+			\Elementor\Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'card_value_type',
+				'label'    => __( 'Value typography', 'digitum-bookings' ),
+				'selector' => '{{WRAPPER}} .dgb-fact-cards .dgb-fact-card__value',
+			)
+		);
+		$this->end_controls_section();
 	}
 
 	/**
@@ -153,7 +250,7 @@ final class TourFactsWidget extends \Elementor\Widget_Base {
 		$s       = $this->get_settings_for_display();
 		$outputs = ElementorIntegration::outputs();
 		$id      = $outputs ? $outputs->tour_id( $s['product_id'] ?? 0 ) : 0;
-		$chips   = 'chips' === ( $s['style'] ?? 'list' );
-		echo $outputs ? $outputs->tour_facts( $id, TourOutputs::fields( (string) ( $s['fields'] ?? '' ), $chips ), $chips ? 'chips' : 'list' ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- TourOutputs escapes its output.
+		$style   = in_array( $s['style'] ?? 'list', array( 'chips', 'cards' ), true ) ? (string) $s['style'] : 'list';
+		echo $outputs ? $outputs->tour_facts( $id, TourOutputs::fields( (string) ( $s['fields'] ?? '' ), 'chips' === $style ), $style ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- TourOutputs escapes its output.
 	}
 }

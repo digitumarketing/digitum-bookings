@@ -90,8 +90,8 @@ final class TourBlocks {
 	 * @param array<string, mixed> $a Attributes.
 	 */
 	public function render_tour_facts( $a ): string {
-		$chips = 'chips' === ( $a['style'] ?? 'list' );
-		return $this->outputs->tour_facts( $this->outputs->tour_id( $a['productId'] ?? 0 ), TourOutputs::fields( (string) ( $a['fields'] ?? '' ), $chips ), $chips ? 'chips' : 'list' );
+		$style = in_array( $a['style'] ?? 'list', array( 'chips', 'cards' ), true ) ? (string) $a['style'] : 'list';
+		return $this->outputs->tour_facts( $this->outputs->tour_id( $a['productId'] ?? 0 ), TourOutputs::fields( (string) ( $a['fields'] ?? '' ), 'chips' === $style ), $style );
 	}
 
 	/**

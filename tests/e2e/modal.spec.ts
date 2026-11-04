@@ -275,6 +275,43 @@ test.describe( 'booking card and modal', () => {
 		}
 	} );
 
+	test( 'facts as cards: 3 columns on computers, 2 on phones with the icon on top, no empty tiles, map link', async ( { page } ) => {
+		await cookies( page, [ 'dgb_test_card' ] );
+		for ( const width of [ 390, 1440 ] ) {
+			await page.setViewportSize( { width, height: 900 } );
+			await page.goto( path( tours.buggy.url ) );
+			const cards = page.locator( '.qa-facts .dgb-fact-card' );
+			await expect( cards ).toHaveCount( 7 );
+			const boxes = await cards.evaluateAll( ( nodes ) => nodes.map( ( n ) => {
+				const r = n.getBoundingClientRect();
+				const icon = n.querySelector( '.dgb-fact-card__icon' )!.getBoundingClientRect();
+				const label = n.querySelector( '.dgb-fact-card__label' )!.getBoundingClientRect();
+				return { x: Math.round( r.x ), y: Math.round( r.y ), w: Math.round( r.width ), iconLeft: icon.right <= label.left + 1, iconTop: icon.bottom <= label.top + 1, value: n.querySelector( '.dgb-fact-card__value' )!.textContent!.trim() };
+			} ) );
+			expect( boxes.every( ( b ) => '' !== b.value ) ).toBe( true );
+			const firstRow = boxes.filter( ( b ) => b.y === boxes[ 0 ].y ).length;
+			expect( firstRow ).toBe( width >= 1025 ? 3 : 2 );
+			// Sessions take the full row.
+			const sessions = page.locator( '.qa-facts .dgb-fact-card--sessions' );
+			const grid = await page.locator( '.qa-facts .dgb-fact-cards' ).boundingBox();
+			expect( Math.abs( ( await sessions.boundingBox() )!.width - grid!.width ) ).toBeLessThan( 2 );
+			await expect( sessions.locator( 'li' ) ).toHaveCount( 2 );
+			// Icon on the left on computers, on top on phones.
+			expect( boxes[ 0 ][ width >= 768 ? 'iconLeft' : 'iconTop' ] ).toBe( true );
+			const link = page.locator( '.qa-facts .dgb-fact-card--meeting-point a' );
+			await expect( link ).toHaveAttribute( 'href', 'https://maps.example/meeting-point' );
+			await expect( link ).toHaveAttribute( 'target', '_blank' );
+			const value = page.locator( '.qa-facts .dgb-fact-card__value' ).first();
+			expect( await value.evaluate( ( n ) => getComputedStyle( n ).fontSize ) ).toBe( width >= 768 ? '16px' : '15px' );
+			expect( await page.locator( '.qa-facts .dgb-fact-card' ).first().evaluate( ( n ) => getComputedStyle( n ).borderTopColor ) ).toBe( 'rgb(226, 207, 182)' );
+			await axe( page, '.qa-facts' );
+		}
+		// Price on request: few facts, none empty.
+		await page.goto( path( tours.newyear.url ) );
+		await expect( page.locator( '.qa-facts .dgb-fact-card--basis .dgb-fact-card__value' ) ).toHaveText( 'Price on request' );
+		expect( await page.locator( '.qa-facts .dgb-fact-card__value' ).evaluateAll( ( n ) => n.every( ( v ) => '' !== ( v.textContent || '' ).trim() ) ) ).toBe( true );
+	} );
+
 	test( 'theme and kit button styles do not reach the card', async ( { page } ) => {
 		await cookies( page, [ 'dgb_test_card', 'dgb_test_theme_css' ] );
 		await page.setViewportSize( { width: 1440, height: 900 } );

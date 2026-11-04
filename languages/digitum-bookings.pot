@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Digitum Bookings 0.9.1\n"
+"Project-Id-Version: Digitum Bookings 0.9.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/digitum-bookings\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-03T21:46:15+00:00\n"
+"POT-Creation-Date: 2026-11-04T10:09:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: digitum-bookings\n"
@@ -83,7 +83,7 @@ msgstr ""
 #: src/Services/Privacy.php:141
 #: templates/front/confirmation.php:61
 #: assets/src/blocks/booking-block.js:24
-#: assets/src/blocks/tour-blocks.js:91
+#: assets/src/blocks/tour-blocks.js:92
 msgid "Tour"
 msgstr ""
 
@@ -179,8 +179,8 @@ msgstr ""
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:668
 #: src/Admin/Screens/CouponsScreen.php:179
 #: src/Admin/Screens/OffersScreen.php:216
-#: src/Frontend/TourOutputs.php:233
-#: src/Frontend/TourOutputs.php:268
+#: src/Frontend/TourOutputs.php:242
+#: src/Frontend/TourOutputs.php:277
 #: src/Frontend/Widget.php:324
 #: templates/front/booking-widget.php:46
 #: templates/front/booking-widget.php:59
@@ -346,7 +346,7 @@ msgid "Options"
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:152
-#: src/Frontend/TourOutputs.php:698
+#: src/Frontend/TourOutputs.php:791
 msgid "Sessions"
 msgstr ""
 
@@ -378,7 +378,7 @@ msgstr ""
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:202
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:530
 #: src/Admin/Screens/OffersScreen.php:167
-#: src/Frontend/TourOutputs.php:428
+#: src/Frontend/TourOutputs.php:437
 msgid "Per person"
 msgstr ""
 
@@ -521,7 +521,7 @@ msgstr ""
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:342
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:492
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:517
-#: src/Frontend/TourOutputs.php:647
+#: src/Frontend/TourOutputs.php:740
 msgid "Price"
 msgstr ""
 
@@ -799,7 +799,7 @@ msgid "Preselected choice"
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:593
-#: src/Frontend/TourOutputs.php:727
+#: src/Frontend/TourOutputs.php:820
 msgid "Meet at the meeting point"
 msgstr ""
 
@@ -811,7 +811,7 @@ msgstr ""
 #: src/Admin/Screens/ManifestScreen.php:377
 #: src/Admin/Screens/ZonesScreen.php:101
 #: src/Frontend/BookingCard.php:177
-#: src/Frontend/TourOutputs.php:685
+#: src/Frontend/TourOutputs.php:778
 #: src/Integrations/Elementor/Tags/MeetingPointTag.php:28
 #: src/Services/Notifications/Listener.php:204
 msgid "Meeting point"
@@ -847,7 +847,7 @@ msgid "days ahead"
 msgstr ""
 
 #: src/Admin/MetaBoxes/BookingSettingsBox.php:624
-#: src/Frontend/TourOutputs.php:667
+#: src/Frontend/TourOutputs.php:760
 #: src/Integrations/Elementor/Tags/MinAgeTag.php:28
 msgid "Minimum age"
 msgstr ""
@@ -1093,7 +1093,7 @@ msgstr ""
 #: src/Admin/Screens/ManifestScreen.php:364
 #: src/Admin/Screens/ZonesScreen.php:76
 #: src/Admin/Screens/ZonesScreen.php:146
-#: src/Frontend/TourOutputs.php:679
+#: src/Frontend/TourOutputs.php:772
 #: src/Frontend/Widget.php:434
 #: src/Services/Notifications/MergeTags.php:107
 #: templates/front/booking-card.php:88
@@ -1395,7 +1395,7 @@ msgid "Open"
 msgstr ""
 
 #: src/Admin/Screens/CalendarScreen.php:249
-#: src/Frontend/TourOutputs.php:350
+#: src/Frontend/TourOutputs.php:359
 msgid "Close"
 msgstr ""
 
@@ -2719,11 +2719,11 @@ msgstr ""
 
 #: src/Admin/Screens/ToolsScreen.php:183
 #: src/Frontend/BookingCard.php:274
-#: src/Frontend/TourOutputs.php:231
-#: src/Frontend/TourOutputs.php:264
-#: src/Frontend/TourOutputs.php:392
-#: src/Frontend/TourOutputs.php:414
-#: src/Frontend/TourOutputs.php:648
+#: src/Frontend/TourOutputs.php:240
+#: src/Frontend/TourOutputs.php:273
+#: src/Frontend/TourOutputs.php:401
+#: src/Frontend/TourOutputs.php:423
+#: src/Frontend/TourOutputs.php:741
 #: src/Services/Notifications/MergeTags.php:108
 #: src/Services/Schema.php:130
 #: templates/front/booking-widget.php:48
@@ -3224,7 +3224,7 @@ msgstr ""
 #. translators: 1: "Hotel pickup" (or the pickup add-on's name), 2: pickup zone.
 #: src/Frontend/BookingCard.php:186
 #: src/Frontend/BookingCard.php:191
-#: src/Frontend/TourOutputs.php:312
+#: src/Frontend/TourOutputs.php:321
 #: src/Frontend/Widget.php:425
 #: src/Services/BookingDetails.php:83
 #: src/Services/Pricing/PriceCalculator.php:481
@@ -3471,35 +3471,35 @@ msgstr ""
 msgid "Text colour and panel background"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:319
+#: src/Frontend/TourOutputs.php:328
 msgid "VAT included"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:319
+#: src/Frontend/TourOutputs.php:328
 msgid "plus VAT"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:350
+#: src/Frontend/TourOutputs.php:359
 msgid "Previous image"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:350
+#: src/Frontend/TourOutputs.php:359
 msgid "Next image"
 msgstr ""
 
 #. translators: 1: image number, 2: total.
-#: src/Frontend/TourOutputs.php:365
+#: src/Frontend/TourOutputs.php:374
 #, php-format
 msgid "Open image %1$d of %2$d"
 msgstr ""
 
 #. translators: %s: price, e.g. AED 699.00.
-#: src/Frontend/TourOutputs.php:396
+#: src/Frontend/TourOutputs.php:405
 #, php-format
 msgid "From %s"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:424
+#: src/Frontend/TourOutputs.php:433
 #: src/Frontend/Widget.php:430
 #: src/Services/Privacy.php:142
 #: templates/front/booking-card.php:53
@@ -3507,26 +3507,26 @@ msgstr ""
 msgid "Option"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:425
-#: src/Frontend/TourOutputs.php:642
+#: src/Frontend/TourOutputs.php:434
+#: src/Frontend/TourOutputs.php:735
 msgid "Duration"
 msgstr ""
 
 #. translators: %s: per person, per vehicle or per car.
-#: src/Frontend/TourOutputs.php:427
+#: src/Frontend/TourOutputs.php:436
 #, php-format
 msgid "Price %s"
 msgstr ""
 
 #. translators: 1: price per person, 2: number of people sharing.
-#: src/Frontend/TourOutputs.php:441
+#: src/Frontend/TourOutputs.php:450
 #, php-format
 msgid "%1$s (%2$d person)"
 msgid_plural "%1$s (%2$d people)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Frontend/TourOutputs.php:471
+#: src/Frontend/TourOutputs.php:480
 #: src/Frontend/Widget.php:426
 #: src/Integrations/Elementor/TourListWidget.php:73
 #: templates/front/booking-widget.php:208
@@ -3534,26 +3534,26 @@ msgstr[1] ""
 msgid "Included"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:472
+#: src/Frontend/TourOutputs.php:481
 #: src/Integrations/Elementor/TourListWidget.php:74
 #: assets/src/blocks/tour-blocks.js:35
 msgid "Not included"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:473
+#: src/Frontend/TourOutputs.php:482
 #: src/Integrations/Elementor/TourListWidget.php:75
 #: assets/src/blocks/tour-blocks.js:36
 msgid "Requirements"
 msgstr ""
 
 #. translators: 1: shortest duration, 2: longest duration.
-#: src/Frontend/TourOutputs.php:532
+#: src/Frontend/TourOutputs.php:625
 #, php-format
 msgid "%1$s to %2$s"
 msgstr ""
 
 #. translators: %d: seats per vehicle.
-#: src/Frontend/TourOutputs.php:537
+#: src/Frontend/TourOutputs.php:630
 #, php-format
 msgid "%d seat"
 msgid_plural "%d seats"
@@ -3561,100 +3561,99 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: guests, 2: what one car is called.
-#: src/Frontend/TourOutputs.php:541
+#: src/Frontend/TourOutputs.php:634
 #, php-format
 msgid "Up to %1$d per %2$s"
 msgstr ""
 
 #. translators: %d: minimum age.
-#: src/Frontend/TourOutputs.php:546
+#: src/Frontend/TourOutputs.php:639
 #, php-format
 msgid "Driver %d+"
 msgstr ""
 
 #. translators: %d: minimum age.
-#: src/Frontend/TourOutputs.php:546
+#: src/Frontend/TourOutputs.php:639
 #, php-format
 msgid "Age %d+"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:549
+#: src/Frontend/TourOutputs.php:642
 msgid "Driving licence needed"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:551
+#: src/Frontend/TourOutputs.php:644
 msgid "No licence needed"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:555
+#: src/Frontend/TourOutputs.php:648
 msgid "Pickup included"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:557
+#: src/Frontend/TourOutputs.php:650
 msgid "Hotel pickup available"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:653
-#: src/Frontend/TourOutputs.php:660
+#: src/Frontend/TourOutputs.php:746
+#: src/Frontend/TourOutputs.php:753
 msgid "Group size"
 msgstr ""
 
-#. translators: %d: seats.
-#: src/Frontend/TourOutputs.php:655
-#: src/Services/LlmsTxt.php:234
+#. translators: 1: seats, 2: what one vehicle is called, e.g. buggy.
+#: src/Frontend/TourOutputs.php:748
 #, php-format
-msgid "Up to %d person per vehicle"
-msgid_plural "Up to %d people per vehicle"
+msgid "Up to %1$d person per %2$s"
+msgid_plural "Up to %1$d people per %2$s"
 msgstr[0] ""
 msgstr[1] ""
 
-#. translators: %d: guests.
-#: src/Frontend/TourOutputs.php:662
+#. translators: 1: guests, 2: what one car is called.
+#: src/Frontend/TourOutputs.php:755
 #, php-format
-msgid "Up to %d guest per car"
-msgid_plural "Up to %d guests per car"
+msgid "Up to %1$d guest per %2$s"
+msgid_plural "Up to %1$d guests per %2$s"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: age in years.
-#: src/Frontend/TourOutputs.php:669
+#: src/Frontend/TourOutputs.php:762
 #, php-format
 msgid "%d year"
 msgid_plural "%d years"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Frontend/TourOutputs.php:674
+#: src/Frontend/TourOutputs.php:767
 msgid "Licence"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:675
+#: src/Frontend/TourOutputs.php:768
 msgid "A driving licence is required"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:716
+#: src/Frontend/TourOutputs.php:809
 msgid "Hotel pickup included"
 msgstr ""
 
 #. translators: %s: price.
-#: src/Frontend/TourOutputs.php:722
+#: src/Frontend/TourOutputs.php:815
 #, php-format
 msgid "Hotel pickup on request (+%s per booking)"
 msgstr ""
 
-#: src/Frontend/TourOutputs.php:725
+#: src/Frontend/TourOutputs.php:818
 msgid "Hotel pickup on request"
 msgstr ""
 
 #. translators: %s: time.
-#: src/Frontend/TourOutputs.php:750
+#: src/Frontend/TourOutputs.php:843
 #: src/Services/LlmsTxt.php:303
 #, php-format
 msgid "starts %s"
 msgstr ""
 
 #. translators: %s: time range.
-#: src/Frontend/TourOutputs.php:755
+#: src/Frontend/TourOutputs.php:848
 #: src/Services/LlmsTxt.php:309
 #, php-format
 msgid "pickup %s"
@@ -4103,7 +4102,7 @@ msgid "Leave empty to use the tour being viewed."
 msgstr ""
 
 #: src/Integrations/Elementor/BookingCardWidget.php:71
-#: assets/src/blocks/tour-blocks.js:73
+#: assets/src/blocks/tour-blocks.js:74
 msgid "Title"
 msgstr ""
 
@@ -4116,7 +4115,7 @@ msgid "Empty: “Book this” and what the tour is called (Booking settings › 
 msgstr ""
 
 #: src/Integrations/Elementor/BookingCardWidget.php:81
-#: assets/src/blocks/tour-blocks.js:74
+#: assets/src/blocks/tour-blocks.js:75
 msgid "Sticky in sidebar"
 msgstr ""
 
@@ -4125,7 +4124,7 @@ msgid "On computers (1025 px and wider) the card stays in view while the page sc
 msgstr ""
 
 #: src/Integrations/Elementor/BookingCardWidget.php:91
-#: assets/src/blocks/tour-blocks.js:75
+#: assets/src/blocks/tour-blocks.js:76
 msgid "“Ask on WhatsApp” button"
 msgstr ""
 
@@ -4191,7 +4190,7 @@ msgid "Tour price"
 msgstr ""
 
 #: src/Integrations/Elementor/PriceWidget.php:69
-#: assets/src/blocks/tour-blocks.js:78
+#: assets/src/blocks/tour-blocks.js:79
 msgid "Show “From”"
 msgstr ""
 
@@ -4200,18 +4199,18 @@ msgid "Show the amount"
 msgstr ""
 
 #: src/Integrations/Elementor/PriceWidget.php:71
-#: assets/src/blocks/tour-blocks.js:79
+#: assets/src/blocks/tour-blocks.js:80
 msgid "Show the basis line"
 msgstr ""
 
 #: src/Integrations/Elementor/PriceWidget.php:72
 #: assets/src/blocks/tour-blocks.js:26
-#: assets/src/blocks/tour-blocks.js:81
+#: assets/src/blocks/tour-blocks.js:82
 msgid "Show the second currency"
 msgstr ""
 
 #: src/Integrations/Elementor/PriceWidget.php:87
-#: assets/src/blocks/tour-blocks.js:80
+#: assets/src/blocks/tour-blocks.js:81
 msgid "Basis text"
 msgstr ""
 
@@ -4232,7 +4231,7 @@ msgid "Primary colour"
 msgstr ""
 
 #: src/Integrations/Elementor/StyleControls.php:34
-#: src/Integrations/Elementor/TourFactsWidget.php:101
+#: src/Integrations/Elementor/TourFactsWidget.php:102
 #: src/Settings/Settings.php:678
 msgid "Text colour"
 msgstr ""
@@ -4242,19 +4241,19 @@ msgid "Secondary text colour"
 msgstr ""
 
 #: src/Integrations/Elementor/StyleControls.php:38
-#: src/Integrations/Elementor/TourFactsWidget.php:103
+#: src/Integrations/Elementor/TourFactsWidget.php:104
 msgid "Background"
 msgstr ""
 
 #: src/Integrations/Elementor/StyleControls.php:39
-#: src/Integrations/Elementor/TourFactsWidget.php:102
+#: src/Integrations/Elementor/TourFactsWidget.php:103
 #: src/Settings/Settings.php:690
 msgid "Border colour"
 msgstr ""
 
 #. translators: %s: part of the widget, e.g. Title.
 #: src/Integrations/Elementor/StyleControls.php:57
-#: src/Integrations/Elementor/TourFactsWidget.php:118
+#: src/Integrations/Elementor/TourFactsWidget.php:119
 msgid "Typography"
 msgstr ""
 
@@ -4264,11 +4263,12 @@ msgid "Title typography"
 msgstr ""
 
 #: src/Integrations/Elementor/StyleControls.php:66
-#: src/Integrations/Elementor/TourFactsWidget.php:125
+#: src/Integrations/Elementor/TourFactsWidget.php:126
 msgid "Padding"
 msgstr ""
 
 #: src/Integrations/Elementor/StyleControls.php:75
+#: src/Integrations/Elementor/TourFactsWidget.php:186
 #: src/Settings/Settings.php:701
 msgid "Corner radius"
 msgstr ""
@@ -4303,7 +4303,7 @@ msgid "Facts"
 msgstr ""
 
 #: src/Integrations/Elementor/TourFactsWidget.php:74
-msgid "Comma-separated, in order: duration, basis, capacity, age, licence, pickup, meeting_point, sessions. Chips: duration, seats, age, licence, pickup. Empty shows all."
+msgid "Comma-separated, in order: duration, basis, capacity, age, licence, pickup, meeting_point, sessions. Chips: duration, seats, age, licence, pickup. Empty shows all. Cards use the same facts as the list."
 msgstr ""
 
 #: src/Integrations/Elementor/TourFactsWidget.php:84
@@ -4314,13 +4314,71 @@ msgid "List"
 msgstr ""
 
 #: src/Integrations/Elementor/TourFactsWidget.php:85
-#: src/Integrations/Elementor/TourFactsWidget.php:95
+#: src/Integrations/Elementor/TourFactsWidget.php:96
 #: assets/src/blocks/tour-blocks.js:67
 msgid "Chips"
 msgstr ""
 
-#: src/Integrations/Elementor/TourFactsWidget.php:134
+#: src/Integrations/Elementor/TourFactsWidget.php:86
+#: src/Integrations/Elementor/TourFactsWidget.php:159
+#: assets/src/blocks/tour-blocks.js:68
+msgid "Cards"
+msgstr ""
+
+#: src/Integrations/Elementor/TourFactsWidget.php:135
 msgid "Minimum height"
+msgstr ""
+
+#: src/Integrations/Elementor/TourFactsWidget.php:173
+msgid "Columns"
+msgstr ""
+
+#: src/Integrations/Elementor/TourFactsWidget.php:185
+msgid "Gap"
+msgstr ""
+
+#: src/Integrations/Elementor/TourFactsWidget.php:187
+msgid "Icon size"
+msgstr ""
+
+#: src/Integrations/Elementor/TourFactsWidget.php:203
+msgid "Tile padding"
+msgstr ""
+
+#: src/Integrations/Elementor/TourFactsWidget.php:210
+msgid "Tile background"
+msgstr ""
+
+#: src/Integrations/Elementor/TourFactsWidget.php:211
+msgid "Tile border colour"
+msgstr ""
+
+#: src/Integrations/Elementor/TourFactsWidget.php:212
+msgid "Icon circle colour"
+msgstr ""
+
+#: src/Integrations/Elementor/TourFactsWidget.php:213
+msgid "Icon colour"
+msgstr ""
+
+#: src/Integrations/Elementor/TourFactsWidget.php:214
+msgid "Label colour"
+msgstr ""
+
+#: src/Integrations/Elementor/TourFactsWidget.php:215
+msgid "Value colour"
+msgstr ""
+
+#: src/Integrations/Elementor/TourFactsWidget.php:216
+msgid "Link colour (meeting point)"
+msgstr ""
+
+#: src/Integrations/Elementor/TourFactsWidget.php:231
+msgid "Label typography"
+msgstr ""
+
+#: src/Integrations/Elementor/TourFactsWidget.php:239
+msgid "Value typography"
 msgstr ""
 
 #: src/Integrations/Elementor/TourListWidget.php:28
@@ -4953,6 +5011,14 @@ msgstr ""
 #, php-format
 msgid "From %1$s %2$s"
 msgstr ""
+
+#. translators: %d: seats.
+#: src/Services/LlmsTxt.php:234
+#, php-format
+msgid "Up to %d person per vehicle"
+msgid_plural "Up to %d people per vehicle"
+msgstr[0] ""
+msgstr[1] ""
 
 #. translators: %d: guests.
 #: src/Services/LlmsTxt.php:238

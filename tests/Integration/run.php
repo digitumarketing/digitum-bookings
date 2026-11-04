@@ -1752,6 +1752,8 @@ if ( scenario( 'N' ) ) {
 	check( str_contains( $h['table'], '1 hour' ) && str_contains( $h['list'], '>Guide</li>' ) && str_contains( $h['facts'], '16 years' ), 'Elementor widgets: price table, tour list, tour facts' );
 	check( 'From AED 699.00 per vehicle' === $h['from'] && '16' === $h['age'] && '2' === $h['seats'] && 'Hotel pickup on request (+AED 300.00 per booking)' === $h['pick'] && 'Sample Meeting Point' === $h['point'] && in_array( $h['next'], array( '6:45 am – 7:15 am', '2:15 pm – 2:45 pm' ), true ), 'dynamic tags: from price, minimum age, seats, pickup, meeting point, next pickup window' );
 	check( 'https://maps.example/meeting-point' === $h['map'] && 'Price on request' === $h['nyf'], 'dynamic tags: map link (URL); price on request' );
+	$el = step( $site, 'elementor', array( 'post' => $buggy['id'], 'render' => array( 'cards' => array( 'dgb_tour_facts', array( 'style' => 'cards' ) ) ) ) );
+	check( str_contains( (string) ( $el['html']['cards'] ?? '' ), '<ul class="dgb-o dgb-fact-cards">' ) && 0 === preg_match( '#<span class="dgb-fact-card__value">\s*</span>#', (string) ( $el['html']['cards'] ?? '' ) ), 'Elementor Tour facts widget, style Cards: tiles, none empty (0.9.2)' );
 	step( $site, 'set_option', array( 'name' => 'dgb_fake_elementor', 'value' => 0 ) );
 
 	// Sticky bar modes and widget theming (sections 6 and 7), on real page loads.
@@ -1855,6 +1857,18 @@ if ( scenario( 'P' ) ) {
 	check( str_contains( $sc['html'], '<span class="dgb-price__basis">per buggy, 30 min · about USD 190 · VAT included</span>' ), 'second currency in the basis line: “per buggy, 30 min · about USD 190 · VAT included”' );
 	check( str_contains( $sc['html'], '<span class="dgb-price__basis">per buggy · about USD 190</span>' ), 'a custom basis text still gets the second currency' );
 	step( $site, 'settings_merge', array( 'values' => array( 'currency' => array( 'second_enabled' => false ) ) ) );
+
+	// 0.9.2: facts as cards. One tile per fact with a value; the meeting point links to the map; sessions list.
+	$c     = step( $site, 'tour_parts', array( 'post' => $buggy['id'], 'content' => '[dgb_tour_facts style="cards"]' ) );
+	$tiles = preg_match_all( '#<li class="dgb-fact-card dgb-fact-card--([a-z-]+)">#', $c['html'], $m ) ? $m[1] : array();
+	check( array( 'duration', 'basis', 'capacity', 'age', 'pickup', 'meeting-point', 'sessions' ) === $tiles, 'cards: seven tiles for the per-vehicle tour, in order (no licence tile without a licence)' );
+	check( ! preg_match( '#<span class="dgb-fact-card__value">\s*</span>#', $c['html'] ) && 7 === substr_count( $c['html'], '<svg viewBox="0 0 24 24"' ), 'cards: no empty tile, an icon on each' );
+	check( (bool) preg_match( '#dgb-fact-card--meeting-point">.*?<a href="https://maps\.example/meeting-point" rel="noopener" target="_blank">Sample Meeting Point</a>#s', $c['html'] ) && 2 === substr_count( (string) strstr( $c['html'], 'dgb-fact-card--sessions' ), '<li>' ), 'cards: meeting point links to the map; the sessions tile lists both sessions' );
+	check( str_contains( $c['html'], '<span class="dgb-fact-card__value">Per buggy</span>' ) && str_contains( $c['html'], 'Up to 2 people per buggy' ) && 1 === substr_count( $c['html'], '<style id="dgb-fact-cards-css">' ), 'cards: basis with the tour noun; card styles printed once' );
+	$n = step( $site, 'tour_parts', array( 'post' => $demo['tours']['newyear']['id'], 'content' => '[dgb_tour_facts style="cards"][dgb_tour_facts style="cards"]' ) );
+	check( str_contains( $n['html'], '<span class="dgb-fact-card__value">Price on request</span>' ) && ! preg_match( '#<span class="dgb-fact-card__value">\s*</span>#', $n['html'] ) && 1 === substr_count( $n['html'], '<style id="dgb-fact-cards-css">' ), 'cards for a price-on-request tour: “Price on request”, no empty tiles, styles once' );
+	$l = step( $site, 'tour_parts', array( 'post' => $buggy['id'], 'content' => '[dgb_tour_facts][dgb_tour_facts style="chips"]' ) );
+	check( str_contains( $l['html'], '<dl class="dgb-o dgb-tour-facts">' ) && str_contains( $l['html'], '<ul class="dgb-o dgb-chips">' ) && ! str_contains( $l['html'], 'dgb-fact-card' ), 'list and chips styles unchanged, no card styles on their page' );
 
 	// Gallery: featured image fallback, then five images with a caption.
 	step( $site, 'attach_image', array( 'post' => $safari['id'] ) );

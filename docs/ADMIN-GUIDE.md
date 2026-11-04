@@ -31,6 +31,7 @@ Cards, hub pages and tour templates can show the same prices and details as the 
 
 | Hero price: “FROM”, “AED 699”, “per buggy, 30 min · about USD 190 · VAT included” (second currency when switched on) | `[dgb_price id="123" label="yes" basis="yes" basis_text="" second="yes"]` | “Tour price” block and Elementor widget (colours and typography in Style) |
 | Facts as chips for a hero: duration range, seats, driver age, licence, pickup (no rating chip). On a dark background set the chip colours in the widget's Style › Chips (text, border, background, typography, padding, minimum height) | `[dgb_tour_facts id="123" style="chips" fields="duration,seats,age,licence,pickup"]` | “Tour facts” block and Elementor widget, Style: Chips |
+| Facts as tiles with icons (“Key facts”): one tile per fact with a value, 3 columns on computers and 2 on phones, the meeting point linked to its map, sessions on a full row | `[dgb_tour_facts id="123" style="cards" fields="duration,basis,capacity,age,licence,pickup,meeting_point,sessions"]` | “Tour facts” block and Elementor widget, Style: Cards (Style › Cards: columns, gap, tile, icon, label and value colours, typography) |
 | Gallery: a large image and four smaller ones (swipe row on phones, lightbox on click) | `[dgb_gallery id="123"]` | “Tour gallery” block and Elementor widget |
 | Booking card for a sidebar (below) | `[dgb_booking_card id="123" title="" sticky="1" whatsapp="1" trust1="" trust2="" trust3=""]` | “Booking card” block and Elementor widget |
 
