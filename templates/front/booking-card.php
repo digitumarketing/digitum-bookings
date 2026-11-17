@@ -12,12 +12,15 @@ defined( 'ABSPATH' ) || exit;
 
 $dgb_id      = $view['id'];
 $dgb_enquiry = $view['on_request'];
-$dgb_steps   = 'per_vehicle' === $view['mode']
-	? array( 'units' => array( $view['quantity'], 1, 1 ) )
-	: array(
-		'adults'   => array( __( 'Adults', 'digitum-bookings' ), 1, 2 ),
-		'children' => array( __( 'Children', 'digitum-bookings' ), 0, 0 ),
-	);
+// Vehicle and car tours: the number of vehicles or cars. Otherwise Persons, and Children when the tour takes them.
+if ( in_array( $view['mode'], array( 'per_vehicle', 'per_group' ), true ) ) {
+	$dgb_steps = array( 'units' => array( $view['quantity'], 1, 1, '' ) );
+} else {
+	$dgb_steps = array( 'adults' => array( __( 'Persons', 'digitum-bookings' ), 1, 2, '' ) );
+	if ( ! empty( $view['children'] ) ) {
+		$dgb_steps['children'] = array( __( 'Children', 'digitum-bookings' ), 0, 0, (string) ( $view['child_label'] ?? '' ) );
+	}
+}
 ?>
 <section class="dgb-w dgb-bc<?php echo $view['sticky'] ? ' is-sticky' : ''; ?>" id="<?php echo esc_attr( $dgb_id ); ?>" data-dgb-card aria-labelledby="<?php echo esc_attr( $dgb_id ); ?>-title">
 	<script type="application/json" data-dgb-card-config><?php echo wp_json_encode( $view['script'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE ); ?></script>
@@ -74,6 +77,9 @@ $dgb_steps   = 'per_vehicle' === $view['mode']
 			<?php foreach ( $dgb_steps as $dgb_key => $dgb_step ) : ?>
 				<div class="dgb-bc-field dgb-bc-stepper">
 					<label class="dgb-bc-label" for="<?php echo esc_attr( $dgb_id . '-' . $dgb_key ); ?>"><?php echo esc_html( $dgb_step[0] ); ?></label>
+					<?php if ( '' !== $dgb_step[3] ) : ?>
+						<span class="dgb-bc-hint"><?php echo esc_html( $dgb_step[3] ); ?></span>
+					<?php endif; ?>
 					<div class="dgb-bc-step">
 						<button type="button" class="dgb-bc-btn" data-dgb-card-dec="<?php echo esc_attr( $dgb_key ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: field, e.g. Adults. */ __( 'Fewer: %s', 'digitum-bookings' ), $dgb_step[0] ) ); ?>">−</button>
 						<input type="number" inputmode="numeric" id="<?php echo esc_attr( $dgb_id . '-' . $dgb_key ); ?>" name="<?php echo esc_attr( $dgb_key ); ?>" value="<?php echo esc_attr( (string) $dgb_step[2] ); ?>" min="<?php echo esc_attr( (string) $dgb_step[1] ); ?>" max="50">

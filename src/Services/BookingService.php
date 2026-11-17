@@ -12,6 +12,7 @@ use Digitum\Bookings\Database\Repositories\CouponRepository;
 use Digitum\Bookings\Database\Repositories\VariantRepository;
 use Digitum\Bookings\Database\Repositories\ZoneRepository;
 use Digitum\Bookings\Domain\BookingStatus;
+use Digitum\Bookings\Domain\GuestRules;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Services\Pricing\ErrorMessages;
@@ -125,10 +126,17 @@ final class BookingService {
 				if ( in_array( $error['code'], array( 'zone_not_allowed', 'zone_required', 'pickup_not_offered' ), true ) && isset( $errors['zone'] ) ) {
 					continue;
 				}
-				$errors[ 'price_' . $error['code'] ] = ErrorMessages::message( $error );
+				// Guest problems show under the guest counters.
+				$key            = in_array( $error['code'], array( 'persons_required', 'children_not_allowed' ), true ) ? 'guests' : 'price_' . $error['code'];
+				$errors[ $key ] = ErrorMessages::message( $error );
 			}
-		} elseif ( empty( $input['variant_id'] ) && array() !== ( new VariantRepository() )->for_product( $product_id ) ) {
-			$errors['variant'] = __( 'Please choose an option.', 'digitum-bookings' );
+		} else {
+			if ( empty( $input['variant_id'] ) && array() !== ( new VariantRepository() )->for_product( $product_id ) ) {
+				$errors['variant'] = __( 'Please choose an option.', 'digitum-bookings' );
+			}
+			foreach ( GuestRules::for_product( $product_id, $product )->errors( self::count( $input, 'adults' ), self::count( $input, 'children' ) ) as $error ) {
+				$errors['guests'] = ErrorMessages::message( $error );
+			}
 		}
 
 		if ( array() !== $errors ) {
@@ -198,7 +206,7 @@ final class BookingService {
 			'start_time'          => $session['start_time'] ?? null,
 			'adults'              => self::count( $input, 'adults' ),
 			'children'            => self::count( $input, 'children' ),
-			'infants'             => self::count( $input, 'infants' ),
+			'infants'             => 0, // Not asked for since 0.9.5; the column stays for older bookings.
 			'units'               => $breakdown ? max( 1, $breakdown->units ) : max( 1, self::count( $input, 'units' ) ),
 			'unit_price'          => $base_line['unit'] ?? '0.00',
 			'line_total'          => $money['subtotal'] ?? '0.00',

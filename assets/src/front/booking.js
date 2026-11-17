@@ -300,7 +300,7 @@
 				session_id: state.session,
 				adults: num( 'adults' ),
 				children: num( 'children' ),
-				infants: num( 'infants' ),
+				infants: 0,
 				units: num( 'units' ) || 1,
 				pickup: pickupOn(),
 				zone_id: pickupOn() ? +( field( 'zone_id' ) || {} ).value || 0 : 0,
@@ -499,8 +499,37 @@
 
 		/* Live price -------------------------------------------------------------- */
 
+		// Persons and Children share the seats of the vehicles or cars: the most guests is units × seats, at least
+		// one person. Run after every change, so fewer vehicles also means fewer guests.
+		function clampGuests() {
+			const persons = field( 'adults' );
+			const kids = field( 'children' );
+			if ( ! persons ) {
+				return;
+			}
+			const seats = cfg.guests ? cfg.guests.unitSeats : 0;
+			let a = Math.max( 1, num( 'adults' ) );
+			let c = kids ? num( 'children' ) : 0;
+			if ( seats > 0 ) {
+				const cap = Math.max( 1, num( 'units' ) || 1 ) * seats;
+				a = Math.min( a, cap );
+				c = Math.min( c, cap - a );
+				persons.max = String( cap - c );
+				if ( kids ) {
+					kids.max = String( cap - a );
+				}
+			}
+			if ( String( a ) !== persons.value ) {
+				persons.value = String( a );
+			}
+			if ( kids && String( c ) !== kids.value ) {
+				kids.value = String( c );
+			}
+		}
+
 		let timer = 0;
 		function update() {
+			clampGuests();
 			syncCards();
 			syncPickup();
 			renderReview();
@@ -639,7 +668,7 @@
 			if ( num( 'units' ) ) {
 				people.push( sprintf( t.nUnits, String( num( 'units' ) ) ) );
 			}
-			[ [ 'adults', t.nAdults ], [ 'children', t.nChildren ], [ 'infants', t.nInfants ] ].forEach( ( pair ) => {
+			[ [ 'adults', t.nAdults ], [ 'children', t.nChildren ] ].forEach( ( pair ) => {
 				if ( num( pair[ 0 ] ) ) {
 					people.push( sprintf( pair[ 1 ], String( num( pair[ 0 ] ) ) ) );
 				}
@@ -751,7 +780,7 @@
 					errors.session = t.chooseSession;
 				}
 				const seats = seatError( state.quote );
-				if ( num( 'adults' ) + num( 'children' ) < 1 ) {
+				if ( num( 'adults' ) < 1 ) {
 					errors.guests = t.addGuest;
 				} else if ( seats && ! cfg.product.onRequest ) {
 					errors.guests = seats.message || t.addGuest;
@@ -1179,6 +1208,7 @@
 				}
 			}
 			set( 'units', values.units );
+			clampGuests();
 			set( 'adults', values.adults );
 			set( 'children', values.children );
 			if ( undefined !== values.pickup ) {
@@ -1275,7 +1305,7 @@
 		// Values for the booking form, as the modal expects them.
 		function values() {
 			const p = pickup();
-			const units = 'per_vehicle' === cfg.mode ? Math.max( 1, num( 'units' ) ) : 0;
+			const units = 'per_vehicle' === cfg.mode || 'per_group' === cfg.mode ? Math.max( 1, num( 'units' ) ) : 0;
 			return {
 				variant_id: variantId(),
 				date: state.date,

@@ -22,6 +22,8 @@ final class ErrorMessagesTest extends TestCase {
 		return array(
 			array( array( 'code' => 'no_variant' ), 'Please choose an option.' ),
 			array( array( 'code' => 'no_guests' ), 'Please add at least one guest.' ),
+			array( array( 'code' => 'persons_required' ), 'Please add at least one person.' ),
+			array( array( 'code' => 'children_not_allowed' ), 'This tour is booked per person only. Please count children as persons.' ),
 			array(
 				array(
 					'code'   => 'too_many_guests',

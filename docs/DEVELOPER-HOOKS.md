@@ -392,6 +392,8 @@ Set a URL and a signing secret in Settings › Emails. Events: `booking.created`
 }
 ```
 
+Since 0.9.5 the booking's guests are counted as persons: `booking.tour` (and each manifest row of `admin/manifest`) carries `persons` next to `adults` (the same number; `adults` stays for existing integrations). Infants are always 0 on new bookings. Form and REST input keep the field name `adults`; `infants` is accepted and ignored.
+
 Headers: `X-DGB-Event`, `X-DGB-Delivery` (unique id), `X-DGB-Timestamp`, `X-DGB-Signature: sha256=<hex>`. Verify:
 
 ```php
@@ -408,7 +410,7 @@ Namespace `dgb/v1`. Logged-in staff send the REST nonce (`X-WP-Nonce`); external
 | Route | Method | Who | |
 |---|---|---|---|
 | `admin/bookings?status=&product=&date_from=&date_to=&source=&payment_method=&search=&orderby=&order=&page=&per_page=` | GET | managers | bookings (webhook shape); `X-WP-Total` and `X-WP-TotalPages` headers |
-| `admin/bookings` | POST `product` + the public booking fields (`variant_id`, `date`, `session_id`, `adults`, `children`, `infants`, `units`, `pickup`, `zone_id`, `hotel`, `room`, `addons`, `payment_method`, `name`, `email`, `phone_code`, `phone`, …) | managers | booking or enquiry taken by staff (source `admin`, no terms checkbox); returns `booking_page` and `payment_link`; 201 |
+| `admin/bookings` | POST `product` + the public booking fields (`variant_id`, `date`, `session_id`, `adults` (persons), `children`, `units`, `pickup`, `zone_id`, `hotel`, `room`, `addons`, `payment_method`, `name`, `email`, `phone_code`, `phone`, …) | managers | booking or enquiry taken by staff (source `admin`, no terms checkbox); returns `booking_page` and `payment_link`; 201 |
 | `admin/bookings/{id}` | GET | managers | one booking |
 | `admin/bookings/{id}` | PATCH `customer` {`name`, `email`, `phone`, `nationality`}, `special_requests`, `vehicle`, `note`, `date` + `session`, `action` | managers | change a booking |
 | `admin/bookings/{id}` | DELETE | managers | cancels the booking (bookings are never deleted; use the privacy eraser for guest data) |

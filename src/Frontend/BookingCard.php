@@ -10,6 +10,7 @@ namespace Digitum\Bookings\Frontend;
 use Digitum\Bookings\Database\Repositories\AddonRepository;
 use Digitum\Bookings\Database\Repositories\LocationRepository;
 use Digitum\Bookings\Database\Repositories\ZoneRepository;
+use Digitum\Bookings\Domain\GuestRules;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Services\PaymentMethods;
@@ -220,7 +221,8 @@ final class BookingCard {
 			$title = sprintf( __( 'Book this %s', 'digitum-bookings' ), TourWords::noun( $product ) );
 		}
 
-		$seats = (int) $product->get( 'seats_per_unit' );
+		$guests = GuestRules::for_product( $product_id, $product );
+		$seats  = $guests->per_unit() ? $guests->unit_seats : (int) $product->get( 'seats_per_unit' );
 		if ( 'per_vehicle' === $mode ) {
 			$quantity = sprintf(
 				/* translators: 1: vehicles, capitalised (e.g. Buggies), 2: seats per vehicle. */
@@ -228,8 +230,15 @@ final class BookingCard {
 				self::ucfirst( TourWords::many( $product ) ),
 				$seats
 			);
+		} elseif ( 'per_group' === $mode ) {
+			$quantity = sprintf(
+				/* translators: 1: cars, capitalised (e.g. Cars), 2: guests per car. */
+				__( '%1$s · up to %2$d each', 'digitum-bookings' ),
+				self::ucfirst( TourWords::many( $product ) ),
+				$seats
+			);
 		} else {
-			$quantity = __( 'Guests', 'digitum-bookings' );
+			$quantity = __( 'Persons', 'digitum-bookings' );
 		}
 
 		$phone    = (string) preg_replace( '/\D+/', '', (string) $all['general']['phone'] );
@@ -287,8 +296,8 @@ final class BookingCard {
 				'waQuantity' => __( 'Quantity: %s', 'digitum-bookings' ),
 				/* translators: %s: pickup choice. */
 				'waPickup'   => __( 'Pickup: %s', 'digitum-bookings' ),
-				/* translators: %s: number of adults. */
-				'adults'     => __( 'Adults: %s', 'digitum-bookings' ),
+				/* translators: %s: number of persons. */
+				'adults'     => __( 'Persons: %s', 'digitum-bookings' ),
 				/* translators: %s: number of children. */
 				'children'   => __( 'Children: %s', 'digitum-bookings' ),
 				/* translators: %s: number of vehicles. */
@@ -298,22 +307,24 @@ final class BookingCard {
 		);
 
 		return array(
-			'id'         => $id,
-			'product'    => $product_id,
-			'title'      => $title,
-			'arrival'    => $arrival,
-			'mode'       => $mode,
-			'on_request' => $on_req,
-			'variants'   => $variants,
-			'quantity'   => $quantity,
-			'pickups'    => $pickups,
-			'default'    => $default,
-			'trust'      => $trust,
-			'sticky'     => ! empty( $options['sticky'] ),
-			'whatsapp'   => $script['whatsapp'],
-			'from'       => $widget['from'],
-			'accent'     => $widget['accent'],
-			'script'     => $script,
+			'id'          => $id,
+			'product'     => $product_id,
+			'title'       => $title,
+			'arrival'     => $arrival,
+			'mode'        => $mode,
+			'on_request'  => $on_req,
+			'variants'    => $variants,
+			'quantity'    => $quantity,
+			'children'    => $guests->children,
+			'child_label' => $guests->child_label,
+			'pickups'     => $pickups,
+			'default'     => $default,
+			'trust'       => $trust,
+			'sticky'      => ! empty( $options['sticky'] ),
+			'whatsapp'    => $script['whatsapp'],
+			'from'        => $widget['from'],
+			'accent'      => $widget['accent'],
+			'script'      => $script,
 		);
 	}
 

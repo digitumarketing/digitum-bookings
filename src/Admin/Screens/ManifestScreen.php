@@ -156,7 +156,7 @@ final class ManifestScreen {
 	 */
 	public static function write_csv( $out, array $groups ): void {
 		fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- UTF-8 BOM for Excel.
-		fputcsv( $out, array( 'tour_session', 'start', 'reference', 'status', 'guest', 'phone', 'adults', 'children', 'infants', 'vehicles', 'pickup', 'zone', 'hotel', 'room', 'pickup_window', 'vehicle', 'to_pay', 'currency', 'requests' ) );
+		fputcsv( $out, array( 'tour_session', 'start', 'reference', 'status', 'guest', 'phone', 'persons', 'children', 'infants', 'vehicles', 'pickup', 'zone', 'hotel', 'room', 'pickup_window', 'vehicle', 'to_pay', 'currency', 'requests' ) );
 		foreach ( $groups as $group ) {
 			foreach ( $group['rows'] as $r ) {
 				$b = $r['booking'];
@@ -228,7 +228,7 @@ final class ManifestScreen {
 			<th><?php esc_html_e( 'Booking', 'digitum-bookings' ); ?></th>
 			<th><?php esc_html_e( 'Guest', 'digitum-bookings' ); ?></th>
 			<th><?php esc_html_e( 'Phone', 'digitum-bookings' ); ?></th>
-			<th class="num"><?php esc_html_e( 'Pax (A/C/I)', 'digitum-bookings' ); ?></th>
+			<th class="num"><?php esc_html_e( 'Pax (persons/children)', 'digitum-bookings' ); ?></th>
 			<th class="num"><?php esc_html_e( 'Veh.', 'digitum-bookings' ); ?></th>
 			<th><?php esc_html_e( 'Pickup', 'digitum-bookings' ); ?></th>
 			<th><?php esc_html_e( 'Vehicle / guide', 'digitum-bookings' ); ?></th>
@@ -244,7 +244,7 @@ final class ManifestScreen {
 			<td><?php echo esc_html( $b['reference'] ); ?><?php echo BookingStatus::AWAITING_TRANSFER === $b['status'] ? '<br><span class="muted">' . esc_html__( 'transfer pending', 'digitum-bookings' ) . '</span>' : ''; ?></td>
 			<td><?php echo esc_html( $b['customer_name'] ); ?></td>
 			<td><?php echo esc_html( $b['customer_phone'] ); ?></td>
-			<td class="num"><?php echo esc_html( $r['pax'] . ' (' . $r['adults'] . '/' . $r['children'] . '/' . $r['infants'] . ')' ); ?></td>
+			<td class="num"><?php echo esc_html( $r['pax'] . ' (' . $r['adults'] . '/' . $r['children'] . ( (int) $r['infants'] > 0 ? ' + ' . sprintf( /* translators: %d: infants on a booking made before 0.9.5. */ _n( '%d infant', '%d infants', (int) $r['infants'], 'digitum-bookings' ), (int) $r['infants'] ) : '' ) . ')' ); ?></td>
 			<td class="num"><?php echo esc_html( (string) $r['units'] ); ?></td>
 			<td><?php echo $r['pickup'] ? esc_html( trim( $r['zone'] . ' · ' . $r['hotel'] . ( '' !== $r['room'] ? ', ' . $r['room'] : '' ) . ' · ' . $r['window'], ' ·' ) ) : esc_html__( 'Meeting point', 'digitum-bookings' ); ?></td>
 			<td><?php echo esc_html( $r['vehicle'] ); ?></td>

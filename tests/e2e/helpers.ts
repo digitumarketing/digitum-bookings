@@ -32,7 +32,16 @@ export async function chooseRide( w: Locator ) {
 	await w.getByRole( 'radio', { name: /^1 hour/ } ).check();
 	await pickTomorrow( w );
 	await w.getByRole( 'radio', { name: /^Evening/ } ).check();
-	await w.getByRole( 'button', { name: 'More: Adults' } ).click();
+	await twoPersons( w );
+}
+
+/** Two persons: a vehicle tour already starts with the seats of one vehicle. */
+export async function twoPersons( w: Locator ) {
+	const persons = w.locator( 'input[name="adults"]' );
+	if ( '2' !== ( await persons.inputValue() ) ) {
+		await w.getByRole( 'button', { name: 'More: Persons' } ).click();
+	}
+	await expect( persons ).toHaveValue( '2' );
 }
 
 /** Click Continue until the step is shown (nothing to do when all steps are on one screen). */

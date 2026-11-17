@@ -1899,6 +1899,125 @@ if ( scenario( 'P' ) ) {
 }
 
 /* -------------------------------------------------------------------- */
+if ( scenario( 'Q' ) ) {
+	echo "\nScenario Q: guests as Persons, Children only where the tour takes them, no infants (0.9.5)\n";
+	$site = make_site( 'v095-guests' );
+	copy( __DIR__ . '/fake-gateways.php', "{$site}/wp-content/mu-plugins/fake-gateways.php" );
+	step( $site, 'install' );
+	step( $site, 'activate' );
+	$demo  = step( $site, 'demo_setup' );
+	$day   = $demo['tomorrow'];
+	$all   = array( '1', '2', '3', '4', '5', '6', '7' );
+	$tours = array();
+	$make  = static function ( string $slug, array $product, array $variants ) use ( $site, $all, &$tours ) {
+		$post = step( $site, 'create_post', array( 'type' => 'dgb_tour', 'title' => ucwords( str_replace( '-', ' ', $slug ) ), 'slug' => $slug ) );
+		$r    = step(
+			$site,
+			'save_box',
+			array(
+				'post'  => $post['id'],
+				'admin' => true,
+				'dgb'   => array(
+					'product'  => $product + array( 'enabled' => '1', 'pickup_policy' => 'none', 'max_days_ahead' => '120' ),
+					'variants' => $variants,
+					'sessions' => array( array( 'name' => 'Day', 'type' => 'fixed', 'start_time' => '10:00', 'days_of_week' => $all, 'active' => '1' ) ),
+					'addons'   => array(),
+				),
+			)
+		);
+		$tours[ $slug ] = array(
+			'id'      => $post['id'],
+			'variant' => (int) $r['variants'][0]['id'],
+			'session' => (int) $r['sessions'][0]['id'],
+		);
+	};
+	$make( 'sample-dune-buggy-2-seater', array( 'pricing_mode' => 'per_vehicle', 'seats_per_unit' => '2', 'min_age' => '14', 'unit_name' => 'buggy', 'unit_name_plural' => 'buggies' ), array( array( 'label' => '30 min', 'duration_minutes' => '30', 'price' => '699', 'active' => '1' ) ) );
+	$make( 'sample-red-dune-tour', array( 'pricing_mode' => 'per_person' ), array( array( 'label' => 'Standard', 'price' => '99', 'active' => '1' ) ) );
+	$make( 'sample-creek-cruise', array( 'pricing_mode' => 'per_person', 'child_age_label' => 'Ages 3 to 11' ), array( array( 'label' => 'Dinner', 'price' => '150', 'child_price' => '100', 'active' => '1' ) ) );
+	$make( 'sample-tower-visit', array( 'pricing_mode' => 'per_person' ), array( array( 'label' => 'Level 124', 'price' => '169', 'child_price' => '134', 'active' => '1' ) ) );
+	$make( 'sample-skydive', array( 'pricing_mode' => 'per_person', 'min_age' => '12' ), array( array( 'label' => 'Tandem', 'price' => '2199', 'active' => '1' ) ) );
+
+	$widget = static function ( string $slug ) use ( $site, &$tours ): array {
+		$html = step( $site, 'tour_parts', array( 'post' => $tours[ $slug ]['id'] ) )['html'];
+		preg_match_all( '#<input type="number"[^>]*name="(units|adults|children|infants)"[^>]*>#', $html, $m );
+		$fields = array();
+		foreach ( $m[0] as $i => $tag ) {
+			preg_match( '/value="(\d+)" min="(\d+)" max="(\d+)"/', $tag, $v );
+			$fields[ $m[1][ $i ] ] = array( 'value' => (int) ( $v[1] ?? -1 ), 'min' => (int) ( $v[2] ?? -1 ), 'max' => (int) ( $v[3] ?? -1 ) );
+		}
+		return array(
+			'html'   => $html,
+			'fields' => $fields,
+		);
+	};
+	$quote = static fn( string $slug, array $input ) => step( $site, 'rest', array( 'method' => 'POST', 'route' => 'quote', 'body' => $input + array( 'product' => $tours[ $slug ]['id'], 'variant_id' => $tours[ $slug ]['variant'], 'date' => $day, 'session_id' => $tours[ $slug ]['session'] ) ) )['data'];
+	$codes = static fn( array $q ) => array_column( (array) ( $q['errors'] ?? array() ), 'code' );
+	$ip    = 0;
+	$book  = static function ( string $slug, array $input ) use ( $site, $day, &$tours, &$ip ) {
+		++$ip;
+		return step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'ip' => '10.9.5.' . $ip, 'body' => $input + array( 'product' => $tours[ $slug ]['id'], 'variant_id' => $tours[ $slug ]['variant'], 'date' => $day, 'session_id' => $tours[ $slug ]['session'], 'payment_method' => 'arrival', 'name' => 'Guest Count', 'email' => 'guests@example.com', 'phone_code' => '+1', 'phone' => '5550142', 'terms' => true ) ) );
+	};
+
+	// 1. Dune buggy 2 seater: Buggies + Persons, 2 persons per buggy, age hint, no Children, no Infants.
+	$w = $widget( 'sample-dune-buggy-2-seater' );
+	check( array( 'units', 'adults' ) === array_keys( $w['fields'] ), 'buggy: counters are Buggies and Persons only (no Children, no Infants)' );
+	check( 2 === $w['fields']['adults']['value'] && 1 === $w['fields']['adults']['min'] && 2 === $w['fields']['adults']['max'], 'buggy: Persons start at the seats of one buggy (2), min 1, max 2 per buggy' );
+	check( str_contains( $w['html'], '<span class="dgb-count-label">Buggies</span>' ) && str_contains( $w['html'], '<span class="dgb-count-label">Persons</span>' ) && str_contains( $w['html'], 'Age 14 and over' ) && ! str_contains( $w['html'], 'Minimum age' ), 'buggy: labels Buggies and Persons, hint “Age 14 and over” once, no separate minimum age line' );
+	$q = $quote( 'sample-dune-buggy-2-seater', array( 'units' => 2, 'adults' => 3 ) );
+	check( '1398.00' === $q['total'] && array() === $codes( $q ), 'buggy: 2 buggies × 699 = 1,398, persons do not change the price' );
+	$q = $quote( 'sample-dune-buggy-2-seater', array( 'units' => 1, 'adults' => 3 ) );
+	check( in_array( 'too_many_guests', $codes( $q ), true ), 'buggy: 3 persons do not fit in 1 buggy' );
+	$q = $quote( 'sample-dune-buggy-2-seater', array( 'units' => 1, 'adults' => 1, 'children' => 1 ) );
+	check( in_array( 'children_not_allowed', $codes( $q ), true ), 'buggy: children rejected by the server (Children hidden)' );
+	$r = $book( 'sample-dune-buggy-2-seater', array( 'units' => 1, 'adults' => 1, 'children' => 1 ) );
+	check( 400 === $r['status'] && str_contains( (string) ( $r['data']['data']['fields']['guests'] ?? '' ), 'per person only' ), 'buggy: a booking with children is refused, the message under the guest counters' );
+	$r = $book( 'sample-dune-buggy-2-seater', array( 'units' => 1, 'adults' => 2, 'infants' => 2 ) );
+	$st = step( $site, 'booking_state', array( 'reference' => $r['data']['reference'] ?? '' ) );
+	check( 201 === $r['status'] && 2 === (int) $st['items'][0]['adults'] && 0 === (int) $st['items'][0]['infants'] && 699.0 === (float) $st['booking']['total'], 'buggy: booking saved with 2 persons, infants sent by an old client saved as 0, total 699' );
+
+	// 2. Red dune tour: per person, no child price → Persons only.
+	$w = $widget( 'sample-red-dune-tour' );
+	check( array( 'adults' ) === array_keys( $w['fields'] ) && 1 === $w['fields']['adults']['value'] && 50 === $w['fields']['adults']['max'], 'per person without child price: Persons only, starting at 1' );
+	check( '297.00' === $quote( 'sample-red-dune-tour', array( 'adults' => 3 ) )['total'], 'per person: 3 × 99 = 297' );
+	check( in_array( 'persons_required', $codes( $quote( 'sample-red-dune-tour', array( 'adults' => 0, 'children' => 0 ) ) ), true ), 'at least one person' );
+
+	// 3. Creek cruise: child prices set → Persons + Children with the age label; both prices count.
+	$w = $widget( 'sample-creek-cruise' );
+	check( array( 'adults', 'children' ) === array_keys( $w['fields'] ) && str_contains( $w['html'], '<span class="dgb-count-note">Ages 3 to 11</span>' ), 'child price set: Persons and Children, with the child age label' );
+	$q = $quote( 'sample-creek-cruise', array( 'adults' => 2, 'children' => 1 ) );
+	check( '400.00' === $q['total'] && array() === $codes( $q ), 'creek cruise: 2 × 150 + 1 × 100 = 400' );
+
+	// 4. Tower visit: child price, no label → Persons + Children, no hint.
+	$w = $widget( 'sample-tower-visit' );
+	check( array( 'adults', 'children' ) === array_keys( $w['fields'] ) && '472.00' === $quote( 'sample-tower-visit', array( 'adults' => 2, 'children' => 1 ) )['total'], 'tower visit: Persons and Children, 2 × 169 + 134 = 472' );
+
+	// 5. Skydive: min age 12, no child price → Persons only with the hint.
+	$w = $widget( 'sample-skydive' );
+	check( array( 'adults' ) === array_keys( $w['fields'] ) && str_contains( $w['html'], 'Age 12 and over' ) && ! str_contains( $w['html'], 'Minimum age' ), 'skydive: Persons only, hint “Age 12 and over”' );
+
+	// Children setting: Show forces the counter (child pays the person price), Hide removes it.
+	step( $site, 'set_meta', array( 'post' => $tours['sample-skydive']['id'], 'meta' => array( '_dgb_children_mode' => 'show' ) ) );
+	$w = $widget( 'sample-skydive' );
+	check( isset( $w['fields']['children'] ) && '4398.00' === $quote( 'sample-skydive', array( 'adults' => 1, 'children' => 1 ) )['total'], 'Children “Show” without a child price: counter shown, child pays the person price' );
+	step( $site, 'set_meta', array( 'post' => $tours['sample-creek-cruise']['id'], 'meta' => array( '_dgb_children_mode' => 'hide' ) ) );
+	check( ! isset( $widget( 'sample-creek-cruise' )['fields']['children'] ) && in_array( 'children_not_allowed', $codes( $quote( 'sample-creek-cruise', array( 'adults' => 1, 'children' => 1 ) ) ), true ), 'Children “Hide” even with child prices: no counter, children refused' );
+
+	// 6. A booking made before 0.9.5 (adults, children and infants stored) still shows and exports.
+	$r   = $book( 'sample-tower-visit', array( 'adults' => 2, 'children' => 1 ) );
+	$ref = $r['data']['reference'];
+	$st  = step( $site, 'booking_state', array( 'reference' => $ref ) );
+	step( $site, 'variant_update', array( 'table' => 'booking_items', 'id' => (int) $st['items'][0]['id'], 'values' => array( 'infants' => 1 ) ) );
+	$admin = step( $site, 'render_admin', array( 'screen' => 'bookings', 'get' => array( 'booking' => $st['booking']['id'] ), 'admin' => true ) );
+	check( str_contains( $admin['html'], '2 persons, 1 child, 1 infant' ), 'old booking opens in admin: “2 persons, 1 child, 1 infant”' );
+	$mf = step( $site, 'manifest', array( 'date' => $day, 'product' => $tours['sample-tower-visit']['id'] ) );
+	check( str_contains( $mf['print'], '4 (2/1 + 1 infant)' ) && str_contains( $mf['print'], 'Pax (persons/children)' ) && str_contains( $mf['csv'], ',persons,children,infants,' ), 'manifest: pax with persons/children, the infant only because there is one; CSV header persons' );
+	$csv = step( $site, 'bookings_csv', array( 'filters' => array( 'search' => $ref ) ) )['csv'];
+	check( str_contains( $csv, ',persons,children,infants,' ) && (bool) preg_match( '/' . preg_quote( $ref, '/' ) . '.*,2,1,1,/', $csv ), 'bookings CSV: header persons, the old booking exports 2,1,1' );
+	$view      = step( $site, 'render_admin', array( 'screen' => 'bookings', 'get' => array( 'booking' => $st['booking']['id'] - 1 ), 'admin' => true ) );
+	check( str_contains( $view['html'], '2 persons' ) && ! str_contains( $view['html'], 'infant' ), 'new booking in admin: “2 persons”, no infants shown' );
+}
+
+/* -------------------------------------------------------------------- */
 $stripe_mock = getenv( 'DGB_STRIPE_MOCK' ) ?: '';
 if ( '' !== $stripe_mock && scenario( 'G' ) ) {
 	echo "\nScenario G: Stripe requests match Stripe's API (stripe-mock at {$stripe_mock})\n";

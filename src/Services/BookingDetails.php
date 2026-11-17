@@ -138,9 +138,9 @@ final class BookingDetails {
 	}
 
 	/**
-	 * "adult" / "children" …
+	 * "person" / "children" … (infants only appear on bookings made before 0.9.5).
 	 *
-	 * @param string $key   adults, children or infants.
+	 * @param string $key   adults (shown as persons), children or infants.
 	 * @param int    $count Number.
 	 */
 	public static function guest_word( string $key, int $count ): string {
@@ -150,7 +150,7 @@ final class BookingDetails {
 			case 'infants':
 				return _n( 'infant', 'infants', $count, 'digitum-bookings' );
 			default:
-				return _n( 'adult', 'adults', $count, 'digitum-bookings' );
+				return _n( 'person', 'persons', $count, 'digitum-bookings' );
 		}
 	}
 }

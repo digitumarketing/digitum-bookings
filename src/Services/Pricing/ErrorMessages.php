@@ -26,6 +26,10 @@ final class ErrorMessages {
 				return __( 'Please choose an option.', 'digitum-bookings' );
 			case 'no_guests':
 				return __( 'Please add at least one guest.', 'digitum-bookings' );
+			case 'persons_required':
+				return __( 'Please add at least one person.', 'digitum-bookings' );
+			case 'children_not_allowed':
+				return __( 'This tour is booked per person only. Please count children as persons.', 'digitum-bookings' );
 			case 'too_many_guests':
 				return sprintf(
 					/* translators: 1: number of seats, 2: vehicles needed. */

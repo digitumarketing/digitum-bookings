@@ -14,6 +14,7 @@ use Digitum\Bookings\Database\Repositories\OverrideRepository;
 use Digitum\Bookings\Database\Repositories\VariantRepository;
 use Digitum\Bookings\Database\Repositories\ZoneRepository;
 use Digitum\Bookings\Domain\Addon;
+use Digitum\Bookings\Domain\GuestRules;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\Domain\Variant;
 use Digitum\Bookings\Domain\Zone;
@@ -130,11 +131,14 @@ final class QuoteService {
 			}
 		}
 
+		// Guests: Persons (stored as adults), Children only where the tour takes them, never infants.
+		$errors = array_merge( $errors, GuestRules::for_product( $product_id, $product )->errors( self::count( $input, 'adults' ), self::count( $input, 'children' ) ) );
+
 		$request = new PriceRequest(
 			$variant,
 			self::count( $input, 'adults' ),
 			self::count( $input, 'children' ),
-			self::count( $input, 'infants' ),
+			0,
 			max( 1, self::count( $input, 'units' ) ),
 			$date,
 			! empty( $input['pickup'] ),

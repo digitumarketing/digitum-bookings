@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.5 (persons and children)
+
+- **Persons instead of adults**: guests and staff see “Persons” (“1 person”, “2 persons”) in the booking form, booking card, review step, confirmation, emails, booking list and page, manifest (header “Pax (persons/children)”), check-in, reports and CSV exports (column `persons`). The database column and the REST and form field stay `adults`; webhooks and the REST manifest also send `persons`.
+- **No infants**: the form no longer asks for infants and new bookings always save 0. Older bookings with infants still show them in admin (“1 infant”), the manifest and the CSV; nothing is shown when the count is 0.
+- **Children per tour**: Booking settings › Pricing › **Children**: Auto (default, shown only when an active option has a child price), Show or Hide, plus an optional **Child age label** (e.g. “Ages 3 to 11”) shown under Children. When Children is hidden the server refuses bookings with children (“This tour is booked per person only. Please count children as persons.”). With Show and no child price, a child pays the person price.
+- **Persons counter**: at least 1. On per-vehicle and per-group tours the form starts with the seats of one vehicle and limits persons plus children to vehicles × seats (seats per vehicle, capped by the maximum guests per vehicle; for per-group tours the maximum guests per car); lowering the vehicles lowers the guests. A per-group tour now has a vehicles counter too. The minimum age shows as “Age 14 and over” under Persons instead of a separate line.
+- **Price**: per person = persons × price + children × child price; per vehicle and per group = vehicles × price. The server always prices again and never uses a total from the browser.
+- No database migration: existing bookings display, export and print as before.
+
 ## 0.9.4 (fact cards adapt to the number of facts)
 
 - **Fact cards follow the number of facts**: on computers 1 to 4 tiles sit in one row, 5 or 6 in rows of 3, 7 or more in rows of 4; on phones 2 per row. The tiles of the last row grow to fill it, so adding or removing a fact never leaves a gap or a lone tile. The Elementor Columns control still overrides this.
