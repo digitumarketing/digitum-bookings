@@ -417,7 +417,8 @@ final class AdminController {
 					'status'    => (string) $r['booking']['status'],
 					'guest'     => (string) $r['booking']['customer_name'],
 					'phone'     => (string) $r['booking']['customer_phone'],
-					'adults'    => $r['adults'],
+					'persons'   => $r['adults'],
+					'adults'    => $r['adults'], // Same as persons; kept for existing integrations.
 					'children'  => $r['children'],
 					'infants'   => $r['infants'],
 					'vehicles'  => $r['units'],

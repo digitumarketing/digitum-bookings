@@ -4,7 +4,7 @@ Tags: bookings, tours, activities, reservations, deposits
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.9.4
+Stable tag: 0.9.5
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -121,6 +121,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 
 == Changelog ==
 
+= 0.9.5 =
+* Guests are counted as Persons (and Children only where the tour needs them); infants are no longer asked for. Vehicle and group tours limit persons to the seats of the chosen vehicles, and a minimum age shows under Persons.
+
 = 0.9.4 =
 * Fact cards adapt their columns to the number of facts and fill the last row; the sessions tile shows only the pickup time.
 
@@ -197,6 +200,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 * Foundation: settings, tour post type (attach or own), booking settings box, database tables, roles.
 
 == Upgrade Notice ==
+
+= 0.9.5 =
+Persons instead of adults, children only where needed, no infants. Existing bookings are kept as they are.
 
 = 0.9.4 =
 Fact cards now size themselves to the number of facts.

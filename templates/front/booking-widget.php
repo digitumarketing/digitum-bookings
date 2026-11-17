@@ -12,16 +12,30 @@ defined( 'ABSPATH' ) || exit;
 
 $dgb_id      = $view['id'];
 $dgb_enquiry = $view['on_request'];
-$dgb_counts  = array(
-	'adults'   => array( __( 'Adults', 'digitum-bookings' ), '', 1 ),
-	'children' => array( __( 'Children', 'digitum-bookings' ), '', 0 ),
-	'infants'  => array( __( 'Infants', 'digitum-bookings' ), __( 'Free', 'digitum-bookings' ), 0 ),
+$dgb_guests  = $view['guests'] ?? null;
+$dgb_seats   = $dgb_guests ? $dgb_guests->unit_seats : 0;
+// Persons, then Children only when the tour takes them (no infants). On vehicle and car tours both share the seats.
+$dgb_counts = array(
+	/* translators: %d: minimum age. */
+	'adults' => array( __( 'Persons', 'digitum-bookings' ), $view['min_age'] > 0 ? sprintf( __( 'Age %d and over', 'digitum-bookings' ), $view['min_age'] ) : '', $dgb_guests ? $dgb_guests->default_persons() : 1, 1, $dgb_seats > 0 ? $dgb_seats : 50 ),
 );
-if ( 'per_vehicle' === $view['mode'] ) {
+if ( $dgb_guests && $dgb_guests->children ) {
+	$dgb_counts['children'] = array( __( 'Children', 'digitum-bookings' ), $dgb_guests->child_label, 0, 0, $dgb_seats > 0 ? max( 0, $dgb_seats - 1 ) : 50 );
+}
+if ( in_array( $view['mode'], array( 'per_vehicle', 'per_group' ), true ) ) {
 	$dgb_counts = array_merge(
 		array(
-			/* translators: %d: seats per vehicle. */
-			'units' => array( $view['units_label'] ?? __( 'Vehicles', 'digitum-bookings' ), sprintf( _n( '%d seat each', '%d seats each', $view['seats'], 'digitum-bookings' ), $view['seats'] ), 1 ),
+			'units' => array(
+				$view['units_label'] ?? __( 'Vehicles', 'digitum-bookings' ),
+				'per_vehicle' === $view['mode']
+					/* translators: %d: seats per vehicle. */
+					? sprintf( _n( '%d seat each', '%d seats each', $dgb_seats, 'digitum-bookings' ), $dgb_seats )
+					/* translators: %d: guests per car. */
+					: sprintf( _n( 'up to %d guest each', 'up to %d guests each', $dgb_seats, 'digitum-bookings' ), $dgb_seats ),
+				1,
+				1,
+				50,
+			),
 		),
 		$dgb_counts
 	);
@@ -118,7 +132,7 @@ $dgb_classes = 'dgb-w' . ( 'inline' !== $dgb_display ? ' is-modal' : '' ) . ( 'h
 					</div>
 
 					<div class="dgb-group" data-dgb-guests>
-						<p class="dgb-label"><?php echo 'per_vehicle' === $view['mode'] ? esc_html__( 'Vehicles and guests', 'digitum-bookings' ) : esc_html__( 'Guests', 'digitum-bookings' ); ?></p>
+						<p class="dgb-label"><?php echo in_array( $view['mode'], array( 'per_vehicle', 'per_group' ), true ) ? esc_html__( 'Vehicles and guests', 'digitum-bookings' ) : esc_html__( 'Guests', 'digitum-bookings' ); ?></p>
 						<?php foreach ( $dgb_counts as $dgb_key => $dgb_count ) : ?>
 							<div class="dgb-count">
 								<label for="<?php echo esc_attr( $dgb_id . '-' . $dgb_key ); ?>">
@@ -129,25 +143,14 @@ $dgb_classes = 'dgb-w' . ( 'inline' !== $dgb_display ? ' is-modal' : '' ) . ( 'h
 								</label>
 								<div class="dgb-stepper">
 									<button type="button" class="dgb-icon-btn" data-dgb-dec="<?php echo esc_attr( $dgb_key ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: Adults, Children… */ __( 'Fewer: %s', 'digitum-bookings' ), $dgb_count[0] ) ); ?>">−</button>
-									<input type="number" inputmode="numeric" id="<?php echo esc_attr( $dgb_id . '-' . $dgb_key ); ?>" name="<?php echo esc_attr( $dgb_key ); ?>" value="<?php echo esc_attr( (string) $dgb_count[2] ); ?>" min="<?php echo 'adults' === $dgb_key || 'units' === $dgb_key ? '1' : '0'; ?>" max="50">
+									<input type="number" inputmode="numeric" id="<?php echo esc_attr( $dgb_id . '-' . $dgb_key ); ?>" name="<?php echo esc_attr( $dgb_key ); ?>" value="<?php echo esc_attr( (string) $dgb_count[2] ); ?>" min="<?php echo esc_attr( (string) $dgb_count[3] ); ?>" max="<?php echo esc_attr( (string) $dgb_count[4] ); ?>">
 									<button type="button" class="dgb-icon-btn" data-dgb-inc="<?php echo esc_attr( $dgb_key ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: Adults, Children… */ __( 'More: %s', 'digitum-bookings' ), $dgb_count[0] ) ); ?>">+</button>
 								</div>
 							</div>
 						<?php endforeach; ?>
-						<?php if ( $view['min_age'] > 0 || $view['licence'] ) : ?>
-							<p class="dgb-hint">
-								<?php
-								$dgb_rules = array();
-								if ( $view['min_age'] > 0 ) {
-									/* translators: %d: minimum age. */
-									$dgb_rules[] = sprintf( __( 'Minimum age %d.', 'digitum-bookings' ), $view['min_age'] );
-								}
-								if ( $view['licence'] ) {
-									$dgb_rules[] = __( 'The driver must show a driving licence.', 'digitum-bookings' );
-								}
-								echo esc_html( implode( ' ', $dgb_rules ) );
-								?>
-							</p>
+						<?php // The minimum age is the hint under Persons; only the licence rule is left here. ?>
+						<?php if ( $view['licence'] ) : ?>
+							<p class="dgb-hint"><?php esc_html_e( 'The driver must show a driving licence.', 'digitum-bookings' ); ?></p>
 						<?php endif; ?>
 						<p class="dgb-field-error" data-dgb-error="guests" hidden></p>
 					</div>

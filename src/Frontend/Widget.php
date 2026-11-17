@@ -12,6 +12,7 @@ use Digitum\Bookings\Database\Repositories\CouponRepository;
 use Digitum\Bookings\Database\Repositories\LocationRepository;
 use Digitum\Bookings\Database\Repositories\VariantRepository;
 use Digitum\Bookings\Database\Repositories\ZoneRepository;
+use Digitum\Bookings\Domain\GuestRules;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\Domain\Variant;
 use Digitum\Bookings\Gateways\PayOnArrival;
@@ -210,8 +211,15 @@ final class Widget {
 		$on_req    = $product->is_on_request();
 		$policy    = (string) $product->get( 'pickup_policy' );
 
+		$guests = GuestRules::for_product( $product_id, $product );
+
 		$script = array(
 			'id'         => $id,
+			// Persons and Children share the seats of the vehicles or cars (unitSeats 0 = no seat limit).
+			'guests'     => array(
+				'children'  => $guests->children,
+				'unitSeats' => $guests->unit_seats,
+			),
 			'product'    => array(
 				'id'        => $product_id,
 				'name'      => $title,
@@ -278,6 +286,7 @@ final class Widget {
 			'extras'       => $extras,
 			'methods'      => $methods,
 			'min_age'      => (int) $product->get( 'min_age' ),
+			'guests'       => $guests,
 			'licence'      => (bool) $product->get( 'licence_required' ),
 			'terms_url'    => (string) $all['general']['terms_url'],
 			'cancellation' => (string) $all['general']['cancellation'],
@@ -436,12 +445,10 @@ final class Widget {
 			/* translators: %s: meeting point. */
 			'meetAt'           => __( 'Meet us at %s', 'digitum-bookings' ),
 			'meetPoint'        => __( 'Meet us at the meeting point', 'digitum-bookings' ),
-			/* translators: 1: number of adults. */
-			'nAdults'          => __( 'Adults: %s', 'digitum-bookings' ),
+			/* translators: 1: number of persons. */
+			'nAdults'          => __( 'Persons: %s', 'digitum-bookings' ),
 			/* translators: 1: number of children. */
 			'nChildren'        => __( 'Children: %s', 'digitum-bookings' ),
-			/* translators: 1: number of infants. */
-			'nInfants'         => __( 'Infants: %s', 'digitum-bookings' ),
 			/* translators: 1: number of vehicles. */
 			'nUnits'           => __( 'Vehicles: %s', 'digitum-bookings' ),
 			/* translators: %s: total price. */

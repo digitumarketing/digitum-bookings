@@ -199,7 +199,7 @@ final class BookingSettingsBox {
 	 */
 	private function panel_pricing( Product $product ): void {
 		$modes = array(
-			'per_person'  => array( __( 'Per person', 'digitum-bookings' ), __( 'Option price × adults + child price × children.', 'digitum-bookings' ) ),
+			'per_person'  => array( __( 'Per person', 'digitum-bookings' ), __( 'Option price × persons + child price × children.', 'digitum-bookings' ) ),
 			'per_vehicle' => array( __( 'Per vehicle', 'digitum-bookings' ), __( 'Option price × vehicles. Guests are checked against the seats.', 'digitum-bookings' ) ),
 			'per_group'   => array( __( 'Per group / car', 'digitum-bookings' ), __( 'Price per car up to the maximum guests; extra cars are added automatically.', 'digitum-bookings' ) ),
 			'on_request'  => array( __( 'On request', 'digitum-bookings' ), __( 'No price is shown. The guest sends a quote request.', 'digitum-bookings' ) ),
@@ -220,6 +220,26 @@ final class BookingSettingsBox {
 			<p class="dgb-field" data-dgb-show-when="per_vehicle">
 				<label for="dgb-seats"><?php esc_html_e( 'Seats per vehicle', 'digitum-bookings' ); ?></label>
 				<input type="number" id="dgb-seats" name="dgb[product][seats_per_unit]" min="1" max="50" value="<?php echo esc_attr( (string) $product->get( 'seats_per_unit' ) ); ?>">
+			</p>
+			<p class="dgb-field">
+				<label for="dgb-children-mode"><?php esc_html_e( 'Children', 'digitum-bookings' ); ?></label>
+				<select id="dgb-children-mode" name="dgb[product][children_mode]" aria-describedby="dgb-children-help">
+					<?php
+					$this->options(
+						array(
+							'auto' => __( 'Auto: when an option has a child price', 'digitum-bookings' ),
+							'show' => __( 'Show', 'digitum-bookings' ),
+							'hide' => __( 'Hide', 'digitum-bookings' ),
+						),
+						(string) $product->get( 'children_mode' )
+					);
+					?>
+				</select>
+				<span class="description" id="dgb-children-help"><?php esc_html_e( 'Guests book as Persons. The Children counter shows only when it is on; children then pay the child price (or the person price when an option has none). Infants are not asked for.', 'digitum-bookings' ); ?></span>
+			</p>
+			<p class="dgb-field">
+				<label for="dgb-child-age-label"><?php esc_html_e( 'Child age label', 'digitum-bookings' ); ?></label>
+				<input type="text" id="dgb-child-age-label" name="dgb[product][child_age_label]" maxlength="40" value="<?php echo esc_attr( (string) $product->get( 'child_age_label' ) ); ?>" placeholder="<?php esc_attr_e( 'e.g. Ages 3 to 11', 'digitum-bookings' ); ?>">
 			</p>
 			<p class="dgb-field" data-dgb-show-when="per_vehicle per_group">
 				<label for="dgb-unit-name"><?php esc_html_e( 'Noun shown to guests (one)', 'digitum-bookings' ); ?></label>

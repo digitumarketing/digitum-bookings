@@ -629,7 +629,7 @@ final class BookingsScreen {
 	 */
 	public static function write_csv( $out, array $rows ): void {
 		fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- UTF-8 BOM for Excel.
-		fputcsv( $out, array( 'reference', 'status', 'payment_status', 'booked_at', 'tour', 'option', 'date', 'session', 'start', 'adults', 'children', 'infants', 'vehicles', 'guest', 'email', 'phone', 'nationality', 'pickup', 'zone', 'hotel', 'room', 'pickup_window', 'vehicle', 'currency', 'total', 'paid', 'balance', 'payment_method', 'coupon', 'offer', 'source', 'utm_source', 'utm_medium', 'utm_campaign', 'gclid' ) );
+		fputcsv( $out, array( 'reference', 'status', 'payment_status', 'booked_at', 'tour', 'option', 'date', 'session', 'start', 'persons', 'children', 'infants', 'vehicles', 'guest', 'email', 'phone', 'nationality', 'pickup', 'zone', 'hotel', 'room', 'pickup_window', 'vehicle', 'currency', 'total', 'paid', 'balance', 'payment_method', 'coupon', 'offer', 'source', 'utm_source', 'utm_medium', 'utm_campaign', 'gclid' ) );
 		foreach ( $rows as $row ) {
 			$d = BookingDetails::of( $row );
 			fputcsv(

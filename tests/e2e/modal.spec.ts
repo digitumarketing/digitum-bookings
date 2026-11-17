@@ -193,7 +193,7 @@ test.describe( 'booking card and modal', () => {
 		await expect( page.locator( '[data-dgb-card]' ) ).toHaveCount( 0 );
 	} );
 
-	test( 'per-person tour with pickup included: one option, adults and children, opens on step 2', async ( { page } ) => {
+	test( 'per-person tour with pickup included: one option, persons and children, opens on step 2', async ( { page } ) => {
 		await cookies( page, [ 'dgb_test_card' ] );
 		for ( const width of [ 375, 1440 ] ) {
 			await page.setViewportSize( { width, height: 900 } );
@@ -201,7 +201,7 @@ test.describe( 'booking card and modal', () => {
 			const card = page.locator( '[data-dgb-card]' );
 			await expect( card.locator( '.dgb-bc-title' ) ).toHaveText( 'Book this tour' );
 			await expect( card.locator( '.dgb-bc-pill' ) ).toHaveCount( 0 );
-			await expect( card.getByLabel( 'Adults', { exact: true } ) ).toHaveValue( '2' );
+			await expect( card.getByLabel( 'Persons', { exact: true } ) ).toHaveValue( '2' );
 			await expect( card.getByLabel( 'Children', { exact: true } ) ).toHaveValue( '0' );
 			await expect( card.locator( '[data-dgb-card-pickup]' ) ).toHaveValue( '1' );
 			await expect( card.locator( '[data-dgb-card-pickup] option' ).nth( 1 ) ).toHaveText( 'Hotel pickup, North Zone, included' );

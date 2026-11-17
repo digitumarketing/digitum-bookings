@@ -1466,6 +1466,12 @@ html.dgb-lock body {
 	gap: 10px;
 }
 
+.dgb-bc-hint {
+	margin-top: -4px;
+	color: var(--dgb-muted);
+	font-size: 0.8rem;
+}
+
 .dgb-bc-step {
 	display: flex;
 	align-items: center;

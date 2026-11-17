@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { e2e, tours, path, events, axe, pickTomorrow, chooseRide, fillDetails, goTo } from './helpers';
+import { e2e, tours, path, events, axe, pickTomorrow, chooseRide, twoPersons, fillDetails, goTo } from './helpers';
 
 test.describe( 'desktop', () => {
 	test.skip( ( { isMobile } ) => isMobile, 'desktop layout' );
@@ -223,7 +223,7 @@ test.describe( 'phone', () => {
 		await w.getByRole( 'radio', { name: /^1 hour/ } ).check();
 		await pickTomorrow( w );
 		await w.getByRole( 'radio', { name: /^Evening/ } ).check();
-		await w.getByRole( 'button', { name: 'More: Adults' } ).click();
+		await twoPersons( w );
 		await axe( page, '.dgb-portal' );
 		await next.click();
 		await expect( w.locator( '[data-dgb-progress]' ) ).toHaveText( 'Step 2 of 3: Pickup and details' );

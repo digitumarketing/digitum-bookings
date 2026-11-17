@@ -193,7 +193,8 @@ final class WebhookOut {
 					'date'     => $d['date_raw'],
 					'session'  => $d['session'],
 					'start'    => (string) ( $d['item']['start_time'] ?? '' ),
-					'adults'   => $d['adults'],
+					'persons'  => $d['adults'],
+					'adults'   => $d['adults'], // Same as persons; kept for existing integrations.
 					'children' => $d['children'],
 					'infants'  => $d['infants'],
 					'units'    => $d['units'],

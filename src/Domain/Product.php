@@ -162,6 +162,17 @@ final class Product {
 				'type'    => 'ids',
 				'default' => '',
 			),
+			// Children counter: auto (when an active option has a child price above 0), show or hide.
+			'children_mode'    => array(
+				'type'    => 'enum',
+				'options' => array( 'auto', 'show', 'hide' ),
+				'default' => 'auto',
+			),
+			// Hint under the Children counter, e.g. "Ages 3 to 11".
+			'child_age_label'  => array(
+				'type'    => 'line',
+				'default' => '',
+			),
 			// What one unit is called: "buggy" / "buggies". Empty: vehicle (per vehicle) or car (per group).
 			'unit_name'        => array(
 				'type'    => 'line',
