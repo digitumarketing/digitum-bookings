@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.6 (vehicle tours ask only for vehicles)
+
+- Per-vehicle tours show only the vehicles stepper: no Persons, no Children. `GuestRules::normalize()` sets persons to units × seats and children to 0 on the server (quote and booking), whatever the request sends; the form keeps a hidden `adults` field in step. The minimum age shows under the vehicles. Per-group tours still ask for guests, since extra cars follow from them.
+- The modal prefill sets persons after the vehicles and clamps afterwards, so persons can no longer stay below the vehicles' seats.
+- A sticky booking card inside an Elementor Shortcode widget sticks by its wrapper, like the Booking card widget.
+
 ## 0.9.5 (persons and children)
 
 - **Persons instead of adults**: guests and staff see “Persons” (“1 person”, “2 persons”) in the booking form, booking card, review step, confirmation, emails, booking list and page, manifest (header “Pax (persons/children)”), check-in, reports and CSV exports (column `persons`). The database column and the REST and form field stay `adults`; webhooks and the REST manifest also send `persons`.

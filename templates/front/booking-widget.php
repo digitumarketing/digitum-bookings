@@ -40,6 +40,11 @@ if ( in_array( $view['mode'], array( 'per_vehicle', 'per_group' ), true ) ) {
 		$dgb_counts
 	);
 }
+// Per-vehicle tours are priced per vehicle: the guest only picks how many, and persons follow from the seats.
+$dgb_ask = ! $dgb_guests || $dgb_guests->ask;
+if ( ! $dgb_ask ) {
+	$dgb_counts = array_intersect_key( $dgb_counts, array( 'units' => true ) );
+}
 $dgb_has_pickup = 'none' !== $view['policy'] || ! empty( $view['point'] );
 ?>
 <?php
@@ -132,7 +137,10 @@ $dgb_classes = 'dgb-w' . ( 'inline' !== $dgb_display ? ' is-modal' : '' ) . ( 'h
 					</div>
 
 					<div class="dgb-group" data-dgb-guests>
-						<p class="dgb-label"><?php echo in_array( $view['mode'], array( 'per_vehicle', 'per_group' ), true ) ? esc_html__( 'Vehicles and guests', 'digitum-bookings' ) : esc_html__( 'Guests', 'digitum-bookings' ); ?></p>
+						<p class="dgb-label"><?php echo ! $dgb_ask ? esc_html( $view['units_label'] ?? __( 'Vehicles', 'digitum-bookings' ) ) : ( 'per_group' === $view['mode'] ? esc_html__( 'Vehicles and guests', 'digitum-bookings' ) : esc_html__( 'Guests', 'digitum-bookings' ) ); ?></p>
+						<?php if ( ! $dgb_ask ) : ?>
+							<input type="hidden" name="adults" value="<?php echo esc_attr( (string) max( 1, $dgb_seats ) ); ?>" data-dgb-seats="<?php echo esc_attr( (string) max( 1, $dgb_seats ) ); ?>">
+						<?php endif; ?>
 						<?php foreach ( $dgb_counts as $dgb_key => $dgb_count ) : ?>
 							<div class="dgb-count">
 								<label for="<?php echo esc_attr( $dgb_id . '-' . $dgb_key ); ?>">
@@ -148,7 +156,10 @@ $dgb_classes = 'dgb-w' . ( 'inline' !== $dgb_display ? ' is-modal' : '' ) . ( 'h
 								</div>
 							</div>
 						<?php endforeach; ?>
-						<?php // The minimum age is the hint under Persons; only the licence rule is left here. ?>
+						<?php // The minimum age is the hint under Persons; without Persons it shows here. ?>
+						<?php if ( ! $dgb_ask && $view['min_age'] > 0 ) : ?>
+							<p class="dgb-hint"><?php echo esc_html( sprintf( /* translators: %d: minimum age. */ __( 'Riders must be %d or over.', 'digitum-bookings' ), $view['min_age'] ) ); ?></p>
+						<?php endif; ?>
 						<?php if ( $view['licence'] ) : ?>
 							<p class="dgb-hint"><?php esc_html_e( 'The driver must show a driving licence.', 'digitum-bookings' ); ?></p>
 						<?php endif; ?>
