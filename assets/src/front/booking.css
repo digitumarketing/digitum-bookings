@@ -1266,13 +1266,15 @@ html.dgb-lock body {
 	/* A card taller than the screen sticks by its bottom edge (--dgb-sticky-fit, set by the script), so the
 	   buttons never end up below the screen. */
 	.dgb-w.dgb-bc.is-sticky,
-	.elementor-widget-dgb_booking_card:has(.dgb-bc.is-sticky) {
+	.elementor-widget-dgb_booking_card:has(.dgb-bc.is-sticky),
+	.elementor-widget-shortcode:has(.dgb-bc.is-sticky) {
 		position: sticky;
 		top: min(var(--dgb-sticky-top, 104px), var(--dgb-sticky-fit, 100vh));
 		align-self: flex-start;
 	}
 
-	.elementor-widget-dgb_booking_card .dgb-w.dgb-bc.is-sticky {
+	.elementor-widget-dgb_booking_card .dgb-w.dgb-bc.is-sticky,
+	.elementor-widget-shortcode .dgb-w.dgb-bc.is-sticky {
 		position: relative;
 		top: auto;
 	}

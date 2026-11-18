@@ -73,6 +73,9 @@ final class BookingService {
 			);
 		}
 
+		// Per-vehicle tours do not ask for guests: persons are the seats of the chosen vehicles.
+		$input = GuestRules::for_product( $product_id, $product )->normalize( $input );
+
 		$errors = array();
 
 		// Date and session.

@@ -11,6 +11,7 @@ use Brain\Monkey\Functions;
 use Digitum\Bookings\Database\Repositories\OverrideRepository;
 use Digitum\Bookings\Domain\Addon;
 use Digitum\Bookings\Domain\Coupon;
+use Digitum\Bookings\Domain\GuestRules;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\Domain\Variant;
 use Digitum\Bookings\Domain\Zone;
@@ -33,6 +34,17 @@ final class DomainTest extends TestCase {
 		$zone = Zone::from_row( array( 'id' => '2', 'name' => 'Far Zone', 'allowed' => '0', 'surcharge' => null ) );
 		$this->assertFalse( $zone->allowed );
 		$this->assertNull( $zone->surcharge );
+	}
+
+	public function test_vehicle_tours_count_seats_instead_of_asking_for_guests(): void {
+		$vehicle = new GuestRules( false, '', 2, 16, false );
+		$this->assertSame( array( 'units' => 3, 'adults' => 6, 'children' => 0 ), $vehicle->normalize( array( 'units' => 3, 'adults' => 1, 'children' => 2 ) ) );
+		$this->assertSame( 2, $vehicle->normalize( array() )['adults'] );
+		$this->assertSame( array(), $vehicle->errors( 6, 0 ) );
+
+		$people = new GuestRules( true );
+		$input  = array( 'units' => 1, 'adults' => 2, 'children' => 1 );
+		$this->assertSame( $input, $people->normalize( $input ) );
 	}
 
 	public function test_promotion_needs_dates_and_a_higher_old_price(): void {

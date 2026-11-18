@@ -507,6 +507,11 @@
 			if ( ! persons ) {
 				return;
 			}
+			// Per-vehicle tours do not ask for guests: persons are the seats of the chosen vehicles.
+			if ( 'hidden' === persons.type ) {
+				persons.value = String( Math.max( 1, num( 'units' ) || 1 ) * ( parseInt( persons.dataset.dgbSeats, 10 ) || 1 ) );
+				return;
+			}
 			const seats = cfg.guests ? cfg.guests.unitSeats : 0;
 			let a = Math.max( 1, num( 'adults' ) );
 			let c = kids ? num( 'children' ) : 0;
@@ -668,8 +673,9 @@
 			if ( num( 'units' ) ) {
 				people.push( sprintf( t.nUnits, String( num( 'units' ) ) ) );
 			}
+			const asked = field( 'adults' ) && 'hidden' !== field( 'adults' ).type;
 			[ [ 'adults', t.nAdults ], [ 'children', t.nChildren ] ].forEach( ( pair ) => {
-				if ( num( pair[ 0 ] ) ) {
+				if ( asked && num( pair[ 0 ] ) ) {
 					people.push( sprintf( pair[ 1 ], String( num( pair[ 0 ] ) ) ) );
 				}
 			} );
@@ -1208,9 +1214,11 @@
 				}
 			}
 			set( 'units', values.units );
+			if ( field( 'adults' ) && 'hidden' !== field( 'adults' ).type ) {
+				set( 'adults', values.adults );
+				set( 'children', values.children );
+			}
 			clampGuests();
-			set( 'adults', values.adults );
-			set( 'children', values.children );
 			if ( undefined !== values.pickup ) {
 				const choice = form.querySelector( 'input[name="pickup"][value="' + ( values.pickup ? '1' : '0' ) + '"]' );
 				if ( choice ) {
@@ -1536,7 +1544,8 @@
 		} );
 
 		// Sticky card: when it is taller than the screen below the sticky offset, it sticks by its bottom edge.
-		const holder = root.closest( '.elementor-widget-dgb_booking_card' ) || root;
+		// In Elementor the widget wrapper sticks (the card fills it), also when the card sits in a Shortcode widget.
+		const holder = root.closest( '.elementor-widget-dgb_booking_card, .elementor-widget-shortcode' ) || root;
 		const fit = () => {
 			if ( ! root.classList.contains( 'is-sticky' ) ) {
 				return;

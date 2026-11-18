@@ -26,12 +26,15 @@ final class GuestRules {
 	 * @param string $child_label Hint under Children, e.g. "Ages 3 to 11".
 	 * @param int    $unit_seats  Seats of one vehicle or car (0 when the tour is not priced per unit).
 	 * @param int    $min_age     Minimum age (0 = none).
+	 * @param bool   $ask         Whether guests are asked for at all. Per-vehicle tours are priced per vehicle, so
+	 *                            the guest only picks how many vehicles; persons are then the seats of those vehicles.
 	 */
 	public function __construct(
 		public readonly bool $children,
 		public readonly string $child_label = '',
 		public readonly int $unit_seats = 0,
-		public readonly int $min_age = 0
+		public readonly int $min_age = 0,
+		public readonly bool $ask = true
 	) {}
 
 	/**
@@ -65,7 +68,24 @@ final class GuestRules {
 		} elseif ( 'per_group' === $mode ) {
 			$seats = max( 1, (int) $product->get( 'max_pax_per_unit' ) );
 		}
-		return new self( $children, trim( (string) $product->get( 'child_age_label' ) ), $seats, (int) $product->get( 'min_age' ) );
+		$ask = 'per_vehicle' !== $mode;
+		return new self( $ask && $children, trim( (string) $product->get( 'child_age_label' ) ), $seats, (int) $product->get( 'min_age' ), $ask );
+	}
+
+	/**
+	 * Guests of a booking or quote as the tour counts them. When guests are not asked for (per-vehicle tours),
+	 * persons are the seats of the chosen vehicles and children are 0, whatever the request sent.
+	 *
+	 * @param array<string, mixed> $input Request with units, adults, children.
+	 * @return array<string, mixed>
+	 */
+	public function normalize( array $input ): array {
+		if ( ! $this->ask ) {
+			$units             = max( 1, (int) ( $input['units'] ?? 1 ) );
+			$input['adults']   = $units * max( 1, $this->unit_seats );
+			$input['children'] = 0;
+		}
+		return $input;
 	}
 
 	/**

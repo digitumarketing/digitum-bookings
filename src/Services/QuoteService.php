@@ -131,8 +131,11 @@ final class QuoteService {
 			}
 		}
 
-		// Guests: Persons (stored as adults), Children only where the tour takes them, never infants.
-		$errors = array_merge( $errors, GuestRules::for_product( $product_id, $product )->errors( self::count( $input, 'adults' ), self::count( $input, 'children' ) ) );
+		// Guests: Persons (stored as adults), Children only where the tour takes them, never infants. Per-vehicle
+		// tours do not ask: persons are the seats of the chosen vehicles.
+		$guests = GuestRules::for_product( $product_id, $product );
+		$input  = $guests->normalize( $input );
+		$errors = array_merge( $errors, $guests->errors( self::count( $input, 'adults' ), self::count( $input, 'children' ) ) );
 
 		$request = new PriceRequest(
 			$variant,
