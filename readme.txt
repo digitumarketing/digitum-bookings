@@ -4,7 +4,7 @@ Tags: bookings, tours, activities, reservations, deposits
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.9.6
+Stable tag: 0.9.7
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -121,6 +121,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 
 == Changelog ==
 
+= 0.9.7 =
+* New tour setting "Free children per booking": that many children in a booking ride free and the rest pay the child price, for rules like "first child under 4 free, more children half price". Price lines now say which line is for children.
+
 = 0.9.6 =
 * Vehicle tours (priced per vehicle) no longer ask for Persons or Children: the guest picks only how many vehicles, and the booking counts the seats of those vehicles. The minimum age shows under the vehicles. A booking card placed in an Elementor Shortcode widget now sticks like the Booking card widget.
 
@@ -203,6 +206,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 * Foundation: settings, tour post type (attach or own), booking settings box, database tables, roles.
 
 == Upgrade Notice ==
+
+= 0.9.7 =
+Free children per booking.
 
 = 0.9.6 =
 Vehicle tours ask only for the number of vehicles.

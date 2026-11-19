@@ -168,6 +168,13 @@ final class Product {
 				'options' => array( 'auto', 'show', 'hide' ),
 				'default' => 'auto',
 			),
+			// Children per booking who ride free (the rest pay the child price), e.g. 1 for "first child under 4 free".
+			'free_children'    => array(
+				'type'    => 'int',
+				'min'     => 0,
+				'max'     => 20,
+				'default' => 0,
+			),
 			// Hint under the Children counter, e.g. "Ages 3 to 11".
 			'child_age_label'  => array(
 				'type'    => 'line',
