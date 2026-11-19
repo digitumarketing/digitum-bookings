@@ -241,6 +241,11 @@ final class BookingSettingsBox {
 				<label for="dgb-child-age-label"><?php esc_html_e( 'Child age label', 'digitum-bookings' ); ?></label>
 				<input type="text" id="dgb-child-age-label" name="dgb[product][child_age_label]" maxlength="40" value="<?php echo esc_attr( (string) $product->get( 'child_age_label' ) ); ?>" placeholder="<?php esc_attr_e( 'e.g. Ages 3 to 11', 'digitum-bookings' ); ?>">
 			</p>
+			<p class="dgb-field">
+				<label for="dgb-free-children"><?php esc_html_e( 'Free children per booking', 'digitum-bookings' ); ?></label>
+				<input type="number" id="dgb-free-children" name="dgb[product][free_children]" min="0" max="20" step="1" value="<?php echo esc_attr( (string) (int) $product->get( 'free_children' ) ); ?>" aria-describedby="dgb-free-children-help">
+				<span class="description" id="dgb-free-children-help"><?php esc_html_e( 'This many children in each booking pay nothing; any more pay the child price. 0 = every child pays.', 'digitum-bookings' ); ?></span>
+			</p>
 			<p class="dgb-field" data-dgb-show-when="per_vehicle per_group">
 				<label for="dgb-unit-name"><?php esc_html_e( 'Noun shown to guests (one)', 'digitum-bookings' ); ?></label>
 				<input type="text" id="dgb-unit-name" name="dgb[product][unit_name]" maxlength="40" value="<?php echo esc_attr( (string) $product->get( 'unit_name' ) ); ?>" placeholder="<?php esc_attr_e( 'vehicle', 'digitum-bookings' ); ?>">

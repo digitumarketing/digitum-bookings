@@ -137,11 +137,15 @@ final class QuoteService {
 		$input  = $guests->normalize( $input );
 		$errors = array_merge( $errors, $guests->errors( self::count( $input, 'adults' ), self::count( $input, 'children' ) ) );
 
+		// The first N children of a booking ride free (product setting); the rest pay the child price.
+		$children = self::count( $input, 'children' );
+		$free     = min( $children, max( 0, (int) $product->get( 'free_children' ) ) );
+
 		$request = new PriceRequest(
 			$variant,
 			self::count( $input, 'adults' ),
-			self::count( $input, 'children' ),
-			0,
+			$children - $free,
+			$free,
 			max( 1, self::count( $input, 'units' ) ),
 			$date,
 			! empty( $input['pickup'] ),

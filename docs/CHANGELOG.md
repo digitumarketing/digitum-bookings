@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.7 (free children per booking)
+
+- New product setting `free_children` (Booking settings, default 0). `QuoteService` passes the first N children as free guests (priced 0 on a "free child" line) and the rest as children at the child price; the booking still saves the full children count.
+- Child price lines are labelled "{option}, child" and "{option}, free child".
+
 ## 0.9.6 (vehicle tours ask only for vehicles)
 
 - Per-vehicle tours show only the vehicles stepper: no Persons, no Children. `GuestRules::normalize()` sets persons to units × seats and children to 0 on the server (quote and booking), whatever the request sends; the form keeps a hidden `adults` field in step. The minimum age shows under the vehicles. Per-group tours still ask for guests, since extra cars follow from them.

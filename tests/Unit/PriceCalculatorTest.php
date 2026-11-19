@@ -114,6 +114,14 @@ final class PriceCalculatorTest extends TestCase {
 		$this->assertSame( 1, $b->units );
 	}
 
+	public function test_free_children_are_named_on_their_line(): void {
+		$v = self::variant( '99.00', array( 'child_price' => '49.50', 'label' => 'Shared 4x4' ) );
+		$b = $this->calc->calculate( self::config( 'per_person' ), self::request( $v, array( 'adults' => 2, 'children' => 1, 'infants' => 1 ) ) );
+
+		$this->assertSame( array( 'Shared 4x4', 'Shared 4x4, child', 'Shared 4x4, free child' ), array_column( $b->lines, 'label' ) );
+		$this->assertSame( 24750, $b->total, '2 × 99 + 1 × 49.50, the first child free.' );
+	}
+
 	public function test_children_pay_the_adult_price_when_no_child_price_is_set(): void {
 		$b = $this->calc->calculate( self::config( 'per_person' ), self::request( self::variant( '160.00' ), array( 'adults' => 0, 'children' => 2 ) ) );
 

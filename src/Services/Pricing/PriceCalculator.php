@@ -56,10 +56,10 @@ final class PriceCalculator {
 					$lines[] = self::line( 'adults', $variant->label, $request->adults, $unit, 'base' );
 				}
 				if ( $request->children > 0 ) {
-					$lines[] = self::line( 'children', $variant->label, $request->children, $child_unit, 'child' );
+					$lines[] = self::line( 'children', sprintf( /* translators: %s: option name. */ __( '%s, child', 'digitum-bookings' ), $variant->label ), $request->children, $child_unit, 'child' );
 				}
 				if ( $request->infants > 0 ) {
-					$lines[] = self::line( 'infants', $variant->label, $request->infants, 0, 'free' );
+					$lines[] = self::line( 'infants', sprintf( /* translators: %s: option name. */ __( '%s, free child', 'digitum-bookings' ), $variant->label ), $request->infants, 0, 'free' );
 				}
 				break;
 
