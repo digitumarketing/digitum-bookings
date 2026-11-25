@@ -102,12 +102,20 @@ add_filter( 'dgb_proof_dir', fn() => '/home/site/private/dgb-proofs' );
 
 ### `dgb_rate_limit` (0.4.0)
 
-Filters the per-IP limits of the public endpoints. Actions and defaults: `quote` 120 per minute, `create` 10 per hour, `pay` 30 and `proof` 10 per 10 minutes.
+Filters the per-IP limits of the public endpoints. Actions and defaults: `quote` 300 per minute (see `dgb_quote_rate_limit`), `create` 10 per hour, `pay` 30 and `proof` 10 per 10 minutes.
 
 ```php
 add_filter( 'dgb_rate_limit', function ( int $limit, string $action, int $window ) {
 	return 'create' === $action ? 30 : $limit; // e.g. a hotel desk booking for many guests
 }, 10, 3 );
+```
+
+### `dgb_quote_rate_limit` (0.9.8)
+
+Price requests one visitor (IP address) may make per minute; default 300. Prices are read-only and the booking card asks for one on every change, so this is far above the booking limit. `dgb_rate_limit` still runs after it.
+
+```php
+add_filter( 'dgb_quote_rate_limit', fn() => 600 ); // many guests behind one hotel or office address
 ```
 
 ### `dgb_stripe_api_base`, `dgb_paypal_api_base` (0.4.0)

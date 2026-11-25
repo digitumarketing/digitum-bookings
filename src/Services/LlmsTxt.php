@@ -11,6 +11,7 @@ use Digitum\Bookings\Database\Repositories\AddonRepository;
 use Digitum\Bookings\Database\Repositories\LocationRepository;
 use Digitum\Bookings\Database\Repositories\SessionRepository;
 use Digitum\Bookings\Database\Repositories\ZoneRepository;
+use Digitum\Bookings\Domain\PickupChoices;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\Frontend\Format;
 use Digitum\Bookings\Frontend\SecondCurrency;
@@ -264,8 +265,10 @@ final class LlmsTxt {
 			$lines[] = '  - ' . __( 'Sessions:', 'digitum-bookings' ) . ' ' . implode( '; ', $sessions );
 		}
 
-		$point   = (int) $product->get( 'meeting_point_id' ) ? ( new LocationRepository() )->find( (int) $product->get( 'meeting_point_id' ) ) : null;
-		$lines[] = '  - ' . __( 'Pickup:', 'digitum-bookings' ) . ' ' . $this->pickup( $post_id, (string) $product->get( 'pickup_policy' ), $point, $points['currency'] );
+		// Pickup-only tours: no meeting point is listed.
+		$only    = PickupChoices::for_product( $post_id, $product )->pickup_only;
+		$point   = ! $only && (int) $product->get( 'meeting_point_id' ) ? ( new LocationRepository() )->find( (int) $product->get( 'meeting_point_id' ) ) : null;
+		$lines[] = '  - ' . __( 'Pickup:', 'digitum-bookings' ) . ' ' . $this->pickup( $post_id, (string) $product->get( 'pickup_policy' ), $point, $points['currency'], $only );
 		if ( $point ) {
 			$where = array( (string) $point['name'] );
 			if ( '' !== trim( (string) $point['address'] ) ) {
@@ -333,8 +336,9 @@ final class LlmsTxt {
 	 * @param string                    $policy   included, addon or none.
 	 * @param array<string, mixed>|null $point    Meeting point.
 	 * @param string                    $currency Currency.
+	 * @param bool                      $only     Pickup only (no meeting point choice).
 	 */
-	private function pickup( int $post_id, string $policy, ?array $point, string $currency ): string {
+	private function pickup( int $post_id, string $policy, ?array $point, string $currency, bool $only = false ): string {
 		$meet = $point
 			/* translators: %s: meeting point. */
 			? sprintf( __( 'meet at %s', 'digitum-bookings' ), (string) $point['name'] )
@@ -368,18 +372,24 @@ final class LlmsTxt {
 				/* translators: 1: price, 2: "per booking"… */
 				? sprintf( __( 'hotel pickup costs %1$s %2$s', 'digitum-bookings' ), Format::money( $price, $currency ), self::price_type( $type ) )
 				: __( 'hotel pickup on request', 'digitum-bookings' );
-			/* translators: 1: "meet at …", 2: pickup cost. */
-			$text = sprintf( __( '%1$s by default; %2$s', 'digitum-bookings' ), $meet, $cost );
+			$text = $only
+				/* translators: %s: pickup cost. */
+				? sprintf( __( 'hotel pickup only; %s', 'digitum-bookings' ), $cost )
+				/* translators: 1: "meet at …", 2: pickup cost. */
+				: sprintf( __( '%1$s by default; %2$s', 'digitum-bookings' ), $meet, $cost );
 		} else {
-			$text = __( 'hotel pickup included', 'digitum-bookings' );
+			$text = $only ? __( 'hotel pickup only, included', 'digitum-bookings' ) : __( 'hotel pickup included', 'digitum-bookings' );
 		}
 		if ( array() !== $allowed ) {
 			/* translators: %s: list of areas. */
 			$text .= ' ' . sprintf( __( 'from %s', 'digitum-bookings' ), implode( ', ', $allowed ) );
 		}
 		if ( array() !== $refused ) {
-			/* translators: 1: list of areas, 2: "meet at …". */
-			$text .= '; ' . sprintf( __( 'no pickup from %1$s (%2$s)', 'digitum-bookings' ), implode( ', ', $refused ), $meet );
+			$text .= '; ' . ( $only
+				/* translators: %s: list of areas. */
+				? sprintf( __( 'no pickup from %s', 'digitum-bookings' ), implode( ', ', $refused ) )
+				/* translators: 1: list of areas, 2: "meet at …". */
+				: sprintf( __( 'no pickup from %1$s (%2$s)', 'digitum-bookings' ), implode( ', ', $refused ), $meet ) );
 		}
 		return self::inline( $text );
 	}

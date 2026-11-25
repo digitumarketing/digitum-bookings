@@ -336,6 +336,28 @@ switch ( $dgb_action ) {
 		$dgb_out['data']    = rest_get_server()->response_to_data( $dgb_res, false );
 		break;
 
+	case 'format_money':
+		$dgb_out['result'] = \Digitum\Bookings\Frontend\Format::money( (string) $dgb_args['amount'], (string) ( $dgb_args['currency'] ?? 'AED' ) );
+		break;
+
+	case 'product_meta':
+		$dgb_out['result'] = \Digitum\Bookings\Domain\Product::find( (int) $dgb_args['post'] )->get( (string) $dgb_args['key'] );
+		break;
+
+	case 'quote_limit':
+		// Price requests from one visitor with the limit filtered down to `limit`.
+		$dgb_limit = (int) $dgb_args['limit'];
+		add_filter( 'dgb_quote_rate_limit', static fn() => $dgb_limit );
+		$_SERVER['REMOTE_ADDR'] = (string) ( $dgb_args['ip'] ?? '10.9.8.200' );
+		$dgb_out['result']      = array();
+		for ( $dgb_i = 0; $dgb_i < (int) $dgb_args['count']; $dgb_i++ ) {
+			$dgb_req = new WP_REST_Request( 'POST', '/dgb/v1/quote' );
+			$dgb_req->set_header( 'content-type', 'application/json' );
+			$dgb_req->set_body( wp_json_encode( array( 'product' => (int) $dgb_args['product'] ) ) );
+			$dgb_out['result'][] = rest_do_request( $dgb_req )->get_status();
+		}
+		break;
+
 	case 'render_page':
 		global $wp_query, $wp_the_query;
 		$_GET                   = $dgb_args['get'] ?? array();
@@ -1242,6 +1264,7 @@ switch ( $dgb_action ) {
 		$dgb_out['length']    = strlen( $html );
 		$dgb_out['tabs']      = substr_count( $html, 'role="tab"' );
 		$dgb_out['templates'] = substr_count( $html, '<template data-dgb-template>' );
+		$dgb_out['html']      = ! empty( $dgb_args['html'] ) ? $html : '';
 		break;
 
 	case 'render_settings':

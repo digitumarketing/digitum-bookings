@@ -332,7 +332,14 @@ final class PublicController {
 		if ( $error ) {
 			return $error;
 		}
-		if ( ! ( new RateLimiter() )->hit( 'quote', 120, MINUTE_IN_SECONDS ) ) {
+		/**
+		 * Filters how many price requests one visitor (IP address) may make per minute. Prices are read-only and every
+		 * stepper click asks for one, so the limit is far higher than for creating bookings (which stays unchanged).
+		 *
+		 * @param int $limit Requests per minute.
+		 */
+		$limit = (int) apply_filters( 'dgb_quote_rate_limit', 300 );
+		if ( ! ( new RateLimiter() )->hit( 'quote', max( 1, $limit ), MINUTE_IN_SECONDS ) ) {
 			return self::too_many();
 		}
 		$breakdown           = $this->quotes->quote_array( $id, self::input( $request ) );

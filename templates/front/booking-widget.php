@@ -207,6 +207,7 @@ $dgb_classes = 'dgb-w' . ( 'inline' !== $dgb_display ? ' is-modal' : '' ) . ( 'h
 					<?php if ( $dgb_has_pickup ) : ?>
 						<div class="dgb-group" data-dgb-pickup-group>
 							<?php if ( 'none' !== $view['policy'] ) : ?>
+								<?php if ( $view['meet'] ) : ?>
 								<div class="dgb-options dgb-options-2" role="radiogroup" aria-label="<?php esc_attr_e( 'Pickup or meeting point', 'digitum-bookings' ); ?>">
 									<label class="dgb-card">
 										<input type="radio" name="pickup" value="0" <?php checked( ! $view['pickup_on'] ); ?>>
@@ -219,17 +220,23 @@ $dgb_classes = 'dgb-w' . ( 'inline' !== $dgb_display ? ' is-modal' : '' ) . ( 'h
 										<input type="radio" name="pickup" value="1" <?php checked( $view['pickup_on'] ); ?>>
 										<span class="dgb-card-body">
 											<span class="dgb-card-title"><?php esc_html_e( 'Hotel pickup', 'digitum-bookings' ); ?></span>
-											<span class="dgb-card-meta"><?php echo 'included' === $view['policy'] ? esc_html__( 'Included', 'digitum-bookings' ) : ( '' !== $view['pickup_price'] ? esc_html( '+ ' . $view['pickup_price'] ) : '' ); ?></span>
+											<span class="dgb-card-meta"><?php echo esc_html( $view['pickup_meta'] ); ?></span>
 										</span>
 									</label>
 								</div>
+								<?php else : ?>
+									<?php // Pickup only: no meeting point choice, the guest chooses a pickup area. ?>
+									<input type="hidden" name="pickup" value="1">
+									<p class="dgb-label"><?php esc_html_e( 'Hotel pickup', 'digitum-bookings' ); ?> <span class="dgb-card-meta"><?php echo esc_html( $view['pickup_meta'] ); ?></span></p>
+								<?php endif; ?>
 								<div class="dgb-pickup" data-dgb-pickup-fields hidden>
 									<div class="dgb-field">
 										<label for="<?php echo esc_attr( $dgb_id ); ?>-zone"><?php esc_html_e( 'Pickup area', 'digitum-bookings' ); ?></label>
 										<select id="<?php echo esc_attr( $dgb_id ); ?>-zone" name="zone_id">
 											<option value=""><?php esc_html_e( 'Choose…', 'digitum-bookings' ); ?></option>
+											<?php $dgb_first_zone = $view['meet'] ? 0 : (int) ( array_values( array_filter( $view['zones'], static fn( $z ) => $z['allowed'] ) )[0]['id'] ?? 0 ); ?>
 											<?php foreach ( $view['zones'] as $dgb_zone ) : ?>
-												<option value="<?php echo esc_attr( (string) $dgb_zone['id'] ); ?>" data-allowed="<?php echo $dgb_zone['allowed'] ? '1' : '0'; ?>"><?php echo esc_html( $dgb_zone['name'] ); ?></option>
+												<option value="<?php echo esc_attr( (string) $dgb_zone['id'] ); ?>" data-allowed="<?php echo $dgb_zone['allowed'] ? '1' : '0'; ?>" <?php selected( $dgb_first_zone, (int) $dgb_zone['id'] ); ?>><?php echo esc_html( $dgb_zone['name'] ); ?></option>
 											<?php endforeach; ?>
 										</select>
 										<p class="dgb-field-error" data-dgb-error="zone" hidden></p>

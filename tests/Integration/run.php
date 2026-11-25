@@ -207,7 +207,8 @@ if ( scenario( 'C' ) ) {
 	check( array( 'zone_not_allowed' ) === array_column( $q['quote']['errors'], 'code' ) && '899.00' === $q['quote']['total'], 'Far Zone pickup refused, no pickup charge' );
 
 	$q = step( $site, 'quote', array( 'post' => $post['id'], 'now' => $now, 'input' => array_merge( $base, array( 'adults' => 3 ) ) ) );
-	check( array( 'too_many_guests' ) === array_column( $q['quote']['errors'], 'code' ), '3 guests in one 2-seater refused' );
+	// Since 0.9.6 vehicle tours do not ask for guests: persons are the seats of the vehicles, so they always fit.
+	check( array() === array_column( $q['quote']['errors'], 'code' ) && '899.00' === $q['quote']['total'], 'per vehicle: 3 guests sent for one 2-seater count as its 2 seats (no seat error, price per vehicle)' );
 
 	$q = step( $site, 'quote', array( 'post' => $post['id'], 'now' => $now, 'input' => array_merge( $base, array( 'date' => '2026-12-31' ) ) ) );
 	check( '1078.80' === $q['quote']['total'], 'New Year evening +20% price change applied' );
@@ -340,7 +341,7 @@ if ( scenario( 'E' ) ) {
 	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'body' => array( 'product' => $buggy['id'], 'variant_id' => $buggy['variants']['1 hour'], 'adults' => 3, 'units' => 1, 'date' => $day, 'session_id' => $buggy['sessions']['Evening'], 'pickup' => true, 'zone_id' => $demo['zones']['Far Zone'] ), 'nonce' => true, 'ip' => '10.0.0.2' ) );
 	$fields = array_keys( $r['data']['data']['fields'] ?? array() );
 	sort( $fields );
-	check( 400 === $r['status'] && array( 'email', 'name', 'payment_method', 'phone', 'price_too_many_guests', 'terms', 'zone' ) === $fields, 'invalid booking: every problem reported by field (' . implode( ', ', $fields ) . ')' );
+	check( 400 === $r['status'] && array( 'email', 'name', 'payment_method', 'phone', 'terms', 'zone' ) === $fields, 'invalid booking: every problem reported by field (' . implode( ', ', $fields ) . ')' );
 
 	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'body' => $base, 'nonce' => true, 'ip' => '10.0.0.3' ) );
 	check( 201 === $r['status'] && 'confirmed' === $r['data']['status'] && preg_match( '/^DGB-\d{6}-[A-Z2-9]{4}$/', $r['data']['reference'] ), 'pay on arrival: booking confirmed with a reference' );
@@ -1958,19 +1959,20 @@ if ( scenario( 'Q' ) ) {
 		return step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'ip' => '10.9.5.' . $ip, 'body' => $input + array( 'product' => $tours[ $slug ]['id'], 'variant_id' => $tours[ $slug ]['variant'], 'date' => $day, 'session_id' => $tours[ $slug ]['session'], 'payment_method' => 'arrival', 'name' => 'Guest Count', 'email' => 'guests@example.com', 'phone_code' => '+1', 'phone' => '5550142', 'terms' => true ) ) );
 	};
 
-	// 1. Dune buggy 2 seater: Buggies + Persons, 2 persons per buggy, age hint, no Children, no Infants.
+	// 1. Dune buggy 2 seater: since 0.9.6 only the number of buggies is asked; persons are the seats.
 	$w = $widget( 'sample-dune-buggy-2-seater' );
-	check( array( 'units', 'adults' ) === array_keys( $w['fields'] ), 'buggy: counters are Buggies and Persons only (no Children, no Infants)' );
-	check( 2 === $w['fields']['adults']['value'] && 1 === $w['fields']['adults']['min'] && 2 === $w['fields']['adults']['max'], 'buggy: Persons start at the seats of one buggy (2), min 1, max 2 per buggy' );
-	check( str_contains( $w['html'], '<span class="dgb-count-label">Buggies</span>' ) && str_contains( $w['html'], '<span class="dgb-count-label">Persons</span>' ) && str_contains( $w['html'], 'Age 14 and over' ) && ! str_contains( $w['html'], 'Minimum age' ), 'buggy: labels Buggies and Persons, hint “Age 14 and over” once, no separate minimum age line' );
+	check( array( 'units' ) === array_keys( $w['fields'] ), 'buggy: only the Buggies counter (no Persons, Children or Infants)' );
+	check( 1 === $w['fields']['units']['value'] && 1 === $w['fields']['units']['min'], 'buggy: one buggy to start with' );
+	check( str_contains( $w['html'], '<span class="dgb-count-label">Buggies</span>' ) && ! str_contains( $w['html'], '<span class="dgb-count-label">Persons</span>' ) && str_contains( $w['html'], 'Riders must be 14 or over.' ) && ! str_contains( $w['html'], 'Minimum age' ), 'buggy: label Buggies, the minimum age under the buggies' );
 	$q = $quote( 'sample-dune-buggy-2-seater', array( 'units' => 2, 'adults' => 3 ) );
 	check( '1398.00' === $q['total'] && array() === $codes( $q ), 'buggy: 2 buggies × 699 = 1,398, persons do not change the price' );
 	$q = $quote( 'sample-dune-buggy-2-seater', array( 'units' => 1, 'adults' => 3 ) );
-	check( in_array( 'too_many_guests', $codes( $q ), true ), 'buggy: 3 persons do not fit in 1 buggy' );
+	check( '699.00' === $q['total'] && array() === $codes( $q ), 'buggy: persons sent by an old client are replaced by the seats of 1 buggy' );
 	$q = $quote( 'sample-dune-buggy-2-seater', array( 'units' => 1, 'adults' => 1, 'children' => 1 ) );
-	check( in_array( 'children_not_allowed', $codes( $q ), true ), 'buggy: children rejected by the server (Children hidden)' );
-	$r = $book( 'sample-dune-buggy-2-seater', array( 'units' => 1, 'adults' => 1, 'children' => 1 ) );
-	check( 400 === $r['status'] && str_contains( (string) ( $r['data']['data']['fields']['guests'] ?? '' ), 'per person only' ), 'buggy: a booking with children is refused, the message under the guest counters' );
+	check( '699.00' === $q['total'] && array() === $codes( $q ), 'buggy: children sent by an old client are not counted (price per buggy)' );
+	$r  = $book( 'sample-dune-buggy-2-seater', array( 'units' => 1, 'adults' => 1, 'children' => 1 ) );
+	$st = step( $site, 'booking_state', array( 'reference' => $r['data']['reference'] ?? '' ) );
+	check( 201 === $r['status'] && 2 === (int) $st['items'][0]['adults'] && 0 === (int) $st['items'][0]['children'], 'buggy: the booking is saved with the 2 seats as persons and no children' );
 	$r = $book( 'sample-dune-buggy-2-seater', array( 'units' => 1, 'adults' => 2, 'infants' => 2 ) );
 	$st = step( $site, 'booking_state', array( 'reference' => $r['data']['reference'] ?? '' ) );
 	check( 201 === $r['status'] && 2 === (int) $st['items'][0]['adults'] && 0 === (int) $st['items'][0]['infants'] && 699.0 === (float) $st['booking']['total'], 'buggy: booking saved with 2 persons, infants sent by an old client saved as 0, total 699' );
@@ -2015,6 +2017,119 @@ if ( scenario( 'Q' ) ) {
 	check( str_contains( $csv, ',persons,children,infants,' ) && (bool) preg_match( '/' . preg_quote( $ref, '/' ) . '.*,2,1,1,/', $csv ), 'bookings CSV: header persons, the old booking exports 2,1,1' );
 	$view      = step( $site, 'render_admin', array( 'screen' => 'bookings', 'get' => array( 'booking' => $st['booking']['id'] - 1 ), 'admin' => true ) );
 	check( str_contains( $view['html'], '2 persons' ) && ! str_contains( $view['html'], 'infant' ), 'new booking in admin: “2 persons”, no infants shown' );
+}
+
+if ( scenario( 'R' ) ) {
+	echo "\nScenario R: booking card totals, pickup choices and dated offers (0.9.8)\n";
+	$site = make_site( 'v098-card' );
+	copy( __DIR__ . '/fake-gateways.php', "{$site}/wp-content/mu-plugins/fake-gateways.php" );
+	step( $site, 'install' );
+	step( $site, 'activate' );
+	$demo  = step( $site, 'demo_setup' );
+	$day   = $demo['tomorrow'];
+	$buggy = $demo['tours']['buggy'];
+	$tour  = $demo['tours']['safari'];
+	$all   = array( '1', '2', '3', '4', '5', '6', '7' );
+	$point = (int) step( $site, 'product_meta', array( 'post' => $buggy['id'], 'key' => 'meeting_point_id' ) )['result'];
+	$extra = array();
+	$make  = static function ( string $slug, array $product, array $variants, array $addons = array() ) use ( $site, $all, &$extra ) {
+		$post = step( $site, 'create_post', array( 'type' => 'dgb_tour', 'title' => ucwords( str_replace( '-', ' ', $slug ) ), 'slug' => $slug ) );
+		$r    = step(
+			$site,
+			'save_box',
+			array(
+				'post'  => $post['id'],
+				'admin' => true,
+				'dgb'   => array(
+					'product'  => $product + array( 'enabled' => '1', 'max_days_ahead' => '120', 'meet_shown' => '1', 'meet_allowed' => '1' ),
+					'variants' => $variants,
+					'sessions' => array( array( 'name' => 'Day', 'type' => 'fixed', 'start_time' => '10:00', 'days_of_week' => $all, 'active' => '1' ) ),
+					'addons'   => $addons,
+				),
+			)
+		);
+		$extra[ $slug ] = array(
+			'id'      => $post['id'],
+			'variant' => (int) $r['variants'][0]['id'],
+			'session' => (int) $r['sessions'][0]['id'],
+			'product' => $r['product'],
+		);
+	};
+	$make( 'sample-addon-no-price', array( 'pricing_mode' => 'per_person', 'pickup_policy' => 'addon', 'meeting_point_id' => (string) $point ), array( array( 'label' => 'Standard', 'price' => '120', 'active' => '1' ) ) );
+	$make( 'sample-pickup-only', array( 'pricing_mode' => 'per_person', 'pickup_policy' => 'included', 'meeting_point_id' => (string) $point, 'meet_allowed' => '' ), array( array( 'label' => 'Standard', 'price' => '80', 'active' => '1' ) ) );
+	$make( 'sample-no-point', array( 'pricing_mode' => 'per_person', 'pickup_policy' => 'addon', 'meeting_point_id' => '0' ), array( array( 'label' => 'Standard', 'price' => '50', 'active' => '1' ) ), array( array( 'label' => 'Hotel pickup', 'price' => '40', 'price_type' => 'per_booking', 'condition_key' => 'pickup', 'active' => '1' ) ) );
+	$make( 'sample-group-car', array( 'pricing_mode' => 'per_group', 'max_pax_per_unit' => '4', 'pickup_policy' => 'none' ), array( array( 'label' => 'Private car', 'price' => '500', 'active' => '1' ) ) );
+
+	$card = static function ( int $id ) use ( $site ): array {
+		$html = step( $site, 'outputs', array( 'post' => $id, 'shortcodes' => array( 'card' => '[dgb_booking_card product="' . $id . '"]' ) ) )['shortcodes']['card'];
+		preg_match( '#data-dgb-card-total aria-live="polite">([^<]*)<#', $html, $t );
+		preg_match( '#data-dgb-card-total-label>([^<]*)<#', $html, $l );
+		preg_match_all( '#<option value="\d+"[^>]*>([^<]*)</option>#', $html, $o );
+		preg_match( '#<script type="application/json" data-dgb-card-config>(.*?)</script>#s', $html, $c );
+		return array(
+			'html'    => $html,
+			'total'   => html_entity_decode( $t[1] ?? '' ),
+			'label'   => $l[1] ?? '',
+			'pickups' => array_map( 'html_entity_decode', $o[1] ),
+			'config'  => json_decode( $c[1] ?? '{}', true ),
+		);
+	};
+	$money = static fn( string $amount ) => step( $site, 'format_money', array( 'amount' => $amount ) )['result'];
+	$quote = static fn( int $id, array $input ) => step( $site, 'rest', array( 'method' => 'POST', 'route' => 'quote', 'body' => $input + array( 'product' => $id ) ) )['data'];
+
+	// 1. The card prints the total of its default choices, from the same calculator as the quote endpoint.
+	$c = $card( $buggy['id'] );
+	$q = $quote( $buggy['id'], array( 'variant_id' => $buggy['variants']['30 min'], 'units' => 1, 'adults' => 2 ) );
+	check( $money( '699.00' ) === $c['total'] && $money( $q['total'] ) === $c['total'] && 'Total, VAT included' === $c['label'], 'per vehicle: the card prints the total of 1 buggy before any script runs (' . $c['total'] . ')' );
+	$c = $card( $tour['id'] );
+	check( $money( '198.00' ) === $c['total'], 'per person: the card prints 2 persons × 99 with the included pickup preselected (' . $c['total'] . ')' );
+	$c = $card( $extra['sample-group-car']['id'] );
+	check( $money( '500.00' ) === $c['total'] && 4 === $c['config']['seats'], 'per group: the card prints 1 car (' . $c['total'] . ')' );
+	check( isset( $c['config']['prices'][ (string) $extra['sample-group-car']['variant'] ] ) && 500.0 === (float) $c['config']['prices'][ (string) $extra['sample-group-car']['variant'] ]['price'] && true === $c['config']['vatInclusive'], 'the card config carries the option prices for the instant estimate' );
+
+	// 2. Pickup labels: only the policy "included" says included.
+	$c = $card( $buggy['id'] );
+	check( in_array( 'Hotel pickup, North Zone, ' . $money( '300.00' ), $c['pickups'], true ) && str_starts_with( $c['pickups'][0], 'Meet at Sample Meeting Point' ), 'add-on with a price: “Hotel pickup, North Zone, AED 300”, meeting point first' );
+	check( in_array( 'Hotel pickup, North Zone, included', $card( $tour['id'] )['pickups'], true ), 'policy included: “…, included”' );
+	$c = $card( $extra['sample-addon-no-price']['id'] );
+	check( in_array( 'Hotel pickup, North Zone, price on request', $c['pickups'], true ) && ! str_contains( implode( '|', $c['pickups'] ), 'included' ), 'add-on policy without a pickup add-on: “price on request”, never “included”' );
+	$w = step( $site, 'tour_parts', array( 'post' => $extra['sample-addon-no-price']['id'] ) )['html'];
+	check( str_contains( $w, '<span class="dgb-card-meta">Price on request</span>' ), 'booking form: hotel pickup “Price on request” for that tour' );
+	$box = step( $site, 'render_box', array( 'post' => $extra['sample-addon-no-price']['id'], 'html' => true ) )['html'];
+	check( str_contains( $box, 'no active pickup add-on' ) && ! str_contains( step( $site, 'render_box', array( 'post' => $buggy['id'], 'html' => true ) )['html'], 'no active pickup add-on' ), 'tour edit screen warns when pickup is an add-on but no pickup add-on exists (and only then)' );
+
+	// 3. Pickup-only tours and tours without a meeting point: no meet choice.
+	$c = $card( $extra['sample-pickup-only']['id'] );
+	check( true === $extra['sample-pickup-only']['product']['pickup_only'] && array() === array_filter( $c['pickups'], static fn( $p ) => str_starts_with( $p, 'Meet' ) ) && 'zone' === $c['config']['pickups'][0]['value'], 'pickup only: the card offers only the pickup zones, the first zone preselected' );
+	$w = step( $site, 'tour_parts', array( 'post' => $extra['sample-pickup-only']['id'] ) )['html'];
+	check( ! str_contains( $w, 'name="pickup" value="0"' ) && str_contains( $w, '<input type="hidden" name="pickup" value="1">' ), 'pickup only: the booking form has no “Meet us at …” choice' );
+	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'ip' => '10.9.8.1', 'body' => array( 'product' => $extra['sample-pickup-only']['id'], 'variant_id' => $extra['sample-pickup-only']['variant'], 'date' => $day, 'session_id' => $extra['sample-pickup-only']['session'], 'adults' => 2, 'pickup' => false, 'payment_method' => 'arrival', 'name' => 'Pickup Guest', 'email' => 'pickup@example.com', 'phone_code' => '+1', 'phone' => '5550198', 'terms' => true ) ) );
+	check( 400 === $r['status'] && str_contains( (string) ( $r['data']['data']['fields']['zone'] ?? '' ), 'hotel pickup only' ), 'pickup only: the server refuses a booking without a pickup area' );
+	$r = step( $site, 'rest', array( 'method' => 'POST', 'route' => 'bookings', 'nonce' => true, 'ip' => '10.9.8.2', 'body' => array( 'product' => $extra['sample-pickup-only']['id'], 'variant_id' => $extra['sample-pickup-only']['variant'], 'date' => $day, 'session_id' => $extra['sample-pickup-only']['session'], 'adults' => 2, 'pickup' => true, 'zone_id' => $demo['zones']['North Zone'], 'hotel' => 'Sample Hotel', 'payment_method' => 'arrival', 'name' => 'Pickup Guest', 'email' => 'pickup@example.com', 'phone_code' => '+1', 'phone' => '5550198', 'terms' => true ) ) );
+	check( 201 === $r['status'], 'pickup only: with a pickup area the booking is saved' );
+	$facts = step( $site, 'outputs', array( 'post' => $extra['sample-pickup-only']['id'], 'shortcodes' => array( 'f' => '[dgb_tour_facts]' ) ) )['shortcodes']['f'];
+	check( ! str_contains( $facts, 'Sample Meeting Point' ) && str_contains( step( $site, 'outputs', array( 'post' => $buggy['id'], 'shortcodes' => array( 'f' => '[dgb_tour_facts]' ) ) )['shortcodes']['f'], 'Sample Meeting Point' ), 'tour facts: no meeting point on the pickup-only tour (still on others)' );
+	$llms = step( $site, 'llms' )['text'];
+	check( str_contains( $llms, 'hotel pickup only' ), 'llms.txt: the pickup-only tour says “hotel pickup only”' );
+	$c = $card( $extra['sample-no-point']['id'] );
+	check( array() === array_filter( $c['pickups'], static fn( $p ) => str_starts_with( $p, 'Meet' ) ) && ! str_contains( $c['html'], 'Meet at the meeting point' ), 'no meeting point set: never a meet choice' );
+	check( false === $extra['sample-addon-no-price']['product']['pickup_only'] && str_starts_with( $card( $extra['sample-addon-no-price']['id'] )['pickups'][0], 'Meet at' ), 'default settings: the meet choice stays' );
+
+	// 4. Dated offers: on the card (no date) checked against today; a chosen date outside the window drops it.
+	step( $site, 'offer_save', array( 'offer' => array( 'name' => 'Pickup deal', 'label' => 'Free hotel pickup on 2 or more buggies', 'active' => 1, 'priority' => 5, 'product_ids' => array( $buggy['id'] ), 'min_units' => 2, 'effect' => 'waive_addon', 'addon_key' => 'pickup', 'show_hint' => 1, 'starts_on' => gmdate( 'Y-m-d', strtotime( '-1 day' ) ), 'ends_on' => gmdate( 'Y-m-d', strtotime( '+3 days' ) ) ) ) );
+	step( $site, 'set_meta', array( 'post' => $buggy['id'], 'meta' => array( '_dgb_unit_name' => 'buggy', '_dgb_unit_name_plural' => 'buggies', '_dgb_pickup_default' => 'pickup' ) ) );
+	$c = $card( $buggy['id'] );
+	check( str_contains( $c['html'], 'Add 1 more buggy to get: Free hotel pickup on 2 or more buggies' ), 'card: the “add 1 more buggy” hint of a dated offer running today, with no date chosen' );
+	$base = array( 'variant_id' => $buggy['variants']['30 min'], 'units' => 2, 'adults' => 4, 'pickup' => true, 'zone_id' => $demo['zones']['North Zone'] );
+	$q    = $quote( $buggy['id'], $base );
+	check( null !== $q['offer'] && $money( '1398.00' ) === $money( $q['total'] ), 'no date: the offer counts against today (2 buggies, pickup free: 1,398)' );
+	$q = $quote( $buggy['id'], $base + array( 'date' => gmdate( 'Y-m-d', strtotime( '+20 days' ) ) ) );
+	check( null === $q['offer'] && $money( '1698.00' ) === $money( $q['total'] ), 'a chosen date outside the window: no offer (1,698)' );
+
+	// 5. The quote limit is higher than before and filterable; booking limits are not changed.
+	$limit = step( $site, 'quote_limit', array( 'limit' => 2, 'count' => 3, 'product' => $buggy['id'] ) )['result'];
+	check( 429 !== $limit[0] && 429 !== $limit[1] && 429 === $limit[2], 'dgb_quote_rate_limit filters the quote limit per visitor' );
+	check( array( 200, 200, 200, 200, 200 ) === step( $site, 'quote_limit', array( 'limit' => 300, 'count' => 5, 'product' => $buggy['id'], 'ip' => '10.9.8.201' ) )['result'], 'default quote limit: rapid clicks are answered' );
 }
 
 /* -------------------------------------------------------------------- */

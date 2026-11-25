@@ -4,7 +4,7 @@ Tags: bookings, tours, activities, reservations, deposits
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.9.7
+Stable tag: 0.9.8
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -121,6 +121,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 
 == Changelog ==
 
+= 0.9.8 =
+* The booking card shows the right total at once, for every quantity, option and pickup, and keeps it when the connection is slow; card and booking form always show the same price. Pickup is only called "included" when it is in the price, otherwise its price or "price on request". Dated offers show on the card before a date is picked. New setting for pickup-only tours.
+
 = 0.9.7 =
 * New tour setting "Free children per booking": that many children in a booking ride free and the rest pay the child price, for rules like "first child under 4 free, more children half price". Price lines now say which line is for children.
 
@@ -206,6 +209,9 @@ In wp-content/uploads/dgb-private, outside the Media Library, under random file 
 * Foundation: settings, tour post type (attach or own), booking settings box, database tables, roles.
 
 == Upgrade Notice ==
+
+= 0.9.8 =
+Correct booking card totals, honest pickup labels, dated offers on the card and pickup-only tours.
 
 = 0.9.7 =
 Free children per booking.

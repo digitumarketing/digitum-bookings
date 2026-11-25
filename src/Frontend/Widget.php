@@ -13,6 +13,7 @@ use Digitum\Bookings\Database\Repositories\LocationRepository;
 use Digitum\Bookings\Database\Repositories\VariantRepository;
 use Digitum\Bookings\Database\Repositories\ZoneRepository;
 use Digitum\Bookings\Domain\GuestRules;
+use Digitum\Bookings\Domain\PickupChoices;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\Domain\Variant;
 use Digitum\Bookings\Gateways\PayOnArrival;
@@ -212,6 +213,7 @@ final class Widget {
 		$policy    = (string) $product->get( 'pickup_policy' );
 
 		$guests = GuestRules::for_product( $product_id, $product );
+		$pickup = PickupChoices::for_product( $product_id, $product );
 
 		$script = array(
 			'id'         => $id,
@@ -231,7 +233,8 @@ final class Widget {
 			'variants'   => $variants,
 			'pickup'     => array(
 				'policy'  => $policy,
-				'default' => (string) $product->get( 'pickup_default' ),
+				'default' => $pickup->meet ? (string) $product->get( 'pickup_default' ) : 'pickup',
+				'meet'    => $pickup->meet,
 				'price'   => $pickup_price,
 			),
 			'zones'      => $zones,
@@ -279,8 +282,11 @@ final class Widget {
 			'variants'     => $variants,
 			'currency'     => $currency,
 			'policy'       => $policy,
-			'pickup_on'    => 'pickup' === $product->get( 'pickup_default' ) && 'none' !== $policy,
+			'pickup_on'    => 'none' !== $policy && ( 'pickup' === $product->get( 'pickup_default' ) || ! $pickup->meet ),
 			'pickup_price' => null !== $pickup_price && $pickup_price > 0 ? Format::money( $pickup_price, $currency ) : '',
+			// Only "included" says included; a guest add-on without a price is "Price on request".
+			'pickup_meta'  => self::pickup_meta( $pickup, $currency ),
+			'meet'         => $pickup->meet,
 			'zones'        => $zones,
 			'point'        => $point,
 			'extras'       => $extras,
@@ -331,6 +337,20 @@ final class Widget {
 		}
 		/* translators: %s: price basis, e.g. per person. */
 		return '' === $basis ? __( 'From', 'digitum-bookings' ) : sprintf( __( '%s from', 'digitum-bookings' ), $basis );
+	}
+
+	/**
+	 * Price of hotel pickup on the pickup choice of the form: "Included", "+ AED 300" or "Price on request".
+	 *
+	 * @param PickupChoices $pickup   Pickup rules of the tour.
+	 * @param string        $currency Currency code.
+	 */
+	public static function pickup_meta( PickupChoices $pickup, string $currency ): string {
+		$price = $pickup->base_price();
+		if ( null === $price ) {
+			return __( 'Price on request', 'digitum-bookings' );
+		}
+		return $price > 0 ? '+ ' . Format::money( $price, $currency ) : __( 'Included', 'digitum-bookings' );
 	}
 
 	/**
