@@ -53,7 +53,7 @@ test.describe( 'Arabic (RTL)', () => {
 		await w.locator( 'input[name="variant_id"]' ).nth( 1 ).check();
 		await pickTomorrow( w );
 		await w.locator( 'input[name="session_id"]' ).last().check();
-		await w.locator( '[data-dgb-inc="adults"]' ).click();
+		await w.locator( '[data-dgb-inc="units"]' ).click();
 		await w.locator( '[data-dgb-next]' ).click();
 		await w.locator( 'input[name="name"]' ).fill( 'ضيف تجريبي' );
 		await w.locator( 'input[name="email"]' ).fill( 'arabic@example.com' );

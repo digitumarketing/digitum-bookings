@@ -8,7 +8,7 @@
 - **Pickup labels**: only the pickup setting “Included in the price” says “included”. “Guest may add it” shows the pickup price, or “price on request” when the tour has no priced pickup add-on (or the tour is priced on request) — in the card, the booking form and the facts. The tour edit screen warns when pickup is a guest add-on but the tour has no active pickup add-on.
 - **Dated offers before a date is chosen**: offers limited to travel dates (and weekdays) are checked against today in the site time zone while no date is chosen, so they show on the booking card with their label; a chosen date is checked instead, and a booking always uses its date. The card also shows the offer hints, with the tour's own noun (“Add 1 more buggy to get: …”).
 - **Pickup-only tours**: new tour setting **Guests can meet us at the meeting point** (Pickup & location, ticked by default, stored as `pickup_only`). Unticked, the card and the booking form offer only the pickup areas (the first one preselected), the server refuses a booking without pickup (“This tour starts with hotel pickup only. Please choose your pickup area.”), and the tour facts and llms.txt no longer show a meeting point. A tour without a meeting point never offers to meet.
-- Test fixes for 0.9.6 (vehicle tours count persons from the seats): scenarios C, E and Q expected the old guest counters.
+- Test fixes for 0.9.6 (vehicle tours count persons from the seats): integration scenarios C, E and Q and the browser tests for theme styles and Arabic still used the old guest counters.
 
 ## 0.9.7 (free children per booking)
 

@@ -43,7 +43,7 @@ test.describe( 'widget', () => {
 			await expect.poll( async () => ( await look( '.dgb-day.is-selected' ) )[ 0 ].bg ).toBe( 'rgb(180, 83, 9)' );
 			await expect.poll( async () => ( await look( '.dgb-day.is-selected' ) )[ 0 ].color ).toBe( 'rgb(255, 255, 255)' );
 
-			for ( const sel of [ '[data-dgb-prev]', '[data-dgb-next-month]', '[data-dgb-inc="adults"]', '[data-dgb-dec="adults"]', '[data-dgb-next]' ] ) {
+			for ( const sel of [ '[data-dgb-prev]', '[data-dgb-next-month]', '[data-dgb-inc="units"]', '[data-dgb-dec="units"]', '[data-dgb-next]' ] ) {
 				const [ b ] = await look( sel );
 				expect( b.border, sel ).not.toBe( PINK );
 				expect( b.shadow, sel ).toBe( 'none' );
@@ -51,10 +51,10 @@ test.describe( 'widget', () => {
 				expect( b.bg, sel ).not.toBe( 'rgb(194, 65, 12)' );
 			}
 			// Hover and focus keep the plugin's look too.
-			const inc = scope.locator( '[data-dgb-inc="adults"]' );
+			const inc = scope.locator( '[data-dgb-inc="units"]' );
 			await inc.hover();
 			await page.waitForTimeout( 300 );
-			const [ hovered ] = await look( '[data-dgb-inc="adults"]' );
+			const [ hovered ] = await look( '[data-dgb-inc="units"]' );
 			expect( hovered.bg ).not.toBe( PINK );
 			expect( hovered.bg ).not.toBe( 'rgb(124, 45, 18)' );
 			expect( hovered.border ).not.toBe( PINK );
