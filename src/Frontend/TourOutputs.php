@@ -10,6 +10,7 @@ namespace Digitum\Bookings\Frontend;
 use Digitum\Bookings\Database\Repositories\AddonRepository;
 use Digitum\Bookings\Database\Repositories\LocationRepository;
 use Digitum\Bookings\Database\Repositories\SessionRepository;
+use Digitum\Bookings\Domain\PickupChoices;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Services\Availability;
@@ -865,6 +866,13 @@ final class TourOutputs {
 		if ( 'included' === $policy ) {
 			return __( 'Hotel pickup included', 'digitum-bookings' );
 		}
+		if ( 'addon' === $policy && PickupChoices::for_product( $id )->pickup_only ) {
+			$price = PickupChoices::for_product( $id )->base_price();
+			return null === $price
+				? __( 'Hotel pickup only, price on request', 'digitum-bookings' )
+				/* translators: %s: price. */
+				: sprintf( __( 'Hotel pickup only (+%s per booking)', 'digitum-bookings' ), Format::money( $price, $currency ) );
+		}
 		if ( 'addon' === $policy ) {
 			foreach ( ( new AddonRepository() )->for_product( $id ) as $addon ) {
 				if ( 'pickup' === $addon['condition_key'] && ! empty( $addon['active'] ) && null !== $addon['price'] && (float) $addon['price'] > 0 ) {
@@ -884,6 +892,10 @@ final class TourOutputs {
 	 * @return array<string, mixed>|null
 	 */
 	private function point( int $id ): ?array {
+		// Pickup-only tours have no meeting point to show.
+		if ( PickupChoices::for_product( $id )->pickup_only ) {
+			return null;
+		}
 		$point_id = (int) Product::find( $id )->get( 'meeting_point_id' );
 		return $point_id ? $this->remember( 'point:' . $point_id, static fn() => ( new LocationRepository() )->find( $point_id ) ) : null;
 	}

@@ -114,6 +114,12 @@ final class Product {
 				'options' => array( 'meet', 'pickup' ),
 				'default' => 'meet',
 			),
+			// A pickup-only tour: no "meet us at the meeting point" choice (shown in admin as "Guests can meet us at
+			// the meeting point", ticked by default). Stored this way round so imports that leave it out keep the choice.
+			'pickup_only'      => array(
+				'type'    => 'bool',
+				'default' => false,
+			),
 			'min_age'          => array(
 				'type'    => 'int',
 				'min'     => 0,

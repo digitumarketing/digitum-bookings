@@ -8,9 +8,9 @@
 namespace Digitum\Bookings\Frontend;
 
 use Digitum\Bookings\Database\Repositories\AddonRepository;
-use Digitum\Bookings\Database\Repositories\LocationRepository;
-use Digitum\Bookings\Database\Repositories\ZoneRepository;
+use Digitum\Bookings\Database\Repositories\VariantRepository;
 use Digitum\Bookings\Domain\GuestRules;
+use Digitum\Bookings\Domain\PickupChoices;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Services\PaymentMethods;
@@ -158,45 +158,56 @@ final class BookingCard {
 		$policy   = (string) $product->get( 'pickup_policy' );
 		$on_req   = $product->is_on_request();
 
-		// Pickup choices: the meeting point (free), then one per zone that offers pickup, with its price.
-		$addon = 0.0;
-		foreach ( ( new AddonRepository() )->for_product( $product_id ) as $row ) {
-			if ( ! empty( $row['active'] ) && 'pickup' === $row['condition_key'] && 'addon' === $policy && 'on_request' !== $row['price_type'] ) {
-				$addon += (float) $row['price'];
-			}
-		}
-		$point   = (int) $product->get( 'meeting_point_id' ) ? ( new LocationRepository() )->find( (int) $product->get( 'meeting_point_id' ) ) : null;
+		// Pickup choices: the meeting point (free) when the guest may meet us, then one per zone with pickup.
+		$rules   = PickupChoices::for_product( $product_id, $product );
+		$point   = $rules->point;
 		$pickups = array();
-		if ( 'none' !== $policy || $point ) {
+		if ( $rules->meet ) {
 			$pickups[] = array(
-				'value' => 'meet',
-				'zone'  => 0,
-				'label' => $point
+				'value'  => 'meet',
+				'zone'   => 0,
+				'label'  => $point
 					/* translators: %s: meeting point. */
 					? sprintf( __( 'Meet at %s, free', 'digitum-bookings' ), (string) $point['name'] )
 					: __( 'Meet at the meeting point, free', 'digitum-bookings' ),
-				'text'  => $point ? (string) $point['name'] : __( 'Meeting point', 'digitum-bookings' ),
+				'text'   => $point ? (string) $point['name'] : __( 'Meeting point', 'digitum-bookings' ),
+				'amount' => 0,
 			);
 		}
-		if ( 'none' !== $policy ) {
-			foreach ( ( new ZoneRepository() )->all() as $zone ) {
-				if ( empty( $zone['allowed'] ) ) {
-					continue;
-				}
-				$price     = $addon + (float) ( $zone['surcharge'] ?? 0 );
-				$where     = sprintf( /* translators: 1: "Hotel pickup", 2: zone. */ __( '%1$s, %2$s', 'digitum-bookings' ), __( 'Hotel pickup', 'digitum-bookings' ), (string) $zone['name'] );
-				$pickups[] = array(
-					'value' => 'zone',
-					'zone'  => (int) $zone['id'],
-					/* translators: 1: "Hotel pickup, North Zone", 2: price or "included". */
-					'label' => sprintf( __( '%1$s, %2$s', 'digitum-bookings' ), $where, $price > 0 ? Format::money( $price, $currency ) : __( 'included', 'digitum-bookings' ) ),
-					'text'  => $where,
-				);
-			}
+		foreach ( $rules->zones as $zone ) {
+			$price     = $rules->price( $zone );
+			$where     = sprintf( /* translators: 1: "Hotel pickup", 2: zone. */ __( '%1$s, %2$s', 'digitum-bookings' ), __( 'Hotel pickup', 'digitum-bookings' ), (string) $zone['name'] );
+			$pickups[] = array(
+				'value'     => 'zone',
+				'zone'      => (int) $zone['id'],
+				/* translators: 1: hotel pickup and the zone, 2: the price, or the word for included, or price on request. */
+				'label'     => sprintf( __( '%1$s, %2$s', 'digitum-bookings' ), $where, PickupChoices::price_text( $price, $currency ) ),
+				'text'      => $where,
+				// For the instant estimate in the browser: the zone's surcharge (the add-on is in `pickupAddon`).
+				'surcharge' => (float) ( $zone['surcharge'] ?? 0 ),
+			);
 		}
 		$default = 0;
 		if ( 'pickup' === $product->get( 'pickup_default' ) && count( $pickups ) > 1 ) {
 			$default = 'meet' === $pickups[0]['value'] ? 1 : 0;
+		}
+
+		// Pickup add-on prices by type, for the estimate (on-request add-ons are left to the server).
+		$pickup_addon = array(
+			'booking' => 0.0,
+			'person'  => 0.0,
+			'vehicle' => 0.0,
+		);
+		if ( 'addon' === $policy ) {
+			foreach ( ( new AddonRepository() )->for_product( $product_id ) as $row ) {
+				if ( ! empty( $row['active'] ) && 'pickup' === $row['condition_key'] && 'on_request' !== $row['price_type'] && is_numeric( $row['price'] ) ) {
+					$type                   = array(
+						'per_person'  => 'person',
+						'per_vehicle' => 'vehicle',
+					)[ (string) $row['price_type'] ] ?? 'booking';
+					$pickup_addon[ $type ] += (float) $row['price'];
+				}
+			}
 		}
 
 		$methods  = array_keys( ( new PaymentMethods( $this->settings ) )->available() );
@@ -253,24 +264,55 @@ final class BookingCard {
 			(array) $widget['variants']
 		);
 
+		// Prices for the instant estimate in the browser (the server quote then replaces it).
+		$raw = array_column( ( new VariantRepository() )->for_product( $product_id ), null, 'id' );
+		$est = array();
+		foreach ( (array) $widget['variants'] as $v ) {
+			$row                      = $raw[ $v['id'] ] ?? array();
+			$est[ (string) $v['id'] ] = array(
+				'price' => null === $v['price'] ? null : (float) $v['price'],
+				'child' => isset( $row['child_price'] ) && is_numeric( $row['child_price'] ) ? (float) $row['child_price'] : null,
+			);
+		}
+
+		// The total of the default choices, printed in the page so it is right before any script runs.
+		$first   = $variants[0]['id'] ?? 0;
+		$per     = in_array( $mode, array( 'per_vehicle', 'per_group' ), true );
+		$choice  = $pickups[ $default ] ?? null;
+		$initial = array(
+			'variant_id' => $first,
+			'units'      => 1,
+			'adults'     => $per ? max( 1, $seats ) : 2,
+			'children'   => 0,
+			'pickup'     => $choice && 'zone' === $choice['value'],
+			'zone_id'    => $choice && 'zone' === $choice['value'] ? $choice['zone'] : 0,
+		);
+		$quote   = $on_req || ! $first ? null : self::card_quote( $this->quotes->quote_array( $product_id, $initial ) );
+
 		$script = array(
-			'id'         => $id,
-			'product'    => $product_id,
-			'name'       => wp_strip_all_tags( get_the_title( $product_id ) ),
-			'url'        => (string) get_permalink( $product_id ),
-			'mode'       => $mode,
-			'seats'      => max( 1, $seats ),
-			'onRequest'  => $on_req,
-			'currency'   => $currency,
-			'decimals'   => Money::decimals( $currency ),
-			'wholeUnits' => Money::whole_units(),
-			'locale'     => str_replace( '_', '-', determine_locale() ),
-			'today'      => $widget['script']['today'],
-			'dates'      => $widget['script']['dates'],
-			'rest'       => esc_url_raw( rest_url( 'dgb/v1/' ) ),
-			'pickups'    => $pickups,
-			'whatsapp'   => ! empty( $options['whatsapp'] ) && '' !== $phone ? $phone : '',
-			'i18n'       => array(
+			'id'           => $id,
+			'product'      => $product_id,
+			'name'         => wp_strip_all_tags( get_the_title( $product_id ) ),
+			'url'          => (string) get_permalink( $product_id ),
+			'mode'         => $mode,
+			'seats'        => max( 1, $seats ),
+			'onRequest'    => $on_req,
+			'currency'     => $currency,
+			'decimals'     => Money::decimals( $currency ),
+			'wholeUnits'   => Money::whole_units(),
+			'locale'       => str_replace( '_', '-', determine_locale() ),
+			'today'        => $widget['script']['today'],
+			'dates'        => $widget['script']['dates'],
+			'rest'         => esc_url_raw( rest_url( 'dgb/v1/' ) ),
+			'pickups'      => $pickups,
+			'prices'       => $est,
+			'pickupAddon'  => $pickup_addon,
+			'freeChildren' => max( 0, (int) $product->get( 'free_children' ) ),
+			'vatInclusive' => $config->vat_inclusive,
+			'vatRate'      => $config->vat_rate,
+			'quote'        => $quote,
+			'whatsapp'     => ! empty( $options['whatsapp'] ) && '' !== $phone ? $phone : '',
+			'i18n'         => array(
 				'weekdays'   => $widget['script']['i18n']['weekdays'],
 				'status'     => $widget['script']['i18n']['status'],
 				'today'      => __( 'today', 'digitum-bookings' ),
@@ -323,8 +365,42 @@ final class BookingCard {
 			'sticky'      => ! empty( $options['sticky'] ),
 			'whatsapp'    => $script['whatsapp'],
 			'from'        => $widget['from'],
+			'quote'       => $quote,
+			'total'       => $quote ? Format::money( $quote['total'], $currency ) : $widget['from'],
+			'total_label' => $quote ? $quote['label'] : __( 'Total', 'digitum-bookings' ),
 			'accent'      => $widget['accent'],
 			'script'      => $script,
+		);
+	}
+
+	/**
+	 * The parts of a quote the card shows: total, its label, the offer line and the "add one more" hints.
+	 *
+	 * @param array<string, mixed> $breakdown QuoteService::quote_array().
+	 * @return array{total: ?string, label: string, offers: array<int, array{label: string, amount: string}>, hints: string[]}|null
+	 */
+	public static function card_quote( array $breakdown ): ?array {
+		if ( ! isset( $breakdown['total'] ) || null === $breakdown['total'] || ! empty( $breakdown['on_request'] ) ) {
+			return null;
+		}
+		$label = __( 'Total', 'digitum-bookings' );
+		if ( (float) ( $breakdown['vat_rate'] ?? 0 ) > 0 ) {
+			$label = ! empty( $breakdown['vat_inclusive'] ) ? __( 'Total, VAT included', 'digitum-bookings' ) : __( 'Total, plus VAT', 'digitum-bookings' );
+		}
+		$offers = array();
+		foreach ( (array) ( $breakdown['lines'] ?? array() ) as $line ) {
+			if ( 'offer' === $line['key'] ) {
+				$offers[] = array(
+					'label'  => (string) $line['label'],
+					'amount' => (string) $line['amount'],
+				);
+			}
+		}
+		return array(
+			'total'  => (string) $breakdown['total'],
+			'label'  => $label,
+			'offers' => $offers,
+			'hints'  => array_values( array_map( 'strval', (array) ( $breakdown['hint_texts'] ?? array() ) ) ),
 		);
 	}
 

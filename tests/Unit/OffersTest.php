@@ -141,8 +141,13 @@ final class OffersTest extends TestCase {
 			$this->assertSame( 1300, $this->price( array( self::offer( $pass ) ) )->offer_discount, "{$name}: met" );
 			$this->assertSame( 0, $this->price( array( self::offer( $fail ) ) )->offer_discount, "{$name}: not met" );
 		}
-		$this->assertSame( 0, $this->price( array( self::offer( array( 'weekdays' => array( 6 ) ) ) ), array( 'date' => null ) )->offer_discount, 'No tour date: weekdays cannot match.' );
-		$this->assertSame( 0, $this->price( array( self::offer( array( 'starts_on' => '2026-01-01' ) ) ), array( 'date' => null ) )->offer_discount, 'No tour date: a dated travel offer cannot match.' );
+		// No tour date yet (the booking card's first estimate): travel dates and weekdays are checked against today (a Tuesday).
+		$this->assertSame( 0, $this->price( array( self::offer( array( 'weekdays' => array( 6 ) ) ) ), array( 'date' => null ) )->offer_discount, 'No tour date: a Saturday offer does not match on a Tuesday.' );
+		$this->assertSame( 1300, $this->price( array( self::offer( array( 'weekdays' => array( 2 ) ) ) ), array( 'date' => null ) )->offer_discount, 'No tour date: a Tuesday offer matches today.' );
+		$this->assertSame( 1300, $this->price( array( self::offer( array( 'starts_on' => '2026-01-01', 'ends_on' => '2026-10-31' ) ) ), array( 'date' => null ) )->offer_discount, 'No tour date: a travel offer running today shows.' );
+		$this->assertSame( 0, $this->price( array( self::offer( array( 'starts_on' => '2026-11-01' ) ) ), array( 'date' => null ) )->offer_discount, 'No tour date: a travel offer that starts later does not show yet.' );
+		$this->assertSame( 0, $this->price( array( self::offer( array( 'starts_on' => '2026-01-01', 'ends_on' => '2026-10-31' ) ) ) )->offer_discount, 'A chosen date outside the window: no offer.' );
+		$this->assertSame( 0, $this->price( array( self::offer( array( 'starts_on' => '2026-01-01' ) ) ), array( 'date' => null, 'now' => null ) )->offer_discount, 'Neither a tour date nor today: a dated travel offer cannot match.' );
 		$this->assertSame( 0, $this->price( array( self::offer( array( 'date_basis' => 'booking', 'starts_on' => '2026-01-01' ) ) ), array( 'now' => null ) )->offer_discount, 'No booking day known: a dated booking offer cannot match.' );
 		$this->assertSame( 0, $this->price( array( self::offer( array( 'active' => false ) ) ) )->offer_discount, 'Switched off.' );
 	}

@@ -13,6 +13,7 @@ use Digitum\Bookings\Database\Repositories\VariantRepository;
 use Digitum\Bookings\Database\Repositories\ZoneRepository;
 use Digitum\Bookings\Domain\BookingStatus;
 use Digitum\Bookings\Domain\GuestRules;
+use Digitum\Bookings\Domain\PickupChoices;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\PostTypes\ProductType;
 use Digitum\Bookings\Services\Pricing\ErrorMessages;
@@ -100,7 +101,10 @@ final class BookingService {
 		$pickup  = ! empty( $input['pickup'] ) && 'none' !== $product->get( 'pickup_policy' );
 		$zone_id = $pickup && ! empty( $input['zone_id'] ) ? absint( $input['zone_id'] ) : 0;
 		$zone    = $zone_id ? ( new ZoneRepository() )->find( $zone_id ) : null;
-		if ( $pickup && ( ! $zone || empty( $zone['allowed'] ) ) ) {
+		if ( ! $pickup && PickupChoices::for_product( $product_id, $product )->pickup_only ) {
+			// Pickup-only tours: there is no meeting point to come to.
+			$errors['zone'] = __( 'This tour starts with hotel pickup only. Please choose your pickup area.', 'digitum-bookings' );
+		} elseif ( $pickup && ( ! $zone || empty( $zone['allowed'] ) ) ) {
 			$errors['zone'] = $zone
 				/* translators: %s: pickup area, e.g. North Zone. */
 				? sprintf( __( 'Pickup is not available from %s. Please meet us at the meeting point.', 'digitum-bookings' ), (string) $zone['name'] )
@@ -154,7 +158,7 @@ final class BookingService {
 		}
 
 		$status = $enquiry ? BookingStatus::QUOTE_REQUESTED : (string) $methods[ $method ]['status'];
-		$money  = $breakdown ? QuoteService::describe_offers( $breakdown->to_array(), (string) Product::find( $product_id )->get( 'pricing_mode' ) ) : null;
+		$money  = $breakdown ? QuoteService::describe_offers( $breakdown->to_array(), (string) $product->get( 'pricing_mode' ), $product ) : null;
 
 		// A coupon counts one use when the booking is saved; it may have been used up since the price was shown.
 		$coupon = '';

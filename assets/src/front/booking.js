@@ -155,6 +155,21 @@
 		};
 	}
 
+	/* One quote state per tour: the booking card, the booking form and the WhatsApp links read the same values and
+	   the same server price, so they cannot disagree. `source` is who published last (card or widget). */
+	const stores = {};
+	const shared = ( product ) => {
+		const key = String( product );
+		if ( ! stores[ key ] ) {
+			stores[ key ] = { values: null, quote: null, source: '', subs: [] };
+		}
+		return stores[ key ];
+	};
+	const publish = ( product, patch, source ) => {
+		const s = Object.assign( shared( product ), patch, { source } );
+		s.subs.forEach( ( fn ) => fn( s, source ) );
+	};
+
 	/* Widgets on the page, by tour: the booking card and the modal triggers open them. */
 	const widgets = [];
 	const findWidget = ( product ) => widgets.find( ( w ) => ! product || String( w.product ) === String( product ) ) || null;
@@ -226,6 +241,8 @@
 			stepped: false,
 			mobile: false,
 			seq: 0,
+			// Set once the guest uses the form (or the card opens it): only then does it publish its price.
+			touched: false,
 			sent: {},
 			opener: null,
 			busy: false,
@@ -542,25 +559,35 @@
 				return;
 			}
 			window.clearTimeout( timer );
-			timer = window.setTimeout( quote, 200 );
+			timer = window.setTimeout( quote, 250 );
 		}
 
-		async function quote() {
+		async function quote( attempt ) {
 			if ( ! variant() ) {
 				renderBreakdown( null );
 				return;
 			}
 			const seq = ++state.seq;
+			const values = collect();
 			try {
-				const result = await api( 'quote', collect() );
+				const result = await api( 'quote', values );
 				if ( seq === state.seq ) {
 					state.quote = result;
 					renderBreakdown( result );
+					if ( state.touched ) {
+						publish( cfg.product.id, { values, quote: result }, 'widget' );
+					}
 				}
 			} catch ( e ) {
-				if ( seq === state.seq ) {
-					renderBreakdown( null );
+				if ( seq !== state.seq ) {
+					return;
 				}
+				// One retry after a second (slow network, busy server, rate limit).
+				if ( ! attempt ) {
+					window.setTimeout( () => seq === state.seq && quote( 1 ), 1000 );
+					return;
+				}
+				renderBreakdown( null );
 			}
 		}
 
@@ -1094,6 +1121,8 @@
 			update();
 		} );
 
+		[ 'input', 'change', 'click' ].forEach( ( type ) => form.addEventListener( type, () => ( state.touched = true ), true ) );
+
 		form.addEventListener( 'input', ( e ) => {
 			const name = e.target.name;
 			if ( 'phone' === name || 'phone_code' === name ) {
@@ -1248,6 +1277,7 @@
 
 		// Called by window.dgbBooking.open(): fill in, open, and go to step 2 when step 1 is complete.
 		async function start( values, opener ) {
+			state.touched = true;
 			if ( values ) {
 				await prefill( values );
 			}
@@ -1326,12 +1356,74 @@
 			};
 		}
 
-		/* Live total, from the same calculator as the booking form. */
-		async function total() {
-			const out = root.querySelector( '[data-dgb-card-total]' );
-			if ( ! out || cfg.onRequest ) {
+		/* Total: an instant estimate on every change, then the server's price (offers, coupons, add-ons, VAT). */
+		const out = root.querySelector( '[data-dgb-card-total]' );
+		const row = root.querySelector( '[data-dgb-card-total-row]' );
+		const unitMode = 'per_vehicle' === cfg.mode || 'per_group' === cfg.mode;
+		let quoteTimer = 0;
+
+		// Price × quantity, child prices, free children, the known pickup add-on and VAT on top when prices exclude it.
+		function estimate() {
+			const price = cfg.prices[ String( variantId() ) ];
+			if ( ! price || null === price.price ) {
+				return null;
+			}
+			const v = values();
+			const units = v.units || 1;
+			let sum = 0;
+			if ( unitMode ) {
+				sum = price.price * units;
+			} else {
+				const paid = Math.max( 0, v.children - ( cfg.freeChildren || 0 ) );
+				sum = price.price * v.adults + ( null === price.child ? price.price : price.child ) * paid;
+			}
+			const p = pickup();
+			if ( p && 'zone' === p.value ) {
+				const a = cfg.pickupAddon;
+				sum += a.booking + a.person * Math.max( 1, v.adults + v.children ) + a.vehicle * units + ( p.surcharge || 0 );
+			}
+			if ( ! cfg.vatInclusive && cfg.vatRate > 0 ) {
+				sum *= 1 + cfg.vatRate / 100;
+			}
+			const f = Math.pow( 10, cfg.decimals );
+			return Math.round( sum * f ) / f;
+		}
+
+		// The parts of a server quote the card shows (the same as BookingCard::card_quote()).
+		function cardQuote( r ) {
+			if ( ! r || null === r.total || undefined === r.total || r.on_request ) {
+				return null;
+			}
+			let label = t.total;
+			if ( Number( r.vat_rate ) > 0 ) {
+				label = r.vat_inclusive ? t.totalIncl : t.totalExcl;
+			}
+			return {
+				total: r.total,
+				label,
+				offers: ( r.lines || [] ).filter( ( l ) => 'offer' === l.key ).map( ( l ) => ( { label: l.label, amount: l.amount } ) ),
+				hints: r.hint_texts || [],
+			};
+		}
+
+		function showQuote( cq ) {
+			if ( ! out ) {
 				return;
 			}
+			const offers = root.querySelector( '[data-dgb-card-offers]' );
+			const hints = root.querySelector( '[data-dgb-card-hints]' );
+			out.textContent = cq ? fmt( cq.total ) : t.onRequest;
+			root.querySelector( '[data-dgb-card-total-label]' ).textContent = cq ? cq.label : t.total;
+			offers.textContent = '';
+			hints.textContent = '';
+			( cq ? cq.offers : [] ).forEach( ( o ) => offers.appendChild( el( 'p', { class: 'dgb-bc-offer' }, [ el( 'span', { text: o.label } ), el( 'span', { text: fmt( o.amount ) } ) ] ) ) );
+			( cq ? cq.hints : [] ).forEach( ( h ) => hints.appendChild( el( 'p', { class: 'dgb-offer-hint', text: h } ) ) );
+			offers.hidden = ! offers.childNodes.length;
+			hints.hidden = ! hints.childNodes.length;
+			row.setAttribute( 'aria-busy', 'false' );
+		}
+
+		async function serverTotal( attempt ) {
 			const v = values();
 			const seq = ++state.seq;
 			try {
@@ -1341,17 +1433,45 @@
 					credentials: 'same-origin',
 					body: JSON.stringify( Object.assign( { product: cfg.product, units: v.units || 1 }, v ) ),
 				} );
-				const r = await res.json();
-				if ( seq !== state.seq || ! res.ok ) {
+				if ( seq !== state.seq ) {
 					return;
 				}
-				out.textContent = null === r.total || undefined === r.total ? t.onRequest : fmt( r.total );
-				let label = t.total;
-				if ( Number( r.vat_rate ) > 0 ) {
-					label = r.vat_inclusive ? t.totalIncl : t.totalExcl;
+				if ( ! res.ok ) {
+					throw new Error( String( res.status ) );
 				}
-				root.querySelector( '[data-dgb-card-total-label]' ).textContent = label;
-			} catch ( e ) {}
+				const r = await res.json();
+				if ( seq !== state.seq ) {
+					return;
+				}
+				showQuote( cardQuote( r ) );
+				publish( cfg.product, { values: v, quote: r }, 'card' );
+			} catch ( e ) {
+				if ( seq !== state.seq ) {
+					return;
+				}
+				if ( ! attempt ) {
+					window.setTimeout( () => seq === state.seq && serverTotal( 1 ), 1000 );
+					return;
+				}
+				// Still no price from the server: the estimate stays, so the total always matches the quantity.
+				row.setAttribute( 'aria-busy', 'false' );
+			}
+		}
+
+		function total() {
+			if ( ! out || cfg.onRequest ) {
+				return;
+			}
+			const guess = estimate();
+			if ( null !== guess ) {
+				out.textContent = fmt( guess );
+				// Offers and hints wait for the server's answer for this quantity.
+				root.querySelector( '[data-dgb-card-offers]' ).hidden = true;
+				root.querySelector( '[data-dgb-card-hints]' ).hidden = true;
+			}
+			row.setAttribute( 'aria-busy', 'true' );
+			window.clearTimeout( quoteTimer );
+			quoteTimer = window.setTimeout( serverTotal, 250 );
 		}
 
 		/* WhatsApp link with the choices so far. */
@@ -1379,6 +1499,10 @@
 			}
 			const message = t.waText.replace( '{tour}', cfg.name ).replace( '{details}', parts.join( ', ' ) + '.' );
 			link.href = 'https://wa.me/' + cfg.whatsapp + '?text=' + encodeURIComponent( message );
+			// The mobile bar of the same tour asks with the same choices.
+			document.querySelectorAll( '[data-dgb-product="' + cfg.product + '"] .dgb-sticky-wa' ).forEach( ( a ) => {
+				a.href = link.href;
+			} );
 		}
 
 		function changed() {
@@ -1386,6 +1510,44 @@
 			whatsapp();
 			total();
 		}
+
+		/* The booking form changed the trip: show its choices and its price here too (no new request). */
+		function follow( s ) {
+			const v = s.values;
+			const option = form.querySelector( 'input[name="variant_id"][value="' + Number( v.variant_id ) + '"]' );
+			if ( option ) {
+				option.checked = true;
+			}
+			if ( unitMode && field( 'units' ) ) {
+				field( 'units' ).value = String( Math.max( 1, v.units || 1 ) );
+			} else {
+				if ( field( 'adults' ) ) {
+					field( 'adults' ).value = String( Math.max( 1, v.adults || 1 ) );
+				}
+				if ( field( 'children' ) ) {
+					field( 'children' ).value = String( v.children || 0 );
+				}
+			}
+			const select = form.querySelector( '[data-dgb-card-pickup]' );
+			if ( select ) {
+				const index = cfg.pickups.findIndex( ( p ) => ( v.pickup ? 'zone' === p.value && p.zone === Number( v.zone_id ) : 'meet' === p.value ) );
+				if ( index >= 0 ) {
+					select.value = String( index );
+				}
+			}
+			if ( v.date && v.date !== state.date ) {
+				state.date = v.date;
+				root.querySelector( '[data-dgb-card-date-text]' ).textContent = dateText.format( toDate( v.date ) );
+				dateButton.classList.add( 'has-value' );
+			}
+			root.querySelectorAll( '.dgb-bc-pill' ).forEach( ( pill ) => pill.classList.toggle( 'is-selected', pill.querySelector( 'input' ).checked ) );
+			// A card request still on its way would show an older trip: the form's price wins.
+			++state.seq;
+			window.clearTimeout( quoteTimer );
+			showQuote( cardQuote( s.quote ) );
+			whatsapp();
+		}
+		shared( cfg.product ).subs.push( ( s, source ) => 'widget' === source && follow( s ) );
 
 		/* Date popover: the plugin's calendar with the same day states as the booking form. */
 		async function month() {
@@ -1530,6 +1692,8 @@
 			changed();
 		} );
 		form.addEventListener( 'change', changed );
+		// Typed quantities count at once, not only when the field loses focus.
+		form.addEventListener( 'input', ( e ) => 'number' === e.target.type && changed() );
 
 		/* Check availability: the booking form opens with these values (step 2 when the trip is complete). */
 		form.addEventListener( 'submit', ( e ) => {
@@ -1558,7 +1722,12 @@
 			new window.ResizeObserver( fit ).observe( holder );
 		}
 
-		changed();
+		// The page already shows the server's total for the default choices; a cached page may be old, so check it.
+		root.querySelectorAll( '.dgb-bc-pill' ).forEach( ( pill ) => pill.classList.toggle( 'is-selected', pill.querySelector( 'input' ).checked ) );
+		whatsapp();
+		if ( out && ! cfg.onRequest ) {
+			serverTotal();
+		}
 		root.classList.add( 'is-ready' );
 	}
 

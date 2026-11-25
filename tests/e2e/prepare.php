@@ -161,6 +161,42 @@ step( $site, 'gallery_setup', array( 'post' => $buggy_id, 'images' => 5 ) );
 // One session for the sample safari, so a complete trip from the card opens the modal on step 2.
 step( $site, 'variant_update', array( 'table' => 'sessions', 'id' => $demo['tours']['safari']['sessions']['Morning'], 'values' => array( 'active' => 0 ) ) );
 
+// 0.9.8: a per-group tour with a dated offer, a pickup-only tour and an add-on pickup without a price.
+$e2e_days  = array( '1', '2', '3', '4', '5', '6', '7' );
+$e2e_point = (string) step( $site, 'product_meta', array( 'post' => $buggy_id, 'key' => 'meeting_point_id' ) )['result'];
+foreach (
+	array(
+		'group'    => array( 'Private Sample Car', array( 'pricing_mode' => 'per_group', 'max_pax_per_unit' => '4', 'pickup_policy' => 'none', 'unit_name' => 'car', 'unit_name_plural' => 'cars' ), '500' ),
+		'pickonly' => array( 'Sample Pickup Only Tour', array( 'pricing_mode' => 'per_person', 'pickup_policy' => 'included', 'meeting_point_id' => $e2e_point ), '80' ),
+		'noprice'  => array( 'Sample Add-on Pickup Tour', array( 'pricing_mode' => 'per_person', 'pickup_policy' => 'addon', 'meeting_point_id' => $e2e_point, 'meet_allowed' => '1' ), '120' ),
+	) as $e2e_key => $e2e_tour
+) {
+	$e2e_post = step( $site, 'create_post', array( 'type' => 'dgb_tour', 'title' => $e2e_tour[0], 'slug' => 'sample-' . $e2e_key ) );
+	$e2e_box  = step(
+		$site,
+		'save_box',
+		array(
+			'post'  => $e2e_post['id'],
+			'admin' => true,
+			'dgb'   => array(
+				'product'  => $e2e_tour[1] + array( 'enabled' => '1', 'max_days_ahead' => '120', 'meet_shown' => '1' ),
+				'variants' => array( array( 'label' => 'Standard', 'price' => $e2e_tour[2], 'active' => '1' ) ),
+				'sessions' => array( array( 'name' => 'Day', 'type' => 'fixed', 'start_time' => '10:00', 'days_of_week' => $e2e_days, 'active' => '1' ) ),
+				'addons'   => array(),
+			),
+		)
+	);
+	$demo['tours'][ $e2e_key ] = array(
+		'id'       => $e2e_post['id'],
+		'url'      => $e2e_post['permalink'],
+		'variants' => array( 'Standard' => (int) $e2e_box['variants'][0]['id'] ),
+		'sessions' => array( 'Day' => (int) $e2e_box['sessions'][0]['id'] ),
+	);
+}
+$e2e_today = new DateTimeImmutable( 'today', new DateTimeZone( 'Asia/Tbilisi' ) );
+step( $site, 'offer_save', array( 'offer' => array( 'name' => 'Car deal', 'label' => '10% off 2 or more cars', 'active' => 1, 'priority' => 5, 'product_ids' => array( $demo['tours']['group']['id'] ), 'min_units' => 2, 'effect' => 'percent', 'amount' => '10', 'show_hint' => 1, 'starts_on' => $e2e_today->modify( '-1 day' )->format( 'Y-m-d' ), 'ends_on' => $e2e_today->modify( '+3 days' )->format( 'Y-m-d' ) ) ) );
+$demo['outside'] = $e2e_today->modify( '+20 days' )->format( 'Y-m-d' );
+
 write_router( $site );
 
 // 20 bookings in one session a week ahead (manifest, calendar, check-in) and a guide account.

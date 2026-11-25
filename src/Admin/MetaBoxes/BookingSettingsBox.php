@@ -12,6 +12,7 @@ use Digitum\Bookings\Database\Repositories\LocationRepository;
 use Digitum\Bookings\Database\Repositories\OverrideRepository;
 use Digitum\Bookings\Database\Repositories\SessionRepository;
 use Digitum\Bookings\Database\Repositories\VariantRepository;
+use Digitum\Bookings\Domain\PickupChoices;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\Frontend\Gallery;
 use Digitum\Bookings\PostTypes\ProductType;
@@ -632,8 +633,19 @@ final class BookingSettingsBox {
 					<span class="description"><?php esc_html_e( 'No meeting points yet. They are added under Digitum Bookings › Pickup zones.', 'digitum-bookings' ); ?></span>
 				<?php endif; ?>
 			</p>
+			<p class="dgb-field">
+				<input type="hidden" name="dgb[product][meet_shown]" value="1">
+				<label class="dgb-check-label">
+					<input type="checkbox" name="dgb[product][meet_allowed]" value="1" <?php checked( ! $product->get( 'pickup_only' ) ); ?> aria-describedby="dgb-meet-allowed-help">
+					<?php esc_html_e( 'Guests can meet us at the meeting point', 'digitum-bookings' ); ?>
+				</label>
+				<span class="description" id="dgb-meet-allowed-help"><?php esc_html_e( 'Untick for pickup-only tours: guests then choose a pickup area and cannot book without one. Without a meeting point, guests are never offered to meet you.', 'digitum-bookings' ); ?></span>
+			</p>
 		</div>
 		<?php
+		if ( 'addon' === $product->get( 'pickup_policy' ) && ! PickupChoices::has_pickup_addon( $product->id() ) ) {
+			echo '<p class="notice notice-warning inline dgb-pickup-warning">' . esc_html__( 'Hotel pickup is set to “Guest may add it”, but this tour has no active pickup add-on. Guests will see “price on request” for pickup. Add one under Add-ons with “Shows when: Guest chooses hotel pickup”, or choose another pickup setting.', 'digitum-bookings' ) . '</p>';
+		}
 	}
 
 	/**
@@ -918,7 +930,12 @@ final class BookingSettingsBox {
 		// Every value is sanitized field by field in Product::save() and the repositories.
 		$input = isset( $_POST['dgb'] ) && is_array( $_POST['dgb'] ) ? wp_unslash( $_POST['dgb'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		Product::save( $post_id, isset( $input['product'] ) && is_array( $input['product'] ) ? $input['product'] : array() );
+		$settings = isset( $input['product'] ) && is_array( $input['product'] ) ? $input['product'] : array();
+		// The box asks the other way round: "Guests can meet us at the meeting point" (ticked = not pickup-only).
+		if ( isset( $settings['meet_shown'] ) ) {
+			$settings['pickup_only'] = empty( $settings['meet_allowed'] ) ? 1 : 0;
+		}
+		Product::save( $post_id, $settings );
 		if ( isset( $input['gallery_captions'] ) && is_array( $input['gallery_captions'] ) ) {
 			Gallery::save_captions( $post_id, $input['gallery_captions'] );
 		}

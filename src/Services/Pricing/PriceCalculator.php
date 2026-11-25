@@ -338,9 +338,12 @@ final class PriceCalculator {
 	 */
 	private function failures( Offer $offer, array $context ): array {
 		$failed = array();
-		$day    = 'booking' === $offer->date_basis ? $context['booked_on'] : $context['date'];
-		$date   = null === $context['date'] ? false : \DateTimeImmutable::createFromFormat( '!Y-m-d', (string) $context['date'] );
-		$checks = array(
+		// No tour date chosen yet (a first estimate, e.g. the booking card): offers by travel date are checked against
+		// today. A booking always has its date, so what is saved uses the chosen day.
+		$tour_day = $context['date'] ?? $context['booked_on'];
+		$day      = 'booking' === $offer->date_basis ? $context['booked_on'] : $tour_day;
+		$date     = null === $tour_day ? false : \DateTimeImmutable::createFromFormat( '!Y-m-d', (string) $tour_day );
+		$checks   = array(
 			'dates'         => ( null === $offer->starts_on && null === $offer->ends_on ) || ( null !== $day && $offer->covers( $day ) ),
 			'tours'         => array() === $offer->product_ids || in_array( (int) $context['product_id'], $offer->product_ids, true ),
 			'pricing_modes' => array() === $offer->pricing_modes || in_array( $context['mode'], $offer->pricing_modes, true ),

@@ -17,6 +17,7 @@ use Digitum\Bookings\Domain\Addon;
 use Digitum\Bookings\Domain\GuestRules;
 use Digitum\Bookings\Domain\Product;
 use Digitum\Bookings\Domain\Variant;
+use Digitum\Bookings\Frontend\TourWords;
 use Digitum\Bookings\Domain\Zone;
 use Digitum\Bookings\Services\Pricing\Money;
 use Digitum\Bookings\Services\Pricing\PriceBreakdown;
@@ -176,7 +177,8 @@ final class QuoteService {
 	 */
 	public function quote_array( int $product_id, array $input, ?\DateTimeImmutable $now = null ): array {
 		$breakdown = $this->quote( $product_id, $input, $now )->to_array();
-		$breakdown = self::describe_offers( $breakdown, (string) Product::find( $product_id )->get( 'pricing_mode' ) );
+		$product   = Product::find( $product_id );
+		$breakdown = self::describe_offers( $breakdown, (string) $product->get( 'pricing_mode' ), $product );
 
 		/**
 		 * Filters a price breakdown before it is shown or stored.
@@ -193,9 +195,10 @@ final class QuoteService {
 	 *
 	 * @param array<string, mixed> $breakdown Breakdown array.
 	 * @param string               $mode      Pricing mode.
+	 * @param Product|null         $product   Tour, for its own unit name ("Add 1 more buggy to get: …").
 	 * @return array<string, mixed>
 	 */
-	public static function describe_offers( array $breakdown, string $mode ): array {
+	public static function describe_offers( array $breakdown, string $mode, ?Product $product = null ): array {
 		foreach ( (array) ( $breakdown['lines'] ?? array() ) as $i => $line ) {
 			if ( 'offer' === $line['key'] && '' === (string) $line['label'] ) {
 				$breakdown['lines'][ $i ]['label'] = __( 'Offer', 'digitum-bookings' );
@@ -205,7 +208,16 @@ final class QuoteService {
 		foreach ( (array) ( $breakdown['hints'] ?? array() ) as $hint ) {
 			$units  = (int) $hint['units'];
 			$guests = (int) $hint['guests'];
-			if ( $units > 0 ) {
+			$own    = $product ? trim( (string) $product->get( 'unit_name' ) ) : '';
+			if ( $units > 0 && '' !== $own ) {
+				$texts[] = sprintf(
+					/* translators: 1: number of units, 2: the tour's unit name (e.g. buggy, buggies), 3: offer name. */
+					_n( 'Add %1$d more %2$s to get: %3$s', 'Add %1$d more %2$s to get: %3$s', $units, 'digitum-bookings' ),
+					$units,
+					1 === $units ? TourWords::one( $product ) : TourWords::many( $product ),
+					$hint['label']
+				);
+			} elseif ( $units > 0 ) {
 				$texts[] = 'per_group' === $mode
 					/* translators: 1: number of cars, 2: offer name. */
 					? sprintf( _n( 'Add %1$d more car to get: %2$s', 'Add %1$d more cars to get: %2$s', $units, 'digitum-bookings' ), $units, $hint['label'] )

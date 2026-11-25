@@ -1566,6 +1566,24 @@ html.dgb-lock body {
 	font-size: 1.45em;
 	font-weight: 800;
 	letter-spacing: -0.01em;
+	transition: opacity 0.15s;
+}
+
+.dgb-bc-total[aria-busy="true"] strong {
+	opacity: 0.6;
+}
+
+.dgb-bc-offer {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	margin: 0;
+	color: var(--dgb-ink);
+	font-size: 0.9rem;
+}
+
+.dgb-bc-hints .dgb-offer-hint {
+	margin-top: 0;
 }
 
 .dgb-bc-actions {

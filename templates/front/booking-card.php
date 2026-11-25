@@ -101,10 +101,21 @@ if ( in_array( $view['mode'], array( 'per_vehicle', 'per_group' ), true ) ) {
 		<?php endif; ?>
 
 		<?php if ( ! $dgb_enquiry ) : ?>
-			<p class="dgb-bc-total">
-				<span data-dgb-card-total-label><?php esc_html_e( 'Total', 'digitum-bookings' ); ?></span>
-				<strong data-dgb-card-total aria-live="polite"><?php echo esc_html( $view['from'] ); ?></strong>
+			<?php // The total of the default choices comes from the server, so it is right before any script runs. ?>
+			<div class="dgb-bc-offers" data-dgb-card-offers<?php echo empty( $view['quote']['offers'] ) ? ' hidden' : ''; ?>>
+				<?php foreach ( (array) ( $view['quote']['offers'] ?? array() ) as $dgb_offer ) : ?>
+					<p class="dgb-bc-offer"><span><?php echo esc_html( $dgb_offer['label'] ); ?></span> <span><?php echo esc_html( \Digitum\Bookings\Frontend\Format::money( $dgb_offer['amount'], $view['script']['currency'] ) ); ?></span></p>
+				<?php endforeach; ?>
+			</div>
+			<p class="dgb-bc-total" data-dgb-card-total-row aria-busy="false">
+				<span data-dgb-card-total-label><?php echo esc_html( $view['total_label'] ?? __( 'Total', 'digitum-bookings' ) ); ?></span>
+				<strong data-dgb-card-total aria-live="polite"><?php echo esc_html( $view['total'] ?? $view['from'] ); ?></strong>
 			</p>
+			<div class="dgb-bc-hints" data-dgb-card-hints<?php echo empty( $view['quote']['hints'] ) ? ' hidden' : ''; ?>>
+				<?php foreach ( (array) ( $view['quote']['hints'] ?? array() ) as $dgb_hint ) : ?>
+					<p class="dgb-offer-hint"><?php echo esc_html( $dgb_hint ); ?></p>
+				<?php endforeach; ?>
+			</div>
 		<?php endif; ?>
 
 		<div class="dgb-bc-actions">
